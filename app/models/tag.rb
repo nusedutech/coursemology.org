@@ -8,9 +8,11 @@ class Tag < ActiveRecord::Base
 
   belongs_to :course
   belongs_to :tag_group
-
+  
+  has_many :taggable_tags, as: :tag, dependent: :destroy 
+  
   has_many :taggings, dependent: :destroy, class_name: 'TaggableTag'
-
+  
   before_save :assign_default_group
 
   def assign_default_group

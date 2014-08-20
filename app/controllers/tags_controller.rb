@@ -5,6 +5,7 @@ class TagsController < ApplicationController
   before_filter :load_general_course_data, only: [:new, :edit, :create, :show, :index]
 
   def new
+    @tag_groups = @course.tag_groups - @course.tag_groups.where(:name => 'Difficulty')
   end
 
   def create
@@ -20,7 +21,7 @@ class TagsController < ApplicationController
   end
 
   def edit
-    @tag_groups = @course.tag_groups
+    @tag_groups = @course.tag_groups - @course.tag_groups.where(:name => 'Difficulty')
   end
 
   def update
@@ -43,11 +44,16 @@ class TagsController < ApplicationController
 
   def index
     @tag_groups = @course.tag_groups.includes(:tags)
+    
+    @difficulty_tags = @course.tag_groups.where(:name => 'Difficulty').includes(:tags)
+    @tag_groups = @tag_groups - @difficulty_tags
     #always put uncategorized last
     uc = @course.tag_groups.uncategorized
     @tag_groups -= [uc]
     @tag_groups << uc
-
+    
+    @concept_tags = @course.topicconcepts
+    
     respond_to do |format|
       format.json { render json: @tags.map {|t| {id: t.id, name: t.name }}}
       format.html

@@ -74,5 +74,48 @@
           </tr>
       <% end %>
   <% end %>
+  <tr class="well">
+      <td><strong>Concept</strong></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <% @concept_tags.each do |concept| %>
+      <tr>
+        <td>Concept	</td>
+        <td>          
+        	<a href="#">
+            	<strong><%= concept.name %></strong>    
+            </a> 
+        </td>
+        <td><%= concept.description %></td>
+        <td>
+        	  
+        </td>
+      </tr>
+    <% end %>
+    
+    <tr class="well">
+      <td><strong>Difficulty</strong></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <% if @difficulty_tags.count > 0%>
+	    <% @difficulty_tags.first.tags.each do |tag| %>
+	      <tr>
+	        <td>Difficulty	</td>
+	        <td>          
+	        	<a href="#">
+	            	<strong><%= tag.name %></strong>    
+	            </a> 
+	        </td>
+	        <td><%= tag.description %></td>
+	        <td>
+	        	  
+	        </td>
+	      </tr>
+	    <% end %>
+	 <% end %>
   </tbody>
 </table>

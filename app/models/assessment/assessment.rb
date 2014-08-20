@@ -63,8 +63,11 @@ class Assessment < ActiveRecord::Base
       where('position < ?', position)
     end
   end
-
+  
+  has_many :taggable_tags, as: :taggable, dependent: :destroy
   has_many :tags, through: :questions
+  has_many :topicconcepts, through: :questions
+
 
   has_many  :general_questions, class_name: "Assessment::GeneralQuestion",
             through: :questions,

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140804045207) do
+ActiveRecord::Schema.define(:version => 20140820165656) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -19,12 +19,13 @@ ActiveRecord::Schema.define(:version => 20140804045207) do
     t.text     "description"
     t.integer  "creator_id"
     t.integer  "course_id"
-    t.datetime "created_at",                         :null => false
-    t.datetime "updated_at",                         :null => false
+    t.datetime "created_at",                                      :null => false
+    t.datetime "updated_at",                                      :null => false
     t.time     "deleted_at"
     t.boolean  "auto_assign"
     t.text     "requirement_text"
-    t.boolean  "published",        :default => true
+    t.boolean  "published",                     :default => true
+    t.integer  "facebook_obj_id",  :limit => 8
   end
 
   add_index "achievements", ["course_id"], :name => "index_achievements_on_course_id"
@@ -392,6 +393,13 @@ ActiveRecord::Schema.define(:version => 20140804045207) do
   add_index "comments", ["commentable_id"], :name => "index_comments_on_commentable_id"
   add_index "comments", ["user_course_id"], :name => "index_comments_on_user_course_id"
 
+  create_table "concept_edges", :force => true do |t|
+    t.integer  "dependent_id"
+    t.integer  "required_id"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+  end
+
   create_table "course_navbar_preferences", :force => true do |t|
     t.integer  "course_id"
     t.integer  "navbar_preferable_item_id"
@@ -667,6 +675,14 @@ ActiveRecord::Schema.define(:version => 20140804045207) do
 
   add_index "levels", ["course_id"], :name => "index_levels_on_course_id"
   add_index "levels", ["creator_id"], :name => "index_levels_on_creator_id"
+
+  create_table "links", :force => true do |t|
+    t.integer  "concept_id"
+    t.string   "link",       :limit => 300
+    t.time     "deleted_at"
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+  end
 
   create_table "masquerade_logs", :force => true do |t|
     t.integer  "by_user_id"
@@ -1060,6 +1076,7 @@ ActiveRecord::Schema.define(:version => 20140804045207) do
     t.datetime "deleted_at"
     t.datetime "created_at",    :null => false
     t.datetime "updated_at",    :null => false
+    t.string   "tag_type"
   end
 
   add_index "taggable_tags", ["taggable_id", "taggable_type"], :name => "index_taggable_tags_on_taggable_id_and_taggable_type"
@@ -1084,6 +1101,24 @@ ActiveRecord::Schema.define(:version => 20140804045207) do
     t.string   "value_type"
     t.datetime "created_at",  :null => false
     t.datetime "updated_at",  :null => false
+  end
+
+  create_table "topic_edges", :force => true do |t|
+    t.integer  "parent_id"
+    t.integer  "included_topic_concept_id"
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+  end
+
+  create_table "topicconcepts", :force => true do |t|
+    t.string   "name",        :limit => 300
+    t.text     "description"
+    t.string   "typename",    :limit => 50
+    t.integer  "course_id"
+    t.string   "rank",        :limit => 50
+    t.time     "deleted_at"
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
   end
 
   create_table "tutorial_groups", :force => true do |t|

@@ -1,4 +1,9 @@
 Coursemology::Application.routes.draw do
+
+  get "topicconcepts/index"
+
+  get "topicconcepts/master"
+
   authenticated :user do
     root :to => "home#index"
   end
@@ -165,7 +170,20 @@ Coursemology::Application.routes.draw do
     post "levels/mass_update" => "levels#mass_update", as: :levels_mass_update
 
     resources :levels
-
+    
+    resources :topicconcepts do
+        post 'get_topicconcept_data', :on => :collection
+        post 'topic_concept_data_create', :on => :collection
+        post 'topic_concept_data_rename', :on => :collection
+        post 'topic_concept_data_delete', :on => :collection
+        post 'topic_concept_data_move', :on => :collection
+        post 'topic_concept_data_dependency', :on => :collection
+        post 'get_concepts_list', :on => :collection
+        post 'topic_concept_data_save_dependency', :on => :collection
+        get 'master'
+        post 'submit_answer', :on => :collection        
+    end
+    
     resources :achievements
 
     resources :requirements

@@ -4,7 +4,29 @@
 
     <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
     <%= f.input :max_grade, as: :integer, input_html: {class: "number_field input-mini"} %>
-    <%= f.input :tags, as: :tag, url: course_tags_path, input_html: {class: "span7"}  %>
+    <%#= f.input :tags, as: :tag, url: course_tags_path, input_html: {class: "span7"}  %>
+    
+    
+    <div class="control-group integer optional">
+		<label class="integer optional control-label">Tags</label>
+		<div class="controls">
+			<% @tags_list.each do |key,value|%>
+			<div class="group-tag-control">
+				<div style="padding-top: 5px;"><strong><%=key%></strong></div>
+				<div style="padding-top: 5px; width: 65%">
+					<textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
+				</div>
+			
+				<input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
+				<input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
+				<input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
+				<input type="hidden" class="as" name="new_tags_con" value="abc123">
+			</div>
+			<% end %>
+		</div>
+	</div>
+	
+	
     <%= f.input :select_all, as: :boolean,
                 input_html: {class: ""},
                 inline_label:"Student must pick all correct answers" %>
@@ -52,6 +74,80 @@
     </div>
 
 
-    <%= f.button :form_submit, cancel: :back %>
+    <%= f.button :form_submit,:id => 'btn_submit', cancel: :back %>
     <%= render :partial => "layouts/html_editor" %>
 <% end %>
+
+
+<script>
+//Create auto complete multi select box
+	//var concepts_list = [];	
+	//$.ajax({
+	//	    type: "POST",
+	//	    dataType: "json",
+	//	    async: false,
+	//	    url: "<%= course_path(@course)%>" + "/tags/get_tag_list",
+	//	    success: function(json) {	    	
+	//	    	concepts_list = json;		    	
+	//	    },
+	//	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	 //       	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	 //   	}
+	//	  });
+	  
+	$(document).ready(function(){
+		
+		
+		$('div.group-tag-control').each( function() {
+			var all_tags = JSON.parse($(this).find(".hdf-all-tags").val());
+			var origin_tags = JSON.parse($(this).find(".hdf-original-tags").val());
+			var textarea_id = $(this).find("textarea").attr("id");
+			
+			$("#" + textarea_id).textext({
+				plugins : 'suggestions tags prompt autocomplete arrow filter',
+				prompt : 'Add tags using concepts...',		
+				suggestions: all_tags,
+		    	ext: {
+			        itemManager: {
+			        	filter: function(list,query)
+				        {	//over-drive filter with substring
+				        	var result = [];
+				            $.each(list, function(){
+				            	if (this.toString().toLowerCase().indexOf(query.toLowerCase()) != -1){
+				            		result.push(this.toString());
+				            	}
+				            });
+				            //console.log(result);
+				            return result;
+				        }
+			        }
+			    }	    
+			}).bind('isTagAllowed', function(e, data){
+				var tagArray = $.parseJSON($("#" + textarea_id).textext()[0].hiddenInput().val());
+				if ((textarea_id == "txtar_tagging_Difficulty" && tagArray.length >= 1) || tagArray.indexOf(data.tag) >= 0) {
+			        data.result = false;
+			    }else{
+			    	//reset suggestion after choosing a tag
+			    	textext = $(e.target).textext()[0];
+			    	$(this).trigger(
+			            'setSuggestions',
+			           { result : textext.itemManager().filter(all_tags, "") }
+	        		);		    
+			    }	   
+			});
+			$("#" + textarea_id).textext()[0].tags().addTags(origin_tags);
+		});
+		
+					
+		$('#assessment_mcq_question_description').click();  
+		$('#btn_submit').on("click",function() {	
+			$('div.group-tag-control').each( function() {
+				$(this).find(".hdf-new-tags").val(JSON.stringify(JSON.parse($(this).find("textarea").textext()[0].hiddenInput().val())));
+				console.log($(this).find(".hdf-original-tags").val());
+				console.log($(this).find(".hdf-new-tags").val());
+			});		
+		    	  
+		  return true;		  
+		}); 
+	});
+</script>

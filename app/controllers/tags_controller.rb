@@ -52,7 +52,7 @@ class TagsController < ApplicationController
     @tag_groups -= [uc]
     @tag_groups << uc
     
-    @concept_tags = @course.topicconcepts
+    @concept_tags = @course.topicconcepts.concepts
     
     respond_to do |format|
       format.json { render json: @tags.map {|t| {id: t.id, name: t.name }}}

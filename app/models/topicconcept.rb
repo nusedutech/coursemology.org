@@ -4,7 +4,9 @@ class Topicconcept < ActiveRecord::Base
   
   include Rails.application.routes.url_helpers
   
-  belongs_to :course
+  scope :concepts, -> { where(:typename => "concept") }
+  
+  belongs_to :course  
   #belongs_to :creator, class_name: "User"
   
   has_many :links, class_name: "Link", foreign_key: "concept_id", dependent: :destroy

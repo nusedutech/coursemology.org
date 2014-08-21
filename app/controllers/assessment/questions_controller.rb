@@ -5,8 +5,23 @@ class Assessment::QuestionsController < ApplicationController
   before_filter :extract_tags, only: [:update]
   before_filter :load_general_course_data, only: [:show, :new, :edit]
 
+  def edit    
+    @tags_list = {}
+    @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
+    @course.tag_groups.each do |t|
+      @tags_list[t.name] = {:origin => @question.tags.where(:tag_group_id => t.id).select(:name).map { |e| e.name }, :all => Tag.where(:tag_group_id => t.id).select(:name).map { |e| e.name }}
+    end
 
+  end
+  
   def new
+    @tags_list = {}
+    @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
+    @course.tag_groups.each do |t|
+      @tags_list[t.name] = {:origin => @question.tags.where(:tag_group_id => t.id).select(:name).map { |e| e.name }, :all => Tag.where(:tag_group_id => t.id).select(:name).map { |e| e.name }}
+    end
+    
+    
     @question.max_grade = @assessment.is_mission? ? 10 : 2
     respond_to do |format|
       format.html # new.html.erb
@@ -39,7 +54,7 @@ class Assessment::QuestionsController < ApplicationController
   def extract_tags
     tags = (params[params[:controller].gsub('/', '_').singularize] || {}).delete(:tags) || ""
     tt = @course.tags.find_or_create_all_with_like_by_name(tags.split(","))
-    @question.tags = tt
+    #@question.tags = tt
   end
 
   def build_resource

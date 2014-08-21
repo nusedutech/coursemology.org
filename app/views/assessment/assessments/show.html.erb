@@ -105,6 +105,20 @@
                 <% end %>
               </div>
             </td>
+            
+            <td width="15%" style="vertical-align: top">
+              <% q.topicconcepts.each do |tag| %>
+                  <a>
+                      <span class="label label-info">Concept - <%= tag.name %></span>
+                  </a>
+              <% end %>
+              <% q.tags.each do |tag| %>
+                  <%= link_to course_tag_path(@course, tag) do %>
+                      <span class="label label-info"><%=tag.tag_group.name%> - <%=tag.name %></span>
+                  <% end %>
+              <% end %>
+            </td>
+            
             <% if can? :manage, Assessment::Training %>
                 <td class="action-there-icons">
                   <div class="btn-group">

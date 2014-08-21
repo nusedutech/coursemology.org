@@ -72,9 +72,14 @@
           <% end %>
           <% if to_display.include? 'tag' %>
               <td>
+              	<% ast.topicconcepts.uniq.each do |tag| %>
+                    <a>
+                        <span class="label label-info">Concept - <%= tag.name %></span>
+                    </a>
+                <% end %>
                 <% ast.tags.uniq.each do |tag| %>
                     <%= link_to course_tag_path(@course, tag) do %>
-                        <span class="label label-info"><%= tag.name %></span>
+                        <span class="label label-info"><%=tag.tag_group.name%> - <%= tag.name %></span>
                     <% end %>
                 <% end %>
               </td>

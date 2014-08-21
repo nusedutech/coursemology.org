@@ -106,7 +106,7 @@ class Assessment < ActiveRecord::Base
   end
 
   def update_grade
-    self.update_attribute(:max_grade, self.questions.sum(&:max_grade))
+    #self.update_attribute(:max_grade, self.questions.sum(&:max_grade))
   end
 
   def get_all_questions

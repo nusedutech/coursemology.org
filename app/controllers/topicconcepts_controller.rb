@@ -15,7 +15,7 @@ class TopicconceptsController < ApplicationController
       @dependencies = @concept.required_concepts
       @current_dependency = @dependencies.first
       @firstquestion = @current_dependency.questions.where(:as_question_type => Assessment::McqQuestion).first
-      @select_all = raw_query_get_select_all(@firstquestion.as_question_id).to_i == 0 ? false : true      
+      @select_all = false #raw_query_get_select_all(@firstquestion.as_question_id).to_i == 0 ? false : true      
       
   end
   

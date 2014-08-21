@@ -88,7 +88,7 @@ class CourseAbility  < Ability
       can :participate, Course
       can :read, UserCourse
       can :read, Announcement, Announcement.published
-
+      
       # Materials: The file is accessible to students if the student uploaded
       # the file, or course staff uploaded the file.
       can :read, MaterialFolder, ['open_at <= ? OR open_at IS NULL', DateTime.now] do |folder|
@@ -155,6 +155,15 @@ class CourseAbility  < Ability
 
       can :read, Tag
       can :read, Achievement
+      
+      
+      can :read, Topicconcept
+      can :get_topicconcept_data, Topicconcept
+      can :master, Topicconcept
+      can :submit_answer, Topicconcept
+      
+      
+      
       can :students, Course
 
       can :manage, [Assessment::Submission], std_course_id: user_course.id

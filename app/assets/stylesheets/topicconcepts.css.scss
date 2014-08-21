@@ -1,3 +1,279 @@
 // Place all the styles related to the Topicconcepts controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+svg {
+    overflow: hidden;
+}
+g.node {
+  cursor: pointer;
+}
+.node rect {
+    stroke: #333;
+    stroke-width: 1.5px;
+    fill: #fff;
+}
+
+.edgeLabel rect {
+    fill: #fff;
+}
+
+.edgePath {
+    stroke: #333;
+    stroke-width: 1.5px;
+    fill: none;
+}
+
+.concept-tutorial {
+  position: relative;
+  top: -20px;
+  left: -20px;
+  width: 970px;  
+}
+
+.concept-tutorial .tutorial-nav {    
+    width:200px;
+    min-height: 500px;
+    vertical-align: top;
+    border-right: 1px solid #ddd;
+    float: left;    
+    background-color: #e1e1e1; 
+}
+
+.tutorial-nav .nav-head-container {
+    height:70px;
+    color: #999;
+    border-bottom: 1px solid #ccc;    
+    padding: 0 14px;
+
+}
+
+.nav-head-container .nav-head-concept {
+  position: relative;
+  top: 20px;  
+}
+
+.nav-head-container .nav-head-concept h3{
+  margin: 0;
+  color: #444; 
+  font-weight: bold;
+} 
+
+.tutorial-nav .slimScrollDiv {
+  min-height: 240px;
+}
+.slimScrollDiv ul {
+    margin: 0;
+    padding: 0;
+}
+.slimScrollDiv li {
+  padding: 0 0 0 10px;
+  height: 50px;
+}
+
+.slimScrollDiv li.selected {
+    background-color: #fdfdfd;
+    height: 50px;
+}
+
+.slimScrollDiv li.selected .status{
+    background-position: 0 50px;  
+}
+
+.slimScrollDiv li.selected a{
+    color: #1c758a;
+}
+
+.slimScrollDiv li:hover {
+  background-color: #1c758a;
+}
+
+.slimScrollDiv li:hover > a {
+  color: white;
+}
+.slimScrollDiv li a{ 
+  color: #555;
+  height: 50px;
+}
+
+.slimScrollDiv .subway-icon {
+    display: block;    
+    width: 40px;
+    height: 100%;
+}
+
+.slimScrollDiv .pipe {
+    background-color: #cdcdcd;    
+    width: 4px;
+    height: 50px;
+    position: relative;
+    left: 11px;
+    
+}
+
+.slimScrollDiv .main-concept .pipe {    
+    height: 30px;   
+}
+
+.slimScrollDiv .main-concept .status {    
+    top: -16px;  
+}
+
+.slimScrollDiv .pipe.completed, .slimScrollDiv li.selected .pipe {
+    background-color: #4fbad4;
+}
+
+.slimScrollDiv .status {
+    background-size: 25px 75px;    
+    height: 25px;   
+    width: 25px;
+    position: relative;
+    top: -38px;
+}
+
+.subway-icon .status.exercise-node {
+    background-image: url("master/master.png");
+}
+
+.slimScrollDiv .progress-title {
+    position: relative;
+    left: 32px;
+    top: -34px;
+}
+
+.concept-tutorial .tutorial-content {
+    margin-left: 200px;   
+    min-height: 500px;
+    background-color: #eee;
+}
+
+.tutorial-content .task-header-container {
+  height:70px;
+  background-color: #1c758a;
+}
+
+.tutorial-content .task-header-container div.cur-concept-title{
+  height: 40px;
+  position: relative;
+  top:13px;
+  left:10px;
+  width: 200px;
+}
+
+.tutorial-content .task-header-container h2 {
+  color: white;  
+}
+
+.tutorial-content .task-header-container div.in-a-row{
+  height: 40px;
+  width: 200px;
+  float: right;
+  position: relative;
+  top:-24px;  
+}
+.tutorial-content .task-header-container div.in-a-row span {
+    width: 150px;
+}
+
+.tutorial-content .task-header-container div.in-a-row h4{
+  color: white;
+  
+}
+.tutorial-content .task-header-container div.in-a-row .row-img{
+  height: 20px; 
+  width: 50px;
+  position: relative;
+  top: -27px;
+  left: 140px;
+}
+.tutorial-content .task-header-container div.in-a-row .img-correct-item{
+  background-image: url("master/correct.png");
+  background-size: 20px 20px;
+  height: 20px;
+  width: 20px;
+  float: left;
+}
+.tutorial-content .task-header-container div.in-a-row .img-wrong-item{
+  background-image: url("master/wrong.png");
+  background-size: 20px 20px;
+  height: 20px;
+  width: 20px;
+  float: left;
+}
+.tutorial-content .task-header-container div.in-a-row .cur-std-got {
+  height: 20px; 
+  width: 50px;
+  position: relative;
+  top:-25px;
+  left: 140px;
+}
+.tutorial-content .task-content-container {
+  min-height:230px;
+}
+#problemarea {
+    float: left;
+    font-size: 14px;
+    min-height: 200px;
+    width: 59%;
+    
+}
+
+#problemarea #workarea {
+    margin-left: 20px;
+}
+
+#problemarea #hintsarea {
+    margin-left: 50px;
+}
+
+#answer_area_wrap {
+    float: right;
+    width: 20%;
+}
+
+.info-box-header {
+    color: #777;
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 100%;
+    margin-bottom: 10px;
+    text-shadow: 0 1px 0 #fff;
+}
+
+
+#solutionarea {
+    border-bottom: 1px solid #c3c3c3;
+    margin: 0 -10px;
+    min-height: 35px;
+    overflow: visible;
+    padding: 10px;
+}
+
+.answer-buttons {
+    border-top: 1px solid #fff;
+    margin: 0 -10px;
+    padding: 10px 10px 0;
+    position: relative;
+}
+.answer-buttons input {
+  width: 100%;
+}
+
+.info-box {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background: none repeat scroll 0 0 #e1e1e1;
+    border-color: #ccc #ccc #aaa;
+    border-image: none;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 2px #ccc;
+    color: #333;
+    margin-bottom: 10px;
+    overflow-x: auto;
+    padding: 10px;
+    position: relative;
+    z-index: 10;
+}

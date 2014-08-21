@@ -721,6 +721,17 @@ if NavbarPreferableItem.count == 12
 end
 
 
+if NavbarPreferableItem.count == 13
+  NavbarPreferableItem.create! item:  "topicconcepts",
+                               navbar_link_type_id:  1,
+                               name: "Topic - Concept",
+                               is_displayed: true,
+                               is_enabled: true,
+                               description: "course topicconcept",
+                               pos: 14
+end
+
+
 if ProgrammingLanguage.count == 0
   ProgrammingLanguage.create!({name: "Python",
                               codemirror_mode: "python",

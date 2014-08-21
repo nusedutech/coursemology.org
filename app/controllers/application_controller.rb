@@ -250,6 +250,9 @@ class ApplicationController < ActionController::Base
       when 'comics'
         url = main_app.course_comics_path(@course)
         icon = 'icon-picture'
+      when 'topicconcepts'
+        url = main_app.course_topicconcepts_path(@course)
+        icon = 'icon-star'
     end
     [url, icon]
   end

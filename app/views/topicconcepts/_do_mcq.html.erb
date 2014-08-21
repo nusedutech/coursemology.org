@@ -1,0 +1,51 @@
+<p><%#= style_format @firstquestion.description
+	%>
+	Different between HTML4 and HTML5
+</p>
+<% if @select_all %>
+  <p>Select all correct answers</p>
+<% end %>
+<ul>
+  <%# @firstquestion.options.each do |ans|
+   %>
+      <li class="checkbox-text">
+        <%# if @select_all
+         %>
+          <!--<input class="choices" type="checkbox" name="answers[]" value="1" id="value=1"/>-->
+        <% #else
+         %>
+          <input class="choices" type="radio" name="answers" value="1" id="value=1"/>
+        <% #end
+         %>
+        <label for="value=1"> options </label>
+      </li>
+      <li class="checkbox-text">
+        <%# if @select_all
+         %>
+          <!--<input class="choices" type="checkbox" name="answers[]" value="1" id="value=1"/>-->
+        <% #else
+         %>
+          <input class="choices" type="radio" name="answers" value="1" id="value=1"/>
+        <% #end
+         %>
+        <label for="value=1"> options </label>
+      </li>
+      <li class="checkbox-text">
+        <%# if @select_all
+         %>
+          <!--<input class="choices" type="checkbox" name="answers[]" value="1" id="value=1"/>-->
+        <% #else
+         %>
+          <input class="choices" type="radio" name="answers" value="1" id="value=1"/>
+        <% #end
+         %>
+        <label for="value=1"> options </label>
+      </li>
+  <%# end
+   %>
+</ul>
+
+<div id="explanation" class="well hidden">
+  <h3 class="result"></h3>
+  <p class="reason"></p>
+</div>

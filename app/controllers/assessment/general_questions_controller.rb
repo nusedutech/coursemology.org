@@ -16,11 +16,12 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
          end
         
         #add difficulty tag for no difficulty question
-      if (@question.tags.where(:tag_group_id => -1).count == 0 && @course.tags.where(:tag_group_id => -1, :name => 'Unspecified').count > 0)
-        taggable = @question.taggable_tags.new                          
-        taggable.tag= @course.tags.where(:tag_group_id => -1, :name => 'Unspecified').first
-        taggable.save
-      end
+        dif = @course.tag_groups.where(:name => 'Difficulty')
+        if (dif.count > 0 && @question.tags.where(:tag_group_id => dif.first.id).count == 0 && @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').count > 0)
+          taggable = @question.taggable_tags.new                          
+          taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
+          taggable.save
+        end
       
       
         format.html { redirect_to url_for([@course, @assessment.as_assessment]),
@@ -47,11 +48,12 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
        end
       
       #add difficulty tag for no difficulty question
-      if (@question.tags.where(:tag_group_id => -1).count == 0 && @course.tags.where(:tag_group_id => -1, :name => 'Unspecified').count > 0)
-        taggable = @question.taggable_tags.new                          
-        taggable.tag= @course.tags.where(:tag_group_id => -1, :name => 'Unspecified').first
-        taggable.save
-      end
+        dif = @course.tag_groups.where(:name => 'Difficulty')
+        if (dif.count > 0 && @question.tags.where(:tag_group_id => dif.first.id).count == 0 && @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').count > 0)
+          taggable = @question.taggable_tags.new                          
+          taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
+          taggable.save
+        end
       
         
       if @question.update_attributes(params[:assessment_general_question])

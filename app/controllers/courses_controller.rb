@@ -14,10 +14,27 @@ class CoursesController < ApplicationController
     user_course = @course.user_courses.build()
     user_course.course = @course
     user_course.user = current_user
-    user_course.role = Role.find_by_name(:lecturer)
-
+    user_course.role = Role.find_by_name(:lecturer)    
+    
     respond_to do |format|
       if @course.save  && user_course.save
+        
+        tag_group = TagGroup.new
+        tag_group.course_id = @course.id
+        tag_group.name = 'Difficulty'
+        tag_group.save
+        
+        ['Easy','Medium','Hard','Unspecified'].each do |t|
+          tag = Tag.new
+          tag.name = t
+          tag.course_id = @course.id
+          tag.tag_group_id = tag_group.id
+          tag.save
+        end
+        
+        
+        
+        
         format.html { redirect_to course_preferences_path(@course),
                                   notice: "The course '#{@course.title}' has been created." }
       else

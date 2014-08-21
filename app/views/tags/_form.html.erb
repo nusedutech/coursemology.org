@@ -3,7 +3,7 @@
                     defaults: { input_html: { class: 'span7' } } do |f| %>
     <%= f.input :name %>
     <%= f.input :description, as: :text, input_html:{class: "span7 text-area", rows:10}  %>
-    <%= f.association :tag_group, collection: @course.tag_groups, input_html: {class: "input-medium"}, include_blank: false%>
+    <%= f.association :tag_group, collection: @tag_groups, input_html: {class: "input-medium"}, include_blank: false%>
 
     <%= f.button :form_submit, cancel: course_tags_path(@course) %>
 <% end %>

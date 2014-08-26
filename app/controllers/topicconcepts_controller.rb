@@ -10,6 +10,10 @@ class TopicconceptsController < ApplicationController
     
   end
   
+  def ivleapi   
+    
+  end
+  
   def master
       @concept = Topicconcept.find(params[:topicconcept_id])
       @dependencies = @concept.required_concepts

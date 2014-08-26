@@ -1,0 +1,113 @@
+<link rel="stylesheet" href="dist/themes/default/style.min.css" />
+<div class="page-header">
+  <h1>IVLE API</h1>
+</div>
+<table>
+	<tr>
+		<td>
+			<input type="button" id="load_webcast" value="show webcast" style="margin-bottom: 10px;"/>
+		</td>
+	</tr>
+</table>
+<div><table id="result_webcast"></table></div>
+<div>	
+<video width="500" height="400" controls>
+  <source src="http://coursecast3.nus.edu.sg/Panopto/Content/Sessions/a861aecb-59d0-4a32-9f13-e86f5a9b67cc/928b902b-cb31-4831-9037-c8aef1720e6e-31f724e6-4376-4b65-9fea-ffaa66e82b1c.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+</div>
+<table>
+	<tr>
+		<td>
+			<input type="text" id="code" style="width: 150px" />
+			<input type="button" id="showstudent" value="show class roster" style="margin-bottom: 10px;"/>
+		</td>
+	</tr>
+</table>
+<div style="min-height: 500px;"><table id="result"></table></div>
+<script>
+	$('#load_webcast').click(function() {
+		var key = "mHy1mEcwwWvlHYqc9bNdO", token = "FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB",
+	        user = ivle.User(key, token);
+	
+	    // you must init the user
+	    user.init()
+	        .done(function() {
+	            //alert("ivle api ok");
+	            //alert(JSON.stringify(user.profile()));   
+	   });
+
+	   user.get("OpenWebcasts", {TitleOnly: false, MP4only: false})
+		.success(function(data) {
+			alert(data.Results[1].CourseName);
+			//$.each(data.Results, function( index1, value1 ) {
+			//	$.each(value1.Files, function( index, value ) {
+			//	$('#result_webcast').append("<tr><td style='width:200px;'>" + value.FileTitle + "</td><td style='width:300px;'>" + value.MP4 + "</td><td style='width:100px;'>" + value.MP3 + "</td></tr>");
+			//	});
+			//});
+		var anns = ivle.filterResult(data); // anns = [...]
+		});
+	   
+	});
+	$('#showstudent').click(function() {
+
+	    var key = "mHy1mEcwwWvlHYqc9bNdO", token = "FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB",
+	        user = ivle.User(key, token);
+	
+	    // you must init the user
+	    user.init()
+	        .done(function() {
+	            //alert("ivle api ok");
+	            //alert(JSON.stringify(user.profile()));   
+	   });
+	   
+	   /*
+	   $.ajax({
+	    type: "GET",
+	    dataType: "application/json",
+	    async: false,
+	    url: "https://ivle.nus.edu.sg/API/Lapi.svc/Class_Roster?APIKey=mHy1mEcwwWvlHYqc9bNdO&AuthToken=FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB&CourseID=fdbea3c8-7387-48ba-bccf-840e29de46f2",
+	    
+	    success: function(json) {
+	    	$('#result').html(json.Results);
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });*/
+	   $('#result').html("");
+	   var id = '';
+	   var params = {ModuleCode:$('#code').val()};
+		user.search("Modules", params, function(result) {
+			//alert(result.length);
+			if(result.length > 0){
+				id = result[result.length - 1].ID;
+				user.get("Class_Roster", {CourseID: id})
+				.success(function(data) {
+				var anns = ivle.filterResult(data); //
+		
+				if (data.Results.length > 0){
+					$('#result').html("");
+					$('#result').append("<tr><td style='width:200px;'>" + result[result.length - 1].CourseName + "</td><td style='width:300px;'></td><td style='width:100px;'></td></tr>");
+					$.each(data.Results, function( index, value ) {
+						
+						$('#result').append("<tr><td style='width:200px;'>" + value.UserID + "</td><td style='width:300px;'>" + value.Name + "</td><td style='width:100px;'>" + value.Email + "</td></tr>");
+					});		
+				}else{
+					$('#result').html("");
+					$('#result').html("Empty");
+				}
+			  });
+			}else{
+					$('#result').html("");
+					$('#result').html("Empty");}
+		});		
+		
+		
+	  
+			    user.modules(function(mods) {
+			    	
+					//console.log(JSON.stringify(mods)); // mods = Module[...]
+				});
+	});
+</script>

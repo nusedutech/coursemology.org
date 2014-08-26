@@ -524,29 +524,6 @@
 	  });
 	  return result;
 	}
+		
 	
-	
-	$(function() {
-	    var key = "mHy1mEcwwWvlHYqc9bNdO", token = "FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB",
-	        user = ivle.User(key, token);
-	
-	    // you must init the user
-	    user.init()
-	        .done(function() {
-	            //alert("ivle api ok");
-	            //alert(JSON.stringify(user.profile()));
-	            
-	            
-    
-	        });
-	   var params = {ModuleCode: "CS5223"};
-			    user.search("Modules", params, function(result) {
-			    	console.log(JSON.stringify(result));
-			    	//console.log(result[0].workbins());
-			    	//alert(result.get("CourseName"));
-			    });
-			    user.modules(function(mods) {
-					//console.log(JSON.stringify(mods)); // mods = Module[...]
-				});
-	});
 </script>

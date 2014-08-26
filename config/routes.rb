@@ -181,7 +181,8 @@ Coursemology::Application.routes.draw do
         post 'get_concepts_list', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'master'
-        post 'submit_answer', :on => :collection        
+        post 'submit_answer', :on => :collection
+        get 'ivleapi'        
     end
     
     resources :achievements

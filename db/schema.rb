@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(:version => 20140820165656) do
     t.text     "requirement_text"
     t.boolean  "published",                     :default => true
     t.integer  "facebook_obj_id",  :limit => 8
+    t.integer  "pos"
   end
 
   add_index "achievements", ["course_id"], :name => "index_achievements_on_course_id"

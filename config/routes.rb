@@ -69,6 +69,12 @@ Coursemology::Application.routes.draw do
         get 'access_denied'
       end
 
+      resources :assessment_questions, path: :questions, controller: :questions do
+        collection do
+          get 'add_question', :action => 'add_question'  
+        end 
+      end
+                
       resources :assessment_mcq_questions,
                 path:       :mcqs,
                 controller: :mcq_questions
@@ -112,6 +118,18 @@ Coursemology::Application.routes.draw do
       end
     end
 
+    resources :assessment_general_questions, path: :general_questions, controller: :general_questions , module: :assessment   
+    
+    resources :assessment_coding_questions, path: :coding_questions, controller: :coding_questions , module: :assessment   
+    
+    resources :assessment_mcq_questions, path: :mcq_questions, controller: :mcq_questions , module: :assessment   
+    
+    resources :assessment_questions, path: :questions, controller: :questions , module: :assessment do
+      collection do
+        get :index, to: 'questions#index', type: 'question'  
+      end
+    end
+    
     resources :assessment_missions, path: 'missions', controller: :missions, module: :assessment do
       collection do
         get :index, to: 'assessments#index', type: 'mission'

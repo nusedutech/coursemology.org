@@ -5,9 +5,9 @@ class TopicconceptsController < ApplicationController
   before_filter :load_general_course_data, only: [:index]
   def index   
     @topics_concepts_with_info = []
-      get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
-      @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
-    
+    get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
+    @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+    Rails.cache.clear
   end
   
   def ivleapi   

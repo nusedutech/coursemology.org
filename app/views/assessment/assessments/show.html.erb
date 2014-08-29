@@ -62,7 +62,9 @@
 
 
 <hr/>
-<% if can? :manage, @assessment %>
+<% if can? :manage, @assessment %>	
+	
+	<!--
     <% if @summary[:allowed_questions].include? Assessment::McqQuestion %>
         <%= link_to t('.new', :default => t("helpers.links.new_mcq")),
                     new_course_assessment_assessment_mcq_question_path(@course, @assessment),
@@ -80,10 +82,12 @@
                     new_course_assessment_assessment_coding_question_path(@course, @assessment),
                     :class => 'btn btn-primary' %>
     <% end %>
+   -->
 <% end %>
 
 <% if can? :view_detail, @assessment %>
     <h2 class="asm-qns-title"><%= display_name %> Questions</h2>
+    <p><%= link_to 'Add Questions',course_assessment_path + '/questions/add_question', :class => 'btn btn-primary'%></p>
     <table class="table asm-qns-table sort">
       <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @assessment) %>">
       <% @summary[:questions].each_with_index do |qn, index| %>

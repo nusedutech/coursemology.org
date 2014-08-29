@@ -2,6 +2,7 @@
 <div class="page-header">
   <h1>IVLE API</h1>
 </div>
+<input type="button" id="log_in" value="log in ivle" style="margin-bottom: 50px;"/>
 <table>
 	<tr>
 		<td>
@@ -9,13 +10,16 @@
 		</td>
 	</tr>
 </table>
-<div><table id="result_webcast"></table></div>
+<div style="height: 300px; 	overflow-y: auto;"><table id="result_webcast"></table></div>
 <div>	
 <video width="500" height="400" controls>
   <source src="http://coursecast3.nus.edu.sg/Panopto/Content/Sessions/a861aecb-59d0-4a32-9f13-e86f5a9b67cc/928b902b-cb31-4831-9037-c8aef1720e6e-31f724e6-4376-4b65-9fea-ffaa66e82b1c.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 </div>
+
+<input type="button" id="get_modules" value="get modules" style="margin-bottom: 10px; margin-top: 50px;"/>
+<div id="modules"></div>
 <table>
 	<tr>
 		<td>
@@ -26,55 +30,52 @@
 </table>
 <div style="min-height: 500px;"><table id="result"></table></div>
 <script>
-	$('#load_webcast').click(function() {
-		var key = "mHy1mEcwwWvlHYqc9bNdO", token = "FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB",
-	        user = ivle.User(key, token);
+	var key = "mHy1mEcwwWvlHYqc9bNdO", token = ivle.getToken(document.URL),	
+	user = ivle.User(key, token);
 	
-	    // you must init the user
-	    user.init()
-	        .done(function() {
-	            //alert("ivle api ok");
-	            //alert(JSON.stringify(user.profile()));   
-	   });
-
+	 // you must init the user
+	user.init().done(function() {
+	   	
+	});
+	
+	$('#log_in').click(function() {
+		window.location.href = "https://ivle.nus.edu.sg/api/login/?apikey=" + key + "&url=" + encodeURI(document.URL);
+	});
+	
+	$('#load_webcast').click(function() {
 	   user.get("OpenWebcasts", {TitleOnly: false, MP4only: false})
 		.success(function(data) {
-			alert(data.Results[1].CourseName);
-			//$.each(data.Results, function( index1, value1 ) {
-			//	$.each(value1.Files, function( index, value ) {
-			//	$('#result_webcast').append("<tr><td style='width:200px;'>" + value.FileTitle + "</td><td style='width:300px;'>" + value.MP4 + "</td><td style='width:100px;'>" + value.MP3 + "</td></tr>");
-			//	});
-			//});
+			$.each(data.Results, function( index1, value1 ) {
+				$.each(value1.ItemGroups, function( index, value ) {
+					$.each(value.Files, function( ind, val ) {
+						$('#result_webcast').append("<tr><td style='width:200px;'>" + val.FileTitle + "</td><td style='width:300px;'><a class='video-play' onclick='playmp4(this)'>" + val.MP4 + "</a></td><td style='width:100px;'>" + val.MP3 + "</td></tr>");
+					});
+				});
+			});
 		var anns = ivle.filterResult(data); // anns = [...]
 		});
 	   
 	});
-	$('#showstudent').click(function() {
-
-	    var key = "mHy1mEcwwWvlHYqc9bNdO", token = "FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB",
-	        user = ivle.User(key, token);
 	
-	    // you must init the user
-	    user.init()
-	        .done(function() {
-	            //alert("ivle api ok");
-	            //alert(JSON.stringify(user.profile()));   
+	function playmp4(a){
+		alert($(a).text());
+	}
+	
+	$('#get_modules').click(function() {
+		var modules = [];
+	   user.modules(function(mods) {
+	 	  modules = mods; // mods = Module[...]
+	 	  $.each(mods, function( ind, val ) {
+	 	  	console.log(val.get("CourseCode"));
+			$('#modules').append("<div>" + val.get("CourseCode") + "</div>");
+		  });
+	 	  
 	   });
-	   
-	   /*
-	   $.ajax({
-	    type: "GET",
-	    dataType: "application/json",
-	    async: false,
-	    url: "https://ivle.nus.edu.sg/API/Lapi.svc/Class_Roster?APIKey=mHy1mEcwwWvlHYqc9bNdO&AuthToken=FA3DD840B3A82F73AA14D3C19D3E09ED0896F5440397009683DD8DEF53413B42BE83A89985207645B1D1618060116D3DEC981C2A6D05BE7927DC72F8D19802982AC51635347C15D72AF31DD9E0AD48403835058D55EAE87C03DFCF13C1A6D6DAAC33FC1E710A125D9D9AEE2FFC8FAE76D0370F6FA0F4E837DDF0DE8A8525B10B01F2A60955FCB9EECD44C83BDFC8E6AFFE1A1AF0E37B5158957C5E25825EA53B7F1BDB67FFC52A88B81D0AD7987D254FA0400E8FEC6E41AF4520358EEE001D71B3DA45887EC6F55F747AEAA90BD843CB&CourseID=fdbea3c8-7387-48ba-bccf-840e29de46f2",
-	    
-	    success: function(json) {
-	    	$('#result').html(json.Results);
-	    },
-	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        	alert("Status: " + textStatus + " Error: " + errorThrown); 
-    	}
-	  });*/
+	});
+	
+	
+	$('#showstudent').click(function() {	   
+    
 	   $('#result').html("");
 	   var id = '';
 	   var params = {ModuleCode:$('#code').val()};
@@ -103,11 +104,6 @@
 					$('#result').html("Empty");}
 		});		
 		
-		
-	  
-			    user.modules(function(mods) {
-			    	
-					//console.log(JSON.stringify(mods)); // mods = Module[...]
-				});
+
 	});
 </script>

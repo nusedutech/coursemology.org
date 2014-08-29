@@ -6,6 +6,8 @@ class Tag < ActiveRecord::Base
   #TODO, validates_uniqueness_of doesn't work when create new questions
   # validates_uniqueness_of :name, scope: [:course_id]
 
+
+  
   belongs_to :course
   belongs_to :tag_group
   

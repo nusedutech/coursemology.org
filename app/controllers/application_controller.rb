@@ -94,6 +94,10 @@ class ApplicationController < ActionController::Base
                           }]
     end
     admin_nav_items += [{
+                           text: "Questions Bank",
+                           url:  course_assessment_questions_path(@course),
+                           icon: "icon-star"
+                       },{
                            text: "Manage Users",
                            url:  main_app.course_manage_students_url(@course),
                            icon: "icon-user"

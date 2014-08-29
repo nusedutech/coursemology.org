@@ -8,18 +8,20 @@
 	<div class="control-group integer optional">
 		<label class="integer optional control-label">Tags</label>
 		<div class="controls">
-			<% @tags_list.each do |key,value|%>
-			<div class="group-tag-control">
-				<div style="padding-top: 5px;"><strong><%=key%></strong></div>
-				<div style="padding-top: 5px; width: 65%">
-					<textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
+			<% if !@tags_list.nil? %>
+				<% @tags_list.each do |key,value|%>
+				<div class="group-tag-control">
+					<div style="padding-top: 5px;"><strong><%=key%></strong></div>
+					<div style="padding-top: 5px; width: 65%">
+						<textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
+					</div>
+				
+					<input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
+					<input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
+					<input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
+					<input type="hidden" class="as" name="new_tags_con" value="abc123">
 				</div>
-			
-				<input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
-				<input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
-				<input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
-				<input type="hidden" class="as" name="new_tags_con" value="abc123">
-			</div>
+				<% end %>
 			<% end %>
 		</div>
 	</div>	

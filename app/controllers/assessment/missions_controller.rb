@@ -73,16 +73,37 @@ class Assessment::MissionsController < Assessment::AssessmentsController
 
   def update
     respond_to do |format|
+      update_questions params[:assessment][:question_assessments]      
       if @mission.update_attributes(params[:assessment_mission])
         update_single_question_type
         format.html { redirect_to course_assessment_mission_path(@course, @mission),
-                                  notice: "The mission #{@mission.title} has been updated." }
+                                  notice: "The mission #{@mission.title} has been updated."}
       else
         format.html {redirect_to edit_course_assessment_mission_path(@course, @mission) }
       end
     end
   end
-
+  
+  def update_questions ques_list
+    if !ques_list.nil?
+      old_list = @mission.as_assessment.question_assessments
+      ques_list.each do |q|
+        if old_list.where(:question_id => q).count === 0
+          qa = QuestionAssessment.new 
+          qa.question_id = q
+          qa.assessment_id =  @mission.as_assessment.id
+          qa.position = @mission.questions.count
+          qa.save
+        end
+      end
+      old_list.each do |qa|
+        if !ques_list.include? qa.question.id.to_s
+          qa.destroy
+        end
+      end
+    end      
+  end
+  
   def destroy
     @mission.destroy
     respond_to do |format|

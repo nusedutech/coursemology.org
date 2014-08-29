@@ -3,8 +3,39 @@ class Assessment::QuestionsController < ApplicationController
   load_resource :assessment, through: :course
   before_filter :build_resource
   before_filter :extract_tags, only: [:update]
-  before_filter :load_general_course_data, only: [:show, :new, :edit]
+  before_filter :load_general_course_data, only: [:index, :new, :edit, :add_questions]
 
+  def index
+    filter = params[:tags]
+    questions = []
+    if !filter.nil?
+      filter_tags = filter.split(",")      
+      if filter_tags.count > 0
+        @summary = {selected_tags: filter_tags || []}
+        filter_tags.each do |t|
+          @tag = @course.topicconcepts.where(:name => t).first
+          if !@tag.nil?
+            questions += @tag.questions
+          end
+        end
+      end
+    end
+    if questions.count > 0
+      @questions = questions.uniq
+    else
+      @questions = @course.tagged_questions.uniq
+    end
+    
+    respond_to do |format|
+      format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }}}
+      format.html
+    end
+  end
+  
+  def add_question
+    @questions = @course.tagged_questions.uniq
+  end
+  
   def edit    
     @tags_list = {}
     @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
@@ -22,7 +53,7 @@ class Assessment::QuestionsController < ApplicationController
     end
     
     
-    @question.max_grade = @assessment.is_mission? ? 10 : 2
+    #@question.max_grade = @assessment.is_mission? ? 10 : 2
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @question }
@@ -31,10 +62,14 @@ class Assessment::QuestionsController < ApplicationController
 
   def create
     @question.creator = current_user
-    qa = @assessment.question_assessments.new
-    qa.question = @question.question
-    qa.position = @assessment.questions.count
-    @question.save && qa.save
+    @question.save
+    if !@assessment.nil?
+      qa = @assessment.question_assessments.new
+      qa.question = @question.question
+      qa.position = @assessment.questions.count
+      qa.save
+    end
+    #@question.save && qa.save
   end
 
   def update

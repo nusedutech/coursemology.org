@@ -3,17 +3,16 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
   def create
     saved = super
     respond_to do |format|
-      if saved
-        
-        
+      #if saved   
+      if @question        
         if(params["new_tags_concept"] != params["original_tags_concept"])
-           update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
-         end
-         @course.tag_groups.each do |t|         
-           if(params["new_tags_#{t.name}"] != params["original_tags_#{t.name}"])
-             update_tag(JSON.parse(params["original_tags_#{t.name}"]),JSON.parse(params["new_tags_#{t.name}"]), t)
-           end
-         end
+          update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
+        end
+        @course.tag_groups.each do |t|         
+          if(params["new_tags_#{t.name}"] != params["original_tags_#{t.name}"])
+            update_tag(JSON.parse(params["original_tags_#{t.name}"]),JSON.parse(params["new_tags_#{t.name}"]), t)
+          end
+        end
         
         #add difficulty tag for no difficulty question
         dif = @course.tag_groups.where(:name => 'Difficulty')
@@ -22,10 +21,14 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
           taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
           taggable.save
         end
-      
-      
-        format.html { redirect_to url_for([@course, @assessment.as_assessment]),
+        
+        if !@assessment.nil?
+          format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                       notice: 'Question has been added.'}
+        else
+          format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                      notice: 'Question has been added.'}
+        end        
         format.json { render json: @question, status: :created, location: @question }
       else
         format.html { render action: 'new' }
@@ -57,8 +60,13 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
       
         
       if @question.update_attributes(params[:assessment_general_question])
-        format.html { redirect_to url_for([@course, @assessment.as_assessment]),
+        if !@assessment.nil?
+          format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                                   notice: 'Question has been updated.'}
+        else
+          format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                      notice: 'Question has been updated.'}
+        end
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }

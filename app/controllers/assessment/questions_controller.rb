@@ -97,8 +97,13 @@ class Assessment::QuestionsController < ApplicationController
   def destroy
     @question.destroy
     respond_to do |format|
-      format.html { redirect_to url_for([@course, @assessment.as_assessment]),
+      if !@assessment.nil?
+        format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                                 notice: "Question has been successfully deleted." }
+      else
+        format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                                notice: "Question has been successfully deleted." }                                
+      end
     end
   end
 

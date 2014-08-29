@@ -32,7 +32,7 @@
 	            </td>
 	            <td>
 	            	<% diff = q.tags.uniq & diffs%>
-	            	<% if !diff.nil?%>
+	            	<% if (!diff.nil? && !diff[0].nil?) %>
 	            		<a><span class="label label-info label-green"><%= diff[0].name %></span></a>
 	            	<% end %>
 	           	</td>

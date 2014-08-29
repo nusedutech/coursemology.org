@@ -85,7 +85,7 @@ class Assessment::MissionsController < Assessment::AssessmentsController
   end
   
   def update_questions ques_list
-    if !ques_list.nil?
+    if (!ques_list.nil? && ques_list.count >0)
       old_list = @mission.as_assessment.question_assessments
       ques_list.each do |q|
         if old_list.where(:question_id => q).count === 0

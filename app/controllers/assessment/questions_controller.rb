@@ -33,7 +33,25 @@ class Assessment::QuestionsController < ApplicationController
   end
   
   def add_question
-    @questions = @course.tagged_questions.uniq
+    filter = params[:tags]
+    questions = []
+    if !filter.nil?
+      filter_tags = filter.split(",")      
+      if filter_tags.count > 0
+        @summary = {selected_tags: filter_tags || []}
+        filter_tags.each do |t|
+          @tag = @course.topicconcepts.where(:name => t).first
+          if !@tag.nil?
+            questions += @tag.questions
+          end
+        end
+      end
+    end
+    if questions.count > 0
+      @questions = questions.uniq
+    else
+      @questions = @course.tagged_questions.uniq
+    end
   end
   
   def edit    

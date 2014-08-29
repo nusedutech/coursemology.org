@@ -73,7 +73,11 @@ class Assessment::MissionsController < Assessment::AssessmentsController
 
   def update
     respond_to do |format|
-      update_questions params[:assessment][:question_assessments]      
+      if !params[:assessment].nil? 
+        update_questions params[:assessment][:question_assessments]
+      else
+        update_questions []
+      end      
       if @mission.update_attributes(params[:assessment_mission])
         update_single_question_type
         format.html { redirect_to course_assessment_mission_path(@course, @mission),
@@ -85,7 +89,7 @@ class Assessment::MissionsController < Assessment::AssessmentsController
   end
   
   def update_questions ques_list
-    if (!ques_list.nil? && ques_list.count >0)
+    if (!ques_list.nil?)
       old_list = @mission.as_assessment.question_assessments
       ques_list.each do |q|
         if old_list.where(:question_id => q).count === 0

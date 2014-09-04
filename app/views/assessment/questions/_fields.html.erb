@@ -1,10 +1,11 @@
-<table class="table assignments missions-list-table">
+<table class="table assignments missions-list-table ver-ali-top">
     <thead>
 	    <tr>
-	    	<th width="50%">Question</th>
-	    	<th width="30%">Tags</th>
-	    	<th width="10%">Level</th>
-	    	<%- if !@assessment.nil? %>
+            <th width="3%"></th>
+	    	<th width="65%">Question</th>
+	    	<th width="15%">Tags</th>
+	    	<th width="7%">Level</th>
+	    	<%- if @assessment.nil? %>
 	    	<th width="10%">Action</th>
 	    	<%- else%>
 	    	<th width="10%">Add</th>
@@ -13,9 +14,20 @@
     </thead>
 
     <tbody class="table-hover">
-    	<% @questions.each do |q| %>
-	        <tr id="row-<%= q.id %>">	          
-	        	<td><%= q.title %></td>
+    	<% @questions.each_with_index do |q, index| %>
+	        <tr id="ques-<%= q.id %>">
+                <td><%= index + 1 %></td>
+	        	<td>
+                  <div class="ellipsis">
+                    <p class="p-bold"><%= q.title %></p>
+                    <% if q.as_question.class == Assessment::McqQuestion %>
+                        <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+                    <% else %>
+                        <%= style_format(q.description) %>
+                    <% end %>
+                  </div>
+                  <a class="show-more small-text float-right">Show More</a>
+                </td>
 	        	<td>
 	              	<% q.topicconcepts.uniq.each do |tag| %>
 	                    <a>
@@ -62,3 +74,15 @@
 		<%= link_to t('.cancel', :default => t("helpers.links.cancel")), :back, :class => 'btn' %>
 		</div>
 	<% end %>
+
+<script>
+    $('a.show-more').click(function() {
+        if($(this).text()==='Show More') {
+            $(this).prev().addClass("show-max-height");
+            $(this).text('Hide');
+        }else{
+            $(this).prev().removeClass("show-max-height");
+            $(this).text('Show More');
+        }
+    });
+</script>

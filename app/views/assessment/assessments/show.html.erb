@@ -87,7 +87,7 @@
 
 <% if can? :view_detail, @assessment %>
     <h2 class="asm-qns-title"><%= display_name %> Questions</h2>
-    <p><%= link_to 'Add Questions',course_assessment_path + '/questions/add_question', :class => 'btn btn-primary'%></p>
+    <p><%= link_to 'Add Questions',course_assessment_path(@course,@assessment) + '/questions/add_question', :class => 'btn btn-primary'%></p>
     <table class="table asm-qns-table sort">
       <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @assessment) %>">
       <% @summary[:questions].each_with_index do |qn, index| %>
@@ -133,6 +133,7 @@
                     <%= link_to polymorphic_path([@course, @assessment, q], action: :edit), class: 'btn' do %>
                         <i class="icon-edit"></i>
                     <% end %>
+                    <%- delete_url = url_for([@course, @assessment, q])%>
                     <%= link_to url_for([@course, @assessment, q]),
                                 method: :delete,
                                 data: { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => "Are you sure to delete 'Question #{q.title}'?")) },

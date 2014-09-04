@@ -3,25 +3,30 @@ class Assessment::QuestionsController < ApplicationController
   load_resource :assessment, through: :course
   before_filter :build_resource
   before_filter :extract_tags, only: [:update]
-  before_filter :load_general_course_data, only: [:index, :new, :edit, :add_questions]
+  before_filter :load_general_course_data, only: [:index, :new, :edit, :add_question]
 
   def index
     filter = params[:tags]
-    questions = []
-    if !filter.nil?
-      filter_tags = filter.split(",")      
+    search_string = params[:search_string]
+    questions = nil
+
+    if (!filter.nil? && !filter.empty?)
+      filter_tags = filter.split(",")
+      q = ''
       if filter_tags.count > 0
         @summary = {selected_tags: filter_tags || []}
         filter_tags.each do |t|
-          @tag = @course.topicconcepts.where(:name => t).first
-          if !@tag.nil?
-            questions += @tag.questions
-          end
+          q += q.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
         end
       end
-    end
-    if questions.count > 0
-      @questions = questions.uniq
+
+      if !search_string.empty?
+        @questions = @course.tagged_questions.where(q).where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+      else
+        @questions = @course.tagged_questions.where(q).uniq
+      end
+    elsif (!search_string.nil? && !search_string.empty?)
+      @questions = @course.tagged_questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
     else
       @questions = @course.tagged_questions.uniq
     end

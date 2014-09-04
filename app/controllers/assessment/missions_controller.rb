@@ -95,7 +95,7 @@ class Assessment::MissionsController < Assessment::AssessmentsController
         if old_list.where(:question_id => q).count === 0
           qa = QuestionAssessment.new 
           qa.question_id = q
-          qa.assessment_id =  @mission.as_assessment.id
+          qa.assessment_id =  @mission.assessment.id
           qa.position = @mission.questions.count
           qa.save
         end

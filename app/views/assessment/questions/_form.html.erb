@@ -4,16 +4,24 @@
 	<%- qs_path = course_assessment_path(@course,@assessment) + '/questions/add_question' %>
 <%- end %>
 <%= form_tag qs_path, :method => 'get', class: "form-inline" do %>
-	<table style="margin-bottom: 5px;"><tr>
-      <td><label>Filter by Concept:</label></td>
-      <td><div class="tag" style="display: inline; width: 400px">
-        <input type="tag" name="tags"
-               allowFreeTagging="false"
-               url="<%= course_assessment_questions_path %>"
-               value="<%= !@summary.nil? ? @summary[:selected_tags].map {|s| {id: 0, name:s}}.to_json : '[]'%>">
-      </div></td>
-      <td><button type="submit" class="btn">Search</button></td>
-   </tr><table>
+	<table class="table-search">
+        <tr>
+            <td><label>Search with:</label></td>
+            <td><%= text_field_tag 'search_string',nil, class: 'question_search' %></td>
+        </tr>
+        <tr>
+            <td><label>Filter by Concept:</label></td>
+            <td><div class="tag" style="display: inline; width: 350px">
+            <input type="tag" name="tags"
+                   allowFreeTagging="false"
+                   url="<%= course_assessment_questions_path %>"
+                   value="<%= !@summary.nil? ? @summary[:selected_tags].map {|s| {id: 0, name:s}}.to_json : '[]'%>">
+            </div></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><button type="submit" class="btn">Search</button></td>
+        </tr></table>
 <% end %>   
 
 <%- if @assessment.nil? %>

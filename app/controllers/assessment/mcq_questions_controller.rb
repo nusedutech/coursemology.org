@@ -50,11 +50,17 @@ class Assessment::McqQuestionsController < Assessment::QuestionsController
       
       
       
-      if saved
+      #if saved
+      if @question
         update_answers(@question)
-        if @assessment.as_assessment.is_a?(Assessment::Training)
-          format.html { redirect_to course_assessment_training_url(@course, @assessment.as_assessment),
+        if !@assessment.nil?
+          if @assessment.as_assessment.is_a?(Assessment::Training)
+            format.html { redirect_to course_assessment_training_url(@course, @assessment.as_assessment),
                         notice: 'New question added.' }
+          end
+        else
+          format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                                    notice: 'New question added.'}
         end
       else
         format.html { render action: "new" }
@@ -87,9 +93,14 @@ class Assessment::McqQuestionsController < Assessment::QuestionsController
     updated = update_answers(@question) && @question.update_attributes(params["assessment_mcq_question"])
     respond_to do |format|
       if updated && @question.save
-        if @assessment.as_assessment.is_a?(Assessment::Training)
-          format.html { redirect_to course_assessment_training_url(@course, @assessment.as_assessment),
-                                    notice: 'Question updated.' }
+        if !@assessment.nil?
+          if @assessment.as_assessment.is_a?(Assessment::Training)
+            format.html { redirect_to course_assessment_training_url(@course, @assessment.as_assessment),
+                                      notice: 'Question updated.' }
+          end
+        else
+          format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                                    notice: 'Question updated.'}
         end
 
       else

@@ -5,7 +5,7 @@
     <%= f.association :language, label_method: :title, value_method: :id, include_blank: false %>
     <%= f.input :max_grade, as: :integer, input_html: {class: "number_field input-mini"}, min: 0  %>
     <%= f.association :dependent_on,
-                      collection: @assessment.questions.coding.before(@question.question, @assessment.questions.count),
+                      collection: !@assessment.nil? ? @assessment.questions.coding.before(@question.question, @assessment.questions.count) : [],
                       label_method: :title, value_method: :id,
                       include_blank: true, hint: "Include student solution from this question" %>
 
@@ -15,25 +15,27 @@
 	<div class="control-group integer optional">
 		<label class="integer optional control-label">Tags</label>
 		<div class="controls">
-			<% @tags_list.each do |key,value|%>
-			<div class="group-tag-control">
-				<div style="padding-top: 5px;"><strong><%=key%></strong></div>
-				<div style="padding-top: 5px; width: 65%">
-					<textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
-				</div>
-			
-				<input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
-				<input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
-				<input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
-				<input type="hidden" class="as" name="new_tags_con" value="abc123">
-			</div>
-			<% end %>
+            <% if !@tags_list.nil? %>
+                <% @tags_list.each do |key,value|%>
+                <div class="group-tag-control">
+                    <div style="padding-top: 5px;"><strong><%=key%></strong></div>
+                    <div style="padding-top: 5px; width: 65%">
+                        <textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
+                    </div>
+
+                    <input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
+                    <input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
+                    <input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
+                    <input type="hidden" class="as" name="new_tags_con" value="abc123">
+                </div>
+                <% end %>
+            <% end %>
 		</div>
 	</div>
 	
 	
     <%= f.input :auto_graded, as: :boolean, inline_label: "Check to enable auto-grading",
-                wrapper_html: {class: "#{'hidden' unless @assessment.is_mission?}"},
+                wrapper_html: {class: "#{'hidden' unless (!@assessment.nil? && @assessment.is_mission?)}"},
                 input_html: {"data-toggle" => "collapse", "data-target" => "#auto-grading-setting"}  %>
 
     <%= f.input :staff_comments, as: :text, input_html:{class: "span7 text-area", rows:5}  %>
@@ -51,7 +53,7 @@
       <%= f.input :memory_limit,label: "Memory Limit (MB)", as: :integer, input_html: {class: "number_field input-mini"}  %>
       <%= f.input :time_limit,label: "Time Limit (secs)", as: :integer, input_html: {class: "number_field input-mini"}  %>
 
-      <% if @assessment.is_mission? %>
+      <% if (!@assessment.nil? && @assessment.is_mission?) %>
           <%= f.input :attempt_limit, label: "Test Limit (times)", as: :integer, input_html: {class: "number_field input-mini"}  %>
       <% end %>
 

@@ -1,0 +1,30 @@
+table.ver-ali-top td {
+  vertical-align: top;
+}
+
+div.ellipsis {
+  overflow: hidden;
+  max-height: 40px;
+  line-height: 20px;
+}
+
+a.small-text {
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.float-right {
+  float: right;
+}
+
+div.show-max-height {
+  max-height: none;
+}
+
+table.table-search td{
+  height: 40px;
+}
+
+input.question_search{
+  width: 338px;
+}

@@ -115,7 +115,14 @@ class Assessment::QuestionsController < ApplicationController
   end
 
   def destroy
-    @question.destroy
+    if !@assessment.nil?
+      qa = QuestionAssessment.find_by_assessment_id_and_question_id(@assessment.id, @question.question.id)
+      if !qa.nil?
+        qa.destroy
+      end
+    else
+      @question.destroy
+    end
     respond_to do |format|
       if !@assessment.nil?
         format.html { redirect_to url_for([@course, @assessment.as_assessment]),

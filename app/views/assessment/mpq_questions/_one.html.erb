@@ -1,0 +1,25 @@
+<table>
+  <% if !mpq_q.nil? %>
+      <% mpq_q.sub_questions.each_with_index do |qn, index| %>
+          <% q = qn.as_question %>
+          <tr>
+            <td>
+              <div>
+                <div>
+                  <p style="font-weight: bold">Sub Question <span class="asm-qn-index"><%= index + 1 %></span>
+                    <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
+                  </p>
+                </div>
+
+                <% if q.class == Assessment::McqQuestion %>
+                    <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+                <% else %>
+                    <%= style_format(q.description) %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+      <% end %>
+  <% end %>
+</table>
+

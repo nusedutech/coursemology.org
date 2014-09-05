@@ -1,11 +1,13 @@
 class Assessment::QuestionsController < ApplicationController
   load_and_authorize_resource :course
   load_resource :assessment, through: :course
+
   before_filter :build_resource
   before_filter :extract_tags, only: [:update]
-  before_filter :load_general_course_data, only: [:index, :new, :edit, :add_question]
+  before_filter :load_general_course_data, only: [:index, :new, :edit,:show, :add_question]
 
   def index
+
     filter = params[:tags]
     search_string = params[:search_string]
     questions = nil
@@ -59,7 +61,10 @@ class Assessment::QuestionsController < ApplicationController
     end
   end
   
-  def edit    
+  def edit
+    if !params[:assessment_mpq_question_id].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:assessment_mpq_question_id])
+    end
     @tags_list = {}
     @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
     @course.tag_groups.each do |t|
@@ -69,12 +74,14 @@ class Assessment::QuestionsController < ApplicationController
   end
   
   def new
+    if !params[:assessment_mpq_question_id].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:assessment_mpq_question_id])
+    end
     @tags_list = {}
     @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
     @course.tag_groups.each do |t|
       @tags_list[t.name] = {:origin => @question.tags.where(:tag_group_id => t.id).select(:name).map { |e| e.name }, :all => Tag.where(:tag_group_id => t.id).select(:name).map { |e| e.name }}
     end
-    
     
     #@question.max_grade = @assessment.is_mission? ? 10 : 2
     respond_to do |format|
@@ -86,6 +93,12 @@ class Assessment::QuestionsController < ApplicationController
   def create
     @question.creator = current_user
     @question.save
+    if !params[:parent_mpq_question].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:parent_mpq_question])
+      sq = @parent_mpq_question.children.new
+      sq.child_id = @question.question.id
+      sq.save
+    end
     if !@assessment.nil?
       qa = @assessment.question_assessments.new
       qa.question = @question.question
@@ -96,7 +109,9 @@ class Assessment::QuestionsController < ApplicationController
   end
 
   def update
-
+    if !params[:parent_mpq_question].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:parent_mpq_question])
+    end
   end
 
   def destroy

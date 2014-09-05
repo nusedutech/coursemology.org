@@ -1,0 +1,2 @@
+module Assessment::MpqQuestionsHelper
+end

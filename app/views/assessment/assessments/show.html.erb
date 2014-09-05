@@ -104,6 +104,8 @@
 
                 <% if q.class == Assessment::McqQuestion %>
                     <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+                <% elsif q.class == Assessment::MpqQuestion %>
+                    <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
                 <% else %>
                     <%= style_format(q.description) %>
                 <% end %>
@@ -126,14 +128,18 @@
             <% if can? :manage, Assessment::Training %>
                 <td class="action-there-icons">
                   <div class="btn-group">
+                    <!--
                     <a class="btn copy-btn" rel="tooltip" title="Copy" qn-type="<%= q.class.to_s.underscore.gsub('/', '_') %>" qn-id="<%= q.id %>">
                       <i class="icon-copy"></i>
                     </a>
 
-                    <%= link_to polymorphic_path([@course, @assessment, q], action: :edit), class: 'btn' do %>
+                    <%#= link_to polymorphic_path([@course, @assessment, q], action: :edit), class: 'btn' do %>
                         <i class="icon-edit"></i>
-                    <% end %>
-                    <%- delete_url = url_for([@course, @assessment, q])%>
+                    <%# end %>
+
+                    <%-# delete_url = url_for([@course, @assessment, q])%>
+                    -->
+
                     <%= link_to url_for([@course, @assessment, q]),
                                 method: :delete,
                                 data: { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => "Are you sure to delete 'Question #{q.title}'?")) },

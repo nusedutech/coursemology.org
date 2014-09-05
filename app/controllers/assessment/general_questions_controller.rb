@@ -1,30 +1,37 @@
 class Assessment::GeneralQuestionsController < Assessment::QuestionsController
-  
+
+
+
   def create
     saved = super
     respond_to do |format|
       #if saved   
-      if @question        
-        if(params["new_tags_concept"] != params["original_tags_concept"])
-          update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
-        end
-        @course.tag_groups.each do |t|         
-          if(params["new_tags_#{t.name}"] != params["original_tags_#{t.name}"])
-            update_tag(JSON.parse(params["original_tags_#{t.name}"]),JSON.parse(params["new_tags_#{t.name}"]), t)
+      if @question
+        if (!params["new_tags_concept"].nil? && !params["original_tags_concept"].nil?)
+          if(params["new_tags_concept"] != params["original_tags_concept"])
+            update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
+          end
+          @course.tag_groups.each do |t|
+            if(params["new_tags_#{t.name}"] != params["original_tags_#{t.name}"])
+              update_tag(JSON.parse(params["original_tags_#{t.name}"]),JSON.parse(params["new_tags_#{t.name}"]), t)
+            end
+          end
+
+          #add difficulty tag for no difficulty question
+          dif = @course.tag_groups.where(:name => 'Difficulty')
+          if (dif.count > 0 && @question.tags.where(:tag_group_id => dif.first.id).count == 0 && @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').count > 0)
+            taggable = @question.taggable_tags.new
+            taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
+            taggable.save
           end
         end
-        
-        #add difficulty tag for no difficulty question
-        dif = @course.tag_groups.where(:name => 'Difficulty')
-        if (dif.count > 0 && @question.tags.where(:tag_group_id => dif.first.id).count == 0 && @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').count > 0)
-          taggable = @question.taggable_tags.new                          
-          taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
-          taggable.save
-        end
-        
+
         if !@assessment.nil?
           format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                       notice: 'Question has been added.'}
+        elsif !@parent_mpq_question.nil?
+          format.html { redirect_to main_app.course_assessment_mpq_question_url(@course,@parent_mpq_question),
+                                    notice: 'Question has been added.'}
         else
           format.html { redirect_to main_app.course_assessment_questions_url(@course),
                       notice: 'Question has been added.'}
@@ -40,29 +47,32 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
   def update
     super
     respond_to do |format|
-      
-      if(JSON.parse(params["new_tags_concept"]) != JSON.parse(params["original_tags_concept"]))
-         update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
-       end
-       @course.tag_groups.each do |t|         
-         if(JSON.parse(params["new_tags_#{t.name}"]) != JSON.parse(params["original_tags_#{t.name}"]))           
-           update_tag(JSON.parse(params["original_tags_#{t.name}"]),JSON.parse(params["new_tags_#{t.name}"]), t)
+      if (!params["new_tags_concept"].nil? && !params["original_tags_concept"].nil?)
+        if(JSON.parse(params["new_tags_concept"]) != JSON.parse(params["original_tags_concept"]))
+           update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
          end
-       end
-      
-      #add difficulty tag for no difficulty question
-        dif = @course.tag_groups.where(:name => 'Difficulty')
-        if (dif.count > 0 && @question.tags.where(:tag_group_id => dif.first.id).count == 0 && @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').count > 0)
-          taggable = @question.taggable_tags.new                          
-          taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
-          taggable.save
-        end
-      
+         @course.tag_groups.each do |t|
+           if(JSON.parse(params["new_tags_#{t.name}"]) != JSON.parse(params["original_tags_#{t.name}"]))
+             update_tag(JSON.parse(params["original_tags_#{t.name}"]),JSON.parse(params["new_tags_#{t.name}"]), t)
+           end
+         end
+
+        #add difficulty tag for no difficulty question
+          dif = @course.tag_groups.where(:name => 'Difficulty')
+          if (dif.count > 0 && @question.tags.where(:tag_group_id => dif.first.id).count == 0 && @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').count > 0)
+            taggable = @question.taggable_tags.new
+            taggable.tag= @course.tags.where(:tag_group_id => dif.first.id, :name => 'Unspecified').first
+            taggable.save
+          end
+      end
         
       if @question.update_attributes(params[:assessment_general_question])
         if !@assessment.nil?
           format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                                   notice: 'Question has been updated.'}
+        elsif !@parent_mpq_question.nil?
+          format.html { redirect_to main_app.course_assessment_mpq_question_url(@course,@parent_mpq_question),
+                                    notice: 'Question has been added.'}
         else
           format.html { redirect_to main_app.course_assessment_questions_url(@course),
                       notice: 'Question has been updated.'}

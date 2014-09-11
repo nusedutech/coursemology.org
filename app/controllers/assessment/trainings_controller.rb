@@ -57,11 +57,36 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
 
   def update
     respond_to do |format|
+      if !params[:assessment].nil?
+        update_questions params[:assessment][:question_assessments]
+      else
+        update_questions []
+      end
       if @training.update_attributes(params[:assessment_training])
         format.html { redirect_to course_assessment_training_url(@course, @training),
                                   notice: "The training '#{@training.title}' has been updated." }
       else
         format.html { render action: "edit" }
+      end
+    end
+  end
+
+  def update_questions ques_list
+    if (!ques_list.nil?)
+      old_list = @training.question_assessments
+      ques_list.each do |q|
+        if old_list.where(:question_id => q).count === 0
+          qa = QuestionAssessment.new
+          qa.question_id = q
+          qa.assessment_id =  @training.assessment.id
+          qa.position = @training.questions.count
+          qa.save
+        end
+      end
+      old_list.each do |qa|
+        if !ques_list.include? qa.question.id.to_s
+          qa.destroy
+        end
       end
     end
   end

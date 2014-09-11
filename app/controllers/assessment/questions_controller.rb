@@ -1,27 +1,34 @@
 class Assessment::QuestionsController < ApplicationController
   load_and_authorize_resource :course
   load_resource :assessment, through: :course
+
   before_filter :build_resource
   before_filter :extract_tags, only: [:update]
-  before_filter :load_general_course_data, only: [:index, :new, :edit, :add_questions]
+  before_filter :load_general_course_data, only: [:index, :new, :edit,:show, :add_question]
 
   def index
+
     filter = params[:tags]
-    questions = []
-    if !filter.nil?
-      filter_tags = filter.split(",")      
+    search_string = params[:search_string]
+    questions = nil
+
+    if (!filter.nil? && !filter.empty?)
+      filter_tags = filter.split(",")
+      q = ''
       if filter_tags.count > 0
         @summary = {selected_tags: filter_tags || []}
         filter_tags.each do |t|
-          @tag = @course.topicconcepts.where(:name => t).first
-          if !@tag.nil?
-            questions += @tag.questions
-          end
+          q += q.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
         end
       end
-    end
-    if questions.count > 0
-      @questions = questions.uniq
+
+      if !search_string.empty?
+        @questions = @course.tagged_questions.where(q).where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+      else
+        @questions = @course.tagged_questions.where(q).uniq
+      end
+    elsif (!search_string.nil? && !search_string.empty?)
+      @questions = @course.tagged_questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
     else
       @questions = @course.tagged_questions.uniq
     end
@@ -54,7 +61,10 @@ class Assessment::QuestionsController < ApplicationController
     end
   end
   
-  def edit    
+  def edit
+    if !params[:assessment_mpq_question_id].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:assessment_mpq_question_id])
+    end
     @tags_list = {}
     @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
     @course.tag_groups.each do |t|
@@ -64,12 +74,14 @@ class Assessment::QuestionsController < ApplicationController
   end
   
   def new
+    if !params[:assessment_mpq_question_id].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:assessment_mpq_question_id])
+    end
     @tags_list = {}
     @tags_list[:concept] = {:origin => @question.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
     @course.tag_groups.each do |t|
       @tags_list[t.name] = {:origin => @question.tags.where(:tag_group_id => t.id).select(:name).map { |e| e.name }, :all => Tag.where(:tag_group_id => t.id).select(:name).map { |e| e.name }}
     end
-    
     
     #@question.max_grade = @assessment.is_mission? ? 10 : 2
     respond_to do |format|
@@ -81,6 +93,12 @@ class Assessment::QuestionsController < ApplicationController
   def create
     @question.creator = current_user
     @question.save
+    if !params[:parent_mpq_question].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:parent_mpq_question])
+      sq = @parent_mpq_question.children.new
+      sq.child_id = @question.question.id
+      sq.save
+    end
     if !@assessment.nil?
       qa = @assessment.question_assessments.new
       qa.question = @question.question
@@ -91,11 +109,20 @@ class Assessment::QuestionsController < ApplicationController
   end
 
   def update
-
+    if !params[:parent_mpq_question].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:parent_mpq_question])
+    end
   end
 
   def destroy
-    @question.destroy
+    if !@assessment.nil?
+      qa = QuestionAssessment.find_by_assessment_id_and_question_id(@assessment.id, @question.question.id)
+      if !qa.nil?
+        qa.destroy
+      end
+    else
+      @question.destroy
+    end
     respond_to do |format|
       if !@assessment.nil?
         format.html { redirect_to url_for([@course, @assessment.as_assessment]),

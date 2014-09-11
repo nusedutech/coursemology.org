@@ -2,31 +2,37 @@
                     html: { class: 'form-horizontal'},
                     defaults: { input_html: { class: 'span7' } } do |f| %>
 
+    <% if !@parent_mpq_question.nil? %>
+        <input type="hidden" name="parent_mpq_question" value="<%= @parent_mpq_question.id %>" />
+    <% end %>
+
     <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
     <%= f.input :max_grade, as: :integer, input_html: {class: "number_field input-mini"} %>
     <%#= f.input :tags, as: :tag, url: course_tags_path, input_html: {class: "span7"}  %>
-    
-    
-    <div class="control-group integer optional">
-		<label class="integer optional control-label">Tags</label>
-		<div class="controls">
-			<% @tags_list.each do |key,value|%>
-			<div class="group-tag-control">
-				<div style="padding-top: 5px;"><strong><%=key%></strong></div>
-				<div style="padding-top: 5px; width: 65%">
-					<textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
-				</div>
-			
-				<input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
-				<input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
-				<input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
-				<input type="hidden" class="as" name="new_tags_con" value="abc123">
-			</div>
-			<% end %>
-		</div>
-	</div>
-	
-	
+
+    <% if @parent_mpq_question.nil? %>
+        <div class="control-group integer optional">
+            <label class="integer optional control-label">Tags</label>
+            <div class="controls">
+                <% if !@tags_list.nil? %>
+                    <% @tags_list.each do |key,value|%>
+                    <div class="group-tag-control">
+                        <div style="padding-top: 5px;"><strong><%=key%></strong></div>
+                        <div style="padding-top: 5px; width: 65%">
+                            <textarea style="height: 28px" id="txtar_tagging_<%=key%>" rows="1"></textarea>
+                        </div>
+
+                        <input type="hidden" class="hdf-all-tags" name="all_tags_<%=key%>" value="<%=value[:all]%>">
+                        <input type="hidden" class="hdf-original-tags" name="original_tags_<%=key%>" value="<%=value[:origin]%>">
+                        <input type="hidden" class="hdf-new-tags" name="new_tags_<%=key%>">
+                        <input type="hidden" class="as" name="new_tags_con" value="abc123">
+                    </div>
+                    <% end %>
+                <% end %>
+            </div>
+        </div>
+	<% end %>
+
     <%= f.input :select_all, as: :boolean,
                 input_html: {class: ""},
                 inline_label:"Student must pick all correct answers" %>

@@ -2,18 +2,24 @@ class Assessment::CodingQuestionsController < Assessment::QuestionsController
   before_filter :set_avaialbe_test_types, only: [:new, :edit]
 
   def new
-    @question.auto_graded = !@assessment.is_mission?
+    if(!@assessment.nil?)
+      @question.auto_graded = !@assessment.is_mission?
+    end
     @question.language = ProgrammingLanguage.first
     super
   end
 
   def create
-    @question.auto_graded = !@assessment.is_mission?
+    if !@assessment.nil?
+      @question.auto_graded = !@assessment.is_mission?
+    else
+      @question.auto_graded = false
+    end
     saved = super
     # update max grade of the asm it belongs to
     respond_to do |format|
-      if saved
-        
+      #if saved
+      if @question
         
         if(params["new_tags_concept"] != params["original_tags_concept"])
            update_tag(JSON.parse(params["original_tags_concept"]),JSON.parse(params["new_tags_concept"]), nil)
@@ -34,7 +40,11 @@ class Assessment::CodingQuestionsController < Assessment::QuestionsController
       
         
         flash[:notice] = 'New question added.'
-        format.html { redirect_to url_for([@course, @assessment.as_assessment]) }
+        if(!@assessment.nil?)
+          format.html { redirect_to url_for([@course, @assessment.as_assessment]) }
+        else
+          format.html { redirect_to main_app.course_assessment_questions_url(@course) }
+        end
         format.json { render json: @question, status: :created, location: @question }
       else
         format.html { render action: 'new' }
@@ -70,7 +80,12 @@ class Assessment::CodingQuestionsController < Assessment::QuestionsController
     respond_to do |format|
       if @question.save
         flash[:notice] = 'Question has been updated.'
-        format.html { redirect_to url_for([@course, @assessment.as_assessment]) }
+        if(!@assessment.nil?)
+          format.html { redirect_to url_for([@course, @assessment.as_assessment]) }
+        else
+          format.html { redirect_to main_app.course_assessment_questions_url(@course) }
+        end
+
       else
         format.html { render action: 'edit' }
         format.json { render json: @question.errors, status: :unprocessable_entity }
@@ -82,8 +97,10 @@ class Assessment::CodingQuestionsController < Assessment::QuestionsController
 
   def set_avaialbe_test_types
     @test_types = {public: 'Public', private: 'Private'}
-    if @assessment.is_mission?
-      @test_types[:eval] = 'Evaluation'
+    if(!@assessment.nil?)
+      if @assessment.is_mission?
+        @test_types[:eval] = 'Evaluation'
+      end
     end
   end
 

@@ -16,7 +16,9 @@
     <div class="control-group">
       <%= f.label :location, :class => 'control-label' %>
       <div class="controls">
-        <%= f.text_field :location, :class => 'text_field span7', :placeholder => "(Optional) Where's this session held?" %>
+        <%= f.text_field :location, :class => 'text_field span7', :list => "link_list", :placeholder => "(Optional) Where's this session held or link?" %>
+        <datalist id="link_list">
+        </datalist>
       </div>
     </div>
 
@@ -26,6 +28,23 @@
       </label>
       <div class="controls">
         <%= f.text_area :description, :class => 'text_field span7 html-editor', :placeholder => "(Optional) What's going to happen? What will students know after attending?" %>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">
+        Tags
+      </label>
+      <div class="controls">
+        <% if !@tags_list.nil? %>
+            <div style="padding-top: 5px; width: 65%">
+              <textarea style="height: 28px" id="txtar_tagging" rows="1"></textarea>
+            </div>
+
+            <input type="hidden" class="hdf-all-tags" name="all_tags" value="<%=@tags_list[:all]%>">
+            <input type="hidden" class="hdf-original-tags" name="original_tags" value="<%=@tags_list[:origin]%>">
+            <input type="hidden" class="hdf-new-tags" name="new_tags">
+        <% end %>
       </div>
     </div>
 
@@ -86,7 +105,7 @@
     </div>
     
     <div class="form-actions">
-      <%= f.submit "Submit", :class => 'btn btn-primary', data: {disable_with: "Submitting..."} %>
+      <%= f.submit "Submit", :id => 'btn_submit', :class => 'btn btn-primary', data: {disable_with: "Submitting..."} %>
       <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
                   course_lesson_plan_path(@course), :class => 'btn' %>
     </div>
@@ -101,4 +120,76 @@
     <input type="hidden" name="resources[]" value="{%= o[0] %},{%= o[1] %}" />
   </td>
 </tr>
+</script>
+
+<script>
+
+    $( document ).ready(function() {
+        $('#lesson_plan_entry_entry_type').change(function(){
+            if($(this).val()==="3"){
+                get_data_ivle();
+            }
+        });
+
+        if($('#lesson_plan_entry_entry_type').val()==="3"){
+            get_data_ivle();
+        }
+    });
+
+    function get_data_ivle(){
+        var key = "mHy1mEcwwWvlHYqc9bNdO", token = "E6E8F6C8B6732A2EFD8487B1ABED6456077EC2D710A350CB87B1FF90684182D00F56BA51A1D4D07A6A80699ED61EA20F90D5A938C8DBA85CE67B04D74F0191C26DDD34C6C8D1C6D64D28F95191BCF9951EDA6927A2C3459F38C7ACEB3E18C403B028FC88A4D0C5215E02C42CEDBAF282ACDA7ACCD24D13978E14C8FE6C5528566E1C0D4075529C76E6CF578C7C369ABB03CF00967661062F82B6DBF69D70370C07208E9F2D0108D9445501FD2F1F55F282AB93E372AA2FF4295F5D33AE9F9A984AFB6A20F3529AB76FD8E975E54ACD23", user = ivle.User(key, token);
+        // you must init the user
+        user.init().done(function() {});
+
+        user.get("Multimedia", {CourseID: "61e76782-0ca8-449d-aa48-d20e93a1358a", TitleOnly: false})
+                .success(function (data) {
+                    $.each(data.Results, function( ind, val ) {
+                        //console.log(val.Title);
+                        $.each(val.Files, function( inf, fi ) {
+                            //console.log(fi.FileDescription);
+                            $('#link_list').append('<option value="'+fi.FileName+'">IS3102 - ' + val.Title + ' - ' + fi.FileTitle+'</option>');
+                        });
+                    });
+                });
+    }
+
+    $(document).ready(function(){
+        var all_tags = JSON.parse($(".hdf-all-tags").val());
+        var origin_tags = JSON.parse($(".hdf-original-tags").val());
+
+        $("#txtar_tagging").textext({
+            plugins : 'suggestions tags prompt autocomplete arrow filter',
+            prompt : 'Add tags using concepts...',
+            suggestions: all_tags,
+            ext: {
+                itemManager: {
+                    filter: function(list,query)
+                    {	//over-drive filter with substring
+                        var result = [];
+                        $.each(list, function(){
+                            if (this.toString().toLowerCase().indexOf(query.toLowerCase()) != -1){
+                                result.push(this.toString());
+                            }
+                        });
+                        //console.log(result);
+                        return result;
+                    }
+                }
+            }
+        }).bind('isTagAllowed', function(e, data){
+            //reset suggestion after choosing a tag
+            textext = $(e.target).textext()[0];
+            $(this).trigger(
+                    'setSuggestions',
+                    { result : textext.itemManager().filter(all_tags, "") }
+            );
+        });
+        $("#txtar_tagging").textext()[0].tags().addTags(origin_tags);
+
+        $('#lesson_plan_entry_title').click();
+        $('#btn_submit').on("click",function() {
+            $(".hdf-new-tags").val(JSON.stringify(JSON.parse($("#txtar_tagging").textext()[0].hiddenInput().val())));
+            return true;
+        });
+    });
 </script>

@@ -1,3 +1,4 @@
+require 'csv'
 class Assessment::Question < ActiveRecord::Base
   acts_as_paranoid
   acts_as_duplicable
@@ -24,6 +25,48 @@ class Assessment::Question < ActiveRecord::Base
   before_update :clean_up_description, :if => :description_changed?
   after_update  :update_assessment_grade, if: :max_grade_changed?
   after_update  :update_attempt_limit, if: :attempt_limit_changed?
+
+  def self.import (file, current_user)
+    csv_text = File.read(file.path)
+    csv = CSV.parse(csv_text, :headers => true)
+
+    error_list = []
+    obj_list = []
+    csv.each_with_index do |row, index|
+      if (!row["max_grade"].nil? && !(true if Integer(row["max_grade"]) rescue false))
+        error_list << "#{index + 2}"
+      elsif row["option1"].nil?
+        attrs = {"creator_id"=> current_user.id, "title" => row["title"], "description" => row["description"], "max_grade"=> row["max_grade"]}
+        obj_list << Assessment::GeneralQuestion.new(attrs)
+      else
+        if (!row["select_all"].nil? && !(true if Integer(row["select_all"]) rescue false))
+          error_list << "#{index + 2}"
+        else
+          attrs = {"creator_id"=> current_user.id, "title" => row["title"], "description" => row["description"], "max_grade"=> row["max_grade"], "select_all" => row["select_all"].nil? ? 0 : row["select_all"].to_i}
+          mcq_ques = Assessment::McqQuestion.new(attrs)
+          obj_list << mcq_ques
+          (1..10).each do |i|
+            if !row["option#{i}"].nil?
+              opt_attrs = {"text"=> row["option#{i}"], "explanation" => row["explanation#{i}"], "correct" => row["correct#{i}"]}
+              mcq_opt = Assessment::McqOption.new(opt_attrs)
+              mcq_opt.question = mcq_ques
+              obj_list << mcq_opt
+            end
+          end
+        end
+      end
+    end
+
+    #File.delete(file.path)
+    if error_list.empty?
+      obj_list.each do |o|
+        o.save
+      end
+      return "Imported #{csv.count} questions"
+    else
+      return "There are something wrong at #{error_list.map(&:inspect).join(', ')}"
+    end
+  end
 
   #TOFIX
   def get_title

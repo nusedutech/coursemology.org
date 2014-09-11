@@ -34,7 +34,7 @@ class Assessment::QuestionsController < ApplicationController
     end
     
     respond_to do |format|
-      format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }}}
+      #format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }}}
       format.html
     end
   end
@@ -60,7 +60,15 @@ class Assessment::QuestionsController < ApplicationController
       @questions = @course.tagged_questions.uniq
     end
   end
-  
+
+  def import
+    result = Assessment::Question.import(params[:file], current_user)
+    respond_to do |format|
+      format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                                notice: result }
+    end
+  end
+
   def edit
     if !params[:assessment_mpq_question_id].nil?
       @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:assessment_mpq_question_id])

@@ -7,6 +7,9 @@ class LessonPlanEntry < ActiveRecord::Base
   belongs_to :creator, class_name: "User"
   has_many :resources, class_name: "LessonPlanResource"
 
+  has_many :taggable_tags, as: :taggable, dependent: :destroy
+  has_many :topicconcepts, through: :taggable_tags, source: :tag, source_type: "Topicconcept"
+
   after_save :save_resources
   
   def save_resources
@@ -95,7 +98,8 @@ class LessonPlanEntry < ActiveRecord::Base
     ['Lecture', 0],
     ['Recitation', 1],
     ['Tutorial', 2],
-    ['Other', 3]
+    ['Video', 3],
+    ['Other', 4]
   ]
 
   def entry_real_type

@@ -93,6 +93,20 @@ class User < ActiveRecord::Base
     user
   end
 
+  def self.find_for_ivle_oauth(email)
+
+      user = User.find_by_email(email)
+      if !user
+         user = User.create(name: email,
+                           email: email
+
+        )
+      end
+      user.save
+
+    user
+  end
+
   def self.new_with_session(params, session)
     super.tap do |user|
       if data = session["devise.facebook_data"] && session["devise.facebook_data"]["extra"]["raw_info"]

@@ -62,7 +62,7 @@ class Assessment::QuestionsController < ApplicationController
   end
 
   def import
-    result = Assessment::Question.import(params[:file], current_user)
+    result = Assessment::Question.import(params[:file], current_user, @course)
     respond_to do |format|
       format.html { redirect_to main_app.course_assessment_questions_url(@course),
                                 notice: result }

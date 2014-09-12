@@ -14,6 +14,9 @@ Coursemology::Application.routes.draw do
   get "contact_us" => "static_pages#contact_us"
   get "help" => "static_pages#help"
 
+  get "ivle" => "static_pages#ivle"
+  get "get_profile" => "static_pages#get_profile"
+
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks",
                                        :registrations => "registrations",
                                        :sessions => "sessions"}
@@ -127,15 +130,14 @@ Coursemology::Application.routes.draw do
 
     resources :assessment_mpq_questions, path: :mpq_questions, controller: :mpq_questions , module: :assessment do
       resources :assessment_general_questions, path: :general_questions, controller: :general_questions
-
       resources :assessment_coding_questions, path: :coding_questions, controller: :coding_questions
-
       resources :assessment_mcq_questions, path: :mcq_questions, controller: :mcq_questions
     end
 
     resources :assessment_questions, path: :questions, controller: :questions , module: :assessment do
       collection do
-        get :index, to: 'questions#index', type: 'question'  
+        get :index, to: 'questions#index', type: 'question'
+        post :import, to: 'questions#import'
       end
     end
     

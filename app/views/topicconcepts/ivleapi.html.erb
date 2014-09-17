@@ -35,7 +35,7 @@
 	
 	 // you must init the user
 	user.init().done(function() {
-	   	
+
 	});
 	
 	$('#log_in').click(function() {
@@ -43,6 +43,24 @@
 	});
 	
 	$('#load_webcast').click(function() {
+        user.get("Multimedia", {CourseID: "61e76782-0ca8-449d-aa48-d20e93a1358a", TitleOnly:false})
+                .success(function(data) {
+                    console.log(data);
+                });
+        /*
+        var modules = [];
+        user.modules(function(mods) {
+            modules = mods; // mods = Module[...]
+            $.each(mods, function( ind, val ) {
+                console.log( val.get("CourseCode") );
+                if(val.get("CourseCode") == 'IS3102'){
+                console.log(val);}
+                $('#modules').append("<div>" + val.get("CourseCode") + "</div>");
+            });
+
+        });
+        */
+        /*
 	   user.get("OpenWebcasts", {TitleOnly: false, MP4only: false})
 		.success(function(data) {
 			$.each(data.Results, function( index1, value1 ) {
@@ -54,7 +72,7 @@
 			});
 		var anns = ivle.filterResult(data); // anns = [...]
 		});
-	   
+	    */
 	});
 	
 	function playmp4(a){

@@ -9,6 +9,13 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def new
+      session[:ivle_token] = "E6E8F6C8B6732A2EFD8487B1ABED6456077EC2D710A350CB87B1FF90684182D00F56BA51A1D4D07A6A80699ED61EA20F90D5A938C8DBA85CE67B04D74F0191C26DDD34C6C8D1C6D64D28F95191BCF9951EDA6927A2C3459F38C7ACEB3E18C403B028FC88A4D0C5215E02C42CEDBAF282ACDA7ACCD24D13978E14C8FE6C5528566E1C0D4075529C76E6CF578C7C369ABB03CF00967661062F82B6DBF69D70370C07208E9F2D0108D9445501FD2F1F55F282AB93E372AA2FF4295F5D33AE9F9A984AFB6A20F3529AB76FD8E975E54ACD23"
+    if !session[:ivle_token].nil?
+      @ivle_token = session[:ivle_token]
+    end
+
+    @tags_list = {:origin => @lesson_plan_entry.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
+
     @start_at = params[:start_at] || ""
     @end_at = params[:end_at] || ""
 
@@ -23,7 +30,14 @@ class LessonPlanEntriesController < ApplicationController
                                    else
                                      []
                                    end
-    
+
+    #add tags
+    if (!params["new_tags"].nil? && !params["original_tags"].nil?)
+      if(params["new_tags"] != params["original_tags"])
+        update_tag(JSON.parse(params["original_tags"]),JSON.parse(params["new_tags"]), nil)
+      end
+    end
+
     respond_to do |format|
       if @lesson_plan_entry.save then
         path = course_lesson_plan_path(@course) + "#entry-" + @lesson_plan_entry.id.to_s
@@ -36,6 +50,8 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def edit
+    @tags_list = {:origin => @lesson_plan_entry.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}
+
   end
 
   def update
@@ -44,7 +60,14 @@ class LessonPlanEntriesController < ApplicationController
                                    else
                                      []
                                    end
-    
+
+    #add tags
+    if (!params["new_tags"].nil? && !params["original_tags"].nil?)
+      if(params["new_tags"] != params["original_tags"])
+        update_tag(JSON.parse(params["original_tags"]),JSON.parse(params["new_tags"]), nil)
+      end
+    end
+
     respond_to do |format|
       if @lesson_plan_entry.update_attributes(params[:lesson_plan_entry]) && @lesson_plan_entry.save then
         path = course_lesson_plan_path(@course) + "#entry-" + @lesson_plan_entry.id.to_s
@@ -154,6 +177,31 @@ private
       prior_entries_milestone = LessonPlanMilestone.create_virtual("Prior Items", entries_before_first)
       prior_entries_milestone.next_milestone = first_milestone
       prior_entries_milestone
+    end
+  end
+
+  def update_tag(original_tags, new_tags, group)
+    new_tags.each do |obj|
+      if(!original_tags.include? obj)
+        tag_element = @course.topicconcepts.where(:name => obj).first
+        if(!tag_element.nil?)
+          taggable = @lesson_plan_entry.taggable_tags.new
+          taggable.tag = tag_element
+          taggable.save
+        end
+      end
+    end
+
+    original_tags.each do |obj|
+      if(!new_tags.include? obj)
+        tag_element = @course.topicconcepts.where(:name => obj).first
+        if(!tag_element.nil?)
+          taggable = @lesson_plan_entry.taggable_tags.where(:tag_type => 'Topicconcept', :tag_id => tag_element.id).first
+          if(!taggable.nil?)
+            taggable.destroy
+          end
+        end
+      end
     end
   end
 end

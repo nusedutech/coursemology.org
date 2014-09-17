@@ -1,0 +1,22 @@
+<form id="f_getprofile" method="get" action="/ivle" accept-charset="UTF-8">
+    <input type="hidden" name="email" id="hdf_profile">
+    <input type="hidden" name="token" id="hdf_token" value="<%= @token%>">
+</form>
+<script>
+  var token = $('#hdf_token').val();
+  var key = "mHy1mEcwwWvlHYqc9bNdO";
+  user = ivle.User(key, token);
+  // you must init the user
+  user.init().done(function() {
+      var email = user.profile("Email");
+      $('#hdf_profile').val(email);
+      $('#f_getprofile').submit();
+  });
+
+
+
+  $(document).ready(function(){
+
+  });
+  //$('#f_getprofile').submit();
+</script>

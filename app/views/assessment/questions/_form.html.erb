@@ -39,6 +39,7 @@
                       new_course_assessment_mpq_question_path(@course),
                       :class => 'btn btn-primary' %>
 	</p>
+    <%= render partial: "import", locals: {url: import_course_assessment_questions_path}%>
 	<%= render partial: "fields"%>
 <%- else%>
 	<%= simple_form_for [@course,@assessment.as_assessment] do |f| %>

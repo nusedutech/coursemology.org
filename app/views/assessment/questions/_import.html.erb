@@ -1,0 +1,14 @@
+<%= form_tag url, multipart: true do %>
+    <%= file_field_tag :file, :class => "btn-file", :id => "file_import", :style => "display:none;" %>
+    <div class="input-append">
+      <input type="text" name="subfile" id="subfile" class="input-xlarge">
+      <a class="btn" onclick="$('#file_import').click();">Browse</a>
+      <%= submit_tag "Import", :class => "btn btn-primary" %>
+    </div>
+<% end %>
+
+<script>
+    $('#file_import').change(function(){
+        $('#subfile').val($(this).val());
+    });
+</script>

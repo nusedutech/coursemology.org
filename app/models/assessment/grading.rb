@@ -56,12 +56,14 @@ class Assessment::Grading < ActiveRecord::Base
   end
 
   def send_notification
-    course = student.course
-    asm = submission.assessment
-    if asm.is_mission? and asm.published? and student.is_student? and course.email_notify_enabled?(PreferableItem.new_grading)
-      UserMailer.delay.new_grading(
-          student,
-          self)
+    if student
+      course = student.course
+      asm = submission.assessment
+      if asm.is_mission? and asm.published? and student.is_student? and course.email_notify_enabled?(PreferableItem.new_grading)
+        UserMailer.delay.new_grading(
+            student,
+            self)
+      end
     end
   end
 end

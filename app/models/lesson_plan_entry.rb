@@ -35,7 +35,7 @@ class LessonPlanEntry < ActiveRecord::Base
         @title = title
       end
       def entry_type
-        3
+        4
       end
       def entry_real_type
         @real_type

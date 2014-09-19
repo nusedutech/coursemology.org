@@ -1,49 +1,82 @@
 <div class="<%= get_lesson_plan_entry_css_class(entry.entry_real_type) %>">
   <hr class="lesson-plan-entry-separator">
   <div class="row <%= entry.is_virtual?  ? 'lesson-plan-virtual-entry' : 'lesson-plan-entry' %>">
-    <div class="span1">
+    <div class="<%= (can? :manage, LessonPlanEntry) ? 'span1' : '' %>">
       <h1>
         <small>
           <%= entry.entry_real_type %>
         </small>
       </h1>
     </div>
-    <div class="span7 lesson-plan-entry-body">
+    <div class="<%= (can? :manage, LessonPlanEntry) ? 'span7' : '' %> lesson-plan-entry-body">
       <% if entry.is_virtual? %>
-        <%= link_to entry.url, :class => "lesson-plan-virtual-entry-title" do %>
-          <% if not entry.is_published %>
-            <span class="label label-important">Unpublished</span>
-          <% end %>
-          <%= entry.title %>
+        <% if (can? :manage, LessonPlanEntry) %>
+            <%= link_to entry.url, :class => "lesson-plan-virtual-entry-title" do %>
+              <% if not entry.is_published %>
+                <span class="label label-important">Unpublished</span>
+              <% end %>
+              <%= entry.title %>
+            <% end %>
+        <% else %>
+              <%= link_to "", :class => "btn_entry" do %>
+                  <span class="entry_title"><%= entry.title %></span>
+                  <input type="hidden" class="entry_url" value="<%= entry.url  %>">
+                  <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
+                  <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
+                  <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
+                  <input type="hidden" class="entry_location" value="<%= entry.location  %>">
+                  <% if entry.start_at %>
+                      <input type="hidden" class="entry_start" value="<%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>">
+                      <% if entry.end_at %>
+                          <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
+                              <input type="hidden" class="entry_end" value="<%= entry.end_at.strftime("%I:%M %p") %>">
+                          <% else %>
+                              <input type="hidden" class="entry_end" value="<%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>">
+                          <% end %>
+                      <% end %>
+                  <% end %>
+
+              <% end %>
         <% end %>
       <% else %>
-      <a class="lesson-plan-anchor" name="entry-<%= entry.id %>"></a>
-      <h2>
-        <%= entry.title %>
-      </h2>
-      <% end %>
-      <h3><%= entry.location %></h3>
-      <h4>
-        <% if entry.start_at %>
-          <span class="icon-calendar"></span>
-          <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
-          <% if entry.end_at %> to 
-            <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
-              <%= entry.end_at.strftime("%I:%M %p") %>
+          <a class="lesson-plan-anchor" name="entry-<%= entry.id %>"></a>
+          <h2>
+            <% if (cannot? :manage, LessonPlanEntry) %>
+               <%= link_to "", :class => "btn_entry" do %>
+                    <span class="entry_title"><%= entry.title %></span>
+                    <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
+                    <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
+                    <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
+                    <input type="hidden" class="entry_location" value="<%= entry.location  %>">
+               <% end %>
             <% else %>
-              <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                <%= entry.title %>
             <% end %>
-          <% end %>
-        <% end %>
-      </h4>
-      <div class="show-bullet-points lesson-plan-entry-description">
-        <% if entry.is_virtual? %>
-          <%= truncate_html entry.description, :length => 140 %>
-        <% else %>
-          <%= entry.description.html_safe %>
-        <% end %>
-      </div>
-      
+          </h2>
+      <% end %>
+      <% if (can? :manage, LessonPlanEntry) %>
+          <h3><%= entry.location %></h3>
+          <h4>
+            <% if entry.start_at %>
+              <span class="icon-calendar"></span>
+              <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
+              <% if entry.end_at %> to
+                <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
+                  <%= entry.end_at.strftime("%I:%M %p") %>
+                <% else %>
+                  <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                <% end %>
+              <% end %>
+            <% end %>
+          </h4>
+          <div class="show-bullet-points lesson-plan-entry-description">
+            <% if entry.is_virtual? %>
+              <%= truncate_html entry.description, :length => 140 %>
+            <% else %>
+              <%= entry.description.html_safe %>
+            <% end %>
+          </div>
+      <% end %>
   <% if entry.resources.length > 0 %>
       <h4>Instructional Resources</h4>
       <ul>
@@ -63,3 +96,4 @@
     </div>
   </div>
 </div>
+

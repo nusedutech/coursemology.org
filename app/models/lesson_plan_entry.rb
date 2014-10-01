@@ -10,6 +10,7 @@ class LessonPlanEntry < ActiveRecord::Base
   has_many :taggable_tags, as: :taggable, dependent: :destroy
   has_many :topicconcepts, through: :taggable_tags, source: :tag, source_type: "Topicconcept"
 
+
   after_save :save_resources
   
   def save_resources

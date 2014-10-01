@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140904141911) do
+ActiveRecord::Schema.define(:version => 20141001022020) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -632,11 +632,13 @@ ActiveRecord::Schema.define(:version => 20140904141911) do
     t.string   "title"
     t.string   "cached_slug"
     t.integer  "author_id"
-    t.boolean  "locked",      :default => false
-    t.boolean  "hidden",      :default => false
-    t.integer  "topic_type",  :default => 0
-    t.datetime "created_at",                     :null => false
-    t.datetime "updated_at",                     :null => false
+    t.boolean  "locked",           :default => false
+    t.boolean  "hidden",           :default => false
+    t.integer  "topic_type",       :default => 0
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+    t.string   "discussable_type"
+    t.integer  "discussable_id"
   end
 
   add_index "forum_topics", ["author_id"], :name => "index_forum_topics_on_author_id"

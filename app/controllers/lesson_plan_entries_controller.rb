@@ -6,6 +6,7 @@ class LessonPlanEntriesController < ApplicationController
 
   def index
     @milestones = get_milestones_for_course(@course)
+    @current_id = params["eid"].nil? ? '' : params["eid"]
   end
 
   def new

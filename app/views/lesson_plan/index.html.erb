@@ -43,6 +43,7 @@
   <div id="<%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-content' %>">
     <div id="milestone-entity">
       <div style="width: auto">
+          <input type="hidden" id="active-entity" value="<%= @current_id%>" />
           <% grouped_milestones = @milestones.group_by { |milestone| milestone.is_virtual? } %>
           <% grouped_milestones[false] = [] unless grouped_milestones[false] %>
           <% grouped_milestones[true] = [] unless grouped_milestones[true] %>
@@ -57,8 +58,8 @@
       </div>
     </div>
     <section id="detail-content">
-
     </section>
+
   </div>
   <div class="end-of-page"></div>
 </div>
@@ -318,6 +319,7 @@
 
         });
 
+
         //show entry
         $('#lesson-plan-content a.btn_entry').click(function(){
             $('section#detail-content').empty();
@@ -326,7 +328,7 @@
             var type  = $(this).find('input.entry_text_type').val();
             var des  = $(this).find('input.entry_description').val();
             var loc  = $(this).find('input.entry_location').val();
-
+            var dis = $(this).next('div.discussion').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
                 show_lecture(title, type, des, loc);
             }else if(entry_type =='3'){
@@ -335,7 +337,8 @@
             }else if(entry_type =='4'){
                 show_mission_training(this,title, type, des, loc);
             }
-            show_discussion();
+
+            show_discussion(dis);
         });
 
         //show entry lecture, recitation, tutorial
@@ -382,17 +385,22 @@
             //return false;
         });
 
-        function show_discussion(){
+        function show_discussion(discussion){
             var entry_form = "";
             $('section#detail-content').append(entry_form);
-            $('section#detail-content').append($('div#demo_dicussion').html());
-
+            $('section#detail-content').append(discussion);
             $('#lesson-plan-content a.a_discussion').click(function() {
                 $('#lesson-plan-content .forum').toggle('slow');
 
             });
         }
 
+        if($('#active-entity')){
+            $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
+            $("a#"+$('#active-entity').val()).click();
+            $('#lesson-plan-content .forum').show();
+            $('#lesson-plan-content a.a_discussion').text('Hide Discussion');
+        }
 
     });
 

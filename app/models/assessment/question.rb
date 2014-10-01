@@ -39,13 +39,22 @@ class Assessment::Question < ActiveRecord::Base
         g_ques = Assessment::GeneralQuestion.new(attrs)
         obj_list << g_ques
         if !row["tags"].nil?
-          tag_element = course.topicconcepts.where(:name => row["tags"]).first
-          if(!tag_element.nil?)
+          row["tags"].split('|').each do |tag|
+            tag_element = course.topicconcepts.where(:name => tag).first
+            if(!tag_element.nil?)
+              taggable = g_ques.question.taggable_tags.new
+              taggable.tag = tag_element
+              obj_list << taggable
+            end
+          end
+        end
+        if !row["difficulty"].nil?
+          diff = course.tags.where(:name => row["difficulty"]).first
+          if(!diff.nil?)
             taggable = g_ques.question.taggable_tags.new
-            taggable.tag = tag_element
+            taggable.tag = diff
             obj_list << taggable
           end
-
         end
 
       else
@@ -64,14 +73,24 @@ class Assessment::Question < ActiveRecord::Base
             end
           end
           if !row["tags"].nil?
-            tag_element = course.topicconcepts.where(:name => row["tags"]).first
-            if(!tag_element.nil?)
+            row["tags"].split('|').each do |tag|
+              tag_element = course.topicconcepts.where(:name => tag).first
+              if(!tag_element.nil?)
+                taggable = mcq_ques.question.taggable_tags.new
+                taggable.tag = tag_element
+                obj_list << taggable
+              end
+            end
+          end
+          if !row["difficulty"].nil?
+            diff = course.tags.where(:name => row["difficulty"]).first
+            if(!diff.nil?)
               taggable = mcq_ques.question.taggable_tags.new
-              taggable.tag = tag_element
+              taggable.tag = diff
               obj_list << taggable
             end
-
           end
+
         end
       end
     end

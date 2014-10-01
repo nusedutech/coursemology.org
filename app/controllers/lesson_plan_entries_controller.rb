@@ -2,11 +2,79 @@ class LessonPlanEntriesController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :lesson_plan_entry, through: :course
 
-  before_filter :load_general_course_data, :only => [:index, :new, :edit, :overview]
+  before_filter :load_general_course_data, :only => [:index, :new, :edit, :overview, :submission]
 
   def index
     @milestones = get_milestones_for_course(@course)
     @current_id = params["eid"].nil? ? '' : params["eid"]
+  end
+
+  def submission
+    @milestones = get_milestones_for_course(@course)
+    @assessment = Assessment.find_by_id(params['assessment_id'])
+    @current_id = @assessment.nil? ? '0' : "virtual-entity-#{@assessment.id}"
+
+    @is_lesson_plan_submission = true
+    sbm = @assessment.submissions.where(std_course_id: curr_user_course).last
+    if curr_user_course.is_student? && sbm.nil?
+      Activity.attempted_asm(curr_user_course, @assessment)
+    end
+
+    if sbm
+      @submission = sbm
+    else
+      @submission.std_course = curr_user_course
+    end
+
+    if @assessment.is_a?(Assessment::Training)
+      @reattempt = @course.training_reattempt
+      #continue unfinished training, or go to finished training of can't reattempt
+      if sbm && (!sbm.graded? ||  !@reattempt || !@reattempt.display)
+        submission_edit
+        return
+      end
+      sbm_count = @assessment.submissions.where(std_course_id: curr_user_course).count
+      if sbm_count > 0
+        @submission.multiplier = @reattempt.prefer_value.to_f / 100
+      end
+      @submission.save
+      @submission.gradings.create({grade: 0, std_course_id: curr_user_course.id})
+    end
+
+    if @submission.save
+      submission_edit
+    end
+  end
+
+  def submission_edit
+    #1. half way, redirect to next undone question, or finalised one if requested, or requested one if stuff or skippable
+    #2. finished, list all submissions
+
+    #implementation, build step control UI separately
+    # @next_undone
+    if !@assessment.nil?
+      @training = @assessment.specific
+      questions = @assessment.questions
+      finalised = @assessment.questions.finalised(@submission)
+      current =  (questions - finalised).first
+      next_undone = (questions.index(current) || questions.length) + 1
+      request_step = (params[:step] || next_undone).to_i
+      step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
+      step = step > questions.length ? next_undone : step
+      current = step > questions.length ? current : questions[step - 1]
+
+      current = current.specific if current
+      if current && current.class == Assessment::CodingQuestion
+        prefilled_code = current.template
+        if current.dependent_on
+          std_answer = current.dependent_on.answers.where("correct = 1 AND std_course_id = ?", curr_user_course.id).last
+          code = std_answer ? std_answer.content : ""
+          prefilled_code = "#Answer from your previous question \n" + code + (prefilled_code.empty? ? "" : ("\n\n#prefilled code \n" + prefilled_code))
+        end
+      end
+      @summary = {questions: questions, finalised: finalised, step: step,
+                  current: current, next_undone: next_undone, prefilled: prefilled_code}
+    end
   end
 
   def new

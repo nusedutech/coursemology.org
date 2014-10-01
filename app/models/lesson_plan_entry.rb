@@ -73,6 +73,13 @@ class LessonPlanEntry < ActiveRecord::Base
       end
 
       # Extra property that real entries do not have, so we can jump to them.
+      def assessment
+        @assessment
+      end
+      def assessment=(assessment)
+        @assessment = assessment
+      end
+
       def url
         @url
       end

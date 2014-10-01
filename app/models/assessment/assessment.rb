@@ -167,6 +167,7 @@ class Assessment < ActiveRecord::Base
     entry.start_at = self.open_at
     entry.end_at = self.close_at  if self.respond_to? :close_at
     entry.url = get_path
+    entry.assessment = self
     entry.is_published = self.published
     entry
   end

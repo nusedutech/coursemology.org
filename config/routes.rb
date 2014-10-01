@@ -303,6 +303,7 @@ Coursemology::Application.routes.draw do
     match "surveys/:id/summary_with_format" => "surveys#summary_with_format", as: :survey_summary_with_format
 
     get "lesson_plan" => 'lesson_plan_entries#index', as: :lesson_plan
+    get "lesson_plan/submission/:assessment_id" => 'lesson_plan_entries#submission', as: :lesson_plan_submission
     get "lesson_plan/overview" => 'lesson_plan_entries#overview', as: :lesson_plan_overview
     post "lesson_plan/bulk_update" => 'lesson_plan_milestones#bulk_update', as: :lesson_plan_bulk_update
     resources :lesson_plan_entries, path: 'lesson_plan/entries', except: [:index, :show]

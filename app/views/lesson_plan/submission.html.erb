@@ -1,0 +1,409 @@
+
+<div>
+  <div id="lesson-plan-toolbar" class="page-header <%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-toolbar-student' %>">
+    <div class="row">
+      <div class="span5">
+        <h1><%= @course.customized_lesson_plan_title %></h1>
+      </div>
+      <div class="pull-right btn-toolbar">
+        <% if can? :manage, LessonPlanEntry %>
+            <div class="btn-group dropdown-trigger-on-hover">
+              <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                New <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <%= link_to "Event", new_course_lesson_plan_entry_path() %>
+                </li>
+                <li>
+                  <%= link_to "Milestone", new_course_lesson_plan_milestone_path() %>
+                </li>
+                <li class="divider"></li>
+                <li id="lesson-plan-open-milestone-generator" data-toggle="modal" data-target="#lesson-plan-multi-milestone" >
+                  <a href="#">Generate Milestones</a>
+                </li>
+              </ul>
+            </div>
+        <% end %>
+        <select class="selectpicker dropdown-trigger-on-hover" id="lesson-plan-entry-filter" multiple="multiple" title="Filter" data-selected-text-format="count>1" data-width="auto">
+          <% get_lesson_plan_entry_types.each {|type| %>
+              <option selected="selected" data-entry-type="<%= get_lesson_plan_entry_css_class(type) %>"><%= type %></option>
+          <% } %>
+        </select>
+        <div class="btn-group">
+          <a id="lesson-plan-hide-all" class="btn">Collapse All</a>
+          <a id="lesson-plan-show-all" class="btn">Expand All</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%= render :partial => 'lesson_plan/navigation' %>
+
+  <div id="<%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-content' %>">
+    <div id="milestone-entity">
+      <div style="width: auto">
+        <input type="hidden" id="active-entity" value="<%= @current_id%>" />
+        <% grouped_milestones = @milestones.group_by { |milestone| milestone.is_virtual? } %>
+        <% grouped_milestones[false] = [] unless grouped_milestones[false] %>
+        <% grouped_milestones[true] = [] unless grouped_milestones[true] %>
+        <% prior_items = grouped_milestones[true].select { |e| e.title == "Prior Items"  } %>
+        <% other_items = grouped_milestones[true].select { |e| e.title == "Other Items" } %>
+        <% sorted_milestones = prior_items + grouped_milestones[false].sort_by { |milestone| milestone.start_at } + other_items %>
+        <% sorted_milestones.each { |milestone| %>
+            <% if !milestone.is_virtual? || milestone.entries.length  > 0 %>
+                <%= render :partial => 'lesson_plan/milestone', locals: { :milestone => milestone } %>
+            <% end %>
+        <% } %>
+      </div>
+    </div>
+    <section id="detail-content">
+      <%= render partial:"assessment/training_submissions/edit_form" %>
+    </section>
+
+  </div>
+  <hr class="hr-shrink-margin">
+  <div class="end-of-page"></div>
+</div>
+
+<% if can? :manage, LessonPlanEntry %>
+    <div id="lesson-plan-multi-milestone" class="modal hide fade" data-backdrop="static">
+      <form class="lesson-plan-milestone-generator-form">
+        <div class="modal-header">
+          <h3>Milestone Generator</h3>
+        </div>
+        <div class="modal-body hidden">
+          <div id="modal-loading">
+            <h2>Loading...</h2>
+            <div class="progress progress-striped active">
+              <div class="bar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <div class="control-group">
+            <label class="control-label" for="input-length-milestones">
+              How long is each milestone, in days?
+            </label>
+            <div class="controls">
+              <input type="number" id="input-length-milestones" required="required">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="input-number-milestones">
+              How many milestones should we create?
+            </label>
+            <div class="controls">
+              <input type="number" id="input-number-milestones" required="required">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="input-prefix-milestones">
+              What should each milestone be prefixed with?
+              <br>(For example, "Week" will generate "Week 1", "Week 2", and so on.)
+            </label>
+            <div class="controls">
+              <input id="input-prefix-milestones" class="text_field">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="input-start-milestones">
+              What day should the first milestone start on?
+            </label>
+            <div class="controls">
+              <div class="datepicker input-append date">
+                <input type="text" class="text_field" id="input-start-milestones" required="required">
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+              </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input id="lesson-plan-done-generating" class="btn btn-primary" type="submit" value="Done" />
+          <button data-dismiss="modal" class="btn">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+<% end %>
+
+
+<div id="demo_dicussion" style="display: none">
+  <div style='margin-top: 50px;'><p style=''><a class='a_discussion btn btn-success'>Show Discussion</a></p></div>
+  <div class="forum" style="display: none">
+    <div class="posts" >
+      <a class="post-anchor" name="post-1"></a>
+      <div id="post-1" class="post odd">
+        <div class="user">
+          <h5 class="username">
+            <a href="/courses/1/user_courses/1">Admin</a>
+          </h5>
+          <div class="icon pull-right">
+            <a href="/courses/1/user_courses/1">
+              <img class="user-profile-pic" src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg">
+            </a>
+          </div>
+        </div>
+        <div class="contents ">
+          <div class="pull-right">
+            <time datetime="2014-09-19 02:32:18"> Posted 25 minutes ago </time>
+          </div>
+          <h4 class="title">
+            <a href="#post-1">topic forum 1</a>
+          </h4>
+          topic forum 1
+          <div class="info">
+            <div class="pull-right">
+              <a class="btn reply" data-post-title="topic forum 1" data-post-id="1" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/1/reply">Reply</a>
+            </div>
+            <div class="voting">
+              <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/1/vote?vote=-1" data-original-title="Downvote">
+                <i class="icon-thumbs-down"></i>
+              </a>
+              <span class="muted">0</span>
+              <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/1/vote?vote=1" data-original-title="Upvote">
+                <i class="icon-thumbs-up"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a class="post-anchor" name="post-2"></a>
+      <div id="post-2" class="post even">
+        <div class="user">
+          <h5 class="username">
+            <a href="/courses/1/user_courses/3">henry</a>
+          </h5>
+          <div class="icon pull-right">
+            <a href="/courses/1/user_courses/3">
+              <img class="user-profile-pic" src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg">
+            </a>
+          </div>
+        </div>
+        <div class="contents ">
+          <div class="pull-right">
+            <time datetime="2014-09-19 02:37:11"> Posted 20 minutes ago </time>
+          </div>
+          <h4 class="title">
+            <a href="#post-2">RE: topic forum 1</a>
+          </h4>
+          answer 1 for topic forum post 1
+          <br>
+          <div class="info">
+            <div class="pull-right">
+              <a class="btn reply" data-post-title="RE: topic forum 1" data-post-id="2" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/2/reply">Reply</a>
+              <a class="btn" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/2/edit">Edit</a>
+              <a class="btn btn-danger delete-button" rel="nofollow" data-method="delete" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/2"> Delete </a>
+            </div>
+            <div class="voting">
+              <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/2/vote?vote=-1" data-original-title="Downvote">
+                <i class="icon-thumbs-down"></i>
+              </a>
+              <span class="muted">0</span>
+              <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/2/vote?vote=1" data-original-title="Upvote">
+                <i class="icon-thumbs-up"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="thread">
+        <a class="post-anchor" name="post-3"></a>
+        <div id="post-3" class="post odd">
+          <div class="user">
+            <h5 class="username">
+              <a href="/courses/1/user_courses/3">henry</a>
+            </h5>
+            <div class="icon pull-right">
+              <a href="/courses/1/user_courses/3">
+                <img class="user-profile-pic" src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg">
+              </a>
+            </div>
+          </div>
+          <div class="contents ">
+            <div class="pull-right">
+              <time datetime="2014-09-19 02:39:18"> Posted 18 minutes ago </time>
+            </div>
+            <h4 class="title">
+              <a href="#post-3">RE: topic forum 1</a>
+            </h4>
+            reply for answer 1
+            <br>
+            <div class="info">
+              <div class="pull-right">
+                <a class="btn reply" data-post-title="RE: topic forum 1" data-post-id="3" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/3/reply">Reply</a>
+                <a class="btn" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/3/edit">Edit</a>
+                <a class="btn btn-danger delete-button" rel="nofollow" data-method="delete" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/3"> Delete </a>
+              </div>
+              <div class="voting">
+                <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/3/vote?vote=-1" data-original-title="Downvote">
+                  <i class="icon-thumbs-down"></i>
+                </a>
+                <span class="muted">0</span>
+                <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/3/vote?vote=1" data-original-title="Upvote">
+                  <i class="icon-thumbs-up"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thread"></div>
+        <a class="post-anchor" name="post-4"></a>
+        <div id="post-4" class="post even">
+          <div class="user">
+            <h5 class="username">
+              <a href="/courses/1/user_courses/3">henry</a>
+            </h5>
+            <div class="icon pull-right">
+              <a href="/courses/1/user_courses/3">
+                <img class="user-profile-pic" src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg">
+              </a>
+            </div>
+          </div>
+          <div class="contents unread-post">
+            <div class="pull-right">
+              <time datetime="2014-09-19 02:57:37"> Posted less than a minute ago </time>
+            </div>
+            <h4 class="title">
+              <span class="label">New!</span>
+              <a href="#post-4">RE: topic forum 1</a>
+            </h4>
+            answer 1.2
+            <br>
+            <div class="info">
+              <div class="pull-right">
+                <a class="btn reply" data-post-title="RE: topic forum 1" data-post-id="4" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/4/reply">Reply</a>
+                <a class="btn" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/4/edit">Edit</a>
+                <a class="btn btn-danger delete-button" rel="nofollow" data-method="delete" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/4"> Delete </a>
+              </div>
+              <div class="voting">
+                <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/4/vote?vote=-1" data-original-title="Downvote">
+                  <i class="icon-thumbs-down"></i>
+                </a>
+                <span class="muted">0</span>
+                <a rel="tooltip nofollow" data-method="put" href="/courses/1/forums/forum-a/topics/topic-forum-1/posts/4/vote?vote=1" data-original-title="Upvote">
+                  <i class="icon-thumbs-up"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thread"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+
+        $('div.span-content').addClass('border-gray');
+        $('div.content').addClass('stretch-content');
+
+        //slide and show hide menubar
+        $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
+        $(".btn.btn-navbar.collapsed").click(function () {
+            if($('.span10.span-content').width()==970) {
+                $('.span2.sidebar').toggle('slow',function(){
+                    $('.span10.span-content').width(1170);
+                });
+            }else{
+                $('.span10.span-content').width(970);
+                $('.span2.sidebar').toggle('slow');
+            }
+
+        });
+
+
+        //show entry
+        $('#lesson-plan-content a.btn_entry').click(function(){
+            $('section#detail-content').empty();
+            var entry_type =$(this).find('input.entry_type').val();
+            var title = $(this).find('span.entry_title').text();
+            var type  = $(this).find('input.entry_text_type').val();
+            var des  = $(this).find('input.entry_description').val();
+            var loc  = $(this).find('input.entry_location').val();
+            var dis = $(this).next('div.discussion').html();
+            if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
+                show_lecture(title, type, des, loc);
+            }else if(entry_type =='3'){
+                loc = loc.replace(".html", "/media/video.mp4");
+                show_video(title, type, des, loc);
+            }else if(entry_type =='4'){
+                show_mission_training(this,title, type, des, loc);
+            }
+
+            show_discussion(dis);
+        });
+
+        //show entry lecture, recitation, tutorial
+        function show_lecture(title, type, des, loc){
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            $('section#detail-content').append(entry_form);
+
+            if(1==1){
+                $('section#detail-content').append($("<a class='a_test' style='display: none' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>test</a>"));
+                $('a.a_test').gdocsViewer({width: 650, height: 450});
+            }
+
+        }
+
+        //show video
+        function show_video(title, type, des, loc){
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><video width='90%' controls>";
+            entry_form += "<source src='" + loc + "' type='video/mp4'>";
+            entry_form += "Your browser does not support the video tag.";
+            entry_form += "</video></div>";
+            $('section#detail-content').append(entry_form);
+        }
+
+        //show entry mission training
+        function show_mission_training(entry, title, type, des, loc){
+            var start  = $(entry).find('input.entry_start').val();
+            var end  = $(entry).find('input.entry_end').val();
+            var url  = $(entry).find('input.entry_url').val();
+
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            entry_form += "<div><p style=''><h4>" + (start ? "<span class='icon-calendar'></span>" + " " + start : "") + (end ? " to " + end : "") + "</h4></p></div>";
+            entry_form += "<div><a class='attempt-assessment btn btn-success' href='" + url + "'>Attempt</a></div>";
+            $('section#detail-content').append(entry_form);
+        }
+
+        $('#lesson-plan-content a.attempt-assessment').click(function() {
+            //alert("abc");
+            //return false;
+        });
+
+        function show_discussion(discussion){
+            var entry_form = "";
+            $('section#detail-content').append(entry_form);
+            $('section#detail-content').append(discussion);
+            $('#lesson-plan-content a.a_discussion').click(function() {
+                $('#lesson-plan-content .forum').toggle('slow');
+
+            });
+        }
+
+        if($('#active-entity')){
+            $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
+            $("a#"+$('#active-entity').val()).click();
+            $('#lesson-plan-content .forum').show();
+            $('#lesson-plan-content a.a_discussion').text('Hide Discussion');
+        }
+
+    });
+
+</script>

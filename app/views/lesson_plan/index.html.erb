@@ -19,6 +19,9 @@
                 <%= link_to "Milestone", new_course_lesson_plan_milestone_path() %>
               </li>
               <li class="divider"></li>
+              <li id="import-ivle-event-importer" data-toggle="modal" data-target="#import-ivle-event" >
+                <a href="#">Import IVLE Events</a>
+              </li>
               <li id="lesson-plan-open-milestone-generator" data-toggle="modal" data-target="#lesson-plan-multi-milestone" >
                 <a href="#">Generate Milestones</a>
               </li>
@@ -66,6 +69,42 @@
 </div>
   
 <% if can? :manage, LessonPlanEntry %>
+  <div id="import-ivle-event" class="modal hide fade" data-backdrop="static">
+    <%= form_tag course_lesson_plan_import_ivle_event_path(@course), :method => 'get', class: "import-ivle-event-form" do %>
+      <div class="modal-header">
+        <h3>IVLE Event Importer</h3>
+      </div>
+      <div class="modal-body hidden">
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <table class="table assignments missions-list-table ver-ali-top">
+            <thead>
+            <tr>
+              <th width="10%">Class</th>
+              <th width="20%">Type</th>
+              <th width="15%">Week Type</th>
+              <th width="15%">Week Date</th>
+              <th width="12%">Start</th>
+              <th width="12%">End</th>
+              <th width="10%">Room</th>
+              <th width="6%">Choose</th>
+            </tr>
+            </thead>
+            <tbody class="table-hover">
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <input id="btn-import-ivle-event" class="btn btn-primary" type="submit" value="Done" />
+        <button data-dismiss="modal" class="btn">
+          Cancel
+        </button>
+      </div>
+    <% end %>
+  </div>
   <div id="lesson-plan-multi-milestone" class="modal hide fade" data-backdrop="static">
     <form class="lesson-plan-milestone-generator-form">
       <div class="modal-header">
@@ -134,10 +173,14 @@
 <% end %>
 
 <script>
+
     $( document ).ready(function() {
 
+        get_timetable_ivle();
         $('div.span-content').addClass('border-gray');
-        $('div.content').addClass('stretch-content');
+        if(!$('div#lesson-plan-content').empty()) {
+            $('div.content').addClass('stretch-content');
+        }
 
         //slide and show hide menubar
         $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
@@ -242,19 +285,47 @@
             var entry_form = "";
             $('section#detail-content').append(entry_form);
             $('section#detail-content').append(discussion);
-            $('#lesson-plan-content a.a_discussion').click(function() {
-                $('#lesson-plan-content .forum').toggle('slow');
-
+            $('section#detail-content a.a_discussion').click(function() {
+                $('section#detail-content .forum').toggle('slow');
+                if ($('section#detail-content a.a_discussion').text()=="Show Discussion"){
+                    $('section#detail-content a.a_discussion').text("Hide Discussion");
+                }else{
+                    $('section#detail-content a.a_discussion').text("Show Discussion");
+                }
             });
         }
 
         if($('#active-entity')){
             $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
             $("a#"+$('#active-entity').val()).click();
-            $('#lesson-plan-content .forum').show();
-            $('#lesson-plan-content a.a_discussion').text('Hide Discussion');
+            $('section#detail-content .forum').show();
+            $('section#detail-content a.a_discussion').text('Hide Discussion');
         }
 
+
+
     });
+
+    function get_timetable_ivle(){
+        var key = "mHy1mEcwwWvlHYqc9bNdO", token = "0AEF67B3087104AD3EC6B505D3DA61BB140A6B2D944082A73DFDE2A1B200786149C406D1BE7B6D37E70DA9CF363910B55EA12C0C67D418D36074AB36F740475F64989431BC7533A8DB1482D2E184DE966933F19FF6F8C876D6DA0EFB7AF78552E9BD8017BFB74BF3DDD07181BA5B04C7DC3BCED0F4CA50E066DF2353A4454E05D2CA113863570F9F6F67689E180096AD74057B3FE5DC29FA31CC8BF7E5C5626A51520888A4802C5D6F6AA2E5B7763FE63BB037235269506B6B80C61F165E270093C61A9B28C26882AA9236FFBE3839B0", user = ivle.User(key, token);
+        // you must init the user
+        user.init().done(function() {});
+
+        user.get("Timetable_Module", {CourseID: "61e76782-0ca8-449d-aa48-d20e93a1358a"})
+                .success(function (data) {
+                    $.each(data.Results, function( ind, val ) {
+                        $('div#import-ivle-event table tbody').append($("<tr><td>" + val.ClassNo + "</td><td>" + val.LessonType + "</td><td>" + val.WeekText + "</td><td>" +  val.DayText + "</td><td>" + val.StartTime + "</td><td>" + val.EndTime + "</td><td>" + val.Venue
+                                + "</td><td><input type='checkbox' value='" + val.ClassNo + "' name='ivle_event[choose][]' />"
+                                + "<input type='hidden' name='ivle_event[lesson_type][" + val.ClassNo + "]' value='" + val.LessonType  + "'>"
+                                + "<input type='hidden' name='ivle_event[week_text][" + val.ClassNo + "]' value='" + val.WeekText  + "'>"
+                                + "<input type='hidden' name='ivle_event[day_code][" + val.ClassNo + "]' value='" + val.DayCode  + "'>"
+                                + "<input type='hidden' name='ivle_event[start_time][" + val.ClassNo + "]' value='" + val.StartTime  + "'>"
+                                + "<input type='hidden' name='ivle_event[end_time][" + val.ClassNo + "]' value='" + val.EndTime  + "'>"
+                                + "<input type='hidden' name='ivle_event[venue][" + val.ClassNo + "]' value='" + val.Venue  + "'>"
+                                + "</td></tr>"));
+
+                    });
+                });
+    }
 
 </script>

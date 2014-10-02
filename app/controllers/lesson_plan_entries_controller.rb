@@ -9,6 +9,46 @@ class LessonPlanEntriesController < ApplicationController
     @current_id = params["eid"].nil? ? '' : params["eid"]
   end
 
+  def import_ivle_event
+    event_list = []
+    if params["ivle_event"]["choose"]
+      params["ivle_event"]["choose"].each do |e|
+        if (params["ivle_event"]["week_text"][e] && params["ivle_event"]["week_text"][e].downcase == 'every week')
+          start_day = @course.lesson_plan_milestones.first.start_at.to_date
+          end_day = @course.lesson_plan_milestones.last.end_at.to_date
+          my_days = [params["ivle_event"]["day_code"][e]] # day of the week in 0-6. Sunday is day-of-week 0; Saturday is day-of-week 6.
+          result = (start_day..end_day).to_a.select {|k| my_days.include?(k.wday.to_s)}
+          result.each_with_index do |d, index|
+            entry = LessonPlanEntry.new
+            entry.course = @course
+            entry.creator = current_user
+            entry.title = params["ivle_event"]["lesson_type"][e] + '-' + index.to_s
+            lesson_type = params["ivle_event"]["lesson_type"][e].downcase
+            entry.entry_type = lesson_type == 'lecture' ? 0 : (lesson_type == 'recitation' ? 1 : (lesson_type == 'tutorial' ? 2 : 4))
+            start_time = params["ivle_event"]["start_time"][e]
+            end_time = params["ivle_event"]["end_time"][e]
+            entry.start_at = DateTime.parse( "#{d} #{start_time[0..start_time.length-3]}:#{start_time[start_time.length-2..start_time.length-1]} +0800" )
+            entry.end_at = DateTime.parse( "#{d} #{end_time[0..end_time.length-3]}:#{end_time[end_time.length-2..end_time.length-1]} +0800" )
+            entry.location = params["ivle_event"]["venue"][e]
+            entry.description = ''
+            entry.save
+          end
+        else
+
+        end
+      end
+
+      respond_to do |format|
+        format.html { redirect_to course_lesson_plan_path(@course), notice: "Import IVLE events successfully." }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to course_lesson_plan_path(@course) }
+      end
+    end
+
+  end
+
   def submission
     @milestones = get_milestones_for_course(@course)
     @assessment = Assessment.find_by_id(params['assessment_id'])

@@ -183,8 +183,27 @@
             $('section#detail-content').append(entry_form);
 
             if(1==1){
-                $('section#detail-content').append($("<a class='a_test' style='display: none' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>test</a>"));
-                $('a.a_test').gdocsViewer({width: 650, height: 450});
+                $('section#detail-content').append($("<table class='material_list'></table>"));
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>cs5228_1a_intro.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_2_data.pdf'>cs5228_2_data.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_2_data.pdf'></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_3_classification_1.pdf'>cs5228_3_classification_1.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_3_classification_1.pdf'></td></tr>"));
+
+                $('section#detail-content .material_list .open-viewer').click(function() {
+                    if($(this).text()=="View Online") {
+                        $(this).parent().parent().next().find('a').gdocsViewer({width: 650, height: 450});
+                        $(this).text("Hide");
+                    }else if ($(this).text()=="Show"){
+                        $(this).parent().parent().next().show();
+                        $(this).text("Hide");
+                    }else{
+                        $(this).parent().parent().next().hide();
+                        $(this).text("Show");
+                    }
+                    //return false;
+                });
             }
 
         }

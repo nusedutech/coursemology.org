@@ -109,25 +109,28 @@
                         <% end %>
                       </div>
                   <% else %>
-                     <div class="quick-reply">
-                       <h3>Post a Dicussion</h3>
+                     <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
+                     <div class="forum" style="display: none">
+                         <div class="quick-reply">
+                           <h3>Post a Dicussion</h3>
 
-                       <% new_topic = ForumTopic.new %>
-                       <% new_topic.forum = @course.forums.first %>
-                       <% new_topic.title = entry.entry_real_type + ' ' + entry.title %>
-                       <% new_topic.discussable_type = 'LessonPlanEntry' %>
-                       <% new_topic.discussable_id = entry.id %>
-                       <% new_post = ForumPost.new %>
-                       <%= form_for new_post, url: course_forum_topics_path(@course, @course.forums.first),
-                                    html: { class: 'form-horizontal' } do |f| %>
-                           <%= render partial: 'forums/posts/form', locals: { reply_to: new_topic.posts.last, form: f } %>
-                           <input type="hidden" name="topic_type" value='<%= entry.entry_real_type%>' />
-                           <input type="hidden" name="topic_title" value='<%= entry.title%>' />
-                           <input type="hidden" name="redirect_link" value='<%= "entity-#{entry.id}"%>' />
-                           <div class="form-actions">
-                             <%= f.submit 'Reply', class: 'btn btn-primary' %>
-                           </div>
-                       <% end %>
+                           <% new_topic = ForumTopic.new %>
+                           <% new_topic.forum = @course.forums.first %>
+                           <% new_topic.title = entry.entry_real_type + ' ' + entry.title %>
+                           <% new_topic.discussable_type = 'LessonPlanEntry' %>
+                           <% new_topic.discussable_id = entry.id %>
+                           <% new_post = ForumPost.new %>
+                           <%= form_for new_post, url: course_forum_topics_path(@course, @course.forums.first),
+                                        html: { class: 'form-horizontal' } do |f| %>
+                               <%= render partial: 'forums/posts/form', locals: { reply_to: new_topic.posts.last, form: f } %>
+                               <input type="hidden" name="topic_type" value='<%= entry.entry_real_type%>' />
+                               <input type="hidden" name="topic_title" value='<%= entry.title%>' />
+                               <input type="hidden" name="redirect_link" value='<%= "entity-#{entry.id}"%>' />
+                               <div class="form-actions">
+                                 <%= f.submit 'Reply', class: 'btn btn-primary' %>
+                               </div>
+                           <% end %>
+                         </div>
                      </div>
                   <% end %>
                </div>

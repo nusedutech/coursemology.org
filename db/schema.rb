@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140904141911) do
+ActiveRecord::Schema.define(:version => 20141002083701) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -178,6 +178,33 @@ ActiveRecord::Schema.define(:version => 20140904141911) do
     t.datetime "updated_at",   :null => false
   end
 
+  create_table "assessment_forward_groups", :force => true do |t|
+    t.integer  "forward_policy_level_id"
+    t.integer  "correct_amount_left",     :default => -1
+    t.integer  "wrong_amount_left",       :default => -1
+    t.datetime "deleted_at"
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+  end
+
+  create_table "assessment_forward_policies", :force => true do |t|
+    t.integer  "overall_wrong_threshold", :default => -1
+    t.datetime "deleted_at"
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+  end
+
+  create_table "assessment_forward_policy_levels", :force => true do |t|
+    t.integer  "order",                 :default => 0
+    t.integer  "progression_threshold", :default => -1
+    t.integer  "wrong_threshold",       :default => -1
+    t.integer  "seconds_to_complete",   :default => -1
+    t.integer  "tag_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
+  end
+
   create_table "assessment_general_answers", :force => true do |t|
     t.datetime "deleted_at"
     t.datetime "created_at", :null => false
@@ -247,18 +274,33 @@ ActiveRecord::Schema.define(:version => 20140904141911) do
     t.datetime "updated_at",                              :null => false
   end
 
-  create_table "assessment_mpq_questions", :force => true do |t|
-    t.time     "deleted_at"
+  create_table "assessment_policy_missions", :force => true do |t|
+    t.datetime "deleted_at"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
 
-  create_table "assessment_mpq_sub_questions", :force => true do |t|
-    t.integer  "parent_id"
-    t.integer  "child_id"
-    t.time     "deleted_at"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+  create_table "assessment_progression_groups", :force => true do |t|
+    t.integer  "as_progression_group_id"
+    t.string   "as_progression_group_type"
+    t.integer  "submission_id"
+    t.string   "uncompleted_questions"
+    t.string   "completed_answers"
+    t.boolean  "is_completed",              :default => false
+    t.datetime "dued_at"
+    t.datetime "deleted_at"
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+  end
+
+  create_table "assessment_progression_policies", :force => true do |t|
+    t.integer  "as_progression_policy_id"
+    t.string   "as_progression_policy_type"
+    t.integer  "policy_mission_id"
+    t.integer  "overall_seconds_to_complete", :default => -1
+    t.datetime "deleted_at"
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
   end
 
   create_table "assessment_questions", :force => true do |t|

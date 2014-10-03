@@ -33,6 +33,8 @@ class Assessment::Submission < ActiveRecord::Base
   has_many :gradings, class_name: Assessment::Grading, dependent: :destroy
   has_one :comment_topic, as: :topic
 
+	has_many :progression_groups, class_name: "ProgressionGroup", dependent: :destroy
+
   after_create :set_attempting
   after_save   :status_change_tasks, if: :status_changed?
 

@@ -178,7 +178,7 @@
 
         get_timetable_ivle();
         $('div.span-content').addClass('border-gray');
-        if(!$('div#lesson-plan-content').empty()) {
+        if($('div#lesson-plan-content').length ) {
             $('div.content').addClass('stretch-content');
         }
 
@@ -196,6 +196,11 @@
 
         });
 
+        //Hide menubar default
+        if ($('#lesson-plan-content').length) {
+            $('.span2.sidebar').hide();
+            $('.span10.span-content').width(1170);
+        }
 
         //show entry
         $('#lesson-plan-content a.btn_entry').click(function(){

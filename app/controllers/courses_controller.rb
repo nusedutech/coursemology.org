@@ -1,6 +1,6 @@
 class CoursesController < ApplicationController
   load_and_authorize_resource
-  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students]
+  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students, :check_before_import]
 
   def index
     @courses = Course.online_course
@@ -166,6 +166,18 @@ class CoursesController < ApplicationController
       @student_courses = Kaminari.paginate_array(@student_courses).page(params[:page]).per(@std_paging.prefer_value.to_i)
     end
 
+  end
+
+  def check_before_import
+    @check_list = TutorialGroup.check(params[:file], @course)
+  end
+
+  def import_student_groups
+    TutorialGroup.import(params[:students], current_user, @course)
+    respond_to do |format|
+      format.html { redirect_to course_manage_students_path(@course),
+                                notice: "import successfully" }
+    end
   end
 
   def manage_students

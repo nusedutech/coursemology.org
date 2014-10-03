@@ -1,0 +1,31 @@
+<h3>Check for Importing Student Groups</h3>
+<%= form_tag course_import_student_groups_path(@course), :method => 'get', class: "course_import_student_groups" do %>
+    <table class="table assignments missions-list-table ver-ali-top">
+      <thead>
+      <tr>
+        <th width="10%">Id</th>
+        <th width="20%">Name</th>
+        <th width="20%">Email</th>
+        <th width="15%">Group</th>
+        <th width="35%">Status</th>
+      </tr>
+      </thead>
+
+      <tbody class="table-hover">
+      <% @check_list.each_with_index do |q, index| %>
+          <tr>
+            <td><%= q[:id]%><input type="hidden" name="students[id][]" value="<%= q[:id]%>"></td>
+            <td><%= q[:name]%><input type="hidden" name="students[name][]" value="<%= q[:name]%>"></td></td>
+            <td><%= q[:email]%><input type="hidden" name="students[email][]" value="<%= q[:email]%>"></td></td>
+            <td><%= q[:group]%><input type="hidden" name="students[group][]" value="<%= q[:group]%>"></td></td>
+            <td><%= q[:status]%><input type="hidden" name="students[status][]" value="<%= q[:status]%>"></td></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div class="form-action">
+      <input id="btn-import-ivle-event" class="btn btn-primary form-submit" type="submit" value="Finish Import" />
+      <%= link_to "Back",course_manage_students_path(@course), :class => 'btn' %>
+    </div>
+
+<% end %>

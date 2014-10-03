@@ -1,0 +1,46 @@
+<div class="alert alert-success hidden"></div>
+<h1>Manage Staff</h1>
+
+<%= render partial: "courses/manage_user_tab", locals: { tab: 2 } %>
+<% tas = @staff_courses.map {|tac| [tac.name, tac.id] }.unshift(["Unassigned", -1]) %>
+<table class="table group-table table-striped">
+  <thead>
+  <th width="60%">Group Name</th>
+  <th width="30%"><%= sortable 'tutor', course_group_path(@course), @phantom ? 'phantom=true' : 'phantom=false' %></th>
+  <th style="min-width: 70px">Actions</th>
+  </thead>
+  <tbody>
+  <% @group_courses.each do |group| %>
+      <tr>
+        <input type="hidden" class="old-name" value="<%= group.name  %>">
+        <td>  <input type="text" style="width: 80%" value="<%= group.name  %>" name="group_name" class="change-name" required> </td>
+        <td>
+          <%tutor = TutorialGroup.where(:group_id => group.id).first %>
+          <% if tutor %>
+              <%= select "tutor","", tas, {:selected => "#{tutor.tut_course_id}" }%>
+          <% else %>
+              <%= select "tutor","", tas, {:selected => "#{-1}" }%>
+          <% end %>
+        </td>
+
+        <td>
+          <% if current_user.is_admin? or curr_user_course.is_lecturer? %>
+              <%= link_to '#', class: 'btn update-group' do %>
+                  <i class="icon-ok"></i>
+              <% end %>
+
+              <input type="hidden" class="user-course-id" value="<%= group.id %>"/>
+              <input type="hidden" class="remove-staff-url" value="<%= course_remove_group_path(@course, group) %>">
+              <%= link_to '#',
+                         class: 'btn remove-group',
+                         data: { confirm: t('.confirm', :default => t("helpers.links.confirm", :default => "Are you sure to remove #{group.name} from group?")) }  do %>
+                  <i class="icon-remove"></i>
+              <% end %>
+
+
+          <% end %>
+        </td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>

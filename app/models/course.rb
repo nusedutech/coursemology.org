@@ -57,10 +57,11 @@ class Course < ActiveRecord::Base
 
   #user related
   has_many  :user_courses,  dependent: :destroy
-  has_many  :users, through: :usccer_courses
+  has_many  :users, through: :user_courses
   has_many  :submissions, through: :user_courses
   has_many  :activities, dependent: :destroy
   has_many  :tutorial_groups,        dependent: :destroy
+  has_many  :student_groups,        dependent: :destroy
   has_many  :comment_topics,         dependent: :destroy
   has_many  :mass_enrollment_emails, dependent: :destroy
   has_many  :enroll_requests,        dependent: :destroy

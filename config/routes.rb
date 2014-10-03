@@ -51,6 +51,8 @@ Coursemology::Application.routes.draw do
     match "/leaderboards"     => "leaderboards#show", as: :leaderboards
     match "/staff"            => "user_courses#staff", as: :staff
     post "/remove_staff/:id"            => "user_courses#remove_staff", as: :remove_staff
+    match "/group"            => "user_courses#group", as: :group
+    post "/remove_group/:id"            => "user_courses#remove_group", as: :remove_group
     match "/manage_group"  => "course_groups#manage_group", as: :manage_group
     post  "/add_student"      => "course_groups#add_student", as: :manage_add_student
     post  "/update_exp"        => "course_groups#update_exp", as: :manage_update_exp
@@ -280,6 +282,7 @@ Coursemology::Application.routes.draw do
 
     get "student_summary" => "student_summary#index"
     get "/student_summary/export" => "student_summary#export", as: :student_summary_export
+    get "/student_summary/export_result" => "student_summary#export_result", as: :student_summary_export_result
 
     resources :staff_leaderboard
 
@@ -353,6 +356,8 @@ Coursemology::Application.routes.draw do
 
   match "courses/:id/students" => "courses#students", as: :course_students
   match "courses/:id/manage_students" => "courses#manage_students", as: :course_manage_students
+  get "courses/:id/import_student_groups" => "courses#import_student_groups", as: :course_import_student_groups
+  post "courses/:id/check_before_import" => "courses#check_before_import", as: :course_check_before_import
   match "courses/:id//pending_gradings"   => "courses#pending_gradings", as: :course_pending_gradings
 
   resources :file_uploads

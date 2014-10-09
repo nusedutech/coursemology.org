@@ -307,6 +307,7 @@ Coursemology::Application.routes.draw do
 
     get "lesson_plan" => 'lesson_plan_entries#index', as: :lesson_plan
     get "lesson_plan/submission/:assessment_id" => 'lesson_plan_entries#submission', as: :lesson_plan_submission
+    put "lesson_plan/submission/:assessment_id/mission_update" => 'lesson_plan_entries#mission_update', as: :lesson_plan_mission_update
     get "lesson_plan/import_ivle_event" => 'lesson_plan_entries#import_ivle_event', as: :lesson_plan_import_ivle_event
     get "lesson_plan/overview" => 'lesson_plan_entries#overview', as: :lesson_plan_overview
     post "lesson_plan/bulk_update" => 'lesson_plan_milestones#bulk_update', as: :lesson_plan_bulk_update

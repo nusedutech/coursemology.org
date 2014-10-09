@@ -106,6 +106,14 @@ th#linked_resource_type, th#linked_resource_actions {
   table-layout: fixed;
 }
 
+#lesson-plan-content iframe.wysihtml5-sandbox {
+  width: 70% !important;
+}
+
+#lesson-plan-content ul.code-comment-box{
+  margin: 0;
+}
+
 #lesson-plan-content div#milestone-entity {
   background: none repeat scroll 0 0 #fcfcfc;
   border-right: 1px solid #c8c8c8;

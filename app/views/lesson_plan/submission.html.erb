@@ -44,6 +44,7 @@
     <div id="milestone-entity">
       <div style="width: auto">
         <input type="hidden" id="active-entity" value="<%= @current_id%>" />
+        <input type="hidden" id="discuss" value="<%= @discuss%>" />
         <% grouped_milestones = @milestones.group_by { |milestone| milestone.is_virtual? } %>
         <% grouped_milestones[false] = [] unless grouped_milestones[false] %>
         <% grouped_milestones[true] = [] unless grouped_milestones[true] %>
@@ -58,7 +59,102 @@
       </div>
     </div>
     <section id="detail-content">
-      <%= render partial:"assessment/training_submissions/edit_form" %>
+      <% if @assessment.is_a?(Assessment::Training) %>
+        <%= render partial:"assessment/training_submissions/edit_form" %>
+      <% elsif @assessment.is_a?(Assessment::Mission)%>
+          <% if @mission_show.nil? %>
+              <%= render partial: 'assessment/mission_submissions/summary' %>
+              <%= render partial: 'assessment/mission_submissions/form' %>
+          <% elsif @mission_show=="true"%>
+              <%= render :partial => 'lesson_plan/show_mission' %>
+          <% end %>
+      <% end %>
+      <div class="discussion" style="display: none">
+        <% topic = ForumTopic.where(:discussable_type => 'Assessment', :discussable_id => @assessment.id).first %>
+        <% if !topic.nil? %>
+            <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
+            <div class="forum" style="display: none">
+              <div class="posts">
+                <%
+                   posts = topic.posts.all.sort do |a, b|
+                     if not a.parent then
+                       -1
+                     elsif not b.parent then
+                       1
+                     else
+                       a.parent.id <=> b.parent.id
+                     end
+                   end
+
+                   # This is basically a DFS: we have to emit the conversation style layout without the
+                   # tree information from the database.
+                   level_iter = lambda do |common_parent, level|
+                     this_level = posts.select {|p| p.parent == common_parent}
+                     this_level.each do |p|
+                %><%= render partial: 'forums/posts/post', locals: { post: p } %><%
+
+                 # We start a new thread only if the current level has more than one post so that we do not
+                 # indent at every reply, only those with forks.
+                 child_level = posts.select {|c| c.parent == p}
+                 fork = level < 3 && (this_level.length > 1 || child_level.length > 1)
+                 if fork then %>
+                            <div class="thread"><% level_iter.call(p, level + 1) %></div>
+                        <% else %>
+                            <% level_iter.call(p, level) %>
+                        <% end
+                           end
+                           end
+
+                           level_iter.call(nil, 1)
+                        %>
+              </div>
+
+              <% if topic.can_be_replied_to? %>
+                  <hr />
+
+                  <div class="quick-reply">
+                    <h3>Post a Reply</h3>
+
+                    <% new_post = ForumPost.new %>
+                    <% new_post.title = replize_title(topic.posts.last.title) %>
+                    <%= form_for new_post, url: course_forum_topic_posts_path(@course, topic.forum, topic, new_post),
+                                 html: { class: 'form-horizontal' } do |f| %>
+                        <%= render partial: 'forums/posts/form', locals: { reply_to: topic.posts.last, form: f } %>
+                        <input type="hidden" name="assessment_redirect_link" value='<%= request.original_url%>' />
+                        <div class="form-actions">
+                          <%= f.submit 'Reply', class: 'btn btn-primary' %>
+                        </div>
+                    <% end %>
+                  </div>
+              <% end %>
+            </div>
+        <% else %>
+            <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
+            <div class="forum" style="display: none">
+              <div class="quick-reply">
+                <h3>Post a Dicussion</h3>
+
+                <% new_topic = ForumTopic.new %>
+                <% new_topic.forum = @course.forums.first %>
+                <% new_topic.title = @assessment.class.to_s + ' ' + @assessment.title %>
+                <% new_topic.discussable_type = @assessment.class %>
+                <% new_topic.discussable_id = @assessment.id %>
+                <% new_post = ForumPost.new %>
+                <%= form_for new_post, url: course_forum_topics_path(@course, @course.forums.first),
+                             html: { class: 'form-horizontal' } do |f| %>
+                    <%= render partial: 'forums/posts/form', locals: { reply_to: new_topic.posts.last, form: f } %>
+                    <input type="hidden" name="topic_id" value='<%= @assessment.id %>' />
+                    <input type="hidden" name="topic_type" value='<%= @assessment.class.to_s %>' />
+                    <input type="hidden" name="topic_title" value='<%= @assessment.title%>' />
+                    <input type="hidden" id="assessment_redirect_link" name="assessment_redirect_link" value='<%= request.original_url%>' />
+                    <div class="form-actions">
+                      <%= f.submit 'Reply', class: 'btn btn-primary' %>
+                    </div>
+                <% end %>
+              </div>
+            </div>
+        <% end %>
+      </div>
     </section>
 
   </div>
@@ -137,11 +233,15 @@
 
 <script>
     $( document ).ready(function() {
-
         $('div.span-content').addClass('border-gray');
         if($('div#lesson-plan-content').length ) {
             $('div.content').addClass('stretch-content');
         }
+
+        $('#submit-btn').click(function(){
+            $('#lesson-plan-content section#detail-content .discussion').show();
+            return true;
+        });
 
         //slide and show hide menubar
         $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
@@ -237,12 +337,32 @@
             });
         }
 
-        if($('#active-entity')){
-            $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
+        $('#lesson-plan-content #detail-content a.a_discussion').click(function() {
+            $('#lesson-plan-content #detail-content .forum').toggle('slow');
+            if($('#lesson-plan-content #detail-content a.a_discussion').text()=='Hide Discussion'){
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Show Discussion');
+            }else{
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+            }
 
-            $('#lesson-plan-content .forum').show();
-            $('#lesson-plan-content a.a_discussion').text('Hide Discussion');
+        });
+        //$('#lesson-plan-content #detail-content a.a_discussion').click();
+
+        if($('#active-entity').val()!=""){
+            $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
+            if(!$('#assessment_redirect_link')) {
+                $('#lesson-plan-content #detail-content .forum').show();
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+            }
+            if($('#discuss').val()!=""){
+                $('#lesson-plan-content section#detail-content .discussion').show();
+                $('#lesson-plan-content section#detail-content #continue-btn').removeClass("disabled");
+                $('#lesson-plan-content #detail-content .forum').show();
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+                $
+            }
         }
+
 
     });
 

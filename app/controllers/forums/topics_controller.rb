@@ -61,21 +61,41 @@ class Forums::TopicsController < ApplicationController
                                   notice: 'The topic was successfully created.' }
       end
     else
-      @topic.forum = @course.forums.first
-      @topic.author = curr_user_course
-      @topic.title = params[:topic_type] + " " + params[:topic_title]
-      @topic.discussable = LessonPlanEntry.find_by_id(params[:redirect_link].split('-')[1].to_i)
-      @topic.save
+      if params["redirect_link"]
+        @topic.forum = @course.forums.first
+        @topic.author = curr_user_course
+        @topic.title = params[:topic_type] + " " + params[:topic_title]
+        @topic.discussable = LessonPlanEntry.find_by_id(params[:redirect_link].split('-')[1].to_i)
+        @topic.save
 
-      post = ForumPost.new
-      post.assign_attributes(params[:forum_post])
-      post.author = curr_user_course
-      post.topic = @topic
-      post.save
+        post = ForumPost.new
+        post.assign_attributes(params[:forum_post])
+        post.author = curr_user_course
+        post.topic = @topic
+        post.save
 
-      respond_to do |format|
-        format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=#{params["redirect_link"]}" + "#post-#{post.id}") }
+        respond_to do |format|
+          format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=#{params["redirect_link"]}" + "#post-#{post.id}") }
+        end
+      elsif params["assessment_redirect_link"]
+        @topic.forum = @course.forums.first
+        @topic.author = curr_user_course
+        @topic.title = params[:topic_type] + " " + params[:topic_title]
+        @topic.discussable = Assessment.find_by_id(params[:topic_id].to_i)
+        @topic.save
+
+        post = ForumPost.new
+        post.assign_attributes(params[:forum_post])
+        post.author = curr_user_course
+        post.topic = @topic
+        post.save
+
+        respond_to do |format|
+
+          format.html { redirect_to params["assessment_redirect_link"] + ((params["assessment_redirect_link"].to_s.include? "step") ? "&discuss=true" : "?discuss=true") }
+        end
       end
+
     end
 
   end

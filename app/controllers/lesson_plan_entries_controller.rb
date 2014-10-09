@@ -4,6 +4,7 @@ class LessonPlanEntriesController < ApplicationController
 
   before_filter :load_general_course_data, :only => [:index, :new, :edit, :overview, :submission]
 
+
   def index
     @milestones = get_milestones_for_course(@course)
     @current_id = params["eid"].nil? ? '' : params["eid"]
@@ -55,6 +56,9 @@ class LessonPlanEntriesController < ApplicationController
     @current_id = @assessment.nil? ? '0' : "virtual-entity-#{@assessment.id}"
 
     @is_lesson_plan_submission = true
+    @mission_show = params['show'];
+    @discuss = params['discuss'];
+
     sbm = @assessment.submissions.where(std_course_id: curr_user_course).last
     if curr_user_course.is_student? && sbm.nil?
       Activity.attempted_asm(curr_user_course, @assessment)
@@ -63,6 +67,10 @@ class LessonPlanEntriesController < ApplicationController
     if sbm
       @submission = sbm
     else
+      if @submission.nil?
+        @submission = Assessment::Submission.new
+        @submission.assessment = @assessment
+      end
       @submission.std_course = curr_user_course
     end
 
@@ -93,27 +101,68 @@ class LessonPlanEntriesController < ApplicationController
     #implementation, build step control UI separately
     # @next_undone
     if !@assessment.nil?
-      @training = @assessment.specific
-      questions = @assessment.questions
-      finalised = @assessment.questions.finalised(@submission)
-      current =  (questions - finalised).first
-      next_undone = (questions.index(current) || questions.length) + 1
-      request_step = (params[:step] || next_undone).to_i
-      step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
-      step = step > questions.length ? next_undone : step
-      current = step > questions.length ? current : questions[step - 1]
+      if @assessment.is_a?(Assessment::Training)
+        @training = @assessment.specific
+        questions = @assessment.questions
+        finalised = @assessment.questions.finalised(@submission)
+        current =  (questions - finalised).first
+        next_undone = (questions.index(current) || questions.length) + 1
+        request_step = (params[:step] || next_undone).to_i
+        step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
+        step = step > questions.length ? next_undone : step
+        current = step > questions.length ? current : questions[step - 1]
 
-      current = current.specific if current
-      if current && current.class == Assessment::CodingQuestion
-        prefilled_code = current.template
-        if current.dependent_on
-          std_answer = current.dependent_on.answers.where("correct = 1 AND std_course_id = ?", curr_user_course.id).last
-          code = std_answer ? std_answer.content : ""
-          prefilled_code = "#Answer from your previous question \n" + code + (prefilled_code.empty? ? "" : ("\n\n#prefilled code \n" + prefilled_code))
+        current = current.specific if current
+        if current && current.class == Assessment::CodingQuestion
+          prefilled_code = current.template
+          if current.dependent_on
+            std_answer = current.dependent_on.answers.where("correct = 1 AND std_course_id = ?", curr_user_course.id).last
+            code = std_answer ? std_answer.content : ""
+            prefilled_code = "#Answer from your previous question \n" + code + (prefilled_code.empty? ? "" : ("\n\n#prefilled code \n" + prefilled_code))
+          end
         end
+        @summary = {questions: questions, finalised: finalised, step: step,
+                    current: current, next_undone: next_undone, prefilled: prefilled_code}
+
+      elsif @assessment.is_a?(Assessment::Mission)
+        if(@mission_show.nil?)
+          unless @submission.attempting?
+            respond_to do |format|
+              format.html { redirect_to course_lesson_plan_submission_path(@course, @assessment, show: true),
+                                        notice: "Your have already submitted this mission." }
+            end
+          end
+        end
+        @mission = @assessment.as_assessment
+        @questions = @assessment.questions
+        @submission.build_initial_answers
       end
-      @summary = {questions: questions, finalised: finalised, step: step,
-                  current: current, next_undone: next_undone, prefilled: prefilled_code}
+    end
+  end
+
+  def mission_update
+    @assessment = Assessment.find_by_id(params['assessment_id'])
+    @submission = @assessment.submissions.where(std_course_id: curr_user_course).last
+    @submission.fetch_params_answers(params)
+    if params[:files]
+      @submission.attach_files(params[:files].values)
+    end
+
+    respond_to do |format|
+      if @submission.save
+        if params[:commit] == 'Save'
+          @submission.set_attempting
+          #course_lesson_plan_submission_path(@course, @assessment, anchor: 'training-stop-pos', step: @summary[:step] + 1)
+          format.html { redirect_to course_lesson_plan_submission_path(@course, @assessment),
+                                    notice: "Your submission has been saved." }
+        else
+          @submission.set_submitted
+          format.html { redirect_to course_lesson_plan_submission_path(@course, @assessment, show: true),
+                                    notice: "Your submission has been updated." }
+        end
+      else
+        format.html { render action: "edit" }
+      end
     end
   end
 

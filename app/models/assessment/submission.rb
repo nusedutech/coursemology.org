@@ -135,7 +135,7 @@ class Assessment::Submission < ActiveRecord::Base
           when qn.is_a?(Assessment::CodingQuestion)
             ans_class = Assessment::CodingAnswer
           when qn.is_a?(Assessment::McqQuestion)
-            ans_class = Assessment::McqQuestion
+            ans_class = Assessment::McqAnswer
           else
             ans_class = Assessment::GeneralAnswer
         end

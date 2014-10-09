@@ -1,0 +1,25 @@
+<%- display_name = "Policy Mission" -%>
+<%= simple_form_for [@course, @policy_mission],
+                    :html => { :class => 'form-horizontal' },
+                    defaults: { input_html: { class: 'span7' } } do |f| %>
+<%= f.input :title %>
+    <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
+    <%= f.input :exp, as: :integer, input_html: {class: "number_field input-medium"}  %>
+    <%= f.input :open_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
+    <%= f.input :close_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
+    <%= f.input :published, as: :boolean, label: "Publish?",
+                input_html: {class: ""},
+                inline_label:"Check to publish #{display_name.downcase}"%>
+    <%= f.input :comment_per_qn, as: :boolean, label: "Comment Mode",
+                input_html: {class: ""},
+                inline_label:"Check to have comment box per question (Otherwise per mission)"%>
+
+    <%= f.association :dependent_on,
+                      collection: @course.policy_missions - [@policy_mission],
+                      input_html: {class: "input-large"}, include_blank: true %>
+
+    <%= f.button :form_submit,
+                 cancel: @policy_mission.persisted? ? course_assessment_policy_mission_path(@course, @policy_mission) :
+                         course_assessment_policy_missions_path(@course) %>
+<% end %>
+

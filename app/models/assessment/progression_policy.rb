@@ -1,4 +1,4 @@
-class ProgressionPolicy < ActiveRecord::Base
+class Assessment::ProgressionPolicy < ActiveRecord::Base
   acts_as_paranoid
 	acts_as_superclass as: :as_progression_policy
 

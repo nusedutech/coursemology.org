@@ -152,7 +152,11 @@ Coursemology::Application.routes.draw do
       get 'dump_code' => 'missions#dump_code'
     end
 
-		resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment
+		resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
+			collection do
+				get :index, to: 'assessments#index', type: 'policy_mission'
+			end
+		end
 
     resources :assessment_trainings, path: 'trainings', controller: :trainings, module: :assessment do
       collection do

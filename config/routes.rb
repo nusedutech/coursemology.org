@@ -357,6 +357,9 @@ Coursemology::Application.routes.draw do
 
   match "courses/:id/students" => "courses#students", as: :course_students
   match "courses/:id/manage_students" => "courses#manage_students", as: :course_manage_students
+  match "courses/:id/download_import_template" => "courses#download_import_template", as: :course_download_import_template
+
+  match "courses/:id/import_ivle_student" => "courses#import_ivle_student", as: :course_import_ivle_student
   get "courses/:id/import_student_groups" => "courses#import_student_groups", as: :course_import_student_groups
   post "courses/:id/check_before_import" => "courses#check_before_import", as: :course_check_before_import
   match "courses/:id//pending_gradings"   => "courses#pending_gradings", as: :course_pending_gradings

@@ -1,5 +1,5 @@
 class TutorialGroup < ActiveRecord::Base
-  attr_accessible :course_id, :std_course_id, :tut_course_id
+  attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id
 
   belongs_to :course
   belongs_to :std_course, class_name: "UserCourse"
@@ -50,7 +50,7 @@ class TutorialGroup < ActiveRecord::Base
       error = ""
       if row["id"].nil?
         error = error + "id is empty,"
-      elsif course.users.where(:name => row["id"]).first.nil?
+      elsif course.users.where(:student_id => row["id"]).first.nil?
         error = error + "id does not exist,"
       elsif row["group"].nil?
         error = error + "group is empty,"
@@ -65,11 +65,10 @@ class TutorialGroup < ActiveRecord::Base
   def self.import (students, current_user, course)
     students["status"].each_with_index do |s, index|
       if s == "accepted"
-        std_course = course.user_courses.where(:course_id => course.id, :user_id => course.users.where(:name => students["id"][index]).first.id).first
+        std_course = course.user_courses.where(:course_id => course.id, :user_id => course.users.where(:student_id => students["id"][index]).first.id).first
         ctg = course.tutorial_groups.where(:std_course_id => std_course.id).first
         if ctg.nil?
-          tg = TutorialGroup.create
-          tg.course = course
+          tg = course.tutorial_groups.build
           tg.std_course = std_course
           sg = StudentGroup.where(:name => students["group"][index]).first
           if sg.nil?
@@ -78,7 +77,8 @@ class TutorialGroup < ActiveRecord::Base
             sg.save
           end
 
-          #tg.group = sg
+          tg.tut_course_id = 0 #have to set tut_course_id because validates :tut_course_id, presence: true (10/this file)
+          tg.group_id = sg.id
           tg.save
         else
           sg = StudentGroup.where(:name => students["group"][index]).first
@@ -90,7 +90,6 @@ class TutorialGroup < ActiveRecord::Base
           ctg.group = sg
           ctg.save
         end
-        t=0
       end
     end
   end

@@ -31,6 +31,18 @@ class UserCoursesController < ApplicationController
       @user_course.user.email = params[:email].strip
     end
 
+    tt = TutorialGroup.where(:std_course_id => @user_course.id).first
+    if tt
+      tt.group_id = params[:group][0].to_i
+    else
+      tt = @course.tutorial_groups.build
+      tt.std_course = @user_course
+      tt.tut_course_id =  params[:tutor].first
+      tt.group_id = params[:group][0].to_i
+      tt.save
+    end
+    tt.save
+
     @user_course.is_phantom =  params[:is_phantom] || false
 
     tut_group_assign

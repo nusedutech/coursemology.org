@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141002135427) do
+ActiveRecord::Schema.define(:version => 20141009171159) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -1216,6 +1216,7 @@ ActiveRecord::Schema.define(:version => 20141002135427) do
     t.boolean  "is_logged_in",           :default => true
     t.boolean  "is_pending_deletion",    :default => false
     t.boolean  "use_uploaded_picture",   :default => false
+    t.string   "student_id"
   end
 
   add_index "users", ["confirmation_token"], :name => "index_users_on_confirmation_token", :unique => true

@@ -1,6 +1,6 @@
 class CoursesController < ApplicationController
   load_and_authorize_resource
-  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students, :check_before_import]
+  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students, :check_before_import, :import_ivle_student]
 
   def index
     @courses = Course.online_course
@@ -31,8 +31,10 @@ class CoursesController < ApplicationController
           tag.tag_group_id = tag_group.id
           tag.save
         end
-        
-        
+
+        invisible_default_forum = ForumForum.create(:name => "Entry Forum", :description => "Store discussions of Lesson Plan")
+        invisible_default_forum.course = @course
+        invisible_default_forum.save
         
         
         format.html { redirect_to course_preferences_path(@course),
@@ -211,4 +213,33 @@ class CoursesController < ApplicationController
     @pending_gradings = @course.pending_gradings(curr_user_course)
   end
 
+  def import_ivle_student
+    count = 0
+    if params["import_ivle_student"] && params["import_ivle_student"]["chose"]
+      params["import_ivle_student"]["chose"].each do |e|
+          email = params["import_ivle_student"]["email"][e]=="" ? (e + "@nus.edu.sg") : params["import_ivle_student"]["email"][e]
+          name = params["import_ivle_student"]["name"][e]
+          password = User.new(password: e).encrypted_password
+          @user = User.new(:name => name, :email => email, :student_id => e, :password => password, :password_confirmation => password, :system_role_id => 2)
+          @user.skip_confirmation!
+          @user.save
+
+          @course.enrol_user(@user, Role.find_by_name("student"))
+          count = count+1
+      end
+      respond_to do |format|
+        if count > 0
+          format.html { redirect_to course_manage_students_path(@course), notice: "Imported #{count} students." }
+        else
+          format.html { redirect_to course_manage_students_path(@course)}
+        end
+      end
+    end
+  end
+
+  def download_import_template
+    send_file "#{Rails.root}/public/import-student-group-template.csv",
+              :filename => "import-student-group-template.csv",
+              :type => "application/csv"
+  end
 end

@@ -22,6 +22,8 @@ class User < ActiveRecord::Base
   attr_accessible :display_name, :name, :profile_photo_url
   attr_accessible :provider, :uid
   attr_accessible :use_uploaded_picture
+  attr_accessible :student_id, :encrypted_password, :sign_in_count, :system_role_id, :confirmation_sent_at, :confirmed_at
+
 
   protected_attributes :system_role_id
 

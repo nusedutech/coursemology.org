@@ -10,7 +10,7 @@
       <%- new_url = new_course_assessment_training_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_training_path(c, a) } %>
       <%- asts_path = course_assessment_trainings_path %>
-  <% else if model_name == 'Mission' %>
+  <% elsif model_name == 'Mission' %>
       <%= render partial: "assessment/missions/navigation", locals: {title: title} %>
       <%- new_url = new_course_assessment_mission_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_mission_path(c, a) } %>

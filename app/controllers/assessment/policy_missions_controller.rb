@@ -23,14 +23,15 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     @policy_mission.open_at = DateTime.now.beginning_of_day
     @policy_mission.close_at = DateTime.now.end_of_day + 1  # 1 day from now
     @policy_mission.course_id = @course.id
+
 		respond_to do |format|
 			format.html
 		end
 	end
 
 	def create
-    @policy_missions = @course.missions
-    @policy_mission.position = @course.missions.count + 1
+    @policy_missions = @course.policy_missions
+    @policy_mission.position = @course.policy_missions.count + 1
     @policy_mission.creator = current_user
     @policy_mission.course_id = @course.id
 

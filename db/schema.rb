@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141009171159) do
+ActiveRecord::Schema.define(:version => 20141013092121) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -275,6 +275,7 @@ ActiveRecord::Schema.define(:version => 20141009171159) do
     t.datetime "deleted_at"
     t.datetime "created_at",                          :null => false
     t.datetime "updated_at",                          :null => false
+    t.integer  "course_id"
   end
 
   add_index "assessment_questions", ["as_question_id", "as_question_type"], :name => "index_on_as_question", :unique => true
@@ -1152,7 +1153,7 @@ ActiveRecord::Schema.define(:version => 20141009171159) do
     t.integer  "tut_course_id"
     t.datetime "created_at",    :null => false
     t.datetime "updated_at",    :null => false
-    t.string   "group_id"
+    t.integer  "group_id"
   end
 
   add_index "tutorial_groups", ["course_id"], :name => "index_tutorial_groups_on_course_id"

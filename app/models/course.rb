@@ -16,7 +16,7 @@ class Course < ActiveRecord::Base
   has_many  :levels, dependent: :destroy
   has_many  :achievements, dependent: :destroy
   has_many  :assessments, dependent: :destroy
-  has_many  :questions, through: :assessments
+  has_many  :assessment_questions, through: :assessments, source: :questions
   has_many  :lesson_plan_milestones, dependent: :destroy
   has_many  :lesson_plan_entries, dependent: :destroy
   has_one   :root_folder, dependent: :destroy, conditions: { parent_folder_id: nil }, class_name: "MaterialFolder"
@@ -33,6 +33,7 @@ class Course < ActiveRecord::Base
   has_many  :course_preferences, dependent: :destroy
   has_many  :course_navbar_preferences, dependent: :destroy
 
+  has_many :questions, class_name: "Assessment::Question", dependent: :destroy
   has_many :topicconcepts, dependent: :destroy
   has_many :tagged_questions, through: :topicconcepts, source: :questions, dependent: :destroy
   

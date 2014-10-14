@@ -57,7 +57,7 @@ class Assessment::QuestionsController < ApplicationController
     if questions.count > 0
       @questions = questions.uniq
     else
-      @questions = @course.tagged_questions.uniq
+      @questions = @course.questions.uniq
     end
   end
 
@@ -146,6 +146,12 @@ class Assessment::QuestionsController < ApplicationController
                                   notice: "Question has been successfully deleted." }
       end
     end
+  end
+
+  def download_import_question_template
+    send_file "#{Rails.root}/public/import-question-template.csv",
+              :filename => "import-question-template.csv",
+              :type => "application/csv"
   end
 
   protected

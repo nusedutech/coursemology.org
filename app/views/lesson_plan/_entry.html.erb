@@ -49,6 +49,19 @@
                     <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
                     <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
                     <input type="hidden" class="entry_location" value="<%= entry.location  %>">
+                    <span class="entry_start_end" style="display: none">
+                      <% if entry.start_at %>
+                        <span class="icon-calendar"></span>
+                        <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                          <% if entry.end_at %> to
+                            <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
+                              <%= entry.end_at.strftime("%I:%M %p") %>
+                            <% else %>
+                              <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+                    </span>
                <% end %>
                <div class="discussion" style="display: none">
                   <% topic = ForumTopic.where(:discussable_type => 'LessonPlanEntry', :discussable_id => entry.id).first %>

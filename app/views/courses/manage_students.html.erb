@@ -48,7 +48,7 @@
                 </td>
                 <td>
 
-                  <%group = TutorialGroup.where(:std_course_id => student_course.id).first %>
+                  <%group = student_course.tut_group_courses.order("created_at DESC").first %>
                   <% if group %>
                       <%= select "group","", groups, {:selected => "#{group.group_id}" }%>
                   <% else %>

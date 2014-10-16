@@ -238,8 +238,29 @@ class CoursesController < ApplicationController
   end
 
   def download_import_template
-    send_file "#{Rails.root}/public/import-student-group-template.csv",
-              :filename => "import-student-group-template.csv",
-              :type => "application/csv"
+    @students = @course.user_courses.student.where(is_phantom: false).order('lower(name) asc')
+    file = Tempfile.new('import-student-group-template')
+    file.puts "id,name,email,group,remark\n"
+
+    @students.each do |student|
+      file.puts student.user.student_id + "," +
+                    student.name.gsub(",", " ") + "," +
+                    student.user.email + "," +
+                    (TutorialGroup.where(:std_course_id => student.id).first ? TutorialGroup.where(:std_course_id => student.id).first.group.name : "") + "," +
+                    "" + "\n"
+    end
+
+    file.close
+    send_file(file.path, {
+        :type => "application/csv",
+        :disposition => "attachment",
+        :filename =>   @course.title + " - Import Question Template.csv"
+    })
+
+    #send_file "#{Rails.root}/public/import-student-group-template.csv",
+    #          :filename => "import-student-group-template.csv",
+    #          :type => "application/csv"
   end
+
+
 end

@@ -15,6 +15,14 @@ class LessonPlanEntriesController < ApplicationController
     if params["ivle_event"]["choose"]
       params["ivle_event"]["choose"].each do |e|
         if (params["ivle_event"]["week_text"][e] && params["ivle_event"]["week_text"][e].downcase == 'every week')
+          #save student group
+          group = @course.student_groups.where(:name => e.to_s).first
+          if !group
+            group = @course.student_groups.new(:name => e.to_s)
+            group.save
+          end
+
+          #save lesson_plan_entities
           start_day = @course.lesson_plan_milestones.first.start_at.to_date
           end_day = @course.lesson_plan_milestones.last.end_at.to_date
           my_days = [params["ivle_event"]["day_code"][e]] # day of the week in 0-6. Sunday is day-of-week 0; Saturday is day-of-week 6.
@@ -23,7 +31,8 @@ class LessonPlanEntriesController < ApplicationController
             entry = LessonPlanEntry.new
             entry.course = @course
             entry.creator = current_user
-            entry.title = params["ivle_event"]["lesson_type"][e] + '-' + index.to_s
+            entry.group = group
+            entry.title = params["ivle_event"]["lesson_type"][e].downcase.capitalize + ' - ' + 'Group ' + e.to_s
             lesson_type = params["ivle_event"]["lesson_type"][e].downcase
             entry.entry_type = lesson_type == 'lecture' ? 0 : (lesson_type == 'recitation' ? 1 : (lesson_type == 'tutorial' ? 2 : 4))
             start_time = params["ivle_event"]["start_time"][e]

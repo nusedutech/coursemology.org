@@ -7,7 +7,7 @@ class TutorialGroup < ActiveRecord::Base
   belongs_to :group, class_name: "StudentGroup"
 
   validates :std_course_id, presence: true
-  validates :tut_course_id, presence: true
+  #validates :tut_course_id, presence: true
 
   before_destroy :unsubscribe_comments
   before_create :subscribe_comments
@@ -23,12 +23,15 @@ class TutorialGroup < ActiveRecord::Base
     std_course.comment_topics.each do |topic|
       CommentSubscription.unsubscribe(topic, tut_course)
     end
+
   end
 
   def subscribe_comments
     # TODO: update subscription
-    std_course.comment_topics.each do |topic|
-      CommentSubscription.subscribe(topic, tut_course)
+    if tut_course
+      std_course.comment_topics.each do |topic|
+        CommentSubscription.subscribe(topic, tut_course)
+      end
     end
   end
 
@@ -66,30 +69,18 @@ class TutorialGroup < ActiveRecord::Base
     students["status"].each_with_index do |s, index|
       if s == "accepted"
         std_course = course.user_courses.where(:course_id => course.id, :user_id => course.users.where(:student_id => students["id"][index]).first.id).first
-        ctg = course.tutorial_groups.where(:std_course_id => std_course.id).first
-        if ctg.nil?
-          tg = course.tutorial_groups.build
-          tg.std_course = std_course
-          sg = StudentGroup.where(:name => students["group"][index]).first
-          if sg.nil?
-            sg = StudentGroup.new(:name => students["group"][index])
-            sg.course = course
-            sg.save
-          end
-
-          tg.tut_course_id = 0 #have to set tut_course_id because validates :tut_course_id, presence: true (10/this file)
-          tg.group_id = sg.id
-          tg.save
-        else
-          sg = StudentGroup.where(:name => students["group"][index]).first
-          if sg.nil?
-            sg = StudentGroup.new(:name => students["group"][index])
-            sg.course = course
-            sg.save
-          end
-          ctg.group = sg
-          ctg.save
+        tg = course.tutorial_groups.build
+        tg.std_course = std_course
+        sg = StudentGroup.where(:name => students["group"][index]).first
+        if sg.nil?
+          sg = StudentGroup.new(:name => students["group"][index])
+          sg.course = course
+          sg.save
         end
+        #tg.tut_course_id = 0 #have to set tut_course_id because validates :tut_course_id, presence: true (10/this file)
+        tg.group_id = sg.id
+        tg.save
+
       end
     end
   end

@@ -5,6 +5,7 @@ class LessonPlanEntry < ActiveRecord::Base
 
   belongs_to :course
   belongs_to :creator, class_name: "User"
+  belongs_to :group, class_name: "StudentGroup"
   has_many :resources, class_name: "LessonPlanResource"
 
   has_many :taggable_tags, as: :taggable, dependent: :destroy

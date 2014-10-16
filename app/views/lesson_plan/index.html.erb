@@ -211,8 +211,9 @@
             var des  = $(this).find('input.entry_description').val();
             var loc  = $(this).find('input.entry_location').val();
             var dis = $(this).next('div.discussion').html();
+            var entry_start_end = $(this).find('span.entry_start_end').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
-                show_lecture(title, type, des, loc);
+                show_lecture(title, type, des, loc, entry_start_end);
             }else if(entry_type =='3'){
                 loc = loc.replace(".html", "/media/video.mp4");
                 show_video(title, type, des, loc);
@@ -224,10 +225,11 @@
         });
 
         //show entry lecture, recitation, tutorial
-        function show_lecture(title, type, des, loc){
+        function show_lecture(title, type, des, loc, entry_start_end){
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";
             entry_form += "<div><p style=''>" + loc + "</p></div>";
+            entry_form += "<div><h4>" + entry_start_end + "</h4></div>";
             $('section#detail-content').append(entry_form);
 
             if(1==1){
@@ -316,19 +318,20 @@
         // you must init the user
         user1.init().done(function() {});
 
-        user1.get("Timetable_Module", {CourseID: "61e76782-0ca8-449d-aa48-d20e93a1358a"})
+        user1.get("Timetable_Module", {CourseID: "6ba4813c-b858-41ce-9ba8-082fe06c92a0"})
                 .success(function (data) {
                     $.each(data.Results, function( ind, val ) {
-                        $('div#import-ivle-event table tbody').append($("<tr><td>" + val.ClassNo + "</td><td>" + val.LessonType + "</td><td>" + val.WeekText + "</td><td>" +  val.DayText + "</td><td>" + val.StartTime + "</td><td>" + val.EndTime + "</td><td>" + val.Venue
-                                + "</td><td><input type='checkbox' value='" + val.ClassNo + "' name='ivle_event[choose][]' />"
-                                + "<input type='hidden' name='ivle_event[lesson_type][" + val.ClassNo + "]' value='" + val.LessonType  + "'>"
-                                + "<input type='hidden' name='ivle_event[week_text][" + val.ClassNo + "]' value='" + val.WeekText  + "'>"
-                                + "<input type='hidden' name='ivle_event[day_code][" + val.ClassNo + "]' value='" + val.DayCode  + "'>"
-                                + "<input type='hidden' name='ivle_event[start_time][" + val.ClassNo + "]' value='" + val.StartTime  + "'>"
-                                + "<input type='hidden' name='ivle_event[end_time][" + val.ClassNo + "]' value='" + val.EndTime  + "'>"
-                                + "<input type='hidden' name='ivle_event[venue][" + val.ClassNo + "]' value='" + val.Venue  + "'>"
-                                + "</td></tr>"));
-
+                        if(val.LessonType=="TUTORIAL") {
+                            $('div#import-ivle-event table tbody').append($("<tr><td>" + val.ClassNo + "</td><td>" + val.LessonType + "</td><td>" + val.WeekText + "</td><td>" + val.DayText + "</td><td>" + val.StartTime + "</td><td>" + val.EndTime + "</td><td>" + val.Venue
+                                    + "</td><td><input type='checkbox' value='" + val.ClassNo + "' name='ivle_event[choose][]' />"
+                                    + "<input type='hidden' name='ivle_event[lesson_type][" + val.ClassNo + "]' value='" + val.LessonType + "'>"
+                                    + "<input type='hidden' name='ivle_event[week_text][" + val.ClassNo + "]' value='" + val.WeekText + "'>"
+                                    + "<input type='hidden' name='ivle_event[day_code][" + val.ClassNo + "]' value='" + val.DayCode + "'>"
+                                    + "<input type='hidden' name='ivle_event[start_time][" + val.ClassNo + "]' value='" + val.StartTime + "'>"
+                                    + "<input type='hidden' name='ivle_event[end_time][" + val.ClassNo + "]' value='" + val.EndTime + "'>"
+                                    + "<input type='hidden' name='ivle_event[venue][" + val.ClassNo + "]' value='" + val.Venue + "'>"
+                                    + "</td></tr>"));
+                        }
                     });
                 });
     }

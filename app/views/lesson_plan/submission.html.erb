@@ -69,6 +69,8 @@
               <%= render :partial => 'lesson_plan/show_mission' %>
           <% end %>
       <% end %>
+
+      <% if  @assessment.allow_discussion %>
       <div class="discussion" style="display: none">
         <% topic = ForumTopic.where(:discussable_type => 'Assessment', :discussable_id => @assessment.id).first %>
         <% if !topic.nil? %>
@@ -155,6 +157,7 @@
             </div>
         <% end %>
       </div>
+      <% end %>
     </section>
 
   </div>

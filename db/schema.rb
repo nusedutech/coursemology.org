@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141015031042) do
+ActiveRecord::Schema.define(:version => 20141016051716) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -321,6 +321,7 @@ ActiveRecord::Schema.define(:version => 20141015031042) do
     t.datetime "deleted_at"
     t.datetime "created_at",                           :null => false
     t.datetime "updated_at",                           :null => false
+    t.boolean  "allow_discussion",   :default => true
   end
 
   add_index "assessments", ["as_assessment_id", "as_assessment_type"], :name => "index_on_as_assessment", :unique => true

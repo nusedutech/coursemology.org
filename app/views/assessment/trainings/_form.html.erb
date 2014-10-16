@@ -17,7 +17,9 @@
     <%= f.input :published, as: :boolean,
                 input_html: {class: ""},
                 inline_label:"Check to publish #{display_name.downcase}" %>
-
+    <%= f.input :allow_discussion, as: :boolean, label: "Allow Discussion",
+                input_html: {class: ""},
+                inline_label:"Check to allow Discussion" %>
     <div id="uploaded_files_div"></div>
     <%= f.button :form_submit, cancel: course_assessment_trainings_path %>
     <%= render :partial => "layouts/html_editor" %>

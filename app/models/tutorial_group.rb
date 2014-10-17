@@ -71,7 +71,7 @@ class TutorialGroup < ActiveRecord::Base
         std_course = course.user_courses.where(:course_id => course.id, :user_id => course.users.where(:student_id => students["id"][index]).first.id).first
         tg = course.tutorial_groups.build
         tg.std_course = std_course
-        sg = StudentGroup.where(:name => students["group"][index]).first
+        sg = course.student_groups.where(:name => students["group"][index]).first
         if sg.nil?
           sg = StudentGroup.new(:name => students["group"][index])
           sg.course = course

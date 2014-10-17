@@ -81,13 +81,13 @@ class LessonPlanMilestone < ActiveRecord::Base
     #check for tutorial group, load for specific student lesson plan
     if user_course.is_student?
       student_tutorial_groups = user_course.tut_group_courses.order(:created_at).to_a
+      str_query = ''
       if student_tutorial_groups.count > 0
-        str_query = ''
         for i in 0..student_tutorial_groups.count - 1
           str_query << " or (entry_type = 2 and group_id is not null and group_id = #{student_tutorial_groups[i].group_id} and start_at >= '#{student_tutorial_groups[i].created_at}' #{ i < student_tutorial_groups.count - 1 ? " and end_at <= '#{ student_tutorial_groups[i+1].created_at}'" : ""})"
         end
-        actual_entries = actual_entries.where("entry_type <> 2 or (entry_type = 2 and group_id is null)" + str_query)
       end
+      actual_entries = actual_entries.where("entry_type <> 2 or (entry_type = 2 and group_id is null)" + str_query)
     end
 
     if include_virtual

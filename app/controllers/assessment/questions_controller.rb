@@ -65,7 +65,7 @@ class Assessment::QuestionsController < ApplicationController
     respond_to do |format|
       result = Assessment::Question.import(params[:file], current_user, @course)
       if result[:flag]
-        format.html { redirect_to main_app.course_assessment_question s_url(@course),
+        format.html { redirect_to main_app.course_assessment_questions_url(@course),
                                 notice: result[:info] }
       else
         format.html { redirect_to main_app.course_assessment_questions_url(@course),

@@ -32,7 +32,8 @@
     </p>
 <% else %>
     <form id="training-step-form">
-      <input type="hidden" name="step" value="<%= @summary[:step] %>">
+      <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">
+      <input type="hidden" name="next_undone" class="next-undone" value="<%= @summary[:next_undone] %>">
       <input type="hidden" name="update_url"
              value="<%= submit_course_assessment_submission_path(@course, @assessment, @submission) %>" />
       <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />

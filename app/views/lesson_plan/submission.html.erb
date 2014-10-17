@@ -365,7 +365,13 @@
                 $
             }
         }
-
+        if(($('.doing-step').val() != "" ? parseInt($('.doing-step').val()) : 0) < ($('.next-undone').val() != "" ? parseInt($('.next-undone').val()) : 0)){
+            $('#lesson-plan-content section#detail-content .discussion').show();
+            $('#lesson-plan-content section#detail-content #continue-btn').removeClass("disabled");
+            $('#lesson-plan-content #detail-content .forum').show();
+            $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+            $
+        }
 
     });
 

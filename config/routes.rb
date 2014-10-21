@@ -14,12 +14,10 @@ Coursemology::Application.routes.draw do
   get "contact_us" => "static_pages#contact_us"
   get "help" => "static_pages#help"
 
-  get "ivle" => "static_pages#ivle"
-  get "get_profile" => "static_pages#get_profile"
-
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks",
                                        :registrations => "registrations",
                                        :sessions => "sessions"}
+
 
   get "users/settings" => "users#edit"
   put "users/update" => "users#update"

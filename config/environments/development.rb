@@ -58,4 +58,8 @@ Coursemology::Application.configure do
           :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
       }
   }
+
+  config.middleware.use OmniAuth::Builder do
+    provider :ivle, api_key: "mHy1mEcwwWvlHYqc9bNdO"
+  end
 end

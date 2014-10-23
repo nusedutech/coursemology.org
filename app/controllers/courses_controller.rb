@@ -93,6 +93,10 @@ class CoursesController < ApplicationController
   end
 
   def new
+    unless session["ivle_login_data"].nil?
+      @ivle_token = session["ivle_login_data"].credentials.token
+      @ivle_api = Rails.application.config.ivle_api_key
+    end
     respond_to do |format|
       format.html
     end

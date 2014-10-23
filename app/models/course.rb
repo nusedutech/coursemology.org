@@ -9,6 +9,7 @@ class Course < ActiveRecord::Base
   attr_accessible :course_navbar_preferences_attributes,
                   :missions_attributes,
                   :trainings_attributes
+  attr_accessible :module_id
 
   belongs_to :creator, class_name: "User"
 

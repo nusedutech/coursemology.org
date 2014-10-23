@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141016051716) do
+ActiveRecord::Schema.define(:version => 20141023025829) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -485,6 +485,7 @@ ActiveRecord::Schema.define(:version => 20141016051716) do
     t.datetime "start_at"
     t.datetime "end_at"
     t.boolean  "is_pending_deletion", :default => false
+    t.string   "module_id"
   end
 
   add_index "courses", ["creator_id"], :name => "index_courses_on_creator_id"

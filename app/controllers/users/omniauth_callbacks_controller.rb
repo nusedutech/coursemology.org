@@ -34,7 +34,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     else
       @user = User.find_for_ivle_oauth(request.env["omniauth.auth"], current_user)
       if @user.persisted?
-        session["devise.ivle_data"] = request.env["omniauth.auth"]
+        session["ivle_login_data"] = request.env["omniauth.auth"]
         sign_in_and_redirect @user, :event => :authentication #this will throw if @user is not activated
         set_flash_message(:notice, :success, :kind => "Ivle") if is_navigational_format?
       else

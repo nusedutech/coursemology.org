@@ -62,4 +62,7 @@ Coursemology::Application.configure do
   config.middleware.use OmniAuth::Builder do
     provider :ivle, api_key: "mHy1mEcwwWvlHYqc9bNdO"
   end
+  config.ivle_api_key = "mHy1mEcwwWvlHYqc9bNdO"
+
+
 end

@@ -2,14 +2,6 @@
   <h1>Import Students</h1>
 </div>
 
-<div id="import-student-group" style="margin-top: 20px;">
-  <p>Choose Module: </p>
-  <select id="module-list" name="import_ivle_student[module]">
-    <option value="-1">Choose Module...</option>
-  </select>
-
-</div>
-
 <%= form_tag course_import_ivle_student_path(@course), :method => 'post', class: "course_import_student" do %>
     <table id="table-import-student" class="table assignments missions-list-table ver-ali-top">
       <thead>
@@ -32,53 +24,32 @@
 
 <% end %>
 
+<% if @ivle_token %>
+    <input type="hidden" id="ivle_token" value="<%= @ivle_token %>" />
+    <input type="hidden" id="ivle_api" value="<%= @ivle_api %>" />
+    <input type="hidden" id="mapping_module" value="<%= @mapping_module %>" />
+<% end%>
+
 <script>
-
-    function get_data_ivle(){
-        var key = "mHy1mEcwwWvlHYqc9bNdO", token = "0AEF67B3087104AD3EC6B505D3DA61BB140A6B2D944082A73DFDE2A1B200786149C406D1BE7B6D37E70DA9CF363910B55EA12C0C67D418D36074AB36F740475F64989431BC7533A8DB1482D2E184DE966933F19FF6F8C876D6DA0EFB7AF78552E9BD8017BFB74BF3DDD07181BA5B04C7DC3BCED0F4CA50E066DF2353A4454E05D2CA113863570F9F6F67689E180096AD74057B3FE5DC29FA31CC8BF7E5C5626A51520888A4802C5D6F6AA2E5B7763FE63BB037235269506B6B80C61F165E270093C61A9B28C26882AA9236FFBE3839B0", user = ivle.User(key, token);
-        // you must init the user
-        user.init().done(function() {});
-
-        var modules = [];
-        user.modules().success(function(mods) {
-            modules = mods.Results; // mods = Module[...]
-            $.each(modules, function(){
-                $('#module-list').append("<option value='" + this.ID + "'>" + this.CourseName + "</option>");
-            });
-
-        });
-        return user;
-    }
-
-    $('.import-student-select-all').change(function(){
-        if(this.checked){
-            $('.import-student-checkbox').prop('checked', true);
-        }else{
-            $('.import-student-checkbox').prop('checked', false);
-        }
-
-
-    });
-
     $(document).ready(function(){
-        var user = get_data_ivle();
-        $('#module-list').change(function() {
-            var id = this.value;
-            if(id != "-1") {
-                user.get("Class_Roster", {CourseID: id}).success(function (data) {
-                    var anns = ivle.filterResult(data); //
-                    if (data.Results.length > 0) {
-                        $('#table-import-student tbody').html("");
-                        $.each(data.Results, function (index, value) {
-                            $('#table-import-student tbody').append("<tr><td>" + value.UserID + "</td><td>" + value.Name + "</td><td>" + value.Email + "</td><td><input type='checkbox' class='import-student-checkbox' value='" + value.UserID + "' name='import_ivle_student[chose][]' />"
-                                    + "<input type='hidden' name='import_ivle_student[name][" + value.UserID + "]' value='" + value.Name + "'>"
-                                    + "<input type='hidden' name='import_ivle_student[email][" + value.UserID + "]' value='" + value.Email + "'>"
-                                    + "</td></tr>");
-
-                        });
-                    }
-                });
-            }
-        });
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            // you must init the user
+            user.init().done(function () {});
+            var id = $("#mapping_module").val();
+            user.get("Class_Roster", {CourseID: id}).success(function (data) {
+                var anns = ivle.filterResult(data); //
+                if (data.Results.length > 0) {
+                    $('#table-import-student tbody').html("");
+                    $.each(data.Results, function (index, value) {
+                        $('#table-import-student tbody').append("<tr><td>" + value.UserID + "</td><td>" + value.Name + "</td><td>" + value.Email + "</td><td><input type='checkbox' class='import-student-checkbox' value='" + value.UserID + "' name='import_ivle_student[chose][]' />"
+                                + "<input type='hidden' name='import_ivle_student[name][" + value.UserID + "]' value='" + value.Name + "'>"
+                                + "<input type='hidden' name='import_ivle_student[email][" + value.UserID + "]' value='" + value.Email + "'>"
+                                + "</td></tr>");
+                    });
+                }
+            });
+        }
     });
+
 </script>

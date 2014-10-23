@@ -53,26 +53,6 @@
                     $('#course_module_id').append("<option value='" + this.ID + "'>" + this.CourseCode + " - " + this.CourseName + "</option>");
                 });
             });
-            /*
-            $('#module-list').change(function() {
-                var id = this.value;
-                if(id != "") {
-                    user.get("Class_Roster", {CourseID: id}).success(function (data) {
-                        var anns = ivle.filterResult(data); //
-                        if (data.Results.length > 0) {
-                            $('#table-import-student tbody').html("");
-                            $.each(data.Results, function (index, value) {
-                                $('#table-import-student tbody').append("<tr><td>" + value.UserID + "</td><td>" + value.Name + "</td><td>" + value.Email + "</td><td><input type='checkbox' class='import-student-checkbox' value='" + value.UserID + "' name='import_ivle_student[chose][]' />"
-                                        + "<input type='hidden' name='import_ivle_student[name][" + value.UserID + "]' value='" + value.Name + "'>"
-                                        + "<input type='hidden' name='import_ivle_student[email][" + value.UserID + "]' value='" + value.Email + "'>"
-                                        + "</td></tr>");
-
-                            });
-                        }
-                    });
-                }
-            });*/
         }
-
     });
 </script>

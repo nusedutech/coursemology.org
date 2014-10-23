@@ -85,6 +85,8 @@ class Assessment::Question < ActiveRecord::Base
                 taggable = mcq_ques.question.taggable_tags.new
                 taggable.tag = tag_element
                 obj_list << taggable
+              else
+                error_sms << "tag #{tag} not exist,"
               end
             end
           end

@@ -2,9 +2,12 @@
 <% if @summary[:type] == 'training' %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_training_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_training_path(@course, a) } %>
-<% else %>
+<% elsif @summary[:type] == 'mission'  %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_mission_path(@course, a) } %>
+<% else #if @summary[:type] == 'policy_mission'  %>
+    <% ast_edit_path = lambda {|a| edit_course_assessment_policy_mission_path(@course, a)} %>
+    <% ast_path = lambda {|a| course_assessment_policy_mission_path(@course, a) } %>
 <% end %>
 
 <%- display_name = @course.customized_title(@summary[:type]).singularize -%>
@@ -83,6 +86,14 @@
                     :class => 'btn btn-primary' %>
     <% end %>
    -->
+<% end %>
+
+<% if can? :manage, @assessment &&  @summary[:type] == 'policy_mission' %>
+	<% if @summary[:specific].progression_policy.isForwardPolicy? %>
+		<% forward_policy = @summary[:specific].progression_policy.getForwardPolicy %>
+		<%= render partial: "assessment/#{@summary[:type].pluralize}/forwardpolicy_details", locals: {fwd: forward_policy} %>
+		<hr>
+	<% end %>
 <% end %>
 
 <% if can? :view_detail, @assessment %>

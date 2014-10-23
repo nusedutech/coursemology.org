@@ -749,3 +749,40 @@ if ProgrammingLanguage.count == 1
 
 
 end
+
+if NavbarPreferableItem.count == 14
+  NavbarPreferableItem.create! item:  "policy missions",
+                               navbar_link_type_id:  1,
+                               name: "Policy Missions",
+                               is_displayed: true,
+                               is_enabled: true,
+                               description: "course policy mission",
+                               pos: 15
+end
+
+if PreferableItem.count == 64
+	PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Time",
+                         name:          "time_format",
+                         default_value: "%d-%m-%Y",
+                         description:   "Policy Mission time display format",
+                         default_display: true
+end
+
+if PreferableItem.count == 65
+	PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Table",
+                         name:          "paging",
+                         default_value: "10",
+                         description:   "Number of rows to display in policy mission table",
+                         default_display: true
+end
+
+if PreferableItem.count == 66
+	PreferableItem.create! item:            "Paging",
+                         item_type:       "Policy_Missions",
+                         name:            "Policy Missions",
+                         default_value:   "50",
+                         description:     "Number of policy missions to display per page",
+                         default_display: true
+end

@@ -24,6 +24,8 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     @policy_mission.close_at = DateTime.now.end_of_day + 1  # 1 day from now
     @policy_mission.course_id = @course.id
 
+		@tags = @course.tags
+
 		respond_to do |format|
 			format.html
 		end
@@ -35,13 +37,32 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     @policy_mission.creator = current_user
     @policy_mission.course_id = @course.id
 
+    forward_policy = Assessment::ForwardPolicy.new
+    forward_policy.overall_wrong_threshold = 0
+
+		invalidSaves = true
     respond_to do |format|
       if @policy_mission.save
+				forward_policy.policy_mission_id = @policy_mission.id
+				if forward_policy.save
+					params[:forward][:tag_id].each_with_index do |tag_id, index|
+						forward_policy_level = Assessment::ForwardPolicyLevel.new
+						forward_policy_level.tag_id = tag_id
+						forward_policy_level.progression_threshold = params[:forward][:value][index]
+						forward_policy_level.order = index
+						forward_policy_level.forward_policy_id = forward_policy.id
+						forward_policy_level.save
+					end
+					invalidSaves = false
+				end
         @policy_mission.create_local_file
-        format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
-                                  notice: "The policy mission #{@policy_mission.title} has been created." }
-      else
+			end
+
+      if invalidSaves
         format.html { render action: "new" }
+			else
+				format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
+                                  notice: "The policy mission #{@policy_mission.title} has been created." }
       end
     end
   end

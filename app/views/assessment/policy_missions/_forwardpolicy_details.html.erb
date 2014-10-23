@@ -1,0 +1,15 @@
+<h2>Forward Policy</h2>
+<table class="table">
+	<tr>
+		<th>Order</th>
+		<th>Tag Name</th>
+		<th>Progression Amount</th>
+	</tr>
+	<% fwd.forward_policy_levels.each_with_index do |level, index| %>
+		<tr>
+			<td><%= level.order %></td>
+			<td><%= Tag.find(level.tag_id).name %></td>
+			<td><%= level.progression_threshold %></td>
+		</tr>
+	<% end %>
+</table>

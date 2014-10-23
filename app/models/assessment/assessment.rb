@@ -28,6 +28,7 @@ class Assessment < ActiveRecord::Base
   scope :future, -> { where("open_at > ? ", Time.now) }
   scope :published, -> { where(published: true) }
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") }
+	scope :policy_mission, -> { where(as_assessment_type: "Assessment::PolicyMission") }
   scope :training, -> { where(as_assessment_type: "Assessment::Training") }
 
   belongs_to  :tab
@@ -124,6 +125,10 @@ class Assessment < ActiveRecord::Base
   def is_training?
     as_assessment_type == Assessment::Training.name
   end
+
+	def is_policy_mission?
+		as_assessment_type == Assessment::PolicyMission.name
+	end
 
   def single_question?
     questions.count == 1

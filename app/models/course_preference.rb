@@ -25,6 +25,10 @@ class CoursePreference < ActiveRecord::Base
       item('Training')
     end
 
+		def policy_mission
+      item('Policy Mission')
+    end
+
     def column
       item_type('Column')
     end

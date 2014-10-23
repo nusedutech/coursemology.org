@@ -10,6 +10,7 @@ class TagsController < ApplicationController
 
   def create
     expire_fragment("course/#{@course.id}/tags")
+		@tag.course_id = @course.id
     respond_to do |format|
       if @tag.save
         format.html { redirect_to course_tags_path(@course),

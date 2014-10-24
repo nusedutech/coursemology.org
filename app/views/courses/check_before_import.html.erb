@@ -1,13 +1,15 @@
 <h3>Check for Importing Student Groups</h3>
-<%= form_tag course_import_student_groups_path(@course), :method => 'get', class: "course_import_student_groups" do %>
+<%= form_tag course_import_student_groups_path(@course), :method => 'post', class: "course_import_student_groups" do %>
     <table class="table assignments missions-list-table ver-ali-top">
       <thead>
       <tr>
         <th width="10%">Id</th>
         <th width="20%">Name</th>
         <th width="20%">Email</th>
-        <th width="15%">Group</th>
-        <th width="35%">Status</th>
+        <th width="5%">Group</th>
+        <th width="10%">From Milestone</th>
+        <th width="10%">To Milestone</th>
+        <th width="25%">Status</th>
       </tr>
       </thead>
 
@@ -18,6 +20,8 @@
             <td><%= q[:name]%><input type="hidden" name="students[name][]" value="<%= q[:name]%>"></td></td>
             <td><%= q[:email]%><input type="hidden" name="students[email][]" value="<%= q[:email]%>"></td></td>
             <td><%= q[:group]%><input type="hidden" name="students[group][]" value="<%= q[:group]%>"></td></td>
+            <td><%= q[:from_milestone]%><input type="hidden" name="students[from_milestone][]" value="<%= q[:from_milestone]%>"></td></td>
+            <td><%= q[:to_milestone]%><input type="hidden" name="students[to_milestone][]" value="<%= q[:to_milestone]%>"></td></td>
             <td><%= q[:status]%><input type="hidden" name="students[status][]" value="<%= q[:status]%>"></td></td>
           </tr>
       <% end %>

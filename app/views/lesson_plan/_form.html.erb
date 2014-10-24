@@ -122,12 +122,17 @@
 </tr>
 </script>
 
+<% if @ivle_token %>
+    <input type="hidden" id="ivle_token" value="<%= @ivle_token %>" />
+    <input type="hidden" id="ivle_api" value="<%= @ivle_api %>" />
+    <input type="hidden" id="mapping_module" value="<%= @mapping_module %>" />
+<% end%>
 <script>
 
     $( document ).ready(function() {
         $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
         $(".btn.btn-navbar.collapsed").click(function(){
-            alert("as");
+            //alert("as");
         });
 
         $('#lesson_plan_entry_entry_type').change(function(){
@@ -142,20 +147,19 @@
     });
 
     function get_data_ivle(){
-        var key = "mHy1mEcwwWvlHYqc9bNdO", token = "0AEF67B3087104AD3EC6B505D3DA61BB140A6B2D944082A73DFDE2A1B200786149C406D1BE7B6D37E70DA9CF363910B55EA12C0C67D418D36074AB36F740475F64989431BC7533A8DB1482D2E184DE966933F19FF6F8C876D6DA0EFB7AF78552E9BD8017BFB74BF3DDD07181BA5B04C7DC3BCED0F4CA50E066DF2353A4454E05D2CA113863570F9F6F67689E180096AD74057B3FE5DC29FA31CC8BF7E5C5626A51520888A4802C5D6F6AA2E5B7763FE63BB037235269506B6B80C61F165E270093C61A9B28C26882AA9236FFBE3839B0", user = ivle.User(key, token);
-        // you must init the user
-        user.init().done(function() {});
-
-        user.get("Multimedia", {CourseID: "61e76782-0ca8-449d-aa48-d20e93a1358a", TitleOnly: false})
-                .success(function (data) {
-                    $.each(data.Results, function( ind, val ) {
-                        //console.log(val.Title);
-                        $.each(val.Files, function( inf, fi ) {
-                            //console.log(fi.FileDescription);
-                            $('#link_list').append('<option value="'+fi.FileName+'">IS3102 - ' + val.Title + ' - ' + fi.FileTitle+'</option>');
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            user.init().done(function () {});
+            var id = $("#mapping_module").val();
+            user.get("Multimedia", {CourseID: id, TitleOnly: false})
+                    .success(function (data) {
+                        $.each(data.Results, function (ind, val) {
+                            $.each(val.Files, function (inf, fi) {
+                                $('#link_list').append('<option value="' + fi.FileName + '">IS3102 - ' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                            });
                         });
                     });
-                });
+        }
     }
 
     $(document).ready(function(){

@@ -258,13 +258,15 @@ class CoursesController < ApplicationController
   def download_import_template
     @students = @course.user_courses.student.where(is_phantom: false).order('lower(name) asc')
     file = Tempfile.new('import-student-group-template')
-    file.puts "id,name,email,group,remark\n"
+    file.puts "id,name,email,group,from_milestone,to_milestone,remark\n"
 
     @students.each do |student|
       file.puts student.user.student_id + "," +
                     student.name.gsub(",", " ") + "," +
                     student.user.email + "," +
                     (TutorialGroup.where(:std_course_id => student.id).first ? TutorialGroup.where(:std_course_id => student.id).first.group.name : "") + "," +
+                    "Week 1" + "," +
+                    "Week 3" + "," +
                     "" + "\n"
     end
 

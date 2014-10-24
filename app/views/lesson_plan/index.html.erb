@@ -25,6 +25,9 @@
               <li id="lesson-plan-open-milestone-generator" data-toggle="modal" data-target="#lesson-plan-multi-milestone" >
                 <a href="#">Generate Milestones</a>
               </li>
+              <li>
+                <a class="academic_milestones_generator" href="#">Generate NUS Academic Milestones</a>
+              </li>
             </ul>
           </div>
         <% end %>
@@ -172,16 +175,17 @@
   </div>
 <% end %>
 
+<% if @ivle_token %>
+    <input type="hidden" id="ivle_token" value="<%= @ivle_token %>" />
+    <input type="hidden" id="ivle_api" value="<%= @ivle_api %>" />
+    <input type="hidden" id="mapping_module" value="<%= @mapping_module %>" />
+<% end%>
 <script>
-
-    $( document ).ready(function() {
-
-        get_timetable_ivle();
+    $(document).ready(function() {
         $('div.span-content').addClass('border-gray');
         if($('div#lesson-plan-content').length ) {
             $('div.content').addClass('stretch-content');
         }
-
         //slide and show hide menubar
         $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
         $(".btn.btn-navbar.collapsed").click(function () {
@@ -302,38 +306,92 @@
             });
         }
 
-        if($('#active-entity')){
+        if($('#active-entity').val()){
             $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
             $("a#"+$('#active-entity').val()).click();
             $('section#detail-content .forum').show();
             $('section#detail-content a.a_discussion').text('Hide Discussion');
         }
 
-
-
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            // you must init the user
+            user.init().done(function () {});
+            var id = $("#mapping_module").val();
+            user.get("Timetable_Module", {CourseID: id})
+                    .success(function (data) {
+                        $.each(data.Results, function( ind, val ) {
+                            if(val.LessonType=="TUTORIAL") {
+                                $('div#import-ivle-event table tbody').append($("<tr><td>" + val.ClassNo + "</td><td>" + val.LessonType + "</td><td>" + val.WeekText + "</td><td>" + val.DayText + "</td><td>" + val.StartTime + "</td><td>" + val.EndTime + "</td><td>" + val.Venue
+                                        + "</td><td><input type='checkbox' value='" + val.ClassNo + "' name='ivle_event[choose][]' />"
+                                        + "<input type='hidden' name='ivle_event[lesson_type][" + val.ClassNo + "]' value='" + val.LessonType + "'>"
+                                        + "<input type='hidden' name='ivle_event[week_text][" + val.ClassNo + "]' value='" + val.WeekText + "'>"
+                                        + "<input type='hidden' name='ivle_event[day_code][" + val.ClassNo + "]' value='" + val.DayCode + "'>"
+                                        + "<input type='hidden' name='ivle_event[start_time][" + val.ClassNo + "]' value='" + val.StartTime + "'>"
+                                        + "<input type='hidden' name='ivle_event[end_time][" + val.ClassNo + "]' value='" + val.EndTime + "'>"
+                                        + "<input type='hidden' name='ivle_event[venue][" + val.ClassNo + "]' value='" + val.Venue + "'>"
+                                        + "</td></tr>"));
+                            }
+                        });
+                    });
+        }
     });
 
-    function get_timetable_ivle(){
-        var key1 = "mHy1mEcwwWvlHYqc9bNdO", token1 = "0AEF67B3087104AD3EC6B505D3DA61BB140A6B2D944082A73DFDE2A1B200786149C406D1BE7B6D37E70DA9CF363910B55EA12C0C67D418D36074AB36F740475F64989431BC7533A8DB1482D2E184DE966933F19FF6F8C876D6DA0EFB7AF78552E9BD8017BFB74BF3DDD07181BA5B04C7DC3BCED0F4CA50E066DF2353A4454E05D2CA113863570F9F6F67689E180096AD74057B3FE5DC29FA31CC8BF7E5C5626A51520888A4802C5D6F6AA2E5B7763FE63BB037235269506B6B80C61F165E270093C61A9B28C26882AA9236FFBE3839B0", user1 = ivle.User(key1, token1);
-        // you must init the user
-        user1.init().done(function() {});
+    $('a.academic_milestones_generator').click(function() {
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+            var milestones = [];
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            user.init().done(function () {
+            });
+            var current_year = "", current_semester = "";
+            user.get("AcadYrSem_Current", {})
+                    .success(function (data) {
+                        current_year = data.Results[0].AcadYear;
+                        current_semester = data.Results[0].AcadSemester;
 
-        user1.get("Timetable_Module", {CourseID: "6ba4813c-b858-41ce-9ba8-082fe06c92a0"})
-                .success(function (data) {
-                    $.each(data.Results, function( ind, val ) {
-                        if(val.LessonType=="TUTORIAL") {
-                            $('div#import-ivle-event table tbody').append($("<tr><td>" + val.ClassNo + "</td><td>" + val.LessonType + "</td><td>" + val.WeekText + "</td><td>" + val.DayText + "</td><td>" + val.StartTime + "</td><td>" + val.EndTime + "</td><td>" + val.Venue
-                                    + "</td><td><input type='checkbox' value='" + val.ClassNo + "' name='ivle_event[choose][]' />"
-                                    + "<input type='hidden' name='ivle_event[lesson_type][" + val.ClassNo + "]' value='" + val.LessonType + "'>"
-                                    + "<input type='hidden' name='ivle_event[week_text][" + val.ClassNo + "]' value='" + val.WeekText + "'>"
-                                    + "<input type='hidden' name='ivle_event[day_code][" + val.ClassNo + "]' value='" + val.DayCode + "'>"
-                                    + "<input type='hidden' name='ivle_event[start_time][" + val.ClassNo + "]' value='" + val.StartTime + "'>"
-                                    + "<input type='hidden' name='ivle_event[end_time][" + val.ClassNo + "]' value='" + val.EndTime + "'>"
-                                    + "<input type='hidden' name='ivle_event[venue][" + val.ClassNo + "]' value='" + val.Venue + "'>"
-                                    + "</td></tr>"));
-                        }
+                        user.get("MyOrganizer_AcadSemesterInfo", {AcadYear: current_year, Semester: current_semester})
+                                .success(function (data) {
+                                    $.each(data.Results, function (ind, val) {
+                                        if (val.TypeName != "0" && val.TypeName != "Vacation") {
+                                            var date_start = moment(val.WeekTypeStartDate_js, DATE_FORMAT);
+                                            var date_end = moment(val.WeekTypeEndDate_js, DATE_FORMAT);
+                                            milestones.push({
+                                                title: $.isNumeric(val.TypeName) ? ( "Week" + ' ' + val.TypeName) : (val.TypeName + ' ' + "Week"),
+                                                start_at: date_start.clone(),
+                                                end_at: date_end.clone()
+                                            });
+                                        }
+                                    });
+                                    var upload_milestones = milestones.map(function (milestone) {
+                                        return {
+                                            title: milestone.title,
+                                            description: '',
+                                            start_at: milestone.start_at.format(DATE_FORMAT),
+                                            end_at: milestone.end_at.format(DATE_FORMAT)
+                                        };
+                                    });
+
+                                    var promise = $.ajax({
+                                        type: 'POST',
+                                        url: 'lesson_plan/milestones.json',
+                                        data: {
+                                            lesson_plan_milestone: upload_milestones
+                                        },
+                                        dataType: 'json'
+                                    });
+
+                                    // Wait for all the requests to come back before closing the dialog.
+                                    promise.then(function () {
+                                        location.reload();
+                                    }, function () {
+                                        alert('An error occurred while processing your request.');
+                                        location.reload();
+                                    });
+                                    return false;
+                                });
                     });
-                });
-    }
+        }
+    });
 
 </script>

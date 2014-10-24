@@ -8,6 +8,11 @@ class LessonPlanEntriesController < ApplicationController
   def index
     @milestones = get_milestones_for_course(@course)
     @current_id = params["eid"].nil? ? '' : params["eid"]
+    if (session["ivle_login_data"] && @course.module_id)
+      @ivle_token = session["ivle_login_data"].credentials.token
+      @ivle_api = Rails.application.config.ivle_api_key
+      @mapping_module = @course.module_id
+    end
   end
 
   def import_ivle_event
@@ -23,25 +28,28 @@ class LessonPlanEntriesController < ApplicationController
           end
 
           #save lesson_plan_entities
-          start_day = @course.lesson_plan_milestones.first.start_at.to_date
-          end_day = @course.lesson_plan_milestones.last.end_at.to_date
-          my_days = [params["ivle_event"]["day_code"][e]] # day of the week in 0-6. Sunday is day-of-week 0; Saturday is day-of-week 6.
-          result = (start_day..end_day).to_a.select {|k| my_days.include?(k.wday.to_s)}
-          result.each_with_index do |d, index|
-            entry = LessonPlanEntry.new
-            entry.course = @course
-            entry.creator = current_user
-            entry.group = group
-            entry.title = params["ivle_event"]["lesson_type"][e].downcase.capitalize + ' - ' + 'Group ' + e.to_s
-            lesson_type = params["ivle_event"]["lesson_type"][e].downcase
-            entry.entry_type = lesson_type == 'lecture' ? 0 : (lesson_type == 'recitation' ? 1 : (lesson_type == 'tutorial' ? 2 : 4))
-            start_time = params["ivle_event"]["start_time"][e]
-            end_time = params["ivle_event"]["end_time"][e]
-            entry.start_at = DateTime.parse( "#{d} #{start_time[0..start_time.length-3]}:#{start_time[start_time.length-2..start_time.length-1]} +0800" )
-            entry.end_at = DateTime.parse( "#{d} #{end_time[0..end_time.length-3]}:#{end_time[end_time.length-2..end_time.length-1]} +0800" )
-            entry.location = params["ivle_event"]["venue"][e]
-            entry.description = ''
-            entry.save
+          milestones = @course.lesson_plan_milestones.where("title <> ? and title <> ? and title <> ?","Recess Week", "Reading Week", "Examination Week")
+          milestones.each do |m|
+            start_day = m.start_at.to_date
+            end_day = m.end_at.to_date
+            my_days = [params["ivle_event"]["day_code"][e]] # day of the week in 0-6. Sunday is day-of-week 0; Saturday is day-of-week 6.
+            result = (start_day..end_day).to_a.select {|k| my_days.include?(k.wday.to_s)}
+            result.each_with_index do |d, index|
+              entry = LessonPlanEntry.new
+              entry.course = @course
+              entry.creator = current_user
+              entry.group = group
+              entry.title = params["ivle_event"]["lesson_type"][e].downcase.capitalize + ' - ' + 'Group ' + e.to_s
+              lesson_type = params["ivle_event"]["lesson_type"][e].downcase
+              entry.entry_type = lesson_type == 'lecture' ? 0 : (lesson_type == 'recitation' ? 1 : (lesson_type == 'tutorial' ? 2 : 4))
+              start_time = params["ivle_event"]["start_time"][e]
+              end_time = params["ivle_event"]["end_time"][e]
+              entry.start_at = DateTime.parse( "#{d} #{start_time[0..start_time.length-3]}:#{start_time[start_time.length-2..start_time.length-1]} +0800" )
+              entry.end_at = DateTime.parse( "#{d} #{end_time[0..end_time.length-3]}:#{end_time[end_time.length-2..end_time.length-1]} +0800" )
+              entry.location = params["ivle_event"]["venue"][e]
+              entry.description = ''
+              entry.save
+            end
           end
         else
 
@@ -176,9 +184,10 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def new
-      session[:ivle_token] = "E6E8F6C8B6732A2EFD8487B1ABED6456077EC2D710A350CB87B1FF90684182D00F56BA51A1D4D07A6A80699ED61EA20F90D5A938C8DBA85CE67B04D74F0191C26DDD34C6C8D1C6D64D28F95191BCF9951EDA6927A2C3459F38C7ACEB3E18C403B028FC88A4D0C5215E02C42CEDBAF282ACDA7ACCD24D13978E14C8FE6C5528566E1C0D4075529C76E6CF578C7C369ABB03CF00967661062F82B6DBF69D70370C07208E9F2D0108D9445501FD2F1F55F282AB93E372AA2FF4295F5D33AE9F9A984AFB6A20F3529AB76FD8E975E54ACD23"
-    if !session[:ivle_token].nil?
-      @ivle_token = session[:ivle_token]
+    if (session["ivle_login_data"] && @course.module_id)
+      @ivle_token = session["ivle_login_data"].credentials.token
+      @ivle_api = Rails.application.config.ivle_api_key
+      @mapping_module = @course.module_id
     end
 
     @tags_list = {:origin => @lesson_plan_entry.topicconcepts.concepts.select(:name).map { |e| e.name }, :all => @course.topicconcepts.concepts.select(:name).map { |e| e.name }}

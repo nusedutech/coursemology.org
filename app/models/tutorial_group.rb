@@ -1,5 +1,5 @@
 class TutorialGroup < ActiveRecord::Base
-  attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id
+  attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id, :from_milestone_id, :to_milestone_id
 
   belongs_to :course
   belongs_to :std_course, class_name: "UserCourse"
@@ -58,7 +58,7 @@ class TutorialGroup < ActiveRecord::Base
       elsif row["group"].nil?
         error = error + "group is empty,"
       end
-      obj_list << {:id => row["id"], :name => row["name"], :email => row["email"], :group => row["group"], :status => (error!="" ? error : "accepted")}
+      obj_list << {:id => row["id"], :name => row["name"], :email => row["email"], :group => row["group"], :from_milestone => row["from_milestone"], :to_milestone => row["to_milestone"], :status => (error!="" ? error : "accepted")}
 
     end
 
@@ -77,6 +77,20 @@ class TutorialGroup < ActiveRecord::Base
           sg.course = course
           sg.save
         end
+
+        unless students["from_milestone"][index].empty?
+          f_milestone = course.lesson_plan_milestones.where(:title => students["from_milestone"][index]).first
+          if f_milestone
+            tg.from_milestone_id = f_milestone.id
+            unless students["to_milestone"][index].empty?
+              t_milestone = course.lesson_plan_milestones.where(:title => students["to_milestone"][index]).first
+              if (t_milestone && t_milestone.start_at >  f_milestone.end_at)
+                tg.to_milestone_id = t_milestone.id
+              end
+            end
+          end
+        end
+
         #tg.tut_course_id = 0 #have to set tut_course_id because validates :tut_course_id, presence: true (10/this file)
         tg.group_id = sg.id
         tg.save

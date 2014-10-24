@@ -72,20 +72,24 @@ class LessonPlanMilestone < ActiveRecord::Base
     before_cutoff = if cutoff_time then " AND start_at < :cutoff" else "" end
     in_current_course = " AND course_id = :course_id"
 
-
-
-
     actual_entries = LessonPlanEntry.where(start_after_us + before_cutoff + in_current_course,
       :start_at => start_date, :cutoff => cutoff_time, :course_id => self.course_id)
 
     #check for tutorial group, load for specific student lesson plan
     if user_course.is_student?
       student_tutorial_groups = user_course.tut_group_courses.order(:created_at).to_a
-      str_query = ''
-      if student_tutorial_groups.count > 0
-        for i in 0..student_tutorial_groups.count - 1
-          str_query << " or (entry_type = 2 and group_id is not null and group_id = #{student_tutorial_groups[i].group_id} and start_at >= '#{student_tutorial_groups[i].created_at}' #{ i < student_tutorial_groups.count - 1 ? " and end_at <= '#{ student_tutorial_groups[i+1].created_at}'" : ""})"
+      current_tutorial = nil
+      student_tutorial_groups.each do |tg|
+        if tg.from_milestone_id.nil?
+          current_tutorial = tg
+        elsif (self.start_at >= LessonPlanMilestone.find_by_id(tg.from_milestone_id).start_at && (tg.to_milestone_id.nil? || self.end_at <= LessonPlanMilestone.find_by_id(tg.to_milestone_id.nil? ? -1 : tg.to_milestone_id).end_at))
+          current_tutorial = tg
+          break
         end
+      end
+      str_query = ''
+      if current_tutorial
+        str_query = " or (entry_type = 2 and group_id is not null and group_id = #{current_tutorial.group_id})"
       end
       actual_entries = actual_entries.where("entry_type <> 2 or (entry_type = 2 and group_id is null)" + str_query)
     end

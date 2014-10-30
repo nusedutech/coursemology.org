@@ -751,7 +751,7 @@ if ProgrammingLanguage.count == 1
 end
 
 if NavbarPreferableItem.count == 14
-  NavbarPreferableItem.create! item:  "policy missions",
+  NavbarPreferableItem.create! item:  "policy_missions",
                                navbar_link_type_id:  1,
                                name: "Policy Missions",
                                is_displayed: true,
@@ -785,4 +785,51 @@ if PreferableItem.count == 66
                          default_value:   "50",
                          description:     "Number of policy missions to display per page",
                          default_display: true
+end
+
+if PreferableItem.count == 67
+
+  #Missions
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "title",
+                         default_value: "Policy Mission",
+                         description:   "Policy Mission title",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "tag",
+                         default_value: "Tag",
+                         description:   "Policy Mission tags" ,
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "exp",
+                         default_value: "Max Exp",
+                         description:   "Mission exp gainable",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "award",
+                         default_value: "Requirement for",
+                         description:   "Requirement for achievement",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "start",
+                         default_value: "Start Time",
+                         description:   "Mission start time",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "end",
+                         default_value: "End Time",
+                         description:   "Mission end time",
+                         default_display: true
+
 end

@@ -23,16 +23,35 @@
 		<hr/>
 		<div class = "multi-field-wrapper">
 			<div class = "sort-table multi-fields">
-				<div class = "sort-table-entry multi-field">
-					<i class="icon-move move-icon"></i>
-					<select class = "tag-name" name="forward[tag_id][]">
-						<%- @tags.each do |tag| -%>
-							<option value="<%= tag.id %>"><%= tag.name %></option>
-						<%- end -%>
-					</select>
-					<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="1">
-					<a class = "btn btn-danger pull-right" ><i class="icon-remove remove-field"></i></a>
-				</div>
+				<% if (defined?(@fwdPolicyLevels)).nil? or @fwdPolicyLevels.nil? %>
+					<div class = "sort-table-entry multi-field">
+						<i class="icon-move move-icon"></i>
+						<select class = "tag-name" name="forward[tag_id][]">
+							<%- @tags.each do |tag| -%>
+								<option value="<%= tag.id %>"><%= tag.name %></option>
+							<%- end -%>
+						</select>
+						<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="1">
+						<a class = "btn btn-danger pull-right" ><i class="icon-remove remove-field"></i></a>
+					</div>
+				<% else %>
+					<% @fwdPolicyLevels.each do |level| %>
+						<div class = "sort-table-entry multi-field">
+							<i class="icon-move move-icon"></i>
+							<select class = "tag-name" name="forward[tag_id][]">
+								<%- @tags.each do |tag| -%>
+									<option value="<%= tag.id %>" 
+									<% if tag.id == level.tag_id %>
+									selected="selected"
+									<% end %>
+									><%= tag.name %></option>
+								<%- end -%>
+							</select>
+							<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="<%= level.progression_threshold %>">
+							<a class = "btn btn-danger pull-right" ><i class="icon-remove remove-field"></i></a>
+						</div>
+					<% end %>
+				<% end %>
 			</div>
 			<hr/>
 			<a class="btn add-fields">Add new tag</a>

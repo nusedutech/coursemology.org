@@ -257,7 +257,7 @@ class ApplicationController < ActionController::Base
       when 'topicconcepts'
         url = main_app.course_topicconcepts_path(@course)
         icon = 'icon-star'
-			when 'policy missions'
+			when 'policy_missions'
         url = main_app.course_assessment_policy_missions_path(@course)
         icon = 'icon-fighter-jet'
     end

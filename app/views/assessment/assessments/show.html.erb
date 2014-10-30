@@ -5,7 +5,7 @@
 <% elsif @summary[:type] == 'mission'  %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_mission_path(@course, a) } %>
-<% else #if @summary[:type] == 'policy_mission'  %>
+<% else #if @summary[:type] == 'policy mission'  %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_policy_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_policy_mission_path(@course, a) } %>
 <% end %>
@@ -88,7 +88,7 @@
    -->
 <% end %>
 
-<% if can? :manage, @assessment &&  @summary[:type] == 'policy_mission' %>
+<% if (can? :manage, @assessment) && (@summary[:type] == 'policy_mission') %>
 	<% if @summary[:specific].progression_policy.isForwardPolicy? %>
 		<% forward_policy = @summary[:specific].progression_policy.getForwardPolicy %>
 		<%= render partial: "assessment/#{@summary[:type].pluralize}/forwardpolicy_details", locals: {fwd: forward_policy} %>

@@ -9,6 +9,10 @@ class Assessment::Submission < ActiveRecord::Base
   scope :training_submissions, -> {
     joins("left join assessments on assessment_submissions.assessment_id = assessments.id ").
         where("assessments.as_assessment_type = 'Assessment::Training'") }
+	
+	scope :policy_mission_submissions, -> {
+    joins("left join assessments on assessment_submissions.assessment_id = assessments.id ").
+        where("assessments.as_assessment_type = 'Assessment::PolicyMission'") }
 
   scope :graded, -> { where(status: 'graded') }
 
@@ -33,7 +37,8 @@ class Assessment::Submission < ActiveRecord::Base
   has_many :gradings, class_name: Assessment::Grading, dependent: :destroy
   has_one :comment_topic, as: :topic
 
-	has_many :progression_groups, class_name: "ProgressionGroup", dependent: :destroy
+	has_many :progression_groups, class_name: "Assessment::ProgressionGroup", dependent: :destroy
+	has_many :forward_groups, class_name: "Assessment::ForwardGroup", dependent: :destroy
 
   after_create :set_attempting
   after_save   :status_change_tasks, if: :status_changed?
@@ -137,7 +142,7 @@ class Assessment::Submission < ActiveRecord::Base
           when qn.is_a?(Assessment::CodingQuestion)
             ans_class = Assessment::CodingAnswer
           when qn.is_a?(Assessment::McqQuestion)
-            ans_class = Assessment::McqQuestion
+            ans_class = Assessment::McqAnswer
           else
             ans_class = Assessment::GeneralAnswer
         end

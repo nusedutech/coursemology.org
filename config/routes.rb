@@ -120,6 +120,17 @@ Coursemology::Application.routes.draw do
           get 'submit' => 'training_submissions#submit'
         end
       end
+
+			resources :assessment_submissions,
+                path:       :submissions,
+                as:         :submissions,
+                controller: :policy_mission_submissions,
+                except: [:create],
+                constraints: PolicyMissionConstraint.new do
+        member do
+          post 'edit' => 'policy_mission_submissions#edit'
+        end
+      end
     end
 
     resources :assessment_general_questions, path: :general_questions, controller: :general_questions , module: :assessment   

@@ -1,5 +1,5 @@
 <div class="missions">
-  <%- model_name = @summary[:module] -%>
+	<%- model_name = ( @summary[:module] == "Policy mission" ? "policy_mission" : @summary[:module] ) %>
   <%- title =  @course.customized_title(model_name).pluralize %>
   <div class="page-header">
     <h1><%=t '.title', :default => title %></h1>
@@ -14,6 +14,10 @@
       <%= render partial: "assessment/missions/navigation", locals: {title: title} %>
       <%- new_url = new_course_assessment_mission_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_mission_path(c, a) } %>
+      <%- asts_path = course_assessment_missions_path %>
+	<% else %>
+			<%- new_url = new_course_assessment_policy_mission_path(@course) %>
+			<%- ast_path = lambda { |c, a| course_assessment_policy_mission_path(c, a) } %>
       <%- asts_path = course_assessment_missions_path %>
   <% end %>
   <% to_display = @summary[:columns].keys %>
@@ -134,7 +138,7 @@
 
           <% if curr_user_course.id%>
               <td>
-                <div id="<%= ast.id %>"></div>
+								<div id="<%= ast.id %>"></div>
               </td>
           <% end %>
           <% if can? :view_detail, ast %>

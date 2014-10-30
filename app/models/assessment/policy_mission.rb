@@ -10,7 +10,10 @@ class Assessment::PolicyMission < ActiveRecord::Base
 	has_one :progression_policy, class_name: "Assessment::ProgressionPolicy",  dependent: :destroy
 
 	
-  #TODO: refactor
+	def full_title
+    "#{I18n.t('Assessment.Policy_Mission')} : #{self.title}"
+  end
+
   def self.reflect_on_association(association)
     super || self.parent.reflect_on_association(association)
   end

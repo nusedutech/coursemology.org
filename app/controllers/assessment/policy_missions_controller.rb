@@ -17,6 +17,11 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     end
   end
 	
+	def edit
+		@tags = @course.tags
+		@fwdPolicyLevels = @policy_mission.progression_policy.getForwardPolicy.getSortedPolicyLevels
+	end
+
 	def new
 		@policy_missions = @course.missions
     @policy_mission.exp = 200
@@ -71,10 +76,22 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     respond_to do |format|
       if !params[:assessment].nil? 
         update_questions params[:assessment][:question_assessments]
-      else
-        update_questions []
+      #else
+        #update_questions []
       end      
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
+				if @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
+					forward_policy = @policy_mission.progression_policy.getForwardPolicy
+					forward_policy.deleteAllPolicyLevels
+					params[:forward][:tag_id].each_with_index do |tag_id, index|
+						forward_policy_level = Assessment::ForwardPolicyLevel.new
+						forward_policy_level.tag_id = tag_id
+						forward_policy_level.progression_threshold = params[:forward][:value][index]
+						forward_policy_level.order = index
+						forward_policy_level.forward_policy_id = forward_policy.id
+						forward_policy_level.save
+					end
+				end
         format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
                                   notice: "The policy mission #{@policy_mission.title} has been updated."}
       else

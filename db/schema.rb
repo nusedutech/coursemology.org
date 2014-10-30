@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141012183154) do
+ActiveRecord::Schema.define(:version => 20141031004316) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -183,8 +183,9 @@ ActiveRecord::Schema.define(:version => 20141012183154) do
     t.integer  "correct_amount_left",     :default => -1
     t.integer  "wrong_amount_left",       :default => -1
     t.datetime "deleted_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
+    t.boolean  "is_consecutive",          :default => false
   end
 
   create_table "assessment_forward_policies", :force => true do |t|
@@ -201,9 +202,10 @@ ActiveRecord::Schema.define(:version => 20141012183154) do
     t.integer  "seconds_to_complete",   :default => -1
     t.integer  "tag_id"
     t.datetime "deleted_at"
-    t.datetime "created_at",                            :null => false
-    t.datetime "updated_at",                            :null => false
+    t.datetime "created_at",                               :null => false
+    t.datetime "updated_at",                               :null => false
     t.integer  "forward_policy_id"
+    t.boolean  "is_consecutive",        :default => false
   end
 
   add_index "assessment_forward_policy_levels", ["forward_policy_id"], :name => "index_assessment_forward_policy_levels_on_forward_policy_id"

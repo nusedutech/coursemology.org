@@ -12,7 +12,7 @@
         <li>
     <% end %>
     <a href='<%= course_group_path(@course) %>'>Manage Groups</a>
-  </li>
+    </li>
 	<% if tab==3 %>
 		<li class="active">
 	<% else %>
@@ -20,4 +20,11 @@
 	<% end %>
 		<a href='<%= course_staff_path(@course) %>'>Manage Staff</a>
 	</li>
+    <% if tab==4 %>
+        <li class="active">
+    <% else %>
+        <li>
+    <% end %>
+    <a href='<%= course_manage_student_group_path(@course) %>'>Manage Student-Group</a>
+    </li>
 </ul>

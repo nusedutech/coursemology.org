@@ -178,12 +178,14 @@
           </div>
       <% end %>
   <% if entry.resources.length > 0 %>
+      <% if (cannot? :manage, LessonPlanEntry) %> <div class="resource-hide" style="display: none"> <% end %>
       <h4>Instructional Resources</h4>
       <ul>
       <% entry.resources.each { |r| %>
         <li><%= link_to r.obj.title, url_for([@course, r.obj]) %></li>
       <% } %>
       </ul>
+      <% if (cannot? :manage, LessonPlanEntry) %> </div> <% end %>
   <% end %>
     </div>
     <div class="pull-right">

@@ -215,9 +215,10 @@
             var des  = $(this).find('input.entry_description').val();
             var loc  = $(this).find('input.entry_location').val();
             var dis = $(this).next('div.discussion').html();
+            var $resource = $(this).parent().parent().find('div.resource-hide ul');
             var entry_start_end = $(this).find('span.entry_start_end').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
-                show_lecture(title, type, des, loc, entry_start_end);
+                show_lecture(title, type, des, loc, entry_start_end, $resource);
             }else if(entry_type =='3'){
                 loc = loc.replace(".html", "/media/video.mp4");
                 show_video(title, type, des, loc);
@@ -229,25 +230,25 @@
         });
 
         //show entry lecture, recitation, tutorial
-        function show_lecture(title, type, des, loc, entry_start_end){
+        function show_lecture(title, type, des, loc, entry_start_end, $resource){
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";
             entry_form += "<div><p style=''>" + loc + "</p></div>";
             entry_form += "<div><h4>" + entry_start_end + "</h4></div>";
             $('section#detail-content').append(entry_form);
 
-            if(1==1){
+            if($resource.length){
                 $('section#detail-content').append($("<table class='material_list'></table>"));
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>cs5228_1a_intro.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_2_data.pdf'>cs5228_2_data.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_2_data.pdf'></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_3_classification_1.pdf'>cs5228_3_classification_1.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_3_classification_1.pdf'></td></tr>"));
+                $resource.children().each(function(){
+                    var parts = $(this).find('a').text().split('.');
+                    var ext = parts[parts.length - 1];
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+                });
 
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>cs5228_1a_intro.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
-                        $(this).parent().parent().next().find('a').gdocsViewer({width: 650, height: 450});
+                        $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});
                         $(this).text("Hide");
                     }else if ($(this).text()=="Show"){
                         $(this).parent().parent().next().show();

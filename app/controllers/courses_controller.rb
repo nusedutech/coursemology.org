@@ -1,6 +1,6 @@
 class CoursesController < ApplicationController
   load_and_authorize_resource
-  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students, :check_before_import, :import_ivle_student]
+  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students, :check_before_import, :import_ivle_student, :manage_student_group]
 
   def index
     @courses = Course.online_course
@@ -181,7 +181,7 @@ class CoursesController < ApplicationController
   def import_student_groups
     TutorialGroup.import(params[:students], current_user, @course)
     respond_to do |format|
-      format.html { redirect_to course_manage_students_path(@course),
+      format.html { redirect_to course_manage_student_group_path(@course),
                                 notice: "import successfully" }
     end
   end
@@ -282,5 +282,45 @@ class CoursesController < ApplicationController
     #          :type => "application/csv"
   end
 
+  def manage_student_group
+    authorize! :manage, UserCourse
+    if params[:phantom] && params[:phantom] == 'true'
+      @phantom = true
+    else
+      @phantom = false
+    end
 
+    @student_courses = @course.user_courses.student.where(is_phantom: @phantom).order('lower(name)')
+    @milestones = @course.lesson_plan_milestones.where("title <> ? and title <> ? and title <> ?","Recess Week", "Reading Week", "Examination Week").order('start_at')
+    @student_count = @student_courses.length
+
+    @std_paging = @course.paging_pref('ManageStudents')
+    if @std_paging.display?
+      @student_courses = Kaminari.paginate_array(@student_courses).page(params[:page]).per(@std_paging.prefer_value.to_i)
+    end
+  end
+
+  def edit_student_group
+    student = UserCourse.find_by_id(params[:std_course_id].to_i)
+    stu_tut_group = student.tut_group_courses.where(:milestone_id => params[:milestone_id].to_i).first
+    respond_to do |format|
+      if stu_tut_group
+        if params[:group_id].to_i != -1
+          stu_tut_group.group_id = params[:group_id].to_i
+          if stu_tut_group.save
+            format.json { render json: { status: 'OK' }}
+          end
+        else
+          stu_tut_group.destroy!
+          format.json { render json: { status: 'OK' }}
+        end
+      else
+        tg = @course.tutorial_groups.build
+        tg.std_course_id = params[:std_course_id].to_i
+        tg.milestone_id = params[:milestone_id].to_i
+        tg.group_id = params[:group_id].to_i
+        tg.save
+      end
+    end
+  end
 end

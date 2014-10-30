@@ -1,0 +1,82 @@
+<div class="page-header">
+  <h1>Manage Student-Group</h1>
+</div>
+
+<%= render partial: "courses/manage_user_tab", locals: { tab: 4 } %>
+
+<div style="width:93%">
+    <span  class="pull-right" style="font-size: 1.3em">
+      Student Count:  <strong style="font-size: 1.6em"><%= @student_count  %></strong>
+    </span>
+</div>
+
+<% if @phantom %>
+    <% url = course_manage_students_path + '?phantom=true' %>
+    <a href="<%= course_manage_students_path %>?phantom=false" class="btn">Show Real Students</a>
+<% else %>
+    <% url = course_manage_students_path + '?phantom=false' %>
+    <a href="<%= course_manage_students_path %>?phantom=true" class="btn">Show Only Phantom Students</a>
+<% end %>
+
+<div id="import-student-group" style="margin-top: 20px;">
+  <p>Import Student Groups (<%= link_to "Download Template",course_download_import_template_path(@course) %>) </p>
+  <%= render partial: "import_student_group", locals: {url: course_check_before_import_path(@course)}%>
+</div>
+
+<% if can? :manage, UserCourse %>
+    <% groups = @course.student_groups.map {|tac| [tac.name, tac.id] }.unshift(["_", -1]) %>
+    <table class="table" style="margin-top: 20px;">
+      <tr>
+        <th>ID</th>
+        <% @milestones.each do |m| %>
+            <th width="6%"><%= m.title %></th>
+        <% end %>
+
+      </tr>
+      <% @student_courses.each_with_index do |student_course| %>
+          <% student = student_course.user %>
+
+              <tr>
+                <td>
+                  <label><%= student.student_id %></label>
+                </td>
+                <% @milestones.each do |m| %>
+                    <td>
+                    <%group = student_course.tut_group_courses.where(:milestone_id => m.id).order("created_at DESC").first %>
+                    <% if group %>
+                        <%= select "group","", groups,{:selected => "#{group.group_id}"} , {:class => "select-student-group",:style => 'width: 45px'} %>
+                    <% else %>
+                        <%= select "group","", groups, {:selected => "#{-1}"},{:class => "select-student-group", :style => 'width: 45px'} %>
+                    <% end %>
+                    <input type="hidden" class="student_course_id" value="<%= student_course.id%>" />
+                    <input type="hidden" class="milestone_id" value="<%= m.id%>" />
+                    </td>
+                <% end %>
+              </tr>
+
+      <% end %>
+    </table>
+    <% if @std_paging.display? %>
+        <%= paginate @student_courses %>
+    <% end %>
+<% end %>
+<input type="hidden" class="hdf-ajax-edit-student-group-url" value="<%= course_edit_student_group_path(@course) %>">
+<script>
+    $(document).ready(function() {
+        $('.select-student-group').change(function(){
+            var data = {std_course_id : $(this).parent().find('.student_course_id').val(), milestone_id : $(this).parent().find('.milestone_id').val(), group_id : $(this).val()};
+            var url = $('input.hdf-ajax-edit-student-group-url').val();
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                success: function (result) {
+                    alert(result);
+                }
+            });
+        });
+    });
+
+
+</script>

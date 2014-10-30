@@ -196,7 +196,7 @@ Coursemology::Application.routes.draw do
     get "materials/files/:id", to: "materials#show", as: :material # Alias for url_for with Material objects
     get "materials/*path", to: "materials#show_by_name", as: :material_by_path
 
-    post "levels/populate" => "levels#populate", as: :levels_populate
+    post "levels/populate" => "levels#populate", as:   :levels_populate
     post "levels/mass_update" => "levels#mass_update", as: :levels_mass_update
 
     resources :levels
@@ -356,6 +356,8 @@ Coursemology::Application.routes.draw do
 
   match "courses/:id/students" => "courses#students", as: :course_students
   match "courses/:id/manage_students" => "courses#manage_students", as: :course_manage_students
+  match "courses/:id/manage_student_group" => "courses#manage_student_group", as: :course_manage_student_group
+  match "courses/:id/edit_student_group" => "courses#edit_student_group", as: :course_edit_student_group
   match "courses/:id/download_import_template" => "courses#download_import_template", as: :course_download_import_template
   match "courses/:id/import_ivle_student" => "courses#import_ivle_student", as: :course_import_ivle_student
   post "courses/:id/import_student_groups" => "courses#import_student_groups", as: :course_import_student_groups

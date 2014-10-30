@@ -1154,11 +1154,10 @@ ActiveRecord::Schema.define(:version => 20141024033615) do
     t.integer  "course_id"
     t.integer  "std_course_id"
     t.integer  "tut_course_id"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
     t.integer  "group_id"
-    t.integer  "from_milestone_id"
-    t.integer  "to_milestone_id"
+    t.integer  "milestone_id"
   end
 
   add_index "tutorial_groups", ["course_id"], :name => "index_tutorial_groups_on_course_id"

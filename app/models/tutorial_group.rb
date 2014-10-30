@@ -1,5 +1,5 @@
 class TutorialGroup < ActiveRecord::Base
-  attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id, :from_milestone_id, :to_milestone_id
+  attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id, :milestone_id
 
   belongs_to :course
   belongs_to :std_course, class_name: "UserCourse"
@@ -69,8 +69,7 @@ class TutorialGroup < ActiveRecord::Base
     students["status"].each_with_index do |s, index|
       if s == "accepted"
         std_course = course.user_courses.where(:course_id => course.id, :user_id => course.users.where(:student_id => students["id"][index]).first.id).first
-        tg = course.tutorial_groups.build
-        tg.std_course = std_course
+
         sg = course.student_groups.where(:name => students["group"][index]).first
         if sg.nil?
           sg = StudentGroup.new(:name => students["group"][index])
@@ -81,19 +80,28 @@ class TutorialGroup < ActiveRecord::Base
         unless students["from_milestone"][index].empty?
           f_milestone = course.lesson_plan_milestones.where(:title => students["from_milestone"][index]).first
           if f_milestone
-            tg.from_milestone_id = f_milestone.id
+            #tg.from_milestone_id = f_milestone.id
             unless students["to_milestone"][index].empty?
               t_milestone = course.lesson_plan_milestones.where(:title => students["to_milestone"][index]).first
               if (t_milestone && t_milestone.start_at >  f_milestone.end_at)
-                tg.to_milestone_id = t_milestone.id
+                l_milestones = course.lesson_plan_milestones.where("start_at >= ? and end_at <= ?", f_milestone.start_at, t_milestone.end_at)
+                if l_milestones.count > 0
+                  l_milestones.each do |m|
+                    tg = course.tutorial_groups.build
+                    tg.std_course = std_course
+                    tg.milestone_id = m.id
+                    tg.group_id = sg.id
+                    tg.save
+                  end
+                end
+                #tg.to_milestone_id = t_milestone.id
               end
             end
           end
         end
-
         #tg.tut_course_id = 0 #have to set tut_course_id because validates :tut_course_id, presence: true (10/this file)
-        tg.group_id = sg.id
-        tg.save
+        #tg.group_id = sg.id
+        #tg.save
 
       end
     end

@@ -118,6 +118,16 @@ class MaterialFolder < ActiveRecord::Base
 
       # Associate the file upload with the record
       file = FileUpload.find_by_id(id)
+
+
+      
+      dir = "#{Rails.root}/Material/files/"
+      FileUtils.mkdir_p(dir) unless File.exist?(dir)
+      path = File.join(dir, file.original_name)
+      file.file.copy_to_local_file :original, path
+
+
+
       if not(file)
         next
       end

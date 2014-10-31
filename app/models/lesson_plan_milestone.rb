@@ -78,15 +78,8 @@ class LessonPlanMilestone < ActiveRecord::Base
     #check for tutorial group, load for specific student lesson plan
     if user_course.is_student?
       student_tutorial_groups = user_course.tut_group_courses.order(:created_at).to_a
-      current_tutorial = nil
-      student_tutorial_groups.each do |tg|
-        if tg.from_milestone_id.nil?
-          current_tutorial = tg
-        elsif (self.start_at >= LessonPlanMilestone.find_by_id(tg.from_milestone_id).start_at && (tg.to_milestone_id.nil? || self.end_at <= LessonPlanMilestone.find_by_id(tg.to_milestone_id.nil? ? -1 : tg.to_milestone_id).end_at))
-          current_tutorial = tg
-          break
-        end
-      end
+      current_tutorial = user_course.tut_group_courses.where(:milestone_id => self.id).first
+
       str_query = ''
       if current_tutorial
         str_query = " or (entry_type = 2 and group_id is not null and group_id = #{current_tutorial.group_id})"

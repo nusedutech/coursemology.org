@@ -35,9 +35,7 @@
                           <% end %>
                       <% end %>
                   <% end %>
-
               <% end %>
-
         <% end %>
       <% else %>
           <a class="lesson-plan-anchor" name="entry-<%= entry.id %>"></a>
@@ -182,9 +180,16 @@
       <h4>Instructional Resources</h4>
       <ul>
       <% entry.resources.each { |r| %>
-        <li><%= link_to r.obj.title, url_for([@course, r.obj]) %></li>
+        <li>
+          <%= link_to url_for([@course, r.obj]) do %><i class="icon-download-alt"></i><%= " #{r.obj.title}" %><% end %>
+        </li>
       <% } %>
       </ul>
+      <% if (cannot? :manage, LessonPlanEntry) %> </div> <% end %>
+  <% elsif entry.is_virtual? %>
+      <% if (cannot? :manage, LessonPlanEntry) %> <div class="resource-hide" style="display: none"> <% end %>
+          <%= render partial: "file_uploads/download_local_files",
+                     locals: { owner: entry.assessment }%>
       <% if (cannot? :manage, LessonPlanEntry) %> </div> <% end %>
   <% end %>
     </div>

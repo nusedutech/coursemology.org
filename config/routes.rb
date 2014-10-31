@@ -67,6 +67,7 @@ Coursemology::Application.routes.draw do
         get 'stats'
         post 'reorder'
         get 'access_denied'
+        match 'files/:file_id', to: "assessments#download_file", as: :assessment_download_file # Alias for url_for with Material objects
       end
 
       resources :assessment_questions, path: :questions, controller: :questions do

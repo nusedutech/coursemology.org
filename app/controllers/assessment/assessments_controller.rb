@@ -196,6 +196,14 @@ class Assessment::AssessmentsController < ApplicationController
     @summary[:paging] = sbms_paging
   end
 
+  def download_file
+    #redirect_to material.file.file_url
+    file = FileUpload.find_by_id(params[:file_id].to_i)
+    send_file "#{Rails.root}/Assessment/#{params[:id]}/files/#{file.original_name}",
+              :filename => params[:filename],
+              :type => file.file_content_type
+  end
+
   def access_denied
   end
 

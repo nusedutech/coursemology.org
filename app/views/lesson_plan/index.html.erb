@@ -65,7 +65,6 @@
     </div>
     <section id="detail-content">
     </section>
-
   </div>
   <hr class="hr-shrink-margin">
   <div class="end-of-page"></div>
@@ -223,7 +222,7 @@
                 loc = loc.replace(".html", "/media/video.mp4");
                 show_video(title, type, des, loc);
             }else if(entry_type =='4'){
-                show_mission_training(this,title, type, des, loc);
+                show_mission_training(this,title, type, des, loc, $resource);
             }
 
             show_discussion(dis);
@@ -245,7 +244,7 @@
                     $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
                 });
 
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>cs5228_1a_intro.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
                         $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});
@@ -275,7 +274,7 @@
         }
 
         //show entry mission training
-        function show_mission_training(entry, title, type, des, loc){
+        function show_mission_training(entry, title, type, des, loc, $resource){
             var start  = $(entry).find('input.entry_start').val();
             var end  = $(entry).find('input.entry_end').val();
             var url  = $(entry).find('input.entry_url').val();
@@ -284,8 +283,32 @@
             entry_form += "<div><p style=''>" + des + "</p></div>";
             entry_form += "<div><p style=''>" + loc + "</p></div>";
             entry_form += "<div><p style=''><h4>" + (start ? "<span class='icon-calendar'></span>" + " " + start : "") + (end ? " to " + end : "") + "</h4></p></div>";
-            entry_form += "<div><a class='attempt-assessment btn btn-success' href='" + url + "'>Attempt</a></div>";
             $('section#detail-content').append(entry_form);
+            if($resource.length){
+                $('section#detail-content').append($("<table class='material_list'></table>"));
+                $resource.children().each(function(){
+                    var parts = $(this).find('a').text().split('.');
+                    var ext = parts[parts.length - 1];
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+                });
+
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list .open-viewer').click(function() {
+                    if($(this).text()=="View Online") {
+                        $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});
+                        $(this).text("Hide");
+                    }else if ($(this).text()=="Show"){
+                        $(this).parent().parent().next().show();
+                        $(this).text("Hide");
+                    }else{
+                        $(this).parent().parent().next().hide();
+                        $(this).text("Show");
+                    }
+                    //return false;
+                });
+            }
+            $('section#detail-content').append("<div><a class='attempt-assessment btn btn-success' href='" + url + "'>Attempt</a></div>");
         }
 
         $('#lesson-plan-content a.attempt-assessment').click(function() {

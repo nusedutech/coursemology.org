@@ -23,6 +23,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 					response = submit_mcq(question)
 					forwardGroup.removeTopQuestion
 					forwardGroup.recordAnswer(response[:answer_id])
+					forwardGroup.save
 					#Correct Answer - Move on!
 					if response[:is_correct]
 						forwardGroup.correct_amount_left = forwardGroup.correct_amount_left - 1
@@ -38,6 +39,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 								forwardGroup.forward_policy_level_id = nextForwardPolicyLevel.id
 								forwardGroup.correct_amount_left = nextForwardPolicyLevel.progression_threshold
 								forwardGroup.uncompleted_questions = nextForwardPolicyLevel.getAllQuestionsString @assessment
+								forwardGroup.is_consecutive = nextForwardPolicyLevel.is_consecutive
 								forwardGroup.save
 								@summary[:promoted] = true
 							else
@@ -46,6 +48,12 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 						else
 							forwardGroup.save
 						end
+					#If consecutive and wrong question, reset progress
+					elsif forwardGroup.is_consecutive
+						forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+						forwardGroup.correct_amount_left = forwardPolicyLevel.progression_threshold
+						@summary[:reset] = true
+						forwardGroup.save
 					end
 					@summary[:lastResult] = response[:result]
 					@summary[:explanation] = response[:explanation]
@@ -55,7 +63,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 					forwardPolicyLevel = forwardGroup.getCorrespondingLevel
 					tag = forwardPolicyLevel.getTag
 					@summary[:tagName] = tag.name
-				
+					@summary[:consecutive] = forwardGroup.is_consecutive
 					@summary[:completedQuestions] = forwardPolicyLevel.progression_threshold - forwardGroup.correct_amount_left
 					@summary[:totalQuestions] = forwardPolicyLevel.progression_threshold
 					current = forwardGroup.getTopQuestion @assessment

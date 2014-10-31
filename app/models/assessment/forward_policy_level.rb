@@ -1,6 +1,6 @@
 class Assessment::ForwardPolicyLevel < ActiveRecord::Base
 	acts_as_paranoid
-	attr_accessible :tag_id, :progression_threshold, :order, :wrong_threshold, :seconds_to_complete
+	attr_accessible :tag_id, :progression_threshold, :order, :wrong_threshold, :seconds_to_complete, :is_consecutive 
 
 	validates_presence_of :tag_id, :progression_threshold
 

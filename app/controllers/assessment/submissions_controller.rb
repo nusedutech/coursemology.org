@@ -46,6 +46,7 @@ class Assessment::SubmissionsController < ApplicationController
 					forward_group.forward_policy_level_id = sortedPolicyLevels[0].id
 					forward_group.correct_amount_left = sortedPolicyLevels[0].progression_threshold
 					forward_group.uncompleted_questions = sortedPolicyLevels[0].getAllQuestionsString @assessment
+					forward_group.is_consecutive = sortedPolicyLevels[0].is_consecutive
 					forward_group.save
 					respond_to do |format|
 		    		format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission)}

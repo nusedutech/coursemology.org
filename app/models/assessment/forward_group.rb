@@ -4,8 +4,8 @@ class Assessment::ForwardGroup < ActiveRecord::Base
 	acts_as_paranoid
 	is_a :progression_group, as: :as_progression_group, class_name: "Assessment::ProgressionGroup"
 
-	attr_accessible :submission_id, :uncompleted_questions, :completed_answers, :is_completed, :dued_at
-	attr_accessible :correct_amount_left, :wrong_amount_left
+	attr_accessible :submission_id, :uncompleted_questions, :completed_answers, :is_completed, :dued_at 
+	attr_accessible :correct_amount_left, :wrong_amount_left, :is_consecutive 
 
 	belongs_to :forward_policy_level, class_name: "Assessment::ForwardPolicyLevel"
 
@@ -18,7 +18,7 @@ class Assessment::ForwardGroup < ActiveRecord::Base
 
 		allQuestions = CSV.parse_line(self.uncompleted_questions)
 		#We will only use line 0 so check line 0 only
-		if allQuestions.nil?
+		if allQuestions == nil || allQuestions.nil?
 			policyLevel = self.getCorrespondingLevel
 			newQuestions = policyLevel.getAllQuestionsString assessment
 			self.uncompleted_questions = newQuestions

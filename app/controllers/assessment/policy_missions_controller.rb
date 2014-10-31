@@ -56,6 +56,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 						forward_policy_level.progression_threshold = params[:forward][:value][index]
 						forward_policy_level.order = index
 						forward_policy_level.forward_policy_id = forward_policy.id
+						forward_policy_level.is_consecutive = (params[:forward][:movement][index] == "consecutive")
 						forward_policy_level.save
 					end
 					invalidSaves = false
@@ -89,6 +90,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 						forward_policy_level.progression_threshold = params[:forward][:value][index]
 						forward_policy_level.order = index
 						forward_policy_level.forward_policy_id = forward_policy.id
+						forward_policy_level.is_consecutive = (params[:forward][:movement][index] == "consecutive")
 						forward_policy_level.save
 					end
 				end

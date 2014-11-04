@@ -22,7 +22,7 @@ class LessonPlanMilestone < ActiveRecord::Base
         def description
           nil
         end
-        def entries
+        def entries (include_virtual = true, user_course = nil)
           @other_entries
         end
         def start_at

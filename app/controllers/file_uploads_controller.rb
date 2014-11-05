@@ -39,6 +39,14 @@ class FileUploadsController < ApplicationController
 
 
     file = params[:files].class == Array ? params[:files].first : params[:files]
+
+    #check the same file name
+    if owner
+      check_file = FileUpload.where(:original_name => file.original_filename, :owner_id => owner.id, :owner_type => owner.class).first
+      if check_file
+        file.original_filename = File.basename(file.original_filename, '.*') + "_" + Time.now.strftime("%d%m%Y%H%M%S") + File.extname(file.original_filename)
+      end
+    end
     file_upload = FileUpload.create({
                                         creator: current_user,
                                         owner: owner || @course,

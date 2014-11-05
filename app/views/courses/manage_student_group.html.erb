@@ -25,37 +25,39 @@
 
 <% if can? :manage, UserCourse %>
     <% groups = @course.student_groups.map {|tac| [tac.name, tac.id] }.unshift(["_", -1]) %>
-    <table class="table" style="margin-top: 20px;">
-      <tr>
-        <th>ID</th>
-        <% @milestones.each do |m| %>
-            <th width="6%"><%= m.title %></th>
-        <% end %>
+    <div class="div-slide">
+        <table class="table table-striped" style="margin-top: 20px;">
+          <tr>
+            <th>ID</th>
+            <% @milestones.each do |m| %>
+                <th width="6%"><%= m.title %></th>
+            <% end %>
 
-      </tr>
-      <% @student_courses.each_with_index do |student_course| %>
-          <% student = student_course.user %>
+          </tr>
+          <% @student_courses.each_with_index do |student_course| %>
+              <% student = student_course.user %>
 
-              <tr>
-                <td>
-                  <label><%= student.student_id %></label>
-                </td>
-                <% @milestones.each do |m| %>
+                  <tr>
                     <td>
-                    <%group = student_course.tut_group_courses.where(:milestone_id => m.id).order("created_at DESC").first %>
-                    <% if group %>
-                        <%= select "group","", groups,{:selected => "#{group.group_id}"} , {:class => "select-student-group",:style => 'width: 45px'} %>
-                    <% else %>
-                        <%= select "group","", groups, {:selected => "#{-1}"},{:class => "select-student-group", :style => 'width: 45px'} %>
-                    <% end %>
-                    <input type="hidden" class="student_course_id" value="<%= student_course.id%>" />
-                    <input type="hidden" class="milestone_id" value="<%= m.id%>" />
+                      <label><%= student.student_id %></label>
                     </td>
-                <% end %>
-              </tr>
+                    <% @milestones.each do |m| %>
+                        <td>
+                        <%group = student_course.tut_group_courses.where(:milestone_id => m.id).order("created_at DESC").first %>
+                        <% if group %>
+                            <%= select "group","", groups,{:selected => "#{group.group_id}"} , {:class => "select-student-group",:style => 'width: 45px'} %>
+                        <% else %>
+                            <%= select "group","", groups, {:selected => "#{-1}"},{:class => "select-student-group", :style => 'width: 45px'} %>
+                        <% end %>
+                        <input type="hidden" class="student_course_id" value="<%= student_course.id%>" />
+                        <input type="hidden" class="milestone_id" value="<%= m.id%>" />
+                        </td>
+                    <% end %>
+                  </tr>
 
-      <% end %>
-    </table>
+          <% end %>
+        </table>
+    </div>
     <% if @std_paging.display? %>
         <%= paginate @student_courses %>
     <% end %>

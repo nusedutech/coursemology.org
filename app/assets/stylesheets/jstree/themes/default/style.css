@@ -358,7 +358,7 @@
 }
 #jstree-dnd.jstree-default .jstree-ok,
 #jstree-dnd.jstree-default .jstree-er {
-  background-image: url("32px.png");
+  background-image: url("/images/32px.png");
   background-repeat: no-repeat;
   background-color: transparent;
 }
@@ -428,7 +428,7 @@
 }
 .jstree-default .jstree-node,
 .jstree-default .jstree-icon {
-  background-image: url("32px.png");
+  background-image: url("/images/32px.png");
 }
 .jstree-default .jstree-node {
   background-position: -292px -4px;
@@ -526,10 +526,10 @@
   background: url("throbber.gif") center center no-repeat;
 }
 .jstree-default .jstree-file {
-  background: url("32px.png") -100px -68px no-repeat;
+  background: url("/images/32px.png") -100px -68px no-repeat;
 }
 .jstree-default .jstree-folder {
-  background: url("32px.png") -260px -4px no-repeat;
+  background: url("/images/32px.png") -260px -4px no-repeat;
 }
 .jstree-default.jstree-rtl .jstree-node {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAACAQMAAAB49I5GAAAABlBMVEUAAAAdHRvEkCwcAAAAAXRSTlMAQObYZgAAAAxJREFUCNdjAAMOBgAAGAAJMwQHdQAAAABJRU5ErkJggg==");
@@ -565,7 +565,7 @@
 }
 .jstree-default-small .jstree-node,
 .jstree-default-small .jstree-icon {
-  background-image: url("32px.png");
+  background-image: url("/images/32px.png");
 }
 .jstree-default-small .jstree-node {
   background-position: -295px -7px;
@@ -662,10 +662,10 @@
   background: url("throbber.gif") center center no-repeat;
 }
 .jstree-default-small .jstree-file {
-  background: url("32px.png") -103px -71px no-repeat;
+  background: url("/images/32px.png") -103px -71px no-repeat;
 }
 .jstree-default-small .jstree-folder {
-  background: url("32px.png") -263px -7px no-repeat;
+  background: url("/images/32px.png") -263px -7px no-repeat;
 }
 .jstree-default-small.jstree-rtl .jstree-node {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAACAQMAAABv1h6PAAAABlBMVEUAAAAdHRvEkCwcAAAAAXRSTlMAQObYZgAAAAxJREFUCNdjAAMHBgAAiABBI4gz9AAAAABJRU5ErkJggg==");
@@ -701,7 +701,7 @@
 }
 .jstree-default-large .jstree-node,
 .jstree-default-large .jstree-icon {
-  background-image: url("32px.png");
+  background-image: url("/images/32px.png");
 }
 .jstree-default-large .jstree-node {
   background-position: -288px 0px;
@@ -798,10 +798,10 @@
   background: url("throbber.gif") center center no-repeat;
 }
 .jstree-default-large .jstree-file {
-  background: url("32px.png") -96px -64px no-repeat;
+  background: url("/images/32px.png") -96px -64px no-repeat;
 }
 .jstree-default-large .jstree-folder {
-  background: url("32px.png") -256px 0px no-repeat;
+  background: url("/images/32px.png") -256px 0px no-repeat;
 }
 .jstree-default-large.jstree-rtl .jstree-node {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAACAQMAAAAD0EyKAAAABlBMVEUAAAAdHRvEkCwcAAAAAXRSTlMAQObYZgAAAAxJREFUCNdjgIIGBgABCgCBvVLXcAAAAABJRU5ErkJggg==");
@@ -953,21 +953,21 @@
 }
 
 .greentree{
-  background: url("tree-icon.png") no-repeat !important;
+  background: url("/images/tree-icon.png") no-repeat !important;
   background-size: 20px 20px !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;
 }
 
 .greenbranch{
-  background: url("branch-icon.png") no-repeat !important;
+  background: url("/images/branch-icon.png") no-repeat !important;
   background-size: 20px 20px !important;
   background-repeat: no-repeat !important;
   background-color: transparent!important;
 }
 
 .greenleaf{
-  background: url("leaf-icon.png") no-repeat !important;
+  background: url("/images/leaf-icon.png") no-repeat !important;
   background-size: 20px 20px !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;

@@ -49,7 +49,7 @@ group :assets do
 end
 
 #gem 'pg'
-gem 'mysql2'
+gem 'mysql2', '~> 0.3.17'
 gem 'uglifier', '>= 1.0.3'
 gem 'jquery-rails', '2.1.3'
 gem 'jqtree-rails'

@@ -49,4 +49,16 @@ class Assessment::ForwardGroup < ActiveRecord::Base
 		self.completed_answers = allAnswers.join(",")
 		self.save
 	end
+
+	def getAllAnswers
+		allAnswers = []
+		if self.completed_answers.present?
+			allAnswerIds = CSV.parse_line(self.completed_answers)
+			allAnswerIds.each do |answerId|
+				allAnswers << Assessment::McqAnswer.find(answerId)
+			end
+		end
+
+		return allAnswers
+	end
 end

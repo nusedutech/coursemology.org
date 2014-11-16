@@ -25,4 +25,8 @@ class Assessment::McqQuestion < ActiveRecord::Base
         where("assessment_answers.std_course_id = ? AND assessment_answers.submission_id = ?",
               filters[:std_course_id], filters[:submission_id])
   end
+
+	def getCorrectOptions
+		self.options.where("correct = '1'")
+	end
 end

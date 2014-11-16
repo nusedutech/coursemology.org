@@ -18,6 +18,13 @@
                       collection: @course.policy_missions - [@policy_mission],
                       input_html: {class: "input-large"}, include_blank: true %>
 
+		<div>
+			<label class="control-label" for="forward_total_wrong_threshold">Total wrong threshold</label>
+			<div class="controls">
+				<input type="number" name="forward[totalWrong]" class="input-medium foward-question-input" min="0" value="<%= @forwardWrong ? @forwardWrong : 0 %>"/>
+			</div>
+		</div>
+
 		<hr/>
 		<h4>Forward Tags</h4>
 		<hr/>

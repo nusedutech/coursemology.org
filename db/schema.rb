@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141031004316) do
+ActiveRecord::Schema.define(:version => 20141114113325) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -296,6 +296,7 @@ ActiveRecord::Schema.define(:version => 20141031004316) do
     t.datetime "deleted_at"
     t.datetime "created_at",                                   :null => false
     t.datetime "updated_at",                                   :null => false
+    t.integer  "wrong_qn_left",             :default => -1
   end
 
   create_table "assessment_progression_policies", :force => true do |t|

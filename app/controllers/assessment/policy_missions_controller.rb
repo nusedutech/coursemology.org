@@ -20,6 +20,8 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 	def edit
 		@tags = @course.tags
 		@fwdPolicyLevels = @policy_mission.progression_policy.getForwardPolicy.getSortedPolicyLevels
+
+		@forwardWrong = @policy_mission.progression_policy.getForwardPolicy.overall_wrong_threshold
 	end
 
 	def new
@@ -30,7 +32,6 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     @policy_mission.course_id = @course.id
 
 		@tags = @course.tags
-
 		respond_to do |format|
 			format.html
 		end
@@ -49,6 +50,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     respond_to do |format|
       if @policy_mission.save
 				forward_policy.policy_mission_id = @policy_mission.id
+				forward_policy.overall_wrong_threshold = params[:forward][:totalWrong]
 				if forward_policy.save
 					params[:forward][:tag_id].each_with_index do |tag_id, index|
 						forward_policy_level = Assessment::ForwardPolicyLevel.new
@@ -83,7 +85,9 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
 				if @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
 					forward_policy = @policy_mission.progression_policy.getForwardPolicy
+					forward_policy.overall_wrong_threshold = params[:forward][:totalWrong]
 					forward_policy.deleteAllPolicyLevels
+					forward_policy.save
 					params[:forward][:tag_id].each_with_index do |tag_id, index|
 						forward_policy_level = Assessment::ForwardPolicyLevel.new
 						forward_policy_level.tag_id = tag_id

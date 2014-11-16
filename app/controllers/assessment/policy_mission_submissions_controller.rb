@@ -5,6 +5,60 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 
  	def show
 		@policy_mission = @assessment.specific
+		@summary = {}
+		if @policy_mission.progression_policy.isForwardPolicy?
+			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+			allProgressionGroups = @submission.progression_groups.where("is_completed = 1")
+
+			@summary[:forwardContent] = {}
+			@summary[:forwardContent][:status] = true
+			@summary[:forwardContent][:highestLevel] = "Invalid"
+			@summary[:forwardContent][:wrongCount] = 0
+			forwardLevelsContent = []	
+			allProgressionGroups.each do |progressionGroup|
+
+				forwardGroup = progressionGroup.getForwardGroup
+				forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+				tag = forwardPolicyLevel.getTag
+
+				#Uncompleted Progression - Mission failed
+				if progressionGroup.correct_amount_left > 0
+					@summary[:forwardContent][:status] = false
+				else
+					@summary[:forwardContent][:highestLevel] = tag.name
+				end
+
+				allMcqAnswers = forwardGroup.getAllAnswers
+				questions = []
+				allMcqAnswers.each do |singleAnsweredQn|
+					mcqQuestion = singleAnsweredQn.question.specific
+		
+					questionSummary = {}
+					questionSummary[:correct] = singleAnsweredQn.correct
+					questionSummary[:description] = mcqQuestion.description
+					questionSummary[:rightOption] = mcqQuestion.getCorrectOptions 
+
+					#For incorrectly answered questions only
+					if !singleAnsweredQn.correct
+						@summary[:forwardContent][:wrongCount] += 1
+						questionSummary[:chosenOption] = []						
+						singleAnsweredQn.answer_options.each do |answerToOptionMapping|
+							questionSummary[:chosenOption] << answerToOptionMapping.option
+						end
+					end
+
+					questions << questionSummary
+				end
+		
+				summarizedContent = {}
+				summarizedContent[:tagName] = tag.name
+				summarizedContent[:questions] = questions
+
+				forwardLevelsContent << summarizedContent
+			end
+
+			@summary[:forwardContent][:levels] = forwardLevelsContent
+		end
   end
 
   def edit
@@ -30,7 +84,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 						if forwardGroup.correct_amount_left <= 0
 							forwardGroup.is_completed = true
 							forwardGroup.save
-
+							wrongQnLeft = forwardGroup.wrong_qn_left 
 							#set next forward level
 							nextForwardPolicyLevel = forwardPolicy.nextPolicyLevel forwardGroup.getCorrespondingLevel
 							if nextForwardPolicyLevel != nil
@@ -40,6 +94,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 								forwardGroup.correct_amount_left = nextForwardPolicyLevel.progression_threshold
 								forwardGroup.uncompleted_questions = nextForwardPolicyLevel.getAllQuestionsString @assessment
 								forwardGroup.is_consecutive = nextForwardPolicyLevel.is_consecutive
+								forwardGroup.wrong_qn_left = wrongQnLeft
 								forwardGroup.save
 								@summary[:promoted] = true
 							else
@@ -53,13 +108,18 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 						forwardPolicyLevel = forwardGroup.getCorrespondingLevel
 						forwardGroup.correct_amount_left = forwardPolicyLevel.progression_threshold
 						@summary[:reset] = true
+						forwardGroup.wrong_qn_left -= 1
+						forwardGroup.save
+					#If just wrong question
+					else
+						forwardGroup.wrong_qn_left -= 1
 						forwardGroup.save
 					end
 					@summary[:lastResult] = response[:result]
 					@summary[:explanation] = response[:explanation]
 				end
 
-			  if forwardGroup != nil
+			  if forwardGroup != nil && forwardGroup.wrong_qn_left != 0
 					forwardPolicyLevel = forwardGroup.getCorrespondingLevel
 					tag = forwardPolicyLevel.getTag
 					@summary[:tagName] = tag.name
@@ -69,6 +129,10 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 					current = forwardGroup.getTopQuestion @assessment
 					@summary[:current] = current.specific
 				else
+					if forwardGroup != nil
+						forwardGroup.is_completed = true
+						forwardGroup.save
+					end
 					@submission.set_submitted
 					#@submission.update_grade
 				end				

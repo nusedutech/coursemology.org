@@ -4,7 +4,7 @@ class Assessment::ForwardPolicy < ActiveRecord::Base
 	
 	attr_accessible :policy_mission_id, :overall_seconds_to_complete, :overall_wrong_threshold
 
-	has_many	:forward_policy_levels, class_name: "Assessment::ForwardPolicyLevel", dependent: :destroy
+	has_many	:forward_policy_levels, class_name: "Assessment::ForwardPolicyLevel", dependent: :destroy, foreign_key: :forward_policy_id
 
 
 	def getSortedPolicyLevels

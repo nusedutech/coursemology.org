@@ -47,6 +47,8 @@ class Assessment::SubmissionsController < ApplicationController
 					forward_group.correct_amount_left = sortedPolicyLevels[0].progression_threshold
 					forward_group.uncompleted_questions = sortedPolicyLevels[0].getAllQuestionsString @assessment
 					forward_group.is_consecutive = sortedPolicyLevels[0].is_consecutive
+					#If not set (forward_policy.overall_wrong_threshold == 0), set to -1 to avoid confusion in decrement later
+					forward_group.wrong_qn_left = forward_policy.overall_wrong_threshold == 0 ? -1 : forward_policy.overall_wrong_threshold
 					forward_group.save
 					respond_to do |format|
 		    		format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission)}

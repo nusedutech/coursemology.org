@@ -107,8 +107,16 @@ class Assessment::AssessmentsController < ApplicationController
 
   def stats
     @summary = {}
-    @summary[:type] = @assessment.is_mission? ? 'mission' : 'training'
-    @stats_paging = @course.paging_pref(@assessment.is_mission? ? "MissionStats" : "TrainingStats")
+		if @assessment.is_mission?
+			@summary[:type] = 'mission'
+			@stats_paging = "MissionStats"
+		elsif
+			@summary[:type] = 'training'
+			@stats_paging = "TrainingStats"
+		elsif
+			@summary[:type] = 'policy_mission'
+		end
+
     @submissions = @assessment.submissions.includes(:gradings)
     std_courses = @course.user_courses.student.order(:name).where(is_phantom: false)
     my_std = curr_user_course.std_courses.student.order(:name).where(is_phantom: false)

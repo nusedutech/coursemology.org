@@ -150,6 +150,17 @@
     </td>
     <td><a href="#" class="btn btn-select-nav" data-target="#select-training">View</a></td>
   </tr>
+	<tr>
+    <td>Policy Missions</td>
+    <td>
+      <select id="select-policyMn">
+        <%= @course.policy_missions.each do |asm| %>
+            <option value="<%= course_stats_policy_mission_path(@course, asm) %>"><%= asm.title %></option>
+        <% end %>
+      </select>
+    </td>
+    <td><a href="#" class="btn btn-select-nav" data-target="#select-policyMn">View</a></td>
+  </tr>
 </table>
 
 <div data-spy="affix" data-offset-top="800" class="float-submit" style="top:50px" id="back-to-top">

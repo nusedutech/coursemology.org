@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+	xmlns:o="urn:schemas-microsoft-com:office:office"
+	xmlns:x="urn:schemas-microsoft-com:office:excel"
+	xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+	xmlns:html="http://www.w3.org/TR/REC-html40">
+
+	<% if @summary[:forwardContent] %>
+		<% @summary[:forwardContent][:levels].each do |singleLevel| %>
+			<Worksheet ss:Name="<%= singleLevel[:tagName]!="" ? singleLevel[:tagName] : "NoName" %>">
+				<Table>
+					<% singleLevel[:questions].each do |singleLevelQuestion| %>
+						<Row>
+							<Cell><Data ss:Type="String"><%= singleLevelQuestion[:description] %></Data></Cell>
+						</Row>
+							<% if singleLevelQuestion[:correct] %>
+								<Row>
+									<Cell><Data ss:Type="String">Answered Correctly</Data></Cell>
+								</Row>
+								<% singleLevelQuestion[:rightOption].each do |option| %>
+									<Row><Cell><Data ss:Type="String"><%= option.text %></Data></Cell></Row>
+								<% end %>
+							<% else %>
+								<Row>
+									<Cell><Data ss:Type="String">Answered Incorrectly</Data></Cell>
+								</Row>
+								<% singleLevelQuestion[:chosenOption].each do |option| %>
+									<Row><Cell><Data ss:Type="String"><%= option.text %></Data></Cell></Row>
+								<% end %>
+								<Row>
+									<Cell><Data ss:Type="String">Correct Options</Data></Cell>
+								</Row>
+								<% singleLevelQuestion[:rightOption].each do |option| %>
+									<Row><Cell><Data ss:Type="String"><%= option.text %></Data></Cell></Row>
+								<% end %>
+							<% end %>
+					<% end %>
+				</Table>
+			</Worksheet>
+		<% end %>
+	<% end %>
+</Workbook>

@@ -61,6 +61,15 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 		end
   end
 
+	def show_export_excel
+		self.show
+		respond_to do |format|
+			headers["Content-Disposition"] = "attachment; filename=\"Student-#{current_user.name}-#{@policy_mission.title}\""
+			headers["Content-Type"] = "xls"
+			format.xls
+		end
+  end
+
   def edit
 		@policy_mission = @assessment.specific
 		if @policy_mission.progression_policy.isForwardPolicy?

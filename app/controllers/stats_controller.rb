@@ -48,6 +48,7 @@ class StatsController < ApplicationController
 
     @missions = @course.missions
     @trainings = @course.trainings
+		@policy_missions = @course.policy_missions
   end
 
   def training
@@ -84,5 +85,54 @@ class StatsController < ApplicationController
 
     @missions = @course.missions
     @trainings = @course.trainings
+		@policy_missions = @course.policy_missions
   end
+
+	def policy_mission
+		@policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
+    authorize! :manage, @policy_mission
+
+		@summary = {}
+		if @policy_mission.progression_policy.isForwardPolicy?
+			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+			forwardPolicyLevels = forwardPolicy.forward_policy_levels
+			@summary[:forwardContent] = {}
+			@summary[:forwardContent][:tagGroup] = []
+			forwardPolicyLevels.each do |singleLevel|
+				packagedLevelQuestions = {}
+				packagedLevelQuestions[:name] = singleLevel.getTag.name
+				packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
+				@summary[:forwardContent][:tagGroup] << packagedLevelQuestions
+			end
+		end
+
+		@missions = @course.missions
+    @trainings = @course.trainings
+		@policy_missions = @course.policy_missions
+	end
+
+	def policy_mission_export_excel
+		@policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
+    authorize! :manage, @policy_mission
+
+		@summary = {}
+		if @policy_mission.progression_policy.isForwardPolicy?
+			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+			forwardPolicyLevels = forwardPolicy.forward_policy_levels
+			@summary[:forwardContent] = {}
+			@summary[:forwardContent][:tagGroup] = []
+			forwardPolicyLevels.each do |singleLevel|
+				packagedLevelQuestions = {}
+				packagedLevelQuestions[:name] = singleLevel.getTag.name
+				packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
+				@summary[:forwardContent][:tagGroup] << packagedLevelQuestions
+			end
+		end
+
+		respond_to do |format|
+			headers["Content-Disposition"] = "attachment; filename=\"Assignment #{@policy_mission.title}\""
+			headers["Content-Type"] = "xls"
+			format.xls
+		end
+	end
 end

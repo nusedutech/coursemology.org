@@ -29,6 +29,16 @@ class Assessment::ForwardPolicyLevel < ActiveRecord::Base
 		return result
 	end
 
+	def getAllRelatedQuestions(assessment)
+		if assessment.is_a? Assessment
+			questions = Assessment::Question.find_by_sql(["SELECT * FROM assessment_questions, question_assessments, taggable_tags WHERE taggable_tags.taggable_id = question_assessments.question_id and assessment_questions.id = question_assessments.question_id and question_assessments.assessment_id = ? and taggable_tags.tag_id = ?", assessment.id, self.tag_id ])
+		else
+			questions = []
+		end
+	
+		return questions
+	end
+
 	def getTag
 		Tag.find(self.tag_id)
 	end

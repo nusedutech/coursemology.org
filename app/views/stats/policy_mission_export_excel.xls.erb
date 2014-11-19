@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+	xmlns:o="urn:schemas-microsoft-com:office:office"
+	xmlns:x="urn:schemas-microsoft-com:office:excel"
+	xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+	xmlns:html="http://www.w3.org/TR/REC-html40">
+
+	<% if @summary[:forwardContent] %>
+		<% @summary[:forwardContent][:tagGroup].each do |singleLevel| %>
+			<Worksheet ss:Name="<%= singleLevel[:name]!="" ? singleLevel[:name] : "NoName" %>">
+				<Table>
+					<% singleLevel[:questions].each_with_index do |qn, i| %>
+						<Row>
+							<Cell><Data ss:Type="Number"><%= i+1 %></Data></Cell>
+							<Cell><Data ss:Type="String"><%= qn.description %></Data></Cell>
+						</Row>
+							<% if qn.specific.class == Assessment::McqQuestion %>
+								<% qn.options.each do |opt| %>
+									<Row>
+								    <% nonuniq_stds = opt.assemt_std(@course, @policy_mission.assessment) %>
+										<% uniq_stds = nonuniq_stds.uniq %>
+										<Cell><Data ss:Type="String"></Data></Cell>
+										<Cell><Data ss:Type="String"><%= opt.text %></Data></Cell>
+										<Cell><Data ss:Type="String"><%= opt.correct ? "O" : "X" %></Data></Cell>
+										<Cell><Data ss:Type="Number"><%= nonuniq_stds.size %></Data></Cell>
+						        <Cell><Data ss:Type="String"><% uniq_stds.each do |std| %><%= std.name + " " %><% end %></Data></Cell>
+									</Row>
+								<% end %>
+							<% end %>
+					<% end %>
+				</Table>
+			</Worksheet>
+		<% end %>
+	<% end %>
+</Workbook>

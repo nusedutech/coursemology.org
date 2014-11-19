@@ -129,6 +129,7 @@ Coursemology::Application.routes.draw do
                 constraints: PolicyMissionConstraint.new do
         member do
           post 'edit' => 'policy_mission_submissions#edit'
+					get 'export' => 'policy_mission_submissions#show_export_excel'
         end
       end
     end
@@ -166,6 +167,8 @@ Coursemology::Application.routes.draw do
 		resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
 			collection do
 				get :index, to: 'assessments#index', type: 'policy_mission'
+        get 'stats' => 'policy_missions#stats'
+				get 'submissions' => 'assessments#listall', type: 'policy_mission'
 			end
 		end
 
@@ -267,6 +270,9 @@ Coursemology::Application.routes.draw do
     get "stats/missions/:mission_id" => "stats#mission", as: :stats_mission
 
     get "stats/trainings/:training_id" => "stats#training", as: :stats_training
+
+		get "stats/policy_missions/:policy_mission_id" => "stats#policy_mission", as: :stats_policy_mission
+		get "stats/policy_missions_excel/:policy_mission_id" => "stats#policy_mission_export_excel", as: :stats_policy_mission_excel
 
     get "duplicate" => "duplicate#manage", as: :duplicate
 

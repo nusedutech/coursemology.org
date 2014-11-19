@@ -38,6 +38,12 @@
 	<hr/>
 	<div>
 		<h2>Attempted Questions</h2>
+		<div>		
+			<%= link_to "Click here",
+									export_course_assessment_submission_path(@course, asm: @policy_mission, format: "xls"),
+									method: "GET" %>
+									to export the statistics in Excel format.
+		</div>
 		<hr/>
 		<% @summary[:forwardContent][:levels].each do |singleLevel| %>
 			<div class = "well">

@@ -33,16 +33,11 @@
 				        </colgroup>
 				        <% qn.options.each do |opt| %>
 				            <% nonuniq_stds = opt.assemt_std(@course, @policy_mission.assessment) %>
-										<% uniq_stds = nonuniq_stds.uniq %>
 				            <tr>
 				              <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
 				              <td><%= opt.text %></td>
 				              <td><%= nonuniq_stds.size %></td>
-				              <td>
-				                <% uniq_stds.each do |std| %>
-				                    <span class="label label-info"><%= std.name %></span>
-				                <% end %>
-				              </td>
+											<td></td>
 				            </tr>
 				        <% end %>
 				      </table>

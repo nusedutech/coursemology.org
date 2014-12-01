@@ -14,6 +14,7 @@ class Assessment::McqOption < ActiveRecord::Base
         where("aao.option_id = ?", self.id)
   end
 
+	#Restrict to assessment only search for options
 	def assemt_std(course, assessment)
     course.user_courses.student.
         joins("INNER JOIN assessment_answers aa ON aa.std_course_id = user_courses.id").

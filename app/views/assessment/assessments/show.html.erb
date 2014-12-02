@@ -2,15 +2,18 @@
 <% if @summary[:type] == 'training' %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_training_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_training_path(@course, a) } %>
+    <%- display_name = @course.customized_title(@summary[:type]).singularize -%>
 <% elsif @summary[:type] == 'mission'  %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_mission_path(@course, a) } %>
+    <%- display_name = @course.customized_title(@summary[:type]).singularize -%>
 <% else #if @summary[:type] == 'policy mission'  %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_policy_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_policy_mission_path(@course, a) } %>
+    <%- display_name = "Policy Mission" -%>
 <% end %>
 
-<%- display_name = @course.customized_title(@summary[:type]).singularize -%>
+
 <div class="page-header">
   <h1> <%= @summary[:specific].title %></h1>
 </div>

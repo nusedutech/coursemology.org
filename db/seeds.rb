@@ -750,16 +750,6 @@ if ProgrammingLanguage.count == 1
 
 end
 
-if NavbarPreferableItem.count == 14
-  NavbarPreferableItem.create! item:  "policy_missions",
-                               navbar_link_type_id:  1,
-                               name: "Policy Missions",
-                               is_displayed: true,
-                               is_enabled: true,
-                               description: "course policy mission",
-                               pos: 15
-end
-
 if PreferableItem.count == 64
 	PreferableItem.create! item:          "Policy Mission",
                          item_type:     "Time",

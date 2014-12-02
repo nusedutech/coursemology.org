@@ -15,6 +15,13 @@ class Assessment::AssessmentsController < ApplicationController
     end
 
     @assessments = @course.assessments.send(assessment_type)
+		if assessment_type == 'training'
+			@policyMissions = @course.assessments.send(:policy_mission)
+			@policyMissionDisplayColumns = {}
+			@course.assessment_columns(:policy_mission, true).each do |cp|
+        @policyMissionDisplayColumns[cp.preferable_item.name] = cp.prefer_value
+    	end
+		end
 
     if selected_tags
       selected_tags = selected_tags.split(",")

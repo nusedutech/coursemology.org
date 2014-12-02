@@ -126,4 +126,12 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     end      
   end
 
+	def destroy
+    @policy_mission.destroy
+    respond_to do |format|
+      format.html { redirect_to course_assessment_trainings_url,
+                                notice: "The mission #{@policy_mission.title} has been removed." }
+    end
+  end
+
 end

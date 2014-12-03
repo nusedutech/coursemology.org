@@ -57,7 +57,7 @@ class Assessment::QuestionsController < ApplicationController
     if questions.count > 0
       @questions = questions.uniq
     else
-      @questions = @course.questions.uniq
+      @questions = @course.questions
     end
   end
 

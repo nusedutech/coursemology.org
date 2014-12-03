@@ -17,6 +17,13 @@
     </div>
 
     <div class="control-group">
+      <%= f.label "Choose IVLE module (Optional)", class: 'control-label' %>
+      <div class="controls">
+        <%= f.select :module_id, [], {:prompt => 'Select IVLE module'},  {:class => 'select span4'}  %>
+      </div>
+    </div>
+
+    <div class="control-group">
       <%= f.label :start_at, :class => 'control-label' %>
       <div class="controls">
         <div class="datetimepicker input-append date">
@@ -132,6 +139,13 @@
                   courses_path, class: 'btn' %>
     </div>
 
+    <% if @ivle_token %>
+        <input type="hidden" id="ivle_token" value="<%= @ivle_token %>" />
+        <input type="hidden" id="ivle_api" value="<%= @ivle_api %>" />
+        <input type="hidden" id="selected_id" value="<%= @course.module_id %>" />
+    <% end%>
+
+
 <% end %>
 
 <%= render partial: "layouts/file_uploader",
@@ -141,3 +155,24 @@
            locals: { upload_to: course_file_uploads_path(@course),
                      container_class: '',
                      image_url_class: '' } %>
+
+
+<script>
+
+    $(document).ready(function(){
+        if($("#ivle_token").length) {
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            // you must init the user
+            user.init().done(function () {});
+            var modules = [];
+            user.modules().success(function(mods) {
+                modules = mods.Results; // mods = Module[...]
+                $.each(modules, function(){
+                    $('#course_module_id').append("<option value='" + this.ID + "'>" + this.CourseCode + " - " + this.CourseName + "</option>");
+                });
+                $('#course_module_id').val($("#selected_id").val());
+
+            });
+        }
+    });
+</script>

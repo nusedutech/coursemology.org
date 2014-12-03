@@ -749,3 +749,77 @@ if ProgrammingLanguage.count == 1
 
 
 end
+
+if PreferableItem.count == 64
+	PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Time",
+                         name:          "time_format",
+                         default_value: "%d-%m-%Y",
+                         description:   "Policy Mission time display format",
+                         default_display: true
+end
+
+if PreferableItem.count == 65
+	PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Table",
+                         name:          "paging",
+                         default_value: "10",
+                         description:   "Number of rows to display in policy mission table",
+                         default_display: true
+end
+
+if PreferableItem.count == 66
+	PreferableItem.create! item:            "Paging",
+                         item_type:       "Policy_Missions",
+                         name:            "Policy Missions",
+                         default_value:   "50",
+                         description:     "Number of policy missions to display per page",
+                         default_display: true
+end
+
+if PreferableItem.count == 67
+
+  #Missions
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "title",
+                         default_value: "Regulated Training",
+                         description:   "Policy Mission title",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "tag",
+                         default_value: "Tag",
+                         description:   "Policy Mission tags" ,
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "exp",
+                         default_value: "Max Exp",
+                         description:   "Mission exp gainable",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "award",
+                         default_value: "Requirement for",
+                         description:   "Requirement for achievement",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "start",
+                         default_value: "Start Time",
+                         description:   "Mission start time",
+                         default_display: true
+
+  PreferableItem.create! item:          "Policy Mission",
+                         item_type:     "Column",
+                         name:          "end",
+                         default_value: "End Time",
+                         description:   "Mission end time",
+                         default_display: true
+
+end

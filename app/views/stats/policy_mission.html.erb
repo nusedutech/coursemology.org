@@ -1,0 +1,103 @@
+<div class="page-header">
+  <h1>Policy Mission Statistics: <span style="font-style: italic; font-weight: normal"><%= @policy_mission.title %></span> </h1>
+  <%= link_to "Click here",
+              submissions_course_assessment_policy_missions_path(@course, asm: @policy_mission.assessment.id),
+              method: "GET" %>
+  to review all submission for this mission.
+</div>
+
+
+<h3>Question stats</h3>
+<div>
+	<%= link_to "Click here",
+							course_stats_policy_mission_excel_path(@course, asm: @policy_mission, format: "xls"),
+		          method: "GET" %>
+	to export the statistics in Excel format.
+</div>
+<% if @summary[:forwardContent] %>
+	<% @summary[:forwardContent][:tagGroup].each do |singleLevel| %>
+		<div class = "well">
+			<h3><%= singleLevel[:name] %></h3><hr/>
+			<% singleLevel[:questions].each_with_index do |qn, i| %>
+				<section id="question_<%= i + 1%>">
+				  <div class="grey_background" style="margin: 10px">
+				    <strong><%= i + 1 %>. </strong>
+				    <%= style_format qn.description %>
+				  </div>
+				  <% if qn.specific.class == Assessment::McqQuestion %>
+				      <table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
+				        <colgroup>
+				          <col width="5%"/>
+				          <col width="35%"/>
+				          <col width="5%"/>
+				        </colgroup>
+				        <% qn.options.each do |opt| %>
+				            <% nonuniq_stds = opt.assemt_std(@course, @policy_mission.assessment) %>
+				            <tr>
+				              <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
+				              <td><%= opt.text %></td>
+				              <td><%= nonuniq_stds.size %></td>
+											<td></td>
+				            </tr>
+				        <% end %>
+				      </table>
+				  <% else %>
+				      <% answers = qn.answers.where(std_course_id: @summary[:student_courses]).order(:std_course_id) %>
+				      <div style="margin: 10px; margin-left: 50px;">
+				        Wrong / Total Attempts: <strong style="color: red"> <%= answers.where(correct:false).length %> </strong> / <%= answers.length %>
+				        <a class="btn" data-toggle="collapse"  href="#code<%= i + 1%>">Click To Expand / Collapse Code</a>
+				      </div>
+				      <div id="code<%= i + 1%>" class="collapse out">
+				        <% answers.each_with_index do |ans, index| %>
+				            <div class="code-review-header <%= ans.correct ? "mcq-ans-correct" : "mcq-ans-incorrect" %>" style="margin-left: 50px">
+				              <%= index + 1 %> : <%= ans.std_course.name %>
+				              <div class="pull-right"><%= time_ago_in_words(ans.created_at) %></div>
+				            </div>
+				            <div style="margin-left: 60px">
+				              <%= style_format('[mc]' + ans.answer + '[/mc]', false) %>
+				            </div>
+				        <% end %>
+				      </div>
+				  <% end %>
+				</section>
+			<% end %>
+		</div>
+	<% end %>
+<% end %>
+<hr/>
+<p>View detail statistics of other assignment:</p>
+<table class="table-basic">
+  <tr>
+    <td>Mission</td>
+    <td>
+      <select id="select-mission">
+        <%= @missions.each do |asm| %>
+            <option value="<%= course_stats_mission_path(@course, asm) %>"><%= asm.title %></option>
+        <% end %>
+      </select>
+    </td>
+    <td><a href="#" class="btn btn-select-nav" data-target="#select-mission">View</a></td>
+  </tr>
+  <tr>
+    <td>Training</td>
+    <td>
+      <select id="select-training">
+        <%= @trainings.each do |asm| %>
+            <option value="<%= course_stats_training_path(@course, asm) %>"><%= asm.title %></option>
+        <% end %>
+      </select>
+    </td>
+    <td><a href="#" class="btn btn-select-nav" data-target="#select-training">View</a></td>
+  </tr>
+	<tr>
+    <td>Policy Missions</td>
+    <td>
+      <select id="select-policyMn">
+        <%= @course.policy_missions.each do |asm| %>
+            <option value="<%= course_stats_policy_mission_path(@course, asm) %>"><%= asm.title %></option>
+        <% end %>
+      </select>
+    </td>
+    <td><a href="#" class="btn btn-select-nav" data-target="#select-policyMn">View</a></td>
+  </tr>
+</table>

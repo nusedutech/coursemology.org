@@ -45,7 +45,8 @@ class Assessment::Grading < ActiveRecord::Base
       self.save
     end
 
-    self.exp_transaction.exp = self.exp ||(asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+    self.exp_transaction.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+
     if submission.has_multiplier?
       self.exp_transaction.exp *= submission.multiplier
     else

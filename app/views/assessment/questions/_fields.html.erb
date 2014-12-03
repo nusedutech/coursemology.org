@@ -39,7 +39,7 @@
 	                    </a>
 	                <% end %>
 	                <% diffg = @course.tag_groups.where(:name => 'Difficulty')%>
-	                <% diffs = diffg.count > 0 ? diffg[0].tags : nil %>
+	                <% diffs = diffg.count > 0 ? diffg[0].tags : [] %>
 	                <% (q.tags.uniq - diffs).each do |tag| %>
 	                    <%= link_to course_tag_path(@course, tag) do %>
 	                        <span class="label label-info"><%= tag.name %></span>

@@ -1,6 +1,13 @@
 <div class="missions">
-  <%- model_name = @summary[:module] -%>
-  <%- title =  @course.customized_title(model_name).pluralize %>
+  <%- if @summary[:module] == "Policy mission" %>
+  	<%- model_name = "policy_mission" %>
+  	<%- title =  "Policy Missions" %>
+		<%- singularTitle = "Policy Mission" %>
+  <%- else %>
+  	<%- model_name = @summary[:module] %>
+  	<%- title =  @course.customized_title(model_name).pluralize %>
+		<%- singularTitle = @course.customized_title(model_name).singularize %>
+  <%- end %>
   <div class="page-header">
     <h1><%=t '.title', :default => title %></h1>
   </div>
@@ -10,11 +17,16 @@
       <%- new_url = new_course_assessment_training_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_training_path(c, a) } %>
       <%- asts_path = course_assessment_trainings_path %>
-  <% else %>
+  <% elsif model_name == 'Mission' %>
       <%= render partial: "assessment/missions/navigation", locals: {title: title} %>
       <%- new_url = new_course_assessment_mission_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_mission_path(c, a) } %>
       <%- asts_path = course_assessment_missions_path %>
+	<% elsif model_name == "policy_mission" %>
+      <%= render  partial: "assessment/trainings/tabs" %>
+			<%- new_url = new_course_assessment_policy_mission_path(@course) %>
+			<%- ast_path = lambda { |c, a| course_assessment_policy_mission_path(c, a) } %>
+      <%- asts_path = course_assessment_policy_missions_path %>
   <% end %>
   <% to_display = @summary[:columns].keys %>
 
@@ -31,12 +43,11 @@
 
   <% if can? :create, Assessment %>
       <p>
-        <%= link_to "New #{@course.customized_title(model_name).singularize}",
+        <%= link_to "New #{singularTitle}",
                     new_url,
                     :class => 'btn btn-primary' %>
       </p>
   <% end %>
-
   <table class="table assignments missions-list-table">
     <thead>
     <tr>
@@ -132,9 +143,9 @@
               </td>
           <% end %>
 
-          <% if curr_user_course.id%>
+          <% if curr_user_course.id %>
               <td>
-                <div id="<%= ast.id %>"></div>
+								<div id="<%= ast.id %>"></div>
               </td>
           <% end %>
           <% if can? :view_detail, ast %>

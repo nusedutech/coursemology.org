@@ -22,7 +22,7 @@ class Assessment::AssessmentsController < ApplicationController
     end
 
     #TODO: refactoring
-    if assessment_type == 'training'
+    if assessment_type == 'training' || assessment_type == 'policy_mission'
       @tabs = @course.tabs.training
       @tab_id = params['_tab']
 
@@ -33,6 +33,10 @@ class Assessment::AssessmentsController < ApplicationController
         @assessments= @tabs.first.assessments
       else
         @tab_id='Trainings'
+      end
+
+      if assessment_type == 'policy_mission'
+        @tab_id='Policy Missions'
       end
     end
     @assessments = @assessments.includes(:as_assessment)
@@ -107,8 +111,16 @@ class Assessment::AssessmentsController < ApplicationController
 
   def stats
     @summary = {}
-    @summary[:type] = @assessment.is_mission? ? 'mission' : 'training'
-    @stats_paging = @course.paging_pref(@assessment.is_mission? ? "MissionStats" : "TrainingStats")
+		if @assessment.is_mission?
+			@summary[:type] = 'mission'
+			@stats_paging = "MissionStats"
+		elsif
+			@summary[:type] = 'training'
+			@stats_paging = "TrainingStats"
+		elsif
+			@summary[:type] = 'policy_mission'
+		end
+
     @submissions = @assessment.submissions.includes(:gradings)
     std_courses = @course.user_courses.student.order(:name).where(is_phantom: false)
     my_std = curr_user_course.std_courses.student.order(:name).where(is_phantom: false)

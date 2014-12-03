@@ -45,6 +45,9 @@ class Course < ActiveRecord::Base
     end
   end
 
+	has_many  :policy_missions, class_name: "Assessment::PolicyMission", through: :assessments,
+            source: :as_assessment, source_type: "Assessment::PolicyMission"
+
   has_many  :trainings, class_name: "Assessment::Training", through: :assessments,
             source: :as_assessment, source_type: "Assessment::Training"
 

@@ -30,6 +30,7 @@ class Assessment < ActiveRecord::Base
   scope :published, -> { where(published: true) }
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") }
   scope :training, -> { where(as_assessment_type: "Assessment::Training") }
+	scope :policy_mission, -> { where(as_assessment_type: "Assessment::PolicyMission") }
 
   belongs_to  :tab
   belongs_to  :course
@@ -126,6 +127,14 @@ class Assessment < ActiveRecord::Base
     as_assessment_type == Assessment::Training.name
   end
 
+	def is_policy_mission?
+		as_assessment_type == Assessment::PolicyMission.name
+	end
+
+	def getPolicyMission
+		Assessment::PolicyMission.find(self.as_assessment_id)
+	end
+
   def single_question?
     questions.count == 1
   end
@@ -155,9 +164,13 @@ class Assessment < ActiveRecord::Base
   end
 
   def get_path
-    is_mission? ?
-        course_assessment_mission_path(self.course, self.specific) :
-        course_assessment_training_path(self.course, self.specific)
+		if is_policy_mission?
+				course_assessment_policy_mission_path(self.course, self.specific)
+		else
+    	is_mission? ?
+        	course_assessment_mission_path(self.course, self.specific) :
+        	course_assessment_training_path(self.course, self.specific)
+		end
   end
 
   def as_lesson_plan_entry

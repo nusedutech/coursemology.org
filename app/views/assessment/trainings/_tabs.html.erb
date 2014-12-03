@@ -29,6 +29,9 @@
           </li>
       <% end %>
   <% end %>
+	<li class="<%= "active" if current_page? :course_assessment_policy_missions %>">
+    <a href="<%= course_assessment_policy_missions_path(@course) %>" ><h4>Regulated Trainings</h4></a>
+  </li>
   <% if can? :bulk_update, Assessment %>
       <li class="<%= "active" if current_page? :overview_course_assessment_trainings %>">
         <a href="<%= overview_course_assessment_trainings_path %>" ><h4>Overview</h4></a>

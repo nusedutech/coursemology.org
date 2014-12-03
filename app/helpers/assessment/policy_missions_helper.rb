@@ -1,0 +1,2 @@
+module Assessment::PolicyMissionsHelper
+end

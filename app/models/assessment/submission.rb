@@ -9,6 +9,10 @@ class Assessment::Submission < ActiveRecord::Base
   scope :training_submissions, -> {
     joins("left join assessments on assessment_submissions.assessment_id = assessments.id ").
         where("assessments.as_assessment_type = 'Assessment::Training'") }
+	
+	scope :policy_mission_submissions, -> {
+    joins("left join assessments on assessment_submissions.assessment_id = assessments.id ").
+        where("assessments.as_assessment_type = 'Assessment::PolicyMission'") }
 
   scope :graded, -> { where(status: 'graded') }
 
@@ -32,6 +36,8 @@ class Assessment::Submission < ActiveRecord::Base
   has_many :files, as: :owner, class_name: "FileUpload", dependent: :destroy
   has_many :gradings, class_name: Assessment::Grading, dependent: :destroy
   has_one :comment_topic, as: :topic
+
+	has_many :progression_groups, class_name: "Assessment::ProgressionGroup", dependent: :destroy
 
   after_create :set_attempting
   after_save   :status_change_tasks, if: :status_changed?

@@ -41,6 +41,7 @@ en:
       forum_forum: Forum
   Assessment:
     Mission:  Mission
+    Policy_Mission: Policy Mission
     Training: Training
   simple_form:
     form_submit:

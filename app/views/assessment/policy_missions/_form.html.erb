@@ -1,0 +1,139 @@
+<%- display_name = "Policy Mission" -%>
+<%= simple_form_for [@course, @policy_mission],
+                    :html => { :class => 'form-horizontal' },
+                    defaults: { input_html: { class: 'span7' } } do |f| %>
+<%= f.input :title %>
+    <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
+    <%= f.input :exp, as: :integer, input_html: {class: "number_field input-medium"}  %>
+    <%= f.input :open_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
+    <%= f.input :close_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
+    <%= f.input :published, as: :boolean, label: "Publish?",
+                input_html: {class: ""},
+                inline_label:"Check to publish #{display_name.downcase}"%>
+    <%= f.input :comment_per_qn, as: :boolean, label: "Comment Mode",
+                input_html: {class: ""},
+                inline_label:"Check to have comment box per question (Otherwise per mission)"%>
+
+    <%= f.association :dependent_on,
+                      collection: @course.policy_missions - [@policy_mission],
+                      input_html: {class: "input-large"}, include_blank: true %>
+
+		<div>
+			<label class="control-label" for="forward_total_wrong_threshold">Total wrong threshold</label>
+			<div class="controls">
+				<input type="number" name="forward[totalWrong]" class="input-medium foward-question-input" min="0" value="<%= @forwardWrong ? @forwardWrong : 0 %>"/>
+			</div>
+		</div>
+
+		<hr/>
+		<h4>Forward Tags</h4>
+		<hr/>
+		<div class = "multi-field-wrapper">
+			<div class = "sort-table multi-fields">
+				<% if (defined?(@fwdPolicyLevels)).nil? or @fwdPolicyLevels.nil? %>
+					<div class = "sort-table-entry multi-field">
+						<i class="icon-move move-icon"></i>
+						<select class = "tag-name" name="forward[tag_id][]">
+							<%- @tags.each do |tag| -%>
+								<option value="<%= tag.id %>"><%= tag.name %></option>
+							<%- end -%>
+						</select>
+						<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="1">
+						<select class = "tag-name" name="forward[movement][]">
+							<option value="consecutive">Consecutive</option>
+							<option value="none" selected="selected">None</option>
+						</select>
+						<a class = "btn btn-danger pull-right" ><i class="icon-remove remove-field"></i></a>
+					</div>
+				<% else %>
+					<% @fwdPolicyLevels.each do |level| %>
+						<div class = "sort-table-entry multi-field">
+							<i class="icon-move move-icon"></i>
+							<select class = "tag-name" name="forward[tag_id][]">
+								<%- @tags.each do |tag| -%>
+									<option value="<%= tag.id %>" 
+									<% if tag.id == level.tag_id %>
+									selected="selected"
+									<% end %>
+									><%= tag.name %></option>
+								<%- end -%>
+							</select>
+							<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="<%= level.progression_threshold %>">
+							<select class = "tag-name" name="forward[movement][]">
+								<option value="consecutive" <% if level.is_consecutive %> selected="selected" <% end %>>Consecutive</option>
+								<option value="none" <% if !level.is_consecutive %> selected="selected" <% end %>>None</option>
+							</select>
+							<a class = "btn btn-danger pull-right" ><i class="icon-remove remove-field"></i></a>
+						</div>
+					<% end %>
+				<% end %>
+			</div>
+			<hr/>
+			<a class="btn add-fields">Add new tag</a>
+		</div>
+		<hr/>
+
+    <%= f.button :form_submit,
+                 cancel: @policy_mission.persisted? ? course_assessment_policy_mission_path(@course, @policy_mission) :
+                         course_assessment_policy_missions_path(@course) %>
+
+<% end %>
+
+<style type="text/css">
+	
+	.tag-name, .foward-question-input {
+		margin: 0px;
+	}
+
+	.add-fields {
+		margin-left:15px;
+	}
+
+	.multi-field {
+		margin-bottom: 10px;
+	}
+
+	.move-icon {
+		cursor: pointer;
+		margin-left:5px;
+		margin-right:5px;
+	}
+
+	.move-icon:hover {
+		cursor: move;
+	}
+
+</style>
+
+<script>
+
+$(function() {
+	$(".sort-table").sortable({
+			connectWith: ".sort-table-entry",
+			handle: ".move-icon",
+			cancel: ".tag-name, .forward-question-input, .remove-field"
+	});
+});
+
+$(".multi-field-wrapper").each(function() {
+
+	var concentratedFields = $(".multi-fields", this);
+ 
+	$(".add-fields", $(this)).click(function(e) {
+		$(".multi-field:first-child", concentratedFields).clone(true)
+																										 .fadeIn("slow")
+																										 .appendTo(concentratedFields);
+	});
+
+	$(".multi-field .remove-field", concentratedFields).click(function(e) {
+		if ($(".multi-field", concentratedFields).length > 1) {
+			$(this).closest('.multi-field').remove();
+		}
+		else {
+			alert("Need at least one field for policy missions.")
+		}
+	});
+
+});
+
+</script>

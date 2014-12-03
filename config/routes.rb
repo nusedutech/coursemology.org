@@ -121,6 +121,18 @@ Coursemology::Application.routes.draw do
           get 'submit' => 'training_submissions#submit'
         end
       end
+
+			resources :assessment_submissions,
+                path:       :submissions,
+                as:         :submissions,
+                controller: :policy_mission_submissions,
+                except: [:create],
+                constraints: PolicyMissionConstraint.new do
+        member do
+          post 'edit' => 'policy_mission_submissions#edit'
+					get 'export' => 'policy_mission_submissions#show_export_excel'
+        end
+      end
     end
 
     resources :assessment_general_questions, path: :general_questions, controller: :general_questions , module: :assessment   
@@ -153,6 +165,14 @@ Coursemology::Application.routes.draw do
       end
       get 'dump_code' => 'missions#dump_code'
     end
+
+		resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
+			collection do
+				get :index, to: 'assessments#index', type: 'policy_mission'
+        get 'stats' => 'policy_missions#stats'
+				get 'submissions' => 'assessments#listall', type: 'policy_mission'
+			end
+		end
 
     resources :assessment_trainings, path: 'trainings', controller: :trainings, module: :assessment do
       collection do
@@ -252,6 +272,9 @@ Coursemology::Application.routes.draw do
     get "stats/missions/:mission_id" => "stats#mission", as: :stats_mission
 
     get "stats/trainings/:training_id" => "stats#training", as: :stats_training
+
+		get "stats/policy_missions/:policy_mission_id" => "stats#policy_mission", as: :stats_policy_mission
+		get "stats/policy_missions_excel/:policy_mission_id" => "stats#policy_mission_export_excel", as: :stats_policy_mission_excel
 
     get "duplicate" => "duplicate#manage", as: :duplicate
 

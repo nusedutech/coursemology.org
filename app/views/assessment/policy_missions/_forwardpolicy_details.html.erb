@@ -1,0 +1,28 @@
+<h2>Forward Policy</h2>
+<div style="margin-bottom:15px;">
+	<table width="100%">
+		<col width="20%" />
+		<tr>
+			<td><strong>Overall wrong threshold : </strong></td>
+			<td><%= fwd.overall_wrong_threshold %></td>
+		</tr>
+	</table>
+</div>
+<div>
+	<table class="table">
+		<tr>
+			<th>Order</th>
+			<th>Tag Name</th>
+			<th>Progression Amount</th>
+			<th>Consecutive</th>
+		</tr>
+		<% fwd.getSortedPolicyLevels.each_with_index do |level, index| %>
+			<tr>
+				<td><%= level.order %></td>
+				<td><%= Tag.find(level.tag_id).name %></td>
+				<td><%= level.progression_threshold %></td>
+				<td><%= level.is_consecutive ? "True" : "False" %></td>
+			</tr>
+		<% end %>
+	</table>
+</div>

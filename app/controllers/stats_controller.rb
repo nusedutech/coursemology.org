@@ -48,6 +48,7 @@ class StatsController < ApplicationController
 
     @missions = @course.missions
     @trainings = @course.trainings
+		@policy_missions = @course.policy_missions
   end
 
   def training
@@ -84,5 +85,91 @@ class StatsController < ApplicationController
 
     @missions = @course.missions
     @trainings = @course.trainings
+		@policy_missions = @course.policy_missions
   end
+
+	def policy_mission
+		@policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
+    authorize! :manage, @policy_mission
+
+		@summary = {}
+		if @policy_mission.progression_policy.isForwardPolicy?
+			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+			forwardPolicyLevels = forwardPolicy.forward_policy_levels
+			@summary[:forwardContent] = {}
+			@summary[:forwardContent][:tagGroup] = []
+			forwardPolicyLevels.each do |singleLevel|
+				packagedLevelQuestions = {}
+				packagedLevelQuestions[:name] = singleLevel.getTag.name
+				packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
+				@summary[:forwardContent][:tagGroup] << packagedLevelQuestions
+			end
+		end
+
+		@missions = @course.missions
+    @trainings = @course.trainings
+		@policy_missions = @course.policy_missions
+	end
+
+	#Extract all policy mission statistics via excel
+	def policy_mission_export_excel
+		@policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
+    authorize! :manage, @policy_mission
+
+		@summary = {}
+		#Extract all of the students data
+		#student_courses = @course.user_courses.student.order('lower(name)')
+
+		if @policy_mission.progression_policy.isForwardPolicy?
+			
+			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+			forwardPolicyLevels = forwardPolicy.forward_policy_levels
+			@summary[:forwardContent] = {}
+			@summary[:forwardContent][:tagGroup] = []
+			forwardPolicyLevels.each do |singleLevel|
+				packagedLevelQuestions = {}
+				packagedLevelQuestions[:name] = singleLevel.getTag.name
+				packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
+				@summary[:forwardContent][:tagGroup] << packagedLevelQuestions
+			end
+
+			#Overall statistics for each student
+			@summary[:forwardContent][:studentSubmissions] = []
+
+			#Record each submission separately
+			@policy_mission.submissions.each do |singleSubmission|
+
+				student = singleSubmission.std_course.user
+				packageSubmissionUser = {}
+				packageSubmissionUser[:id] = student.id
+				packageSubmissionUser[:name] = student.name
+				packageSubmissionUser[:levelInfos] = []
+
+				allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
+				#Separate each entries by the progression levels
+				allProgressionGroups.each do |progressionGroup|
+					forwardGroup = progressionGroup.getForwardGroup
+						
+					allMcqAnswers = forwardGroup.getAllAnswers
+					numCorrect = 0
+					numTotal = 0
+					allMcqAnswers.each do |singleAnsweredQn|
+						if singleAnsweredQn.correct
+							numCorrect += 1
+						end
+						numTotal += 1
+					end
+
+					packageSubmissionUser[:levelInfos] << numCorrect.to_s + " / " + numTotal.to_s
+				end
+				@summary[:forwardContent][:studentSubmissions] << packageSubmissionUser
+			end
+		end
+
+		respond_to do |format|
+			headers["Content-Disposition"] = "attachment; filename=\"Assignment #{@policy_mission.title}\""
+			headers["Content-Type"] = "xls"
+			format.xls
+		end
+	end
 end

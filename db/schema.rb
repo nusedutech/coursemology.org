@@ -11,9 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-
 ActiveRecord::Schema.define(:version => 20141114113325) do
-
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -279,6 +277,20 @@ ActiveRecord::Schema.define(:version => 20141114113325) do
     t.datetime "deleted_at"
     t.datetime "created_at",                              :null => false
     t.datetime "updated_at",                              :null => false
+  end
+
+  create_table "assessment_mpq_questions", :force => true do |t|
+    t.time     "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "assessment_mpq_sub_questions", :force => true do |t|
+    t.integer  "parent_id"
+    t.integer  "child_id"
+    t.time     "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "assessment_policy_missions", :force => true do |t|

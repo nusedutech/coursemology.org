@@ -15,13 +15,6 @@ class Assessment::AssessmentsController < ApplicationController
     end
 
     @assessments = @course.assessments.send(assessment_type)
-		if assessment_type == 'training'
-			@policyMissions = @course.assessments.send(:policy_mission)
-			@policyMissionDisplayColumns = {}
-			@course.assessment_columns(:policy_mission, true).each do |cp|
-        @policyMissionDisplayColumns[cp.preferable_item.name] = cp.prefer_value
-    	end
-		end
 
     if selected_tags
       selected_tags = selected_tags.split(",")
@@ -29,7 +22,7 @@ class Assessment::AssessmentsController < ApplicationController
     end
 
     #TODO: refactoring
-    if assessment_type == 'training'
+    if assessment_type == 'training' || assessment_type == 'policy_mission'
       @tabs = @course.tabs.training
       @tab_id = params['_tab']
 
@@ -40,6 +33,10 @@ class Assessment::AssessmentsController < ApplicationController
         @assessments= @tabs.first.assessments
       else
         @tab_id='Trainings'
+      end
+
+      if assessment_type == 'policy_mission'
+        @tab_id='Policy Missions'
       end
     end
     @assessments = @assessments.includes(:as_assessment)

@@ -783,7 +783,7 @@ if PreferableItem.count == 67
   PreferableItem.create! item:          "Policy Mission",
                          item_type:     "Column",
                          name:          "title",
-                         default_value: "Policy Mission",
+                         default_value: "Regulated Training",
                          description:   "Policy Mission title",
                          default_display: true
 

@@ -23,9 +23,7 @@
         <% if can? :manage, Assessment::Grading %>
             <% if sub.gradings.empty? %>
                 <td>
-                  <%= link_to 'Evaluate',
-                              new_course_assessment_submission_grading_path(@course, sub.assessment, sub),
-                              class: 'btn btn-primary' %>
+                  Uncompleted
                 </td>
             <% else %>
                 <td>

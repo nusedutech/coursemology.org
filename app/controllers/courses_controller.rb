@@ -1,6 +1,6 @@
 class CoursesController < ApplicationController
   load_and_authorize_resource
-  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students]
+  before_filter :load_general_course_data, only: [:show, :students, :pending_gradings, :manage_students, :check_before_import, :import_ivle_student, :manage_student_group]
 
   def index
     @courses = Course.online_course
@@ -31,8 +31,10 @@ class CoursesController < ApplicationController
           tag.tag_group_id = tag_group.id
           tag.save
         end
-        
-        
+
+        invisible_default_forum = ForumForum.create(:name => "Entry Forum", :description => "Store discussions of Lesson Plan")
+        invisible_default_forum.course = @course
+        invisible_default_forum.save
         
         
         format.html { redirect_to course_preferences_path(@course),
@@ -91,6 +93,10 @@ class CoursesController < ApplicationController
   end
 
   def new
+    unless session["ivle_login_data"].nil?
+      @ivle_token = session["ivle_login_data"].credentials.token
+      @ivle_api = Rails.application.config.ivle_api_key
+    end
     respond_to do |format|
       format.html
     end
@@ -168,6 +174,18 @@ class CoursesController < ApplicationController
 
   end
 
+  def check_before_import
+    @check_list = TutorialGroup.check(params[:file], @course)
+  end
+
+  def import_student_groups
+    TutorialGroup.import(params[:students], current_user, @course)
+    respond_to do |format|
+      format.html { redirect_to course_manage_student_group_path(@course),
+                                notice: "import successfully" }
+    end
+  end
+
   def manage_students
     authorize! :manage, UserCourse
     if params[:phantom] && params[:phantom] == 'true'
@@ -199,4 +217,110 @@ class CoursesController < ApplicationController
     @pending_gradings = @course.pending_gradings(curr_user_course)
   end
 
+  def import_ivle_student
+    count = 0
+    existing = ""
+    if params["import_ivle_student"] && params["import_ivle_student"]["chose"]
+      params["import_ivle_student"]["chose"].each do |e|
+          email = params["import_ivle_student"]["email"][e]=="" ? (e + "@nus.edu.sg") : params["import_ivle_student"]["email"][e]
+          name = params["import_ivle_student"]["name"][e]
+          password = User.new(password: e).encrypted_password
+          user = User.where(:provider => "ivle", :uid => e).first
+          unless user
+            user = User.new(:name => name, :email => email, :student_id => e, :provider => "ivle" ,:uid => e, :password => password, :password_confirmation => password)
+            user.skip_confirmation!
+            user.save
+            count = count+1
+          else
+            existing += " #{e},"
+          end
+          user_course = @course.user_courses.find_by_user_id_and_course_id(user.id, @course.id)
+          unless user_course
+            @course.enrol_user(user, Role.find_by_name("student"))
+          end
+      end
+      respond_to do |format|
+        if ( count > 0 || !existing.empty? )
+          format.html { redirect_to course_manage_students_path(@course), notice: ( count > 0 ? "Imported #{count} students." : "" ) + ( existing.empty? ? "" : "<br />Student Numbers existed: #{existing[0..-2]}") }
+        else
+          format.html { redirect_to course_manage_students_path(@course)}
+        end
+      end
+    else
+      if (session["ivle_login_data"] && @course.module_id)
+        @ivle_token = session["ivle_login_data"].credentials.token
+        @ivle_api = Rails.application.config.ivle_api_key
+        @mapping_module = @course.module_id
+      end
+    end
+  end
+
+  def download_import_template
+    @students = @course.user_courses.student.where(is_phantom: false).order('lower(name) asc')
+    file = Tempfile.new('import-student-group-template')
+    file.puts "id,name,email,group,from_milestone,to_milestone,remark\n"
+
+    @students.each do |student|
+      file.puts student.user.student_id + "," +
+                    student.name.gsub(",", " ") + "," +
+                    student.user.email + "," +
+                    (TutorialGroup.where(:std_course_id => student.id).first ? TutorialGroup.where(:std_course_id => student.id).first.group.name : "") + "," +
+                    "Week 1" + "," +
+                    "Week 3" + "," +
+                    "" + "\n"
+    end
+
+    file.close
+    send_file(file.path, {
+        :type => "application/csv",
+        :disposition => "attachment",
+        :filename =>   @course.title + " - Import Student Group Template.csv"
+    })
+
+    #send_file "#{Rails.root}/public/import-student-group-template.csv",
+    #          :filename => "import-student-group-template.csv",
+    #          :type => "application/csv"
+  end
+
+  def manage_student_group
+    authorize! :manage, UserCourse
+    if params[:phantom] && params[:phantom] == 'true'
+      @phantom = true
+    else
+      @phantom = false
+    end
+
+    @student_courses = @course.user_courses.student.where(is_phantom: @phantom).order('lower(name)')
+    @milestones = @course.lesson_plan_milestones.where("title <> ? and title <> ? and title <> ?","Recess Week", "Reading Week", "Examination Week").order('start_at')
+    @student_count = @student_courses.length
+
+    @std_paging = @course.paging_pref('ManageStudents')
+    if @std_paging.display?
+      @student_courses = Kaminari.paginate_array(@student_courses).page(params[:page]).per(@std_paging.prefer_value.to_i)
+    end
+  end
+
+  def edit_student_group
+    student = UserCourse.find_by_id(params[:std_course_id].to_i)
+    stu_tut_group = student.tut_group_courses.where(:milestone_id => params[:milestone_id].to_i).first
+    respond_to do |format|
+      if stu_tut_group
+        if params[:group_id].to_i != -1
+          stu_tut_group.group_id = params[:group_id].to_i
+          if stu_tut_group.save
+            format.json { render json: { status: 'OK' }}
+          end
+        else
+          stu_tut_group.destroy!
+          format.json { render json: { status: 'OK' }}
+        end
+      else
+        tg = @course.tutorial_groups.build
+        tg.std_course_id = params[:std_course_id].to_i
+        tg.milestone_id = params[:milestone_id].to_i
+        tg.group_id = params[:group_id].to_i
+        tg.save
+      end
+    end
+  end
 end

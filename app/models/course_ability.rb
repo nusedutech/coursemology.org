@@ -145,6 +145,8 @@ class CourseAbility  < Ability
 
       can :read, [LessonPlanEntry]
       can :read, [LessonPlanMilestone], is_publish: true
+      can :submission, LessonPlanEntry
+      can :mission_update, LessonPlanEntry
 
       can :read, Assessment, published: true
       can :access_denied, Assessment

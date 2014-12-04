@@ -7,6 +7,7 @@ class ForumTopic < ActiveRecord::Base
   has_many :subscriptions, class_name: 'ForumTopicSubscription', foreign_key: :topic_id
   belongs_to :author, class_name: 'UserCourse', foreign_key: :author_id
   belongs_to :forum, class_name: 'ForumForum'
+  belongs_to  :discussable, polymorphic: true
 
   scope :questions, -> {
     where(topic_type: TOPIC_TYPE_QUESTION)

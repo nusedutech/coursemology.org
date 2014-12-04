@@ -7,7 +7,7 @@ class FileUpload < ActiveRecord::Base
   has_attached_file :file, :restricted_characters => /[:\/\\]/
 
   before_post_process :hash_filename
-  after_save :sync_filename, if: :original_name_changed?
+  #after_save :sync_filename, if: :original_name_changed?
 
   include Rails.application.routes.url_helpers
   require 'digest/md5'

@@ -2,7 +2,7 @@
     <a class="lesson-plan-anchor" name="milestone-<%= milestone.id %>"></a>
 <% end %>
 
-<% entries = milestone.entries.sort { |a, b| a.start_at <=> b.start_at } %>
+<% entries = milestone.entries(true,@curr_user_course).sort { |a, b| a.start_at <=> b.start_at } %>
 <% if cannot? :manage, Assessment %>
     <% entries = entries.select { |entry| entry.is_published } %>
 <% end %>
@@ -13,32 +13,36 @@
       <div class="row">
         <div class="lesson-plan-header span8">
           <div>
-            <h2>
+            <h3>
               <% if entries.length > 0 %>
                   <a class="lesson-plan-hide-entries" style="display: none;"><i class="icon-minus"></i></a>
                   <a class="lesson-plan-show-entries"><i class="icon-plus"></i></a>
               <% end %>
               <%= milestone.title %>
-              <% if milestone.start_at %>
-                  <small>
-                    <%= milestone.start_at.strftime("%d %b %Y") %>
-                    <% if milestone.end_at %>
-                        - <%= milestone.end_at.strftime("%d %b %Y") %>
-                    <% elsif milestone.next_milestone %>
-                        - <%= milestone.next_milestone.start_at.advance(:days => -1).strftime("%d %b %Y") %>
-                    <% else %>
-                        onwards
-                    <% end %>
-                  </small>
+              <% if can? :manage, LessonPlanEntry %>
+                  <% if milestone.start_at %>
+                      <small>
+                        <%= milestone.start_at.strftime("%d %b %Y") %>
+                        <% if milestone.end_at %>
+                            - <%= milestone.end_at.strftime("%d %b %Y") %>
+                        <% elsif milestone.next_milestone %>
+                            - <%= milestone.next_milestone.start_at.advance(:days => -1).strftime("%d %b %Y") %>
+                        <% else %>
+                            onwards
+                        <% end %>
+                      </small>
+                  <% end %>
               <% end %>
-            </h2>
+            </h3>
           </div>
-          <% if milestone.description %>
-              <div>
-                <p>
-                  <%= milestone.description.html_safe %>
-                </p>
-              </div>
+          <% if can? :manage, LessonPlanEntry %>
+              <% if milestone.description %>
+                  <div>
+                    <p>
+                      <%= milestone.description.html_safe %>
+                    </p>
+                  </div>
+              <% end %>
           <% end %>
         </div>
         <div class="pull-right lesson-plan-milestone-controls">

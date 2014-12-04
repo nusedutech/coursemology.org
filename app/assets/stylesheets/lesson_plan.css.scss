@@ -83,3 +83,198 @@ th#linked_resource_type, th#linked_resource_actions {
 .transparent-background {
   background-color:rgba(255, 255, 255, 0.9);
 }
+
+//HLV
+//addition css for new lesson plan - 17 Sep 2014
+
+.border-gray{
+  border: 1px solid #ccc;
+}
+
+.stretch-content {
+  padding: 0 !important;
+}
+
+.lesson-plan-toolbar-student {
+  margin-bottom: 0;
+  padding:0 10px 8px 10px ;
+}
+
+#lesson-plan-content {
+  width: 100%;
+  display: table;
+  table-layout: fixed;
+}
+
+#lesson-plan-content iframe.wysihtml5-sandbox {
+  width: 70% !important;
+}
+
+#lesson-plan-content ul.code-comment-box{
+  margin: 0;
+}
+
+#lesson-plan-content div#milestone-entity {
+  background: none repeat scroll 0 0 #fcfcfc;
+  border-right: 1px solid #c8c8c8;
+  box-sizing: border-box;
+  display: table-cell;
+  position: relative;
+  width: 25%;
+  vertical-align: top;
+}
+
+#lesson-plan-content div#milestone-entity .lesson-plan-header-row-wrapper{
+  background-color: #e3e3e3;
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  //box-shadow: 0 1px 0 #fff inset, 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+  transition: background-color 0.1s linear 0s;
+}
+
+#lesson-plan-content div#milestone-entity .lesson-plan-item hr{
+  margin: 0;
+}
+#lesson-plan-content section#detail-content {
+  box-sizing: border-box;
+  display: table-cell;
+  width: 75%;
+  height: auto;
+  padding: 20px;
+
+}
+
+#lesson-plan-content section#detail-content p {
+  font-size: 15px;
+}
+
+#lesson-plan-content .row {
+  margin-left: 0;
+  padding-left: 10px;
+}
+
+#lesson-plan-content .span8 {
+  width: auto;
+  margin-left: 0;
+}
+
+#lesson-plan-content .lesson-plan-entry-body {
+  margin-left: 0;
+}
+
+#lesson-plan-content h1, #lesson-plan-content h2{
+  margin: 0;
+  line-height: 27px;
+}
+
+#lesson-plan-content h1 small, #lesson-plan-content .lesson-plan-virtual-entry-title,
+#lesson-plan-content .lesson-plan-entry-body h2 {
+  font-size: 16px;
+  line-height: 27px;
+}
+
+
+//addition css for forum/discussion in Lession Plan - 19 Sep 2014
+.forum {
+  ul.breadcrumb {
+    .dropdown-menu {
+      max-width: inherit;
+    }
+  }
+
+  .post-status-icons {
+    display: block;
+    text-align: center;
+    font-size: 130%;
+  }
+
+  .post {
+    // In case the previous post was too short.
+    clear: both;
+
+    // Spacing between posts.
+    margin-bottom: 1em;
+
+    .user {
+      margin-right: 1em;
+      text-align: right;
+      width: 7em;
+      float: left;
+
+      .voting {
+        clear: both;
+        text-align: center;
+      }
+    }
+
+    .contents {
+      // Same as .thumbnail from Bootstrap 2.2.
+      padding: 20px;
+      line-height: 1;
+      border: 1px solid #ddd;
+      -webkit-border-radius: 4px;
+      -moz-border-radius: 4px;
+      border-radius: 4px;
+      -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+      -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+
+      // Block formatting context
+      overflow: hidden;
+
+      // Post title
+      .title {
+        margin: -0.4em 0 0.75em 0;
+        font-size: 90%;
+      }
+
+      // The post info, like post time etc
+      .info {
+        margin-top: 1em;
+      }
+
+      // Voting
+      .voting {
+        font-size: 130%;
+      }
+    }
+
+    .contents.answer {
+      // background-color: $state-success-bg;
+      background-color: #dff0d8;
+    }
+
+    .quick-reply {
+      clear: both;
+    }
+  }
+
+  .thread {
+    padding-left: 75px;
+  }
+
+  .posts-count, .views-count, .topics-count, .votes-count {
+    vertical-align: middle;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .unread-count {
+    background-color: #bd362f;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+    line-height: 25px;
+    margin-top: 5px;
+    padding: 0 6px;
+    margin-left: 5px;
+  }
+
+  .unread-post {
+    background-color: #f8e3e3;
+  }
+}

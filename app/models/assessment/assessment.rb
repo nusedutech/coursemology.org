@@ -15,6 +15,7 @@ class Assessment < ActiveRecord::Base
   attr_accessible :published, :comment_per_qn
   attr_accessible :open_at, :close_at, :bonus_cutoff_at
   attr_accessible :tab_id, :display_mode_id, :dependent_id
+  attr_accessible :allow_discussion
 
   validates_presence_of :title
 
@@ -180,6 +181,7 @@ class Assessment < ActiveRecord::Base
     entry.start_at = self.open_at
     entry.end_at = self.close_at  if self.respond_to? :close_at
     entry.url = get_path
+    entry.assessment = self
     entry.is_published = self.published
     entry
   end

@@ -144,7 +144,11 @@ class MaterialsController < ApplicationController
       curr_user_course.mark_as_seen(material)
     end
 
-    redirect_to material.file.file_url
+    #redirect_to material.file.file_url
+    send_file "#{Rails.root}/Material/files/#{material.file.original_name}",
+                :filename => material.file.original_name,
+                :type => material.file.file_content_type
+
   end
 
   def show_by_name

@@ -5,10 +5,12 @@ class LessonPlanEntry < ActiveRecord::Base
 
   belongs_to :course
   belongs_to :creator, class_name: "User"
+  belongs_to :group, class_name: "StudentGroup"
   has_many :resources, class_name: "LessonPlanResource"
 
   has_many :taggable_tags, as: :taggable, dependent: :destroy
   has_many :topicconcepts, through: :taggable_tags, source: :tag, source_type: "Topicconcept"
+
 
   after_save :save_resources
   
@@ -35,7 +37,7 @@ class LessonPlanEntry < ActiveRecord::Base
         @title = title
       end
       def entry_type
-        3
+        4
       end
       def entry_real_type
         @real_type
@@ -72,6 +74,13 @@ class LessonPlanEntry < ActiveRecord::Base
       end
 
       # Extra property that real entries do not have, so we can jump to them.
+      def assessment
+        @assessment
+      end
+      def assessment=(assessment)
+        @assessment = assessment
+      end
+
       def url
         @url
       end

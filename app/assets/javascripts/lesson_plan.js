@@ -55,7 +55,8 @@ $(document).ready(function() {
     // the header is removed from the normal document flow.
     var currentWrapper = $(wrappers[i]);
     currentWrapper.height(currentHeader.outerHeight(true));
-    
+
+    /*
     currentHeader.scrollToFixed({
       marginTop: $('.navbar-inner').outerHeight(true),
       limit: function() {
@@ -71,6 +72,7 @@ $(document).ready(function() {
         currentHeader.removeClass("transparent-background");
       }
     });
+    */
   });
   
   function resizeStickyHeaders () {

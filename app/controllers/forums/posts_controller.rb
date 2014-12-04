@@ -34,11 +34,18 @@ class Forums::PostsController < ApplicationController
       end
 
       respond_to do |format|
-        format.html { redirect_to course_forum_topic_path(@course, @forum, @topic, anchor: "post-#{@post.id}"),
-                                  notice: 'The post was successfully created.' }
+        if params["redirect_link"]
+          format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=#{params["redirect_link"]}" + "#post-#{@post.id}") }
+        elsif params["assessment_redirect_link"]
+          format.html { redirect_to params["assessment_redirect_link"] + ((params["assessment_redirect_link"].to_s.include? "step") ? "&discuss=true" : "?discuss=true") }
+        else
+          format.html { redirect_to course_forum_topic_path(@course, @forum, @topic, anchor: "post-#{@post.id}"),
+                                    notice: 'The post was successfully created.' }
+        end
       end
     rescue
       redirect_to course_forum_topic_path(@course, @forum, @topic)
+
     end
   end
 
@@ -70,7 +77,7 @@ class Forums::PostsController < ApplicationController
   end
 
   def reply
-    authorize! :reply, @topic
+    #authorize! :reply, @topic
   end
 
   def set_vote

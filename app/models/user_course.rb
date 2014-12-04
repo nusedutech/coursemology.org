@@ -68,6 +68,7 @@ class UserCourse < ActiveRecord::Base
   has_many :activities, foreign_key: "actor_course_id", dependent: :destroy
   has_many :pending_actions, dependent: :destroy
 
+
   default_scope includes(:course)
 
   def is_student?

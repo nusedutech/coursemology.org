@@ -39,6 +39,7 @@
                       new_course_assessment_mpq_question_path(@course),
                       :class => 'btn btn-primary' %>
 	</p>
+    <p>Import Question (<%= link_to "Download Template",download_import_question_template_course_assessment_questions_path %>) </p>
     <%= render partial: "import", locals: {url: import_course_assessment_questions_path}%>
 	<%= render partial: "fields"%>
 <%- else%>

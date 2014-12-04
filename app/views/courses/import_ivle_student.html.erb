@@ -1,0 +1,55 @@
+<div class="page-header">
+  <h1>Import Students</h1>
+</div>
+
+<%= form_tag course_import_ivle_student_path(@course), :method => 'post', class: "course_import_student" do %>
+    <table id="table-import-student" class="table assignments missions-list-table ver-ali-top">
+      <thead>
+          <tr>
+            <th width="15%">Id</th>
+            <th width="35%">Name</th>
+            <th width="40%">Email</th>
+            <th width="10%"><input type='checkbox' class='import-student-select-all' /></th>
+          </tr>
+      </thead>
+
+      <tbody class="table-hover">
+
+      </tbody>
+    </table>
+    <div class="form-action">
+      <input id="btn-import" class="btn btn-primary form-submit" type="submit" value="Finish Import" />
+      <%= link_to "Back",course_manage_students_path(@course), :class => 'btn' %>
+    </div>
+
+<% end %>
+
+<% if @ivle_token %>
+    <input type="hidden" id="ivle_token" value="<%= @ivle_token %>" />
+    <input type="hidden" id="ivle_api" value="<%= @ivle_api %>" />
+    <input type="hidden" id="mapping_module" value="<%= @mapping_module %>" />
+<% end%>
+
+<script>
+    $(document).ready(function(){
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            // you must init the user
+            user.init().done(function () {});
+            var id = $("#mapping_module").val();
+            user.get("Class_Roster", {CourseID: id}).success(function (data) {
+                var anns = ivle.filterResult(data); //
+                if (data.Results.length > 0) {
+                    $('#table-import-student tbody').html("");
+                    $.each(data.Results, function (index, value) {
+                        $('#table-import-student tbody').append("<tr><td>" + value.UserID + "</td><td>" + value.Name + "</td><td>" + value.Email + "</td><td><input type='checkbox' class='import-student-checkbox' value='" + value.UserID + "' name='import_ivle_student[chose][]' />"
+                                + "<input type='hidden' name='import_ivle_student[name][" + value.UserID + "]' value='" + value.Name + "'>"
+                                + "<input type='hidden' name='import_ivle_student[email][" + value.UserID + "]' value='" + value.Email + "'>"
+                                + "</td></tr>");
+                    });
+                }
+            });
+        }
+    });
+
+</script>

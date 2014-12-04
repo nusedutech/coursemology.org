@@ -1,5 +1,6 @@
+
 <div>
-  <div id="lesson-plan-toolbar" class="page-header">
+  <div id="lesson-plan-toolbar" class="page-header <%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-toolbar-student' %>">
     <div class="row">
       <div class="span5">
         <h1><%= @course.customized_lesson_plan_title %></h1>
@@ -18,8 +19,14 @@
                 <%= link_to "Milestone", new_course_lesson_plan_milestone_path() %>
               </li>
               <li class="divider"></li>
+              <li id="import-ivle-event-importer" data-toggle="modal" data-target="#import-ivle-event" >
+                <a href="#">Import IVLE Events</a>
+              </li>
               <li id="lesson-plan-open-milestone-generator" data-toggle="modal" data-target="#lesson-plan-multi-milestone" >
                 <a href="#">Generate Milestones</a>
+              </li>
+              <li>
+                <a class="academic_milestones_generator" href="#">Generate NUS Academic Milestones</a>
               </li>
             </ul>
           </div>
@@ -39,23 +46,67 @@
 
   <%= render :partial => 'lesson_plan/navigation' %>
 
-  <div>
-  <% grouped_milestones = @milestones.group_by { |milestone| milestone.is_virtual? } %>
-  <% grouped_milestones[false] = [] unless grouped_milestones[false] %>
-  <% grouped_milestones[true] = [] unless grouped_milestones[true] %>
-  <% prior_items = grouped_milestones[true].select { |e| e.title == "Prior Items"  } %>
-  <% other_items = grouped_milestones[true].select { |e| e.title == "Other Items" } %>
-  <% sorted_milestones = prior_items + grouped_milestones[false].sort_by { |milestone| milestone.start_at } + other_items %>
-  <% sorted_milestones.each { |milestone| %>
-    <% if !milestone.is_virtual? || milestone.entries.length  > 0 %>
-      <%= render :partial => 'lesson_plan/milestone', locals: { :milestone => milestone } %>
-    <% end %>
-  <% } %>
+  <div id="<%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-content' %>">
+    <div id="milestone-entity">
+      <div style="width: auto">
+          <input type="hidden" id="active-entity" value="<%= @current_id%>" />
+          <% grouped_milestones = @milestones.group_by { |milestone| milestone.is_virtual? } %>
+          <% grouped_milestones[false] = [] unless grouped_milestones[false] %>
+          <% grouped_milestones[true] = [] unless grouped_milestones[true] %>
+          <% prior_items = grouped_milestones[true].select { |e| e.title == "Prior Items"  } %>
+          <% other_items = grouped_milestones[true].select { |e| e.title == "Other Items" } %>
+          <% sorted_milestones = prior_items + grouped_milestones[false].sort_by { |milestone| milestone.start_at } + other_items %>
+          <% sorted_milestones.each { |milestone| %>
+            <% if !milestone.is_virtual? || milestone.entries.length  > 0 %>
+              <%= render :partial => 'lesson_plan/milestone', locals: { :milestone => milestone } %>
+            <% end %>
+          <% } %>
+      </div>
+    </div>
+    <section id="detail-content">
+    </section>
   </div>
+  <hr class="hr-shrink-margin">
   <div class="end-of-page"></div>
 </div>
   
 <% if can? :manage, LessonPlanEntry %>
+  <div id="import-ivle-event" class="modal hide fade" data-backdrop="static">
+    <%= form_tag course_lesson_plan_import_ivle_event_path(@course), :method => 'get', class: "import-ivle-event-form" do %>
+      <div class="modal-header">
+        <h3>IVLE Event Importer</h3>
+      </div>
+      <div class="modal-body hidden">
+      </div>
+      <div class="modal-body">
+        <div class="control-group">
+          <table class="table assignments missions-list-table ver-ali-top">
+            <thead>
+            <tr>
+              <th width="10%">Class</th>
+              <th width="20%">Type</th>
+              <th width="15%">Week Type</th>
+              <th width="15%">Week Date</th>
+              <th width="12%">Start</th>
+              <th width="12%">End</th>
+              <th width="10%">Room</th>
+              <th width="6%">Choose</th>
+            </tr>
+            </thead>
+            <tbody class="table-hover">
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <input id="btn-import-ivle-event" class="btn btn-primary" type="submit" value="Done" />
+        <button data-dismiss="modal" class="btn">
+          Cancel
+        </button>
+      </div>
+    <% end %>
+  </div>
   <div id="lesson-plan-multi-milestone" class="modal hide fade" data-backdrop="static">
     <form class="lesson-plan-milestone-generator-form">
       <div class="modal-header">
@@ -123,18 +174,251 @@
   </div>
 <% end %>
 
+<% if @ivle_token %>
+    <input type="hidden" id="ivle_token" value="<%= @ivle_token %>" />
+    <input type="hidden" id="ivle_api" value="<%= @ivle_api %>" />
+    <input type="hidden" id="mapping_module" value="<%= @mapping_module %>" />
+<% end%>
 <script>
-    $( document ).ready(function() {
+    $(document).ready(function() {
+
+        $('div.span-content').addClass('border-gray');
+        if($('div#lesson-plan-content').length ) {
+            $('div.content').addClass('stretch-content');
+        }
+        //slide and show hide menubar
         $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
         $(".btn.btn-navbar.collapsed").click(function () {
-            $('.span2.sidebar').toggle('slow',function(){
-                if($('.span10.span-content').width()==970) {
+            if($('.span10.span-content').width()==970) {
+                $('.span2.sidebar').toggle('slow',function(){
                     $('.span10.span-content').width(1170);
-                }else{
-                    $('.span10.span-content').width(970);
-                }
-            });
+                });
+            }else{
+                $('.span10.span-content').width(970);
+                $('.span2.sidebar').toggle('slow');
+            }
 
         });
+
+        //Hide menubar default
+        if ($('#lesson-plan-content').length) {
+            $('.span2.sidebar').hide();
+            $('.span10.span-content').width(1170);
+        }
+
+        //show entry
+        $('#lesson-plan-content a.btn_entry').click(function(){
+            $('section#detail-content').empty();
+            var entry_type =$(this).find('input.entry_type').val();
+            var title = $(this).find('span.entry_title').text();
+            var type  = $(this).find('input.entry_text_type').val();
+            var des  = $(this).find('input.entry_description').val();
+            var loc  = $(this).find('input.entry_location').val();
+            var dis = $(this).next('div.discussion').html();
+            var $resource = $(this).parent().parent().find('div.resource-hide ul');
+            var entry_start_end = $(this).find('span.entry_start_end').html();
+            if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
+                show_lecture(title, type, des, loc, entry_start_end, $resource);
+            }else if(entry_type =='3'){
+                loc = loc.replace(".html", "/media/video.mp4");
+                show_video(title, type, des, loc);
+            }else if(entry_type =='4'){
+                show_mission_training(this,title, type, des, loc, $resource);
+            }
+
+            show_discussion(dis);
+        });
+
+        //show entry lecture, recitation, tutorial
+        function show_lecture(title, type, des, loc, entry_start_end, $resource){
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            entry_form += "<div><h4>" + entry_start_end + "</h4></div>";
+            $('section#detail-content').append(entry_form);
+
+            if($resource.length){
+                $('section#detail-content').append($("<table class='material_list'></table>"));
+                $resource.children().each(function(){
+                    var parts = $(this).find('a').text().split('.');
+                    var ext = parts[parts.length - 1];
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+                    $('section#detail-content .material_list').append($("<tr><td colspan='2'>"+ $(this).html()+"</td></tr>"));
+                });
+
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://localhost:3000/data/lecture01.pdf'></td></tr>"));
+                $('section#detail-content .material_list .open-viewer').click(function() {
+                    if($(this).text()=="View Online") {
+                        $(this).parent().parent().next().find('a').gdocsViewer({width: 650, height: 450});
+                        $(this).text("Hide");
+                    }else if ($(this).text()=="Show"){
+                        $(this).parent().parent().next().show();
+                        $(this).text("Hide");
+                    }else{
+                        $(this).parent().parent().next().hide();
+                        $(this).text("Show");
+                    }
+                    //return false;
+                });
+            }
+
+        }
+
+        //show video
+        function show_video(title, type, des, loc){
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><video width='90%' controls>";
+            entry_form += "<source src='" + loc + "' type='video/mp4'>";
+            entry_form += "Your browser does not support the video tag.";
+            entry_form += "</video></div>";
+            $('section#detail-content').append(entry_form);
+        }
+
+        //show entry mission training
+        function show_mission_training(entry, title, type, des, loc, $resource){
+            var start  = $(entry).find('input.entry_start').val();
+            var end  = $(entry).find('input.entry_end').val();
+            var url  = $(entry).find('input.entry_url').val();
+
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            entry_form += "<div><p style=''><h4>" + (start ? "<span class='icon-calendar'></span>" + " " + start : "") + (end ? " to " + end : "") + "</h4></p></div>";
+            $('section#detail-content').append(entry_form);
+            if($resource.length){
+                $('section#detail-content').append($("<table class='material_list'></table>"));
+                $resource.children().each(function(){
+                    var parts = $(this).find('a').text().split('.');
+                    var ext = parts[parts.length - 1];
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+                });
+
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list .open-viewer').click(function() {
+                    if($(this).text()=="View Online") {
+                        $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});
+                        $(this).text("Hide");
+                    }else if ($(this).text()=="Show"){
+                        $(this).parent().parent().next().show();
+                        $(this).text("Hide");
+                    }else{
+                        $(this).parent().parent().next().hide();
+                        $(this).text("Show");
+                    }
+                    //return false;
+                });
+            }
+            $('section#detail-content').append("<div><a class='attempt-assessment btn btn-success' href='" + url + "'>Attempt</a></div>");
+        }
+
+        $('#lesson-plan-content a.attempt-assessment').click(function() {
+            //alert("abc");
+            //return false;
+        });
+
+        function show_discussion(discussion){
+            var entry_form = "";
+            $('section#detail-content').append(entry_form);
+            $('section#detail-content').append(discussion);
+            $('section#detail-content a.a_discussion').click(function() {
+                $('section#detail-content .forum').toggle('slow');
+                if ($('section#detail-content a.a_discussion').text()=="Show Discussion"){
+                    $('section#detail-content a.a_discussion').text("Hide Discussion");
+                }else{
+                    $('section#detail-content a.a_discussion').text("Show Discussion");
+                }
+            });
+        }
+
+        if($('#active-entity').val()){
+            $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
+            $("a#"+$('#active-entity').val()).click();
+            $('section#detail-content .forum').show();
+            $('section#detail-content a.a_discussion').text('Hide Discussion');
+        }
+
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            // you must init the user
+            user.init().done(function () {});
+            var id = $("#mapping_module").val();
+            user.get("Timetable_Module", {CourseID: id})
+                    .success(function (data) {
+                        $.each(data.Results, function( ind, val ) {
+                            if(val.LessonType=="TUTORIAL") {
+                                $('div#import-ivle-event table tbody').append($("<tr><td>" + val.ClassNo + "</td><td>" + val.LessonType + "</td><td>" + val.WeekText + "</td><td>" + val.DayText + "</td><td>" + val.StartTime + "</td><td>" + val.EndTime + "</td><td>" + val.Venue
+                                        + "</td><td><input type='checkbox' value='" + val.ClassNo + "' name='ivle_event[choose][]' />"
+                                        + "<input type='hidden' name='ivle_event[lesson_type][" + val.ClassNo + "]' value='" + val.LessonType + "'>"
+                                        + "<input type='hidden' name='ivle_event[week_text][" + val.ClassNo + "]' value='" + val.WeekText + "'>"
+                                        + "<input type='hidden' name='ivle_event[day_code][" + val.ClassNo + "]' value='" + val.DayCode + "'>"
+                                        + "<input type='hidden' name='ivle_event[start_time][" + val.ClassNo + "]' value='" + val.StartTime + "'>"
+                                        + "<input type='hidden' name='ivle_event[end_time][" + val.ClassNo + "]' value='" + val.EndTime + "'>"
+                                        + "<input type='hidden' name='ivle_event[venue][" + val.ClassNo + "]' value='" + val.Venue + "'>"
+                                        + "</td></tr>"));
+                            }
+                        });
+                    });
+        }
     });
+
+    $('a.academic_milestones_generator').click(function() {
+        if($("#ivle_token").length && $("#mapping_module").length) {
+            var DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+            var milestones = [];
+            var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+            user.init().done(function () {
+            });
+            var current_year = "", current_semester = "";
+            user.get("AcadYrSem_Current", {})
+                    .success(function (data) {
+                        current_year = data.Results[0].AcadYear;
+                        current_semester = data.Results[0].AcadSemester;
+
+                        user.get("MyOrganizer_AcadSemesterInfo", {AcadYear: current_year, Semester: current_semester})
+                                .success(function (data) {
+                                    $.each(data.Results, function (ind, val) {
+                                        if (val.TypeName != "0" && val.TypeName != "Vacation") {
+                                            var date_start = moment(val.WeekTypeStartDate_js, DATE_FORMAT);
+                                            var date_end = moment(val.WeekTypeEndDate_js, DATE_FORMAT);
+                                            milestones.push({
+                                                title: $.isNumeric(val.TypeName) ? ( "Week" + ' ' + val.TypeName) : (val.TypeName + ' ' + "Week"),
+                                                start_at: date_start.clone(),
+                                                end_at: date_end.clone()
+                                            });
+                                        }
+                                    });
+                                    var upload_milestones = milestones.map(function (milestone) {
+                                        return {
+                                            title: milestone.title,
+                                            description: '',
+                                            start_at: milestone.start_at.format(DATE_FORMAT),
+                                            end_at: milestone.end_at.format(DATE_FORMAT)
+                                        };
+                                    });
+
+                                    var promise = $.ajax({
+                                        type: 'POST',
+                                        url: 'lesson_plan/milestones.json',
+                                        data: {
+                                            lesson_plan_milestone: upload_milestones
+                                        },
+                                        dataType: 'json'
+                                    });
+
+                                    // Wait for all the requests to come back before closing the dialog.
+                                    promise.then(function () {
+                                        location.reload();
+                                    }, function () {
+                                        alert('An error occurred while processing your request.');
+                                        location.reload();
+                                    });
+                                    return false;
+                                });
+                    });
+        }
+    });
+
 </script>

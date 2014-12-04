@@ -49,13 +49,12 @@ Coursemology::Application.configure do
     :password => ENV['GMAIL_SMTP_PASSWORD'],
   }
 
-  config.paperclip_defaults = {
-      preserve_files: true,
-      :storage => :s3,
-      :s3_credentials => {
-          :bucket => ENV['AWS_BUCKET'],
-          :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-          :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
-      }
-  }
+
+
+  config.middleware.use OmniAuth::Builder do
+    provider :ivle, api_key: "mHy1mEcwwWvlHYqc9bNdO"
+  end
+  config.ivle_api_key = "mHy1mEcwwWvlHYqc9bNdO"
+
+
 end

@@ -2,7 +2,7 @@ class UserCoursesController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :user_course
 
-  before_filter :load_general_course_data, only: [:show,:staff, :achievements]
+  before_filter :load_general_course_data, only: [:show,:staff, :group, :achievements]
 
   def show
     @tag_groups = @course.tag_groups.includes(:tags)
@@ -31,6 +31,18 @@ class UserCoursesController < ApplicationController
       @user_course.user.email = params[:email].strip
     end
 
+    tt = TutorialGroup.where(:std_course_id => @user_course.id).first
+    if tt
+      tt.group_id = params[:group][0].to_i
+    else
+      tt = @course.tutorial_groups.build
+      tt.std_course = @user_course
+      tt.tut_course_id =  params[:tutor].first
+      tt.group_id = params[:group][0].to_i
+      tt.save
+    end
+    tt.save
+
     @user_course.is_phantom =  params[:is_phantom] || false
 
     tut_group_assign
@@ -44,6 +56,20 @@ class UserCoursesController < ApplicationController
         flash[:error] ='Update failed. You may entered invalid name or email.'
         format.html { redirect_to params[:redirect_back_url] }
       end
+    end
+  end
+
+  def group
+    @group_courses = @course.student_groups
+    @staff_courses = @course.user_courses.staff
+  end
+
+  def remove_group
+    #@user_course.role = Role.student.first
+    #@user_course.save
+    respond_to do |format|
+      format.json { render json: { status: 'OK' } }
+      format.html { redirect_to course_students_path(@course) }
     end
   end
 

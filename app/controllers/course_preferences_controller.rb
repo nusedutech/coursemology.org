@@ -51,6 +51,11 @@ class CoursePreferencesController < ApplicationController
           @course_atts <<
               CourseThemeAttribute.where(course_id: @course.id, theme_attribute_id:att.id).first_or_create
         end
+
+        unless session["ivle_login_data"].nil?
+          @ivle_token = session["ivle_login_data"].credentials.token
+          @ivle_api = Rails.application.config.ivle_api_key
+        end
     end
   end
 

@@ -23,14 +23,14 @@ class Assessment::QuestionsController < ApplicationController
       end
 
       if !search_string.empty?
-        @questions = @course.tagged_questions.where(q).where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+        @questions = @course.questions.where(q).where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
       else
-        @questions = @course.tagged_questions.where(q).uniq
+        @questions = @course.questions.where(q).uniq
       end
     elsif (!search_string.nil? && !search_string.empty?)
-      @questions = @course.tagged_questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+      @questions = @course.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
     else
-      @questions = @course.tagged_questions.uniq
+      @questions = @course.questions.uniq
     end
     
     respond_to do |format|
@@ -57,15 +57,20 @@ class Assessment::QuestionsController < ApplicationController
     if questions.count > 0
       @questions = questions.uniq
     else
-      @questions = @course.tagged_questions.uniq
+      @questions = @course.questions
     end
   end
 
   def import
-    result = Assessment::Question.import(params[:file], current_user, @course)
     respond_to do |format|
-      format.html { redirect_to main_app.course_assessment_questions_url(@course),
-                                notice: result }
+      result = Assessment::Question.import(params[:file], current_user, @course)
+      if result[:flag]
+        format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                                notice: result[:info] }
+      else
+        format.html { redirect_to main_app.course_assessment_questions_url(@course),
+                                  :flash => { :error => result[:info] }}
+      end
     end
   end
 
@@ -100,6 +105,7 @@ class Assessment::QuestionsController < ApplicationController
 
   def create
     @question.creator = current_user
+    @question.course = @course
     @question.save
     if !params[:parent_mpq_question].nil?
       @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:parent_mpq_question])
@@ -137,9 +143,15 @@ class Assessment::QuestionsController < ApplicationController
                                 notice: "Question has been successfully deleted." }
       else
         format.html { redirect_to main_app.course_assessment_questions_url(@course),
-                                notice: "Question has been successfully deleted." }                                
+                                  notice: "Question has been successfully deleted." }
       end
     end
+  end
+
+  def download_import_question_template
+    send_file "#{Rails.root}/public/import-question-template.csv",
+              :filename => "import-question-template.csv",
+              :type => "application/csv"
   end
 
   protected

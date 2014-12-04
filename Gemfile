@@ -92,6 +92,7 @@ gem "haml"
 gem "axlsx"
 gem "nokogiri"
 gem "newrelic_rpm"
+gem "omniauth-ivle"
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'

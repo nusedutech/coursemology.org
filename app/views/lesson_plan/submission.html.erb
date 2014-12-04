@@ -1,0 +1,378 @@
+
+<div>
+  <div id="lesson-plan-toolbar" class="page-header <%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-toolbar-student' %>">
+    <div class="row">
+      <div class="span5">
+        <h1><%= @course.customized_lesson_plan_title %></h1>
+      </div>
+      <div class="pull-right btn-toolbar">
+        <% if can? :manage, LessonPlanEntry %>
+            <div class="btn-group dropdown-trigger-on-hover">
+              <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                New <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <%= link_to "Event", new_course_lesson_plan_entry_path() %>
+                </li>
+                <li>
+                  <%= link_to "Milestone", new_course_lesson_plan_milestone_path() %>
+                </li>
+                <li class="divider"></li>
+                <li id="lesson-plan-open-milestone-generator" data-toggle="modal" data-target="#lesson-plan-multi-milestone" >
+                  <a href="#">Generate Milestones</a>
+                </li>
+              </ul>
+            </div>
+        <% end %>
+        <select class="selectpicker dropdown-trigger-on-hover" id="lesson-plan-entry-filter" multiple="multiple" title="Filter" data-selected-text-format="count>1" data-width="auto">
+          <% get_lesson_plan_entry_types.each {|type| %>
+              <option selected="selected" data-entry-type="<%= get_lesson_plan_entry_css_class(type) %>"><%= type %></option>
+          <% } %>
+        </select>
+        <div class="btn-group">
+          <a id="lesson-plan-hide-all" class="btn">Collapse All</a>
+          <a id="lesson-plan-show-all" class="btn">Expand All</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%= render :partial => 'lesson_plan/navigation' %>
+
+  <div id="<%= (can? :manage, LessonPlanEntry) ? '' : 'lesson-plan-content' %>">
+    <div id="milestone-entity">
+      <div style="width: auto">
+        <input type="hidden" id="active-entity" value="<%= @current_id%>" />
+        <input type="hidden" id="discuss" value="<%= @discuss%>" />
+        <% grouped_milestones = @milestones.group_by { |milestone| milestone.is_virtual? } %>
+        <% grouped_milestones[false] = [] unless grouped_milestones[false] %>
+        <% grouped_milestones[true] = [] unless grouped_milestones[true] %>
+        <% prior_items = grouped_milestones[true].select { |e| e.title == "Prior Items"  } %>
+        <% other_items = grouped_milestones[true].select { |e| e.title == "Other Items" } %>
+        <% sorted_milestones = prior_items + grouped_milestones[false].sort_by { |milestone| milestone.start_at } + other_items %>
+        <% sorted_milestones.each { |milestone| %>
+            <% if !milestone.is_virtual? || milestone.entries.length  > 0 %>
+                <%= render :partial => 'lesson_plan/milestone', locals: { :milestone => milestone } %>
+            <% end %>
+        <% } %>
+      </div>
+    </div>
+    <section id="detail-content">
+      <% if @assessment.is_a?(Assessment::Training) %>
+        <%= render partial:"assessment/training_submissions/edit_form" %>
+      <% elsif @assessment.is_a?(Assessment::Mission)%>
+          <% if @mission_show.nil? %>
+              <%= render partial: 'assessment/mission_submissions/summary' %>
+              <%= render partial: 'assessment/mission_submissions/form' %>
+          <% elsif @mission_show=="true"%>
+              <%= render :partial => 'lesson_plan/show_mission' %>
+          <% end %>
+      <% end %>
+
+      <% if  @assessment.allow_discussion %>
+      <div class="discussion" style="display: none">
+        <% topic = ForumTopic.where(:discussable_type => 'Assessment', :discussable_id => @assessment.id).first %>
+        <% if !topic.nil? %>
+            <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
+            <div class="forum" style="display: none">
+              <div class="posts">
+                <%
+                   posts = topic.posts.all.sort do |a, b|
+                     if not a.parent then
+                       -1
+                     elsif not b.parent then
+                       1
+                     else
+                       a.parent.id <=> b.parent.id
+                     end
+                   end
+
+                   # This is basically a DFS: we have to emit the conversation style layout without the
+                   # tree information from the database.
+                   level_iter = lambda do |common_parent, level|
+                     this_level = posts.select {|p| p.parent == common_parent}
+                     this_level.each do |p|
+                %><%= render partial: 'forums/posts/post', locals: { post: p } %><%
+
+                 # We start a new thread only if the current level has more than one post so that we do not
+                 # indent at every reply, only those with forks.
+                 child_level = posts.select {|c| c.parent == p}
+                 fork = level < 3 && (this_level.length > 1 || child_level.length > 1)
+                 if fork then %>
+                            <div class="thread"><% level_iter.call(p, level + 1) %></div>
+                        <% else %>
+                            <% level_iter.call(p, level) %>
+                        <% end
+                           end
+                           end
+
+                           level_iter.call(nil, 1)
+                        %>
+              </div>
+
+              <% if topic.can_be_replied_to? %>
+                  <hr />
+
+                  <div class="quick-reply">
+                    <h3>Post a Reply</h3>
+
+                    <% new_post = ForumPost.new %>
+                    <% new_post.title = replize_title(topic.posts.last.title) %>
+                    <%= form_for new_post, url: course_forum_topic_posts_path(@course, topic.forum, topic, new_post),
+                                 html: { class: 'form-horizontal' } do |f| %>
+                        <%= render partial: 'forums/posts/form', locals: { reply_to: topic.posts.last, form: f } %>
+                        <input type="hidden" name="assessment_redirect_link" value='<%= request.original_url%>' />
+                        <div class="form-actions">
+                          <%= f.submit 'Reply', class: 'btn btn-primary' %>
+                        </div>
+                    <% end %>
+                  </div>
+              <% end %>
+            </div>
+        <% else %>
+            <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
+            <div class="forum" style="display: none">
+              <div class="quick-reply">
+                <h3>Post a Dicussion</h3>
+
+                <% new_topic = ForumTopic.new %>
+                <% new_topic.forum = @course.forums.first %>
+                <% new_topic.title = @assessment.class.to_s + ' ' + @assessment.title %>
+                <% new_topic.discussable_type = @assessment.class %>
+                <% new_topic.discussable_id = @assessment.id %>
+                <% new_post = ForumPost.new %>
+                <%= form_for new_post, url: course_forum_topics_path(@course, @course.forums.first),
+                             html: { class: 'form-horizontal' } do |f| %>
+                    <%= render partial: 'forums/posts/form', locals: { reply_to: new_topic.posts.last, form: f } %>
+                    <input type="hidden" name="topic_id" value='<%= @assessment.id %>' />
+                    <input type="hidden" name="topic_type" value='<%= @assessment.class.to_s %>' />
+                    <input type="hidden" name="topic_title" value='<%= @assessment.title%>' />
+                    <input type="hidden" id="assessment_redirect_link" name="assessment_redirect_link" value='<%= request.original_url%>' />
+                    <div class="form-actions">
+                      <%= f.submit 'Reply', class: 'btn btn-primary' %>
+                    </div>
+                <% end %>
+              </div>
+            </div>
+        <% end %>
+      </div>
+      <% end %>
+    </section>
+
+  </div>
+  <hr class="hr-shrink-margin">
+  <div class="end-of-page"></div>
+</div>
+
+<% if can? :manage, LessonPlanEntry %>
+    <div id="lesson-plan-multi-milestone" class="modal hide fade" data-backdrop="static">
+      <form class="lesson-plan-milestone-generator-form">
+        <div class="modal-header">
+          <h3>Milestone Generator</h3>
+        </div>
+        <div class="modal-body hidden">
+          <div id="modal-loading">
+            <h2>Loading...</h2>
+            <div class="progress progress-striped active">
+              <div class="bar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <div class="control-group">
+            <label class="control-label" for="input-length-milestones">
+              How long is each milestone, in days?
+            </label>
+            <div class="controls">
+              <input type="number" id="input-length-milestones" required="required">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="input-number-milestones">
+              How many milestones should we create?
+            </label>
+            <div class="controls">
+              <input type="number" id="input-number-milestones" required="required">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="input-prefix-milestones">
+              What should each milestone be prefixed with?
+              <br>(For example, "Week" will generate "Week 1", "Week 2", and so on.)
+            </label>
+            <div class="controls">
+              <input id="input-prefix-milestones" class="text_field">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="input-start-milestones">
+              What day should the first milestone start on?
+            </label>
+            <div class="controls">
+              <div class="datepicker input-append date">
+                <input type="text" class="text_field" id="input-start-milestones" required="required">
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+              </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input id="lesson-plan-done-generating" class="btn btn-primary" type="submit" value="Done" />
+          <button data-dismiss="modal" class="btn">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+<% end %>
+
+
+<script>
+    $( document ).ready(function() {
+        $('div.span-content').addClass('border-gray');
+        if($('div#lesson-plan-content').length ) {
+            $('div.content').addClass('stretch-content');
+        }
+
+        $('#submit-btn').click(function(){
+            $('#lesson-plan-content section#detail-content .discussion').show();
+            return true;
+        });
+
+        //slide and show hide menubar
+        $('.row.main-content').prepend('<div style="position: relative; margin-left: 30px;"><a class="btn btn-navbar collapsed"><span class="icon-chevron-down"></span></a></div>');
+        $(".btn.btn-navbar.collapsed").click(function () {
+            if($('.span10.span-content').width()==970) {
+                $('.span2.sidebar').toggle('slow',function(){
+                    $('.span10.span-content').width(1170);
+                });
+            }else{
+                $('.span10.span-content').width(970);
+                $('.span2.sidebar').toggle('slow');
+            }
+
+        });
+        //Hide menubar default
+        if ($('#lesson-plan-content').length) {
+            $('.span2.sidebar').hide();
+            $('.span10.span-content').width(1170);
+        }
+
+        //show entry
+        $('#lesson-plan-content a.btn_entry').click(function(){
+            $('section#detail-content').empty();
+            var entry_type =$(this).find('input.entry_type').val();
+            var title = $(this).find('span.entry_title').text();
+            var type  = $(this).find('input.entry_text_type').val();
+            var des  = $(this).find('input.entry_description').val();
+            var loc  = $(this).find('input.entry_location').val();
+            var dis = $(this).next('div.discussion').html();
+            if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
+                show_lecture(title, type, des, loc);
+            }else if(entry_type =='3'){
+                loc = loc.replace(".html", "/media/video.mp4");
+                show_video(title, type, des, loc);
+            }else if(entry_type =='4'){
+                show_mission_training(this,title, type, des, loc);
+            }
+
+            show_discussion(dis);
+        });
+
+        //show entry lecture, recitation, tutorial
+        function show_lecture(title, type, des, loc){
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            $('section#detail-content').append(entry_form);
+
+            if(1==1){
+                $('section#detail-content').append($("<a class='a_test' style='display: none' href='http://www1.i2r.a-star.edu.sg/~jspan/courses/nus/slides/cs5228_1a_intro.pdf'>test</a>"));
+                $('a.a_test').gdocsViewer({width: 650, height: 450});
+            }
+
+        }
+
+        //show video
+        function show_video(title, type, des, loc){
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><video width='90%' controls>";
+            entry_form += "<source src='" + loc + "' type='video/mp4'>";
+            entry_form += "Your browser does not support the video tag.";
+            entry_form += "</video></div>";
+            $('section#detail-content').append(entry_form);
+        }
+
+        //show entry mission training
+        function show_mission_training(entry, title, type, des, loc){
+            var start  = $(entry).find('input.entry_start').val();
+            var end  = $(entry).find('input.entry_end').val();
+            var url  = $(entry).find('input.entry_url').val();
+
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            entry_form += "<div><p style=''><h4>" + (start ? "<span class='icon-calendar'></span>" + " " + start : "") + (end ? " to " + end : "") + "</h4></p></div>";
+            entry_form += "<div><a class='attempt-assessment btn btn-success' href='" + url + "'>Attempt</a></div>";
+            $('section#detail-content').append(entry_form);
+        }
+
+        $('#lesson-plan-content a.attempt-assessment').click(function() {
+            //alert("abc");
+            //return false;
+        });
+
+        function show_discussion(discussion){
+            var entry_form = "";
+            $('section#detail-content').append(entry_form);
+            $('section#detail-content').append(discussion);
+            $('#lesson-plan-content a.a_discussion').click(function() {
+                $('#lesson-plan-content .forum').toggle('slow');
+
+            });
+        }
+
+        $('#lesson-plan-content #detail-content a.a_discussion').click(function() {
+            $('#lesson-plan-content #detail-content .forum').toggle('slow');
+            if($('#lesson-plan-content #detail-content a.a_discussion').text()=='Hide Discussion'){
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Show Discussion');
+            }else{
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+            }
+
+        });
+        //$('#lesson-plan-content #detail-content a.a_discussion').click();
+
+        if($('#active-entity').val()!=""){
+            $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();
+            if(!$('#assessment_redirect_link')) {
+                $('#lesson-plan-content #detail-content .forum').show();
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+            }
+            if($('#discuss').val()!=""){
+                $('#lesson-plan-content section#detail-content .discussion').show();
+                $('#lesson-plan-content section#detail-content #continue-btn').removeClass("disabled");
+                $('#lesson-plan-content #detail-content .forum').show();
+                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+                $
+            }
+        }
+        if(($('.doing-step').val() != "" ? parseInt($('.doing-step').val()) : 0) < ($('.next-undone').val() != "" ? parseInt($('.next-undone').val()) : 0)){
+            $('#lesson-plan-content section#detail-content .discussion').show();
+            $('#lesson-plan-content section#detail-content #continue-btn').removeClass("disabled");
+            $('#lesson-plan-content #detail-content .forum').show();
+            $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+            $
+        }
+
+    });
+
+</script>

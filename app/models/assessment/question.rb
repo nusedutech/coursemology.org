@@ -8,8 +8,10 @@ class Assessment::Question < ActiveRecord::Base
   attr_accessible :title, :description, :max_grade, :attempt_limit, :staff_comments
   attr_accessible :auto_graded
 
+  belongs_to  :course
   belongs_to  :creator, class_name: "User"
   belongs_to  :dependent_on, class_name: "Assessment::Question", foreign_key: "dependent_id"
+
 
   #TODO, dependent: :destroy here
   has_many  :question_assessments, dependent: :destroy
@@ -32,28 +34,41 @@ class Assessment::Question < ActiveRecord::Base
     error_list = []
     obj_list = []
     csv.each_with_index do |row, index|
+      error_sms = String.new
       if (!row["max_grade"].nil? && !(true if Integer(row["max_grade"]) rescue false))
-        error_list << "#{index + 2}"
+        error_sms << "max_grade empty,"
       elsif row["option1"].nil?
         attrs = {"creator_id"=> current_user.id, "title" => row["title"], "description" => row["description"], "max_grade"=> row["max_grade"]}
         g_ques = Assessment::GeneralQuestion.new(attrs)
+        g_ques.course = course
         obj_list << g_ques
         if !row["tags"].nil?
-          tag_element = course.topicconcepts.where(:name => row["tags"]).first
-          if(!tag_element.nil?)
+          row["tags"].split('|').each do |tag|
+            tag_element = course.topicconcepts.where(:name => tag).first
+            if(!tag_element.nil?)
+              taggable = g_ques.question.taggable_tags.new
+              taggable.tag = tag_element
+              obj_list << taggable
+            else
+              error_sms << "tag #{tag} not exist,"
+            end
+          end
+        end
+        if !row["difficulty"].nil?
+          diff = course.tags.where(:name => row["difficulty"]).first
+          if(!diff.nil?)
             taggable = g_ques.question.taggable_tags.new
-            taggable.tag = tag_element
+            taggable.tag = diff
             obj_list << taggable
           end
-
         end
-
       else
         if (!row["select_all"].nil? && !(true if Integer(row["select_all"]) rescue false))
-          error_list << "#{index + 2}"
+          error_sms << "select_all invalid,"
         else
           attrs = {"creator_id"=> current_user.id, "title" => row["title"], "description" => row["description"], "max_grade"=> row["max_grade"], "select_all" => row["select_all"].nil? ? 0 : row["select_all"].to_i}
           mcq_ques = Assessment::McqQuestion.new(attrs)
+          mcq_ques.course = course
           obj_list << mcq_ques
           (1..10).each do |i|
             if !row["option#{i}"].nil?
@@ -64,15 +79,29 @@ class Assessment::Question < ActiveRecord::Base
             end
           end
           if !row["tags"].nil?
-            tag_element = course.topicconcepts.where(:name => row["tags"]).first
-            if(!tag_element.nil?)
+            row["tags"].split('|').each do |tag|
+              tag_element = course.topicconcepts.where(:name => tag).first
+              if(!tag_element.nil?)
+                taggable = mcq_ques.question.taggable_tags.new
+                taggable.tag = tag_element
+                obj_list << taggable
+              else
+                error_sms << "tag #{tag} not exist,"
+              end
+            end
+          end
+          if !row["difficulty"].nil?
+            diff = course.tags.where(:name => row["difficulty"]).first
+            if(!diff.nil?)
               taggable = mcq_ques.question.taggable_tags.new
-              taggable.tag = tag_element
+              taggable.tag = diff
               obj_list << taggable
             end
-
           end
         end
+      end
+      if !error_sms.empty?
+        error_list << ("Row #{index + 2}: " + error_sms[0..-2]);
       end
     end
 
@@ -81,11 +110,17 @@ class Assessment::Question < ActiveRecord::Base
       obj_list.each do |o|
         o.save
       end
-      return "Imported #{csv.count} questions"
+      return {:flag => true, :info => "Imported #{csv.count} questions"}
     else
-      return "There are something wrong at #{error_list.map(&:inspect).join(', ')}"
+      return {:flag => false, :info => "There are somethings wrong: </br>" + error_list.join("</br>")}
     end
   end
+
+
+  def self check_before_import_question
+
+  end
+
 
   #TOFIX
   def get_title

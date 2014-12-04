@@ -9,6 +9,7 @@ class Course < ActiveRecord::Base
   attr_accessible :course_navbar_preferences_attributes,
                   :missions_attributes,
                   :trainings_attributes
+  attr_accessible :module_id
 
   belongs_to :creator, class_name: "User"
 
@@ -16,7 +17,7 @@ class Course < ActiveRecord::Base
   has_many  :levels, dependent: :destroy
   has_many  :achievements, dependent: :destroy
   has_many  :assessments, dependent: :destroy
-  has_many  :questions, through: :assessments
+  has_many  :assessment_questions, through: :assessments, source: :questions
   has_many  :lesson_plan_milestones, dependent: :destroy
   has_many  :lesson_plan_entries, dependent: :destroy
   has_one   :root_folder, dependent: :destroy, conditions: { parent_folder_id: nil }, class_name: "MaterialFolder"
@@ -33,6 +34,7 @@ class Course < ActiveRecord::Base
   has_many  :course_preferences, dependent: :destroy
   has_many  :course_navbar_preferences, dependent: :destroy
 
+  has_many :questions, class_name: "Assessment::Question", dependent: :destroy
   has_many :topicconcepts, dependent: :destroy
   has_many :tagged_questions, through: :topicconcepts, source: :questions, dependent: :destroy
   
@@ -60,10 +62,11 @@ class Course < ActiveRecord::Base
 
   #user related
   has_many  :user_courses,  dependent: :destroy
-  has_many  :users, through: :usccer_courses
+  has_many  :users, through: :user_courses
   has_many  :submissions, through: :user_courses
   has_many  :activities, dependent: :destroy
   has_many  :tutorial_groups,        dependent: :destroy
+  has_many  :student_groups,        dependent: :destroy
   has_many  :comment_topics,         dependent: :destroy
   has_many  :mass_enrollment_emails, dependent: :destroy
   has_many  :enroll_requests,        dependent: :destroy

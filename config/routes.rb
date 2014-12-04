@@ -14,12 +14,10 @@ Coursemology::Application.routes.draw do
   get "contact_us" => "static_pages#contact_us"
   get "help" => "static_pages#help"
 
-  get "ivle" => "static_pages#ivle"
-  get "get_profile" => "static_pages#get_profile"
-
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks",
                                        :registrations => "registrations",
                                        :sessions => "sessions"}
+
 
   get "users/settings" => "users#edit"
   put "users/update" => "users#update"
@@ -51,6 +49,8 @@ Coursemology::Application.routes.draw do
     match "/leaderboards"     => "leaderboards#show", as: :leaderboards
     match "/staff"            => "user_courses#staff", as: :staff
     post "/remove_staff/:id"            => "user_courses#remove_staff", as: :remove_staff
+    match "/group"            => "user_courses#group", as: :group
+    post "/remove_group/:id"            => "user_courses#remove_group", as: :remove_group
     match "/manage_group"  => "course_groups#manage_group", as: :manage_group
     post  "/add_student"      => "course_groups#add_student", as: :manage_add_student
     post  "/update_exp"        => "course_groups#update_exp", as: :manage_update_exp
@@ -67,6 +67,7 @@ Coursemology::Application.routes.draw do
         get 'stats'
         post 'reorder'
         get 'access_denied'
+        match 'files/:file_id', to: "assessments#download_file", as: :assessment_download_file # Alias for url_for with Material objects
       end
 
       resources :assessment_questions, path: :questions, controller: :questions do
@@ -150,6 +151,7 @@ Coursemology::Application.routes.draw do
       collection do
         get :index, to: 'questions#index', type: 'question'
         post :import, to: 'questions#import'
+        match :download_import_question_template,to: 'questions#download_import_question_template', as: :download_import_question_template
       end
     end
     
@@ -215,7 +217,7 @@ Coursemology::Application.routes.draw do
     get "materials/files/:id", to: "materials#show", as: :material # Alias for url_for with Material objects
     get "materials/*path", to: "materials#show_by_name", as: :material_by_path
 
-    post "levels/populate" => "levels#populate", as: :levels_populate
+    post "levels/populate" => "levels#populate", as:   :levels_populate
     post "levels/mass_update" => "levels#mass_update", as: :levels_mass_update
 
     resources :levels
@@ -303,6 +305,7 @@ Coursemology::Application.routes.draw do
 
     get "student_summary" => "student_summary#index"
     get "/student_summary/export" => "student_summary#export", as: :student_summary_export
+    get "/student_summary/export_result" => "student_summary#export_result", as: :student_summary_export_result
 
     resources :staff_leaderboard
 
@@ -326,6 +329,9 @@ Coursemology::Application.routes.draw do
     match "surveys/:id/summary_with_format" => "surveys#summary_with_format", as: :survey_summary_with_format
 
     get "lesson_plan" => 'lesson_plan_entries#index', as: :lesson_plan
+    get "lesson_plan/submission/:assessment_id" => 'lesson_plan_entries#submission', as: :lesson_plan_submission
+    put "lesson_plan/submission/:assessment_id/mission_update" => 'lesson_plan_entries#mission_update', as: :lesson_plan_mission_update
+    get "lesson_plan/import_ivle_event" => 'lesson_plan_entries#import_ivle_event', as: :lesson_plan_import_ivle_event
     get "lesson_plan/overview" => 'lesson_plan_entries#overview', as: :lesson_plan_overview
     post "lesson_plan/bulk_update" => 'lesson_plan_milestones#bulk_update', as: :lesson_plan_bulk_update
     resources :lesson_plan_entries, path: 'lesson_plan/entries', except: [:index, :show]
@@ -374,6 +380,12 @@ Coursemology::Application.routes.draw do
 
   match "courses/:id/students" => "courses#students", as: :course_students
   match "courses/:id/manage_students" => "courses#manage_students", as: :course_manage_students
+  match "courses/:id/manage_student_group" => "courses#manage_student_group", as: :course_manage_student_group
+  match "courses/:id/edit_student_group" => "courses#edit_student_group", as: :course_edit_student_group
+  match "courses/:id/download_import_template" => "courses#download_import_template", as: :course_download_import_template
+  match "courses/:id/import_ivle_student" => "courses#import_ivle_student", as: :course_import_ivle_student
+  post "courses/:id/import_student_groups" => "courses#import_student_groups", as: :course_import_student_groups
+  post "courses/:id/check_before_import" => "courses#check_before_import", as: :course_check_before_import
   match "courses/:id//pending_gradings"   => "courses#pending_gradings", as: :course_pending_gradings
 
   resources :file_uploads

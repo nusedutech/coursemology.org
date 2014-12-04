@@ -15,8 +15,8 @@ class LessonPlanMilestonesController < ApplicationController
   def create
     authorize! :create, LessonPlanMilestone
     raw_milestones = not(params[:lesson_plan_milestone]['0']) ?
-      {'0' => params[:lesson_plan_milestone]} :
-      params[:lesson_plan_milestone]
+        {'0' => params[:lesson_plan_milestone]} :
+        params[:lesson_plan_milestone]
     milestones = []
     raw_milestones.each_pair do |key, value|
       milestone = LessonPlanMilestone.create

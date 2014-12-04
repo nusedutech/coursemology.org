@@ -15,13 +15,15 @@ class User < ActiveRecord::Base
   # :lockable, :timeoutable and :omniauthable
   devise :confirmable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
-         :omniauthable, :omniauth_providers => [:facebook]
+         :omniauthable, :omniauth_providers => [:facebook,:ivle]
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me
   attr_accessible :display_name, :name, :profile_photo_url
   attr_accessible :provider, :uid
   attr_accessible :use_uploaded_picture
+  attr_accessible :student_id, :encrypted_password, :sign_in_count
+
 
   protected_attributes :system_role_id
 
@@ -93,17 +95,25 @@ class User < ActiveRecord::Base
     user
   end
 
-  def self.find_for_ivle_oauth(email)
-
-      user = User.find_by_email(email)
-      if !user
-         user = User.create(name: email,
-                           email: email
-
+  def self.find_for_ivle_oauth(auth, signed_in_resource = nil)
+    user = User.where(:provider => auth.provider, :uid => auth.uid).first
+    unless user
+      user = User.find_by_email(auth.info.email)
+      if user
+        user.provider = auth.provider
+        user.uid = auth.uid
+      else
+        user = User.create(name: auth.extra.profile.Name,
+                           provider: auth.provider,
+                           uid: auth.uid,
+                           email: auth.info.email,
+                           student_id: auth.uid,
+                           password: Devise.friendly_token[0,20]
         )
+        user.skip_confirmation!
       end
       user.save
-
+    end
     user
   end
 

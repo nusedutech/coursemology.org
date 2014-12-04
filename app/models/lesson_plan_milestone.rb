@@ -22,7 +22,7 @@ class LessonPlanMilestone < ActiveRecord::Base
         def description
           nil
         end
-        def entries
+        def entries (include_virtual = true, user_course = nil)
           @other_entries
         end
         def start_at
@@ -57,7 +57,7 @@ class LessonPlanMilestone < ActiveRecord::Base
     self.course.lesson_plan_milestones.where("start_at > :start_at", :start_at => self.start_at).order("start_at ASC").first
   end
 
-  def entries(include_virtual = true)
+  def entries(include_virtual = true, user_course = nil)
     next_milestone = self.next_milestone
     cutoff_time = if self.end_at then self.end_at.end_of_day end
     start_date = self.start_at
@@ -74,6 +74,18 @@ class LessonPlanMilestone < ActiveRecord::Base
 
     actual_entries = LessonPlanEntry.where(start_after_us + before_cutoff + in_current_course,
       :start_at => start_date, :cutoff => cutoff_time, :course_id => self.course_id)
+
+    #check for tutorial group, load for specific student lesson plan
+    if user_course.is_student?
+      student_tutorial_groups = user_course.tut_group_courses.order(:created_at).to_a
+      current_tutorial = user_course.tut_group_courses.where(:milestone_id => self.id).first
+
+      str_query = ''
+      if current_tutorial
+        str_query = " or (entry_type = 2 and group_id is not null and group_id = #{current_tutorial.group_id})"
+      end
+      actual_entries = actual_entries.where("entry_type <> 2 or (entry_type = 2 and group_id is null)" + str_query)
+    end
 
     if include_virtual
       virtual_entries = course.lesson_plan_virtual_entries(start_date, cutoff_time)

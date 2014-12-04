@@ -2,7 +2,7 @@
   <h1>Manage Students</h1>
 </div>
 
-<%= render partial: "courses/manage_user_tab", locals: { manage_students: true } %>
+<%= render partial: "courses/manage_user_tab", locals: { tab: 1 } %>
 
 <div style="width:93%">
     <span  class="pull-right" style="font-size: 1.3em">
@@ -17,15 +17,17 @@
     <% url = course_manage_students_path + '?phantom=false' %>
     <a href="<%= course_manage_students_path %>?phantom=true" class="btn">Show Only Phantom Students</a>
 <% end %>
+<a href="<%= course_import_ivle_student_path(@course) %>" class="btn btn-primary"> Import Students from IVLE</a>
 
-<br><br>
 <% if can? :manage, UserCourse %>
     <% tas = @staff_courses.map {|tac| [tac.name, tac.id] }.unshift(["Unassigned", -1]) %>
-    <table class="table">
+    <% groups = @course.student_groups.map {|tac| [tac.name, tac.id] }.unshift(["Unassigned", -1]) %>
+    <table class="table" style="margin-top: 20px;">
       <tr>
         <th>Name</th>
         <th>Email</th>
-        <th><%= sortable 'tutor', course_manage_students_path, @phantom ? 'phantom=true' : 'phantom=false' %></th>
+        <!--<th><%= sortable 'tutor', course_manage_students_path, @phantom ? 'phantom=true' : 'phantom=false' %></th>-->
+        <th>Group</th>
         <th>Phantom</th>
         <th></th>
       </tr>
@@ -41,12 +43,21 @@
                   <input type="email" name="email" value="<%= student.email %>" required>
                 </td>
                 <td>
+
+                  <%group = student_course.tut_group_courses.order("created_at DESC").first %>
+                  <% if group %>
+                      <%= select "group","", groups, {:selected => "#{group.group_id}" }%>
+                  <% else %>
+                      <%= select "group","", groups, {:selected => "#{-1}" }%>
+                  <% end %>
+                  <!--
                   <%tutor = student_course.get_my_tutors.first %>
                   <% if tutor %>
                       <%= select "tutor","", tas, {:selected => "#{tutor.id}" }%>
                   <% else %>
                       <%= select "tutor","", tas, {:selected => "#{-1}" }%>
                   <% end %>
+                  -->
                 </td>
                 <td><input type="checkbox" name="is_phantom" <%= 'checked' if student_course.is_phantom? %>> </td>
                 <td>

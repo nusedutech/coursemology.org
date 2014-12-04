@@ -1309,4 +1309,3 @@ ActiveRecord::Schema.define(:version => 20141114113325) do
   add_index "votes", ["voter_id", "voter_type"], :name => "index_votes_on_voter_id_and_voter_type"
 
 end
-

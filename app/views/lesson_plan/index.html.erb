@@ -25,8 +25,8 @@
               <li id="lesson-plan-open-milestone-generator" data-toggle="modal" data-target="#lesson-plan-multi-milestone" >
                 <a href="#">Generate Milestones</a>
               </li>
-              <li>
-                <a class="academic_milestones_generator" href="#">Generate NUS Academic Milestones</a>
+              <li id="academic_milestones_generator" data-toggle="modal" data-target="#generate-nus-academic-calendar"  >
+                <a class="a_academic_milestones_generator" href="#">Generate NUS Academic Milestones</a>
               </li>
             </ul>
           </div>
@@ -172,6 +172,40 @@
       </div>
       </form>
   </div>
+    <div id="generate-nus-academic-calendar" class="modal hide fade" data-backdrop="static">
+      <form>
+        <div class="modal-header">
+          <h3>NUS Academic Milestone Generator</h3>
+        </div>
+        <div class="modal-body hidden">
+        </div>
+        <div class="modal-body">
+          <div class="control-group">
+            <label class="control-label" for="input-length-milestones">
+              Choose Academic Year
+            </label>
+            <div class="controls">
+              <select id="select-academic-year"></select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="input-prefix-milestones">
+              Choose Semester
+            </label>
+            <div class="controls">
+              <select id="select-semester"></select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <span id="span_error" class="error" style="display: none; float: left"></span>
+          <input id="btn-generate-nus-calendar-milestone" class="btn btn-primary" type="submit" value="Done" />
+          <button data-dismiss="modal" class="btn">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
 <% end %>
 
 <% if @ivle_token %>
@@ -364,10 +398,9 @@
         }
     });
 
-    $('a.academic_milestones_generator').click(function() {
+    $('a.a_academic_milestones_generator').click(function() {
+        $('#span_error').hide();
         if($("#ivle_token").length && $("#mapping_module").length) {
-            var DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
-            var milestones = [];
             var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
             user.init().done(function () {
             });
@@ -376,49 +409,76 @@
                     .success(function (data) {
                         current_year = data.Results[0].AcadYear;
                         current_semester = data.Results[0].AcadSemester;
-
-                        user.get("MyOrganizer_AcadSemesterInfo", {AcadYear: current_year, Semester: current_semester})
-                                .success(function (data) {
-                                    $.each(data.Results, function (ind, val) {
-                                        if (val.TypeName != "0" && val.TypeName != "Vacation") {
-                                            var date_start = moment(val.WeekTypeStartDate_js, DATE_FORMAT);
-                                            var date_end = moment(val.WeekTypeEndDate_js, DATE_FORMAT);
-                                            milestones.push({
-                                                title: $.isNumeric(val.TypeName) ? ( "Week" + ' ' + val.TypeName) : (val.TypeName + ' ' + "Week"),
-                                                start_at: date_start.clone(),
-                                                end_at: date_end.clone()
-                                            });
-                                        }
-                                    });
-                                    var upload_milestones = milestones.map(function (milestone) {
-                                        return {
-                                            title: milestone.title,
-                                            description: '',
-                                            start_at: milestone.start_at.format(DATE_FORMAT),
-                                            end_at: milestone.end_at.format(DATE_FORMAT)
-                                        };
-                                    });
-
-                                    var promise = $.ajax({
-                                        type: 'POST',
-                                        url: 'lesson_plan/milestones.json',
-                                        data: {
-                                            lesson_plan_milestone: upload_milestones
-                                        },
-                                        dataType: 'json'
-                                    });
-
-                                    // Wait for all the requests to come back before closing the dialog.
-                                    promise.then(function () {
-                                        location.reload();
-                                    }, function () {
-                                        alert('An error occurred while processing your request.');
-                                        location.reload();
-                                    });
-                                    return false;
-                                });
+                        $("#select-academic-year").empty();
+                        $("#select-academic-year").append("<option value='" + current_year + "'>" + current_year + "</option>");
+                        next_year = (parseInt(current_year.split('/')[0]) + 1) + '/' + (parseInt(current_year.split('/')[1]) + 1);
+                        $("#select-academic-year").append("<option value='" + next_year + "'>" + next_year + "</option>");
+                        $("#select-semester").empty();
+                        for (i = 1; i <= 4; i++) {
+                            $("#select-semester").append("<option value='" + i + "'>" + i + "</option>");
+                        }
+                        $("#select-semester").val(current_semester);
                     });
         }
     });
+
+    $('#btn-generate-nus-calendar-milestone').click(function() {
+        $('#span_error').hide();
+        var key = $("#ivle_api").val(), token = $("#ivle_token").val(), user = ivle.User(key, token);
+        user.init().done(function () {
+        });
+        var DATE_FORMAT = 'YYYY-MM-DDThh:mm:ss';
+        var milestones = [];
+        var current_year = $("#select-academic-year").val(), current_semester = $("#select-semester").val();
+        if(current_year.length && current_semester.length) {
+            user.get("MyOrganizer_AcadSemesterInfo", {AcadYear: current_year, Semester: current_semester})
+                    .success(function (data) {
+                        if(data.Results.length > 0) {
+                            $.each(data.Results, function (ind, val) {
+                                if (val.TypeName != "0" && val.TypeName != "Vacation") {
+                                    var date_start = moment(val.WeekTypeStartDate_js, DATE_FORMAT);
+                                    var date_end = moment(val.WeekTypeEndDate_js, DATE_FORMAT);
+                                    milestones.push({
+                                        title: $.isNumeric(val.TypeName) ? ( "Week" + ' ' + val.TypeName) : (val.TypeName + ' ' + "Week"),
+                                        start_at: date_start.clone(),
+                                        end_at: date_end.clone()
+                                    });
+                                }
+                            });
+                            var upload_milestones = milestones.map(function (milestone) {
+                                return {
+                                    title: milestone.title,
+                                    description: '',
+                                    start_at: milestone.start_at.format(DATE_FORMAT),
+                                    end_at: milestone.end_at.format(DATE_FORMAT)
+                                };
+                            });
+
+                            var promise = $.ajax({
+                                type: 'POST',
+                                url: 'lesson_plan/milestones.json',
+                                data: {
+                                    lesson_plan_milestone: upload_milestones
+                                },
+                                dataType: 'json'
+                            });
+
+                            // Wait for all the requests to come back before closing the dialog.
+                            promise.then(function () {
+                                location.reload();
+                            }, function () {
+                                alert('An error occurred while processing your request.');
+                                location.reload();
+                            });
+                        }else{
+                            $('#span_error').text("No data for this Year and Semester");
+                            $('#span_error').show();
+                        }
+                        return false;
+                    });
+        }
+    });
+
+
 
 </script>

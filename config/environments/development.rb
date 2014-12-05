@@ -50,11 +50,11 @@ Coursemology::Application.configure do
   }
 
 
-
+  #ivle login, NUS openID login
   config.middleware.use OmniAuth::Builder do
     provider :ivle, api_key: "mHy1mEcwwWvlHYqc9bNdO"
+    provider :open_id, :identifier => "https://openid.nus.edu.sg"
   end
   config.ivle_api_key = "mHy1mEcwwWvlHYqc9bNdO"
-
 
 end

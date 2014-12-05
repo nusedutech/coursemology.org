@@ -25,14 +25,11 @@
 
     <div id="_sign_up">
       <div id="landerapp_conversionform" style="text-align: center; margin-top: 15px;">
-        <div style="margin-left: 12px;">
-            <%= link_to user_omniauth_authorize_path(:ivle),:class => "btn btn-primary", :style => "width: 85%; height: 30px; font-size: 15px; line-height: 30px"  do %>Login With IVLE<% end %>
+        <form>
+            <%= link_to user_omniauth_authorize_path(:ivle),:class => "btn btn-primary", :style => "width: 85%; height: 30px; font-size: 15px; line-height: 30px; margin-bottom: 15px;"  do %>Login With IVLE<% end %>
+            <%= link_to user_omniauth_authorize_path(:open_id),:class => "btn btn-primary", :style => "width: 85%; height: 30px; font-size: 15px; line-height: 30px; margin-bottom: 15px;"  do %>Login With OpenID<% end %>
 
-        </div>
-        <div style="margin-left: 12px;">
-          <%= link_to user_omniauth_authorize_path(:open_id),:class => "btn btn-primary", :style => "width: 85%; height: 30px; font-size: 15px; line-height: 30px"  do %>Login With OpenID<% end %>
-
-        </div>
+        </form>
         <div style="display: none">
         <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
 

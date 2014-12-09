@@ -280,8 +280,8 @@
                     $('section#detail-content .material_list').append($("<tr><td colspan='2'>"+ $(this).html()+"</td></tr>"));
                 });
 
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://localhost:3000/data/lecture01.pdf'></td></tr>"));
+                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                //$('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://localhost:3000/data/lecture01.pdf'></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
                         $(this).parent().parent().next().find('a').gdocsViewer({width: 650, height: 450});
@@ -329,8 +329,8 @@
                     $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
                 });
 
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                $('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
                         $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});

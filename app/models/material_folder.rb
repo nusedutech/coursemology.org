@@ -121,7 +121,7 @@ class MaterialFolder < ActiveRecord::Base
 
 
       
-      dir = "#{Rails.root}/Material/files/"
+      dir = "#{Rails.root}/public/Material/files/"
       FileUtils.mkdir_p(dir) unless File.exist?(dir)
       path = File.join(dir, file.original_name)
       file.file.copy_to_local_file :original, path

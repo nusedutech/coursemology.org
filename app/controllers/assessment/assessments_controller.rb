@@ -211,6 +211,8 @@ class Assessment::AssessmentsController < ApplicationController
   def download_file
     #redirect_to material.file.file_url
     file = FileUpload.find_by_id(params[:file_id].to_i)
+
+    #send_file "#{Rails.root}/#{file.file_url}",
     send_file "#{Rails.root}/public/Assessment/#{params[:id]}/files/#{file.original_name}",
               :filename => params[:filename],
               :type => file.file_content_type

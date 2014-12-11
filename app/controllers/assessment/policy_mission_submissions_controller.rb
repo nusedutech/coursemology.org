@@ -22,10 +22,10 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 				tag = forwardPolicyLevel.getTag
 
 				#Uncompleted Progression - Mission failed
-				if progressionGroup.correct_amount_left > 0
-					@summary[:forwardContent][:status] = false
-				else
-					@summary[:forwardContent][:highestLevel] = tag.name
+        if progressionGroup.correct_amount_left > 0
+          @summary[:forwardContent][:status] = false
+        else
+          @summary[:forwardContent][:highestLevel] = tag.name
 				end
 
 				allMcqAnswers = forwardGroup.getAllAnswers

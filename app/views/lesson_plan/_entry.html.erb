@@ -20,7 +20,8 @@
         <% else %>
               <%= link_to "",:id => "virtual-entity-#{entry.assessment.id}",  :class => "btn_entry" do %>
                   <span class="entry_title"><%= entry.title %></span>
-                  <input type="hidden" class="entry_url" value="<%= course_lesson_plan_submission_path(@course, entry.assessment )  %>">
+                  <input type="hidden" class="entry_action" value="<%= entry.submission[:action]  %>">
+                  <input type="hidden" class="entry_url" value="<%= entry.submission[:url]  %>">
                   <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
                   <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
                   <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">

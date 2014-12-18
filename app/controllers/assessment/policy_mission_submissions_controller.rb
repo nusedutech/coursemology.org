@@ -58,7 +58,12 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 			end
 
 			@summary[:forwardContent][:levels] = forwardLevelsContent
-		end
+    end
+
+    #Policy Mission in lesson plan - Show view
+    if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+      render_lesson_plan_view(@course, @assessment, params, true, @curr_user_course)
+    end
   end
 
 	def show_export_excel
@@ -144,13 +149,15 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 					end
 					@submission.set_submitted
 					#@submission.update_grade
-				end				
-				respond_to do |format|
-					format.html 
-				end
+        end
+
+        #Mission in lesson plan - Edit view
+        if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+          render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
+        end
 			else
 				respond_to do |format|
-					format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission) }
+					format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission, :from_lesson_plan => params['from_lesson_plan'], :discuss => params['discuss']) }
 				end
 			end
 		end
@@ -215,7 +222,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 	def no_update_after_submission
     unless @submission.attempting?
       respond_to do |format|
-        format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission),
+        format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission, :from_lesson_plan => params['from_lesson_plan'], :discuss => params['discuss']),
                                   notice: "Your have already submitted this mission." }
       end
     end

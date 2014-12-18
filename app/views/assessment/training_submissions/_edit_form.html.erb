@@ -52,15 +52,9 @@
             <!--<input id="pathrun" class="path_button" type="button" value="Run (ALT+R)" />-->
         <% end %>
 
-        <% if @is_lesson_plan_submission.nil? %>
         <%= link_to "Continue",
-                    edit_course_assessment_submission_path(@course, @assessment, @submission, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
+                    edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
                     :id => 'continue-btn' %>
-        <% else %>
-            <%= link_to "Continue",
-                        course_lesson_plan_submission_path(@course, @assessment, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
-                        :id => 'continue-btn' %>
-        <% end %>
       </div>
     </form>
 

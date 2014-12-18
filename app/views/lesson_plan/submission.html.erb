@@ -65,8 +65,14 @@
           <% if @mission_show.nil? %>
               <%= render partial: 'assessment/mission_submissions/summary' %>
               <%= render partial: 'assessment/mission_submissions/form' %>
-          <% elsif @mission_show=="true"%>
-              <%= render :partial => 'lesson_plan/show_mission' %>
+          <% elsif @mission_show %>
+              <%= render partial: 'assessment/mission_submissions/show_form' %>
+          <% end %>
+      <% elsif @assessment.is_a?(Assessment::PolicyMission)%>
+          <% if @mission_show.nil? %>
+              <%= render partial: 'assessment/policy_mission_submissions/form' %>
+          <% elsif @mission_show %>
+              <%= render partial: 'assessment/policy_mission_submissions/show_form' %>
           <% end %>
       <% end %>
 
@@ -339,6 +345,7 @@
         function show_mission_training(entry, title, type, des, loc, $resource){
             var start  = $(entry).find('input.entry_start').val();
             var end  = $(entry).find('input.entry_end').val();
+            var action = $(entry).find('input.entry_action').val();
             var url  = $(entry).find('input.entry_url').val();
 
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
@@ -346,6 +353,8 @@
             entry_form += "<div><p style=''>" + loc + "</p></div>";
             entry_form += "<div><p style=''><h4>" + (start ? "<span class='icon-calendar'></span>" + " " + start : "") + (end ? " to " + end : "") + "</h4></p></div>";
             $('section#detail-content').append(entry_form);
+
+            //Show resource - files
             if($resource.length){
                 $('section#detail-content').append($("<table class='material_list'></table>"));
                 $resource.children().each(function(){
@@ -370,7 +379,10 @@
                     //return false;
                 });
             }
-            $('section#detail-content').append("<div><a class='attempt-assessment btn btn-success' href='" + url + "'>Attempt</a></div>");
+
+            //Show link
+            $('section#detail-content').append("<div><a class='attempt-assessment btn " + (action=="Attempt" ? "btn-success" : (action=="Edit" ? "" : "btn-info")) + "' href='" + url + "'>" + action + "</a></div>");
+
         }
 
         $('#lesson-plan-content a.attempt-assessment').click(function() {

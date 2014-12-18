@@ -1,4 +1,4 @@
-<%= form_for @submission, url: (@is_lesson_plan_submission.nil? ? course_assessment_submission_path(@course, @assessment, @submission): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
+<%= form_for @submission, url: (@from_lesson_plan.nil? ? course_assessment_submission_path(@course, @assessment, @submission): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
     <div class="tabbable tabs-below">
       <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
           <ul class="nav nav-tabs" id="assign-qn-tabs">

@@ -11,7 +11,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
 
 	
 	def full_title
-    "#{I18n.t('Assessment.Policy_Mission')} : #{self.title}"
+    "Regulated Trainings : #{self.title}"
   end
 
   def self.reflect_on_association(association)

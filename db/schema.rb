@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141114113325) do
+ActiveRecord::Schema.define(:version => 20141225211009) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -281,8 +281,9 @@ ActiveRecord::Schema.define(:version => 20141114113325) do
 
   create_table "assessment_policy_missions", :force => true do |t|
     t.datetime "deleted_at"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.boolean  "multiple_submissions", :default => false
   end
 
   create_table "assessment_progression_groups", :force => true do |t|

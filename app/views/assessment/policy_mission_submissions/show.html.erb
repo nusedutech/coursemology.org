@@ -5,6 +5,11 @@
 </div>
 <p class="well"><%= @policy_mission.description.html_safe %></p>
 
+<% if @policy_mission.multiple_submissions == true %>
+	<select id="select-policy-list">
+  </select>
+<% end %>
+
 <% if @summary[:forwardContent] %>
 	<div>
 		<h2>Statistics</h2>

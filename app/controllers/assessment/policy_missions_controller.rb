@@ -38,6 +38,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 	end
 
 	def create
+		@assessment = @policy_mission.assessment
     @policy_missions = @course.policy_missions
     @policy_mission.position = @course.policy_missions.count + 1
     @policy_mission.creator = current_user
@@ -75,8 +76,11 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 			end
       
 		  additionalPublishNotice = @policy_mission.assessment.published && invalidPublish ? " Cannot be published as missing forward levels with questions." : ""
-      @policy_mission.assessment.published = !invalidPublish
-      @policy_mission.assessment.save
+      
+      if @policy_mission.published
+        @policy_mission.published = !invalidPublish
+        @policy_mission.save
+      end
 
       if invalidSaves
         format.html { render action: "new" }
@@ -88,13 +92,14 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
   end
 
 	def update
+		@assessment = @policy_mission.assessment
     respond_to do |format|
       if !params[:assessment].nil? 
         update_questions params[:assessment][:question_assessments]
       #else
         #update_questions []
       end      
-      
+      meow = ""
 		  invalidPublish = false
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
 				if @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
@@ -115,14 +120,18 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 						forward_policy_level.save
 
             #Cannot publish as long as one single level is missing a question to do
+						meow = meow + forward_policy_level.getAllRelatedQuestions(@assessment).size.to_s + ", "
             if forward_policy_level.getAllRelatedQuestions(@assessment).size  <= 0
               invalidPublish = true
             end
 					end
 				end
-				additionalPublishNotice = @policy_mission.published && invalidPublish ? " Cannot be published as missing forward levels with questions." : ""
-        @policy_mission.published = !invalidPublish
-        @policy_mission.save
+				additionalPublishNotice = @policy_mission.published && invalidPublish ? meow + "Cannot be published as missing forward levels with questions." : ""
+				
+				if @policy_mission.published
+          @policy_mission.published = !invalidPublish
+          @policy_mission.save
+        end
 
         format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
                                   notice: "The policy mission #{@policy_mission.title} has been updated." + additionalPublishNotice}

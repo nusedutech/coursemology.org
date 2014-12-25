@@ -10,7 +10,7 @@ class Assessment::ForwardGroup < ActiveRecord::Base
 	belongs_to :forward_policy_level, class_name: "Assessment::ForwardPolicyLevel"
 
 	def getCorrespondingLevel
-		Assessment::ForwardPolicyLevel.find(self.forward_policy_level_id)
+		Assessment::ForwardPolicyLevel.with_deleted.find(self.forward_policy_level_id)
 	end
 
 

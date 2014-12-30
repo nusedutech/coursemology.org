@@ -40,24 +40,35 @@ class Assessment::QuestionsController < ApplicationController
   end
   
   def add_question
-    filter = params[:tags]
-    questions = []
-    if !filter.nil?
-      filter_tags = filter.split(",")      
-      if filter_tags.count > 0
-        @summary = {selected_tags: filter_tags || []}
-        filter_tags.each do |t|
-          @tag = @course.topicconcepts.where(:name => t).first
-          if !@tag.nil?
-            questions += @tag.questions
+    if !@assessment.nil?
+      filter = params[:tags]
+      questions = []
+      if !filter.nil?
+        filter_tags = filter.split(",")
+        if filter_tags.count > 0
+          @summary = {selected_tags: filter_tags || []}
+          filter_tags.each do |t|
+            @tag = @course.topicconcepts.where(:name => t).first
+            if !@tag.nil?
+              questions += @tag.questions
+            end
           end
         end
       end
-    end
-    if questions.count > 0
-      @questions = questions.uniq
-    else
-      @questions = @course.questions
+      if questions.count > 0
+        @questions = questions.uniq
+      else
+        @questions = @course.questions
+      end
+      
+      #filter question by kind of assessment
+      if @assessment.is_mission?
+        @questions = @questions.general_and_coding_question
+      elsif @assessment.is_training?
+        @questions = @questions.mcq_and_coding_question
+      elsif @assessment.is_policy_mission?
+        @questions = @questions.mcq_question
+      end
     end
   end
 

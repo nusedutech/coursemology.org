@@ -9,6 +9,9 @@ class Assessment::PolicyMission < ActiveRecord::Base
 	
 	has_one :progression_policy, class_name: "Assessment::ProgressionPolicy",  dependent: :destroy
 
+  def multipleAttempts?
+    self.multiple_submissions
+  end
 	
 	def full_title
     "Regulated Trainings : #{self.title}"

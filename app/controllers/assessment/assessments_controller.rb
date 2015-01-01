@@ -64,6 +64,12 @@ class Assessment::AssessmentsController < ApplicationController
         action_map[ast.id] = { action: attempting ? "Edit" : "Review",
                                url: edit_course_assessment_submission_path(@course, ast, sub_map[ast.id]) }
 
+        
+        if assessment_type == 'policy_mission' and !attempting and ast.multipleAttempts?
+          action_map[ast.id][:actionSecondary] = "Reattempt"
+          action_map[ast.id][:urlSecondary] = new_course_assessment_submission_path(@course, ast)
+        end
+
         #potential bug
         #1, can mange, 2, opened and fulfil the dependency requirements
       elsif (ast.opened? and (ast.as_assessment.class == Assessment::Training or

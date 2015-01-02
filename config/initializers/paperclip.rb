@@ -3,7 +3,7 @@
 #Paperclip::Attachment.default_options[:path] = '/:class/:attachment/:id_partition/:style/:filename'
 
 ### local storage setting
-Paperclip::Attachment.default_options[:url] = 'public/:class/:attachment/:id_partition/:filename'
+Paperclip::Attachment.default_options[:url] = '/:class/:attachment/:id_partition/:filename'
 Paperclip::Attachment.default_options[:path] = ':rails_root/public/:class/:attachment/:id_partition/:filename'
 
 ### example for url string

@@ -60,7 +60,7 @@ class Assessment::QuestionsController < ApplicationController
       else
         @questions = @course.questions
       end
-      
+
       #filter question by kind of assessment
       if @assessment.is_mission?
         @questions = @questions.general_and_coding_question

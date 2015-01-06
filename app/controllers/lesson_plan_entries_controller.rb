@@ -191,7 +191,7 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def overview
-    @milestones = get_milestones_for_course(@course)
+    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course)
     render "/lesson_plan/overview"
   end
 

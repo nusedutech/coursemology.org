@@ -14,7 +14,7 @@ class Assessment::ForwardPolicyLevel < ActiveRecord::Base
 	def getAllQuestionsString(assessment)
 		result = ""
 		if assessment.is_a? Assessment
-			questions = QuestionAssessment.find_by_sql(["SELECT * FROM question_assessments, taggable_tags WHERE taggable_tags.taggable_id = question_assessments.question_id and question_assessments.assessment_id = ? and taggable_tags.tag_id = ?", assessment.id, self.tag_id ])
+			questions = QuestionAssessment.find_by_sql(["SELECT * FROM question_assessments, taggable_tags WHERE taggable_tags.taggable_type = 'Assessment::Question' and taggable_tags.tag_type = 'Tag' and question_assessments.deleted_at IS NULL and taggable_tags.deleted_at IS NULL and taggable_tags.taggable_id = question_assessments.question_id and question_assessments.assessment_id = ? and taggable_tags.tag_id = ?", assessment.id, self.tag_id ])
 
 			arr = []
 			questions.each do |question|
@@ -31,7 +31,7 @@ class Assessment::ForwardPolicyLevel < ActiveRecord::Base
 
 	def getAllRelatedQuestions(assessment)
 		if assessment.is_a? Assessment
-			questions = Assessment::Question.find_by_sql(["SELECT * FROM assessment_questions, question_assessments, taggable_tags WHERE taggable_tags.taggable_id = question_assessments.question_id and assessment_questions.id = question_assessments.question_id and question_assessments.assessment_id = ? and taggable_tags.tag_id = ?", assessment.id, self.tag_id])
+			questions = Assessment::Question.find_by_sql(["SELECT * FROM assessment_questions, question_assessments, taggable_tags WHERE taggable_tags.taggable_type = 'Assessment::Question' and taggable_tags.tag_type = 'Tag' and question_assessments.deleted_at IS NULL and taggable_tags.deleted_at IS NULL and assessment_questions.deleted_at IS NULL and taggable_tags.taggable_id = question_assessments.question_id and assessment_questions.id = question_assessments.question_id and question_assessments.assessment_id = ? and taggable_tags.tag_id = ?", assessment.id, self.tag_id])
 		else
 			questions = []
 		end

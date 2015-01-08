@@ -9,9 +9,10 @@ class Assessment::QuestionsController < ApplicationController
   def index
 
     filter = params[:tags]
-    search_string = params[:search_string]
+    #search_string = params[:search_string]
     questions = nil
 
+=begin
     if (!filter.nil? && !filter.empty?)
       filter_tags = filter.split(",")
       q = ''
@@ -32,30 +33,54 @@ class Assessment::QuestionsController < ApplicationController
     else
       @questions = @course.questions.uniq
     end
-    
+=end    
+
     respond_to do |format|
-      #format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }}}
+      format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }} + @course.tags.map {|t| {id: t.id, name: t.name }}}
       format.html
     end
   end
   
   def add_question
     filter = params[:tags]
+    search_string = params[:search_string]
     questions = []
     if !filter.nil?
       filter_tags = filter.split(",")      
       if filter_tags.count > 0
         @summary = {selected_tags: filter_tags || []}
+
+        tag_query_string = ""
         filter_tags.each do |t|
-          @tag = @course.topicconcepts.where(:name => t).first
-          if !@tag.nil?
-            questions += @tag.questions
-          end
+          tag_query_string += tag_query_string.empty? ? "tags.name = '#{t}'" : " or tags.name = '#{t}'"
         end
+        selected_tags =  @course.tags.where(tag_query_string)
+
+        topicconcepts_query_string = ""
+        filter_tags.each do |t|
+          topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
+        end
+        selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
+
+        selected_taggable_tags = []
+        selected_tags.each do |tag|
+          selected_taggable_tags = selected_taggable_tags + tag.taggable_tags
+        end
+        selected_topicconcepts.each do |topicconcept|
+          selected_taggable_tags = selected_taggable_tags + topicconcept.taggable_tags
+        end
+        selected_taggable_tags = selected_taggable_tags.uniq
+
+				#Link broken for question to taggable_tag - temp fix
+        selected_taggable_tags.each do |taggable_tag|
+          questions = questions + @course.questions.where("assessment_questions.title like ? or assessment_questions.description like ? and assessment_questions.id = ? ", "%#{search_string}%", "%#{search_string}%", taggable_tag.taggable_id)
+        end     
+
       end
     end
     if questions.count > 0
       @questions = questions.uniq
+      @meow = @questions
     else
       @questions = @course.questions
     end

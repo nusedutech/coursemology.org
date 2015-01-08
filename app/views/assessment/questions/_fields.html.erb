@@ -8,8 +8,8 @@
 
 	    	<%- if @assessment.nil? %>
 	    	<th width="10%">Action</th>
-	    	<%- else%>
-	    	<th width="10%">Add</th>
+	    	<%- else %>
+	    	<th width="10%">Add <input type="checkbox" class="selectall_question_option" ></th>
 	    	<%- end %>
 		</tr>
     </thead>
@@ -64,7 +64,7 @@
 	                        <i class="icon-trash"></i>
 	                    <% end %>
 	                <% else %>
-	                	<%= check_box_tag 'question_#{q.id}', q.id, @assessment.questions.include?(q), :name => 'assessment[question_assessments][]' %>
+	                	<%= check_box_tag 'question_#{q.id}', q.id, @assessment.questions.include?(q), :name => 'assessment[question_assessments][]', class: 'question_option' %>
                     <% end %>             
 			
 	            </td>
@@ -88,5 +88,10 @@
             $(this).prev().removeClass("show-max-height");
             $(this).text('Show More');
         }
+    });
+
+    $('input.selectall_question_option').click(function() {
+        $('input.question_option').prop('checked', $(this).prop('checked'));
+        console.log("cats");
     });
 </script>

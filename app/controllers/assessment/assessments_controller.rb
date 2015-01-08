@@ -64,10 +64,9 @@ class Assessment::AssessmentsController < ApplicationController
         action_map[ast.id] = { action: attempting ? "Edit" : "Review",
                                url: edit_course_assessment_submission_path(@course, ast, sub_map[ast.id]) }
 
-        
-        if assessment_type == 'policy_mission' and !attempting and ast.multipleAttempts?
+        if ast.is_policy_mission? and !attempting and ast.specific.multipleAttempts?
           action_map[ast.id][:actionSecondary] = "Reattempt"
-          action_map[ast.id][:urlSecondary] = new_course_assessment_submission_path(@course, ast)
+          action_map[ast.id][:urlSecondary] = reattempt_course_assessment_submissions_path(@course, ast)
         end
 
         #potential bug
@@ -121,7 +120,7 @@ class Assessment::AssessmentsController < ApplicationController
 			redirect_to course_stats_mission_path(@course, @assessment.specific)
 		elsif @assessment.is_training?
 			redirect_to course_stats_training_path(@course, @assessment.specific)
-		elsif
+		elsif @assessment.is_policy_mission?
 			redirect_to course_stats_policy_mission_path(@course, @assessment.specific)
 		end
   end

@@ -1,7 +1,7 @@
 <div class="page-header">
   <h1>Policy Mission Statistics: <span style="font-style: italic; font-weight: normal"><%= @policy_mission.title %></span> </h1>
   <%= link_to "Click here",
-              submissions_course_assessment_policy_missions_path(@course, asm: @policy_mission.assessment.id),
+              submissions_course_assessment_policy_missions_path(@course, asm: @policy_mission.assessment),
               method: "GET" %>
   to review all submission for this mission.
 </div>

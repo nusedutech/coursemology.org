@@ -1,6 +1,6 @@
 class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsController
 
-	before_filter :authorize, only: [:new, :create, :update]
+	before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt]
   before_filter :no_update_after_submission, only: [:edit, :update]
 
  	def show
@@ -68,6 +68,25 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 			headers["Content-Type"] = "xls"
 			format.xls
 		end
+  end
+
+  def reattempt
+    @policy_mission = @assessment.specific
+    lastSbm = @assessment.submissions.where(std_course_id: curr_user_course).last
+    if @policy_mission.multipleAttempts? and lastSbm and lastSbm.submitted?
+      @submission = @assessment.submissions.new
+      @submission.std_course = curr_user_course
+      if @submission.save
+        respond_to do |format|
+        		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment)}
+        end
+      end
+    else
+		  respond_to do |format|
+					format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
+												notice: "Invalid policy mission attempted" }
+			end
+    end
   end
 
   def edit
@@ -210,7 +229,6 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 		 answer_id: ans.id
     }
   end
-
 
 	def no_update_after_submission
     unless @submission.attempting?

@@ -132,6 +132,9 @@ Coursemology::Application.routes.draw do
           post 'edit' => 'policy_mission_submissions#edit'
 					get 'export' => 'policy_mission_submissions#show_export_excel'
         end
+        collection do
+          get 'reattempt' => 'policy_mission_submissions#reattempt'
+        end
       end
     end
 

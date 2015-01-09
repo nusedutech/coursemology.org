@@ -52,6 +52,7 @@ class Assessment::AssessmentsController < ApplicationController
 
     sub_ids = submissions.map {|s| s.assessment_id}
     sub_map = {}
+    #Going by date, the last submission will overwrite everything else
     submissions.each do |sub|
       sub_map[sub.assessment_id] = sub
     end

@@ -43,9 +43,12 @@ class Assessment::QuestionsController < ApplicationController
   
   def add_question
     filter = params[:tags]
+    search_string = ""
     search_string = params[:search_string]
+    query_string = "assessment_questions.title like '%#{search_string}%' or assessment_questions.description like '%#{search_string}%'"
+
     questions = []
-    if !filter.nil?
+    if !filter.nil? and !filter.empty?
       filter_tags = filter.split(",")      
       if filter_tags.count > 0
         @summary = {selected_tags: filter_tags || []}
@@ -71,16 +74,20 @@ class Assessment::QuestionsController < ApplicationController
         end
         selected_taggable_tags = selected_taggable_tags.uniq
 
+
 				#Link broken for question to taggable_tag - temp fix
         selected_taggable_tags.each do |taggable_tag|
-          questions = questions + @course.questions.where("assessment_questions.title like ? or assessment_questions.description like ? and assessment_questions.id = ? ", "%#{search_string}%", "%#{search_string}%", taggable_tag.taggable_id)
-        end     
-
+          questions = questions + @course.questions.where(query_string + " and assessment_questions.id = ? ", taggable_tag.taggable_id)
+        end  
       end
+    else
+      questions = questions + @course.questions.where(query_string)
     end
+
     if questions.count > 0
+      #Add questions in the assessment already to filter criteria
+      questions = questions + @assessment.questions
       @questions = questions.uniq
-      @meow = @questions
     else
       @questions = @course.questions
     end

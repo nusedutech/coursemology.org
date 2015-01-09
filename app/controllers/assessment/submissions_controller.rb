@@ -38,7 +38,7 @@ class Assessment::SubmissionsController < ApplicationController
       if sbm && sbm.submitted?
         redirect_to edit_course_assessment_submission_path(@course, @assessment, sbm)
       end
-
+      
 			if @assessment.getPolicyMission.progression_policy.isForwardPolicy?
 				forward_policy = @assessment.getPolicyMission.progression_policy.getForwardPolicy
 				sortedPolicyLevels = forward_policy.getSortedPolicyLevels

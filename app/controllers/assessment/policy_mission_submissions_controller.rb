@@ -9,7 +9,8 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 		@summary = {}
    
     if @policy_mission.multipleAttempts?
-      @assessment.submissions.where(std_course_id: curr_user_course).last
+      #Get all attempts for displaying later
+      @allSubmissions = @assessment.submissions.where(std_course_id: @submission.std_course)
     end
 
 		if @policy_mission.progression_policy.isForwardPolicy?

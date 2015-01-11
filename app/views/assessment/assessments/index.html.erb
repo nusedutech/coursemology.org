@@ -1,8 +1,8 @@
 <div class="missions">
   <%- if @summary[:module] == "Policy mission" %>
   	<%- model_name = "policy_mission" %>
-  	<%- title =  "Policy Missions" %>
-		<%- singularTitle = "Policy Mission" %>
+  	<%- title =  "Regulated Trainings" %>
+		<%- singularTitle = "Regulated Training" %>
   <%- else %>
   	<%- model_name = @summary[:module] %>
   	<%- title =  @course.customized_title(model_name).pluralize %>

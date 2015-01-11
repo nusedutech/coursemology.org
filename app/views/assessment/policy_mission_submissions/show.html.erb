@@ -8,11 +8,11 @@
 <% if @policy_mission.multiple_submissions == true %>
 	<table class="table-basic">
 		<tr>
-		  <td>Submission date</td>
+		  <td>Submission date: </td>
 		  <td>
 		    <select id="select-submission">
-		      <%= @course.policy_missions.each do |asm| %>
-		          <option value="<%= course_stats_policy_mission_path(@course, asm) %>"><%= asm.title %></option>
+		      <%= @allSubmissions.each do |sbm| %>
+		          <option value="<%= course_assessment_submission_path(@course, @assessment, sbm) %>"><%= sbm.submitted_at %></option>
 		      <% end %>
 		    </select>
 		  </td>

@@ -1,13 +1,24 @@
 <div class="page-header">
   <h1>
-    Policy Mission submission: <%= @policy_mission.title %>
+    Regulated Training Submission: <%= @policy_mission.title %>
   </h1>
 </div>
 <p class="well"><%= @policy_mission.description.html_safe %></p>
 
 <% if @policy_mission.multiple_submissions == true %>
-	<select id="select-policy-list">
-  </select>
+	<table class="table-basic">
+		<tr>
+		  <td>Submission date</td>
+		  <td>
+		    <select id="select-submission">
+		      <%= @course.policy_missions.each do |asm| %>
+		          <option value="<%= course_stats_policy_mission_path(@course, asm) %>"><%= asm.title %></option>
+		      <% end %>
+		    </select>
+		  </td>
+		  <td><a href="#" class="btn btn-select-nav" data-target="#select-submission">View</a></td>
+		</tr>
+	</table>
 <% end %>
 
 <% if @summary[:forwardContent] %>

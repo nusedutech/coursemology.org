@@ -1,11 +1,17 @@
 class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsController
 
 	before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt]
+  before_filter :no_showing_before_submission, only: [:show, :show_export_excel]
   before_filter :no_update_after_submission, only: [:edit, :update]
 
  	def show
 		@policy_mission = @assessment.specific
 		@summary = {}
+   
+    if @policy_mission.multipleAttempts?
+      @assessment.submissions.where(std_course_id: curr_user_course).last
+    end
+
 		if @policy_mission.progression_policy.isForwardPolicy?
 			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
 			allProgressionGroups = @submission.progression_groups.where("is_completed = 1")
@@ -235,6 +241,15 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
       respond_to do |format|
         format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission),
                                   notice: "Your have already submitted this mission." }
+      end
+    end
+  end
+
+  def no_showing_before_submission
+    unless !@submission.attempting?
+      respond_to do |format|
+        format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission),
+                                  notice: "Your have not finished this mission." }
       end
     end
   end  

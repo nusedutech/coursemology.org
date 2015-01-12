@@ -52,6 +52,7 @@ class Assessment::AssessmentsController < ApplicationController
 
     sub_ids = submissions.map {|s| s.assessment_id}
     sub_map = {}
+    #Going by date, the last submission will overwrite everything else
     submissions.each do |sub|
       sub_map[sub.assessment_id] = sub
     end
@@ -63,6 +64,11 @@ class Assessment::AssessmentsController < ApplicationController
         attempting = sub_map[ast.id].attempting?
         action_map[ast.id] = { action: attempting ? "Edit" : "Review",
                                url: edit_course_assessment_submission_path(@course, ast, sub_map[ast.id]) }
+
+        if ast.is_policy_mission? and !attempting and ast.specific.multipleAttempts?
+          action_map[ast.id][:actionSecondary] = "Reattempt"
+          action_map[ast.id][:urlSecondary] = reattempt_course_assessment_submissions_path(@course, ast)
+        end
 
         #potential bug
         #1, can mange, 2, opened and fulfil the dependency requirements
@@ -112,26 +118,12 @@ class Assessment::AssessmentsController < ApplicationController
   def stats
     @summary = {}
 		if @assessment.is_mission?
-			@summary[:type] = 'mission'
-			@stats_paging = "MissionStats"
-		elsif
-			@summary[:type] = 'training'
-			@stats_paging = "TrainingStats"
-		elsif
-			@summary[:type] = 'policy_mission'
+			redirect_to course_stats_mission_path(@course, @assessment.specific)
+		elsif @assessment.is_training?
+			redirect_to course_stats_training_path(@course, @assessment.specific)
+		elsif @assessment.is_policy_mission?
+			redirect_to course_stats_policy_mission_path(@course, @assessment.specific)
 		end
-
-    @submissions = @assessment.submissions.includes(:gradings)
-    std_courses = @course.user_courses.student.order(:name).where(is_phantom: false)
-    my_std = curr_user_course.std_courses.student.order(:name).where(is_phantom: false)
-    std_phantom = @course.user_courses.student.order(:name).where(is_phantom: true)
-
-    if @stats_paging.display?
-      std_courses = std_courses.page(params[:page]).per(@stats_paging.prefer_value.to_i)
-    end
-
-
-    @summary[:stats] = {'My Students' => my_std, "All Students" => std_courses, "Phantom Students" => std_phantom}
   end
 
   def reorder

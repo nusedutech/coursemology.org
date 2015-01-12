@@ -12,6 +12,9 @@
 				<Row>
 					<Cell><Data ss:Type="String">Student ID</Data></Cell>
 					<Cell><Data ss:Type="String">Name</Data></Cell>
+					<Cell><Data ss:Type="String">Status</Data></Cell>
+					<Cell><Data ss:Type="String">Mastery</Data></Cell>
+					<Cell><Data ss:Type="String">Mastery String</Data></Cell>
 					<% @summary[:forwardContent][:tagGroup].each do |singleLevel| %>
 						<Cell><Data ss:Type="String"><%= singleLevel[:name]!="" ? singleLevel[:name] : "NoName" %></Data></Cell>
 					<% end %>
@@ -21,6 +24,9 @@
 					<Row>
 						<Cell><Data ss:Type="String"><%= studentSubmission[:id] %></Data></Cell>
 						<Cell><Data ss:Type="String"><%= studentSubmission[:name] %></Data></Cell>
+						<Cell><Data ss:Type="String"><%= studentSubmission[:status] %></Data></Cell>
+						<Cell><Data ss:Type="String"><%= studentSubmission[:highestLevel] %></Data></Cell>
+            <Cell><Data ss:Type="String"><%= studentSubmission[:masteryString] %></Data></Cell>
 						<% studentSubmission[:levelInfos].each do |singleLevelString| %>
 							<Cell><Data ss:Type="String"><%= singleLevelString %></Data></Cell>
 						<% end %>

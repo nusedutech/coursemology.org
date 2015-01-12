@@ -304,7 +304,7 @@ class Assessment < ActiveRecord::Base
     #2. auto submission
     #3. email notifications
     tks = {pending_action: true,
-           auto_submission:  is_mission? && course.auto_create_sbm_pref.enabled?,
+           auto_submission:  (is_mission? || is_policy_mission?)  && course.auto_create_sbm_pref.enabled?,
            notification: self.open_at >= Time.now &&
                course.email_notify_enabled?(PreferableItem.new_assessment(as_assessment_type.constantize)) }
 
@@ -317,7 +317,7 @@ class Assessment < ActiveRecord::Base
   def update_closing_tasks
     #1. remainder
     type = :mission_due
-    if is_mission? and self.close_at >= Time.now and course.email_notify_enabled?(type.to_s)
+    if (is_mission? || is_policy_mission?) and self.close_at >= Time.now and course.email_notify_enabled?(type.to_s)
       create_delayed_job(type, 1.day.ago(self.close_at))
     end
   end

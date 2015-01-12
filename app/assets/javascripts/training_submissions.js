@@ -129,6 +129,8 @@ $(document).ready(function(){
                 $("#pathrun").attr("disabled",false);
             }, 'json')
     }
+
+    set_show_hide_discussion();
 });
 
 

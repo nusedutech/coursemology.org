@@ -27,7 +27,7 @@ class ForumTopic < ActiveRecord::Base
 
   is_sluggable :title, history: false
 
-  attr_accessible :forum, :topic_type, :locked, :hidden
+  attr_accessible :forum, :topic_type, :locked, :hidden, :title, :discussable_type, :discussable_id
 
   # Defines all topic types. Last element is the permission required.
   TOPIC_TYPES = [

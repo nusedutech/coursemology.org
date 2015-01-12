@@ -359,17 +359,9 @@
         });
 
         function show_discussion(discussion){
-            var entry_form = "";
-            $('section#detail-content').append(entry_form);
-            $('section#detail-content').append(discussion);
-            $('section#detail-content a.a_discussion').click(function() {
-                $('section#detail-content .forum').toggle('slow');
-                if ($('section#detail-content a.a_discussion').text()=="Show Discussion"){
-                    $('section#detail-content a.a_discussion').text("Hide Discussion");
-                }else{
-                    $('section#detail-content a.a_discussion').text("Show Discussion");
-                }
-            });
+            $('section#detail-content').append($("<div id='discussion-wrapper'></div>"));
+            $('div#discussion-wrapper').append(discussion);
+            set_show_hide_discussion();
         }
 
         if($('#active-entity').val()){

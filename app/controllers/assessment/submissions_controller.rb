@@ -35,6 +35,10 @@ class Assessment::SubmissionsController < ApplicationController
 
 		#Processing permutation for policy levels
 		if @assessment.is_policy_mission? 
+      if sbm && sbm.submitted?
+        redirect_to edit_course_assessment_submission_path(@course, @assessment, sbm)
+      end
+      
 			if @assessment.getPolicyMission.progression_policy.isForwardPolicy?
 				forward_policy = @assessment.getPolicyMission.progression_policy.getForwardPolicy
 				sortedPolicyLevels = forward_policy.getSortedPolicyLevels
@@ -70,7 +74,8 @@ class Assessment::SubmissionsController < ApplicationController
   private
 
   def build_resource
-    if params[:id]
+    #Additional numeric check to prevent collection methods from defaulting to member methods
+    if params[:id] and params[:id].is_a? Numeric
       @submission = @assessment.submissions.send(:find, params[:id])
     elsif params[:action] == 'index'
       @submissions = @assessment.submissions.accessible_by(current_ability)

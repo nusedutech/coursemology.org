@@ -143,22 +143,46 @@ class StatsController < ApplicationController
 				packageSubmissionUser = {}
 				packageSubmissionUser[:id] = student.id
 				packageSubmissionUser[:name] = student.name
+				packageSubmissionUser[:status] = "Pass" #default pass - we check for failing condition and overwrite
+				packageSubmissionUser[:highestLevel] = "All mastered" #default all mastered - check for lower mastery and overwrite
+        packageSubmissionUser[:masteryString] = ""
 				packageSubmissionUser[:levelInfos] = []
+				previousTiming = singleSubmission.created_at
 
 				allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
 				#Separate each entries by the progression levels
 				allProgressionGroups.each do |progressionGroup|
 					forwardGroup = progressionGroup.getForwardGroup
-						
+					tagName = progressionGroup.getTagName	
 					allMcqAnswers = forwardGroup.getAllAnswers
 					numCorrect = 0
 					numTotal = 0
+
+					#Counting right answers
 					allMcqAnswers.each do |singleAnsweredQn|
+						packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + tagName
+            mcqQuestion = singleAnsweredQn.question.specific
+            
 						if singleAnsweredQn.correct
 							numCorrect += 1
+              packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "1"
+            else
+              packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "0"
 						end
 						numTotal += 1
+						
+						#Calculate timing to answer question from previous timing
+						timingQn = (singleAnsweredQn.created_at - previousTiming)
+					  #Update timing for next question
+						previousTiming = singleAnsweredQn.created_at
+						packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + mcqQuestion.id.to_s + "," + timingQn.to_s + ";"
 					end
+
+					#Validate student's mastery level
+          if progressionGroup.correct_amount_left > 0
+            packageSubmissionUser[:status] = "Fail"
+          	packageSubmissionUser[:highestLevel] = tagName
+          end
 
 					packageSubmissionUser[:levelInfos] << numCorrect.to_s + " / " + numTotal.to_s
 				end

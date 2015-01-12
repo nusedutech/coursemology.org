@@ -27,6 +27,18 @@ $(document).ready(function() {
                     }
                     $div.html('<a href="' + actions_map[mid].url + '" class="btn ' + klass + '" >' + actions_map[mid].action + '</a>')
                 }
+                
+                var $divSecondary = $("#"+mid+"-secondary");
+                if ($divSecondary.length > 0 && actions_map[mid].actionSecondary) {
+                    var klass = "";
+                    switch (actions_map[mid].actionSecondary) {
+                        case 'Reattempt':
+                            klass = 'btn-success';
+                            break;
+                    }
+                    $divSecondary.html('<a href="' + actions_map[mid].urlSecondary + '" class="btn ' + klass + '" >' + actions_map[mid].actionSecondary + '</a>')
+                }
+
                 var $title = $("#title-"+mid);
                 if ($title.length > 0) {
                     var to_add = "";

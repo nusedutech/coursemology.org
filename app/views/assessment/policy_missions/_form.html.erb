@@ -7,6 +7,9 @@
     <%= f.input :exp, as: :integer, input_html: {class: "number_field input-medium"}  %>
     <%= f.input :open_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
     <%= f.input :close_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
+    <%= f.input :multiple_submissions, as: :boolean, label: "Multiple Submissions?",
+                input_html: {class: ""},
+                inline_label:"Check to allow multiple submissions" %>
     <%= f.input :published, as: :boolean, label: "Publish?",
                 input_html: {class: ""},
                 inline_label:"Check to publish #{display_name.downcase}"%>

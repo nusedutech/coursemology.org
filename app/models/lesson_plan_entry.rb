@@ -28,6 +28,7 @@ class LessonPlanEntry < ActiveRecord::Base
       def initialize
         @title = @description = @real_type = @start_at = @end_at = nil
         @resources = []
+        @submission = Hash.new
       end
 
       def title
@@ -99,6 +100,13 @@ class LessonPlanEntry < ActiveRecord::Base
       def is_published=(is_published)
         @is_published = is_published
       end
+
+      def submission
+        @submission
+      end
+      def submission=(submission)
+        @submission = submission
+      end
     end).new
   end
 
@@ -120,5 +128,72 @@ class LessonPlanEntry < ActiveRecord::Base
   end
   def is_published
     true
+  end
+
+  def self.get_milestones_for_course(course, current_ability, can_manage_mission, curr_user_course)
+    milestones = course.lesson_plan_milestones.accessible_by(current_ability).order("start_at")
+
+
+    other_entries_milestone = create_other_items_milestone(milestones, course, can_manage_mission, curr_user_course)
+    prior_entries_milestone = create_prior_items_milestone(milestones, course, can_manage_mission, curr_user_course)
+
+    milestones <<= other_entries_milestone
+    if prior_entries_milestone
+      milestones.insert(0, prior_entries_milestone)
+    end
+
+    milestones
+  end
+
+  def self.entries_between_date_range(start_date, end_date, course, can_manage_mission, curr_user_course)
+    if can_manage_mission
+      virtual_entries = course.lesson_plan_virtual_entries(start_date, end_date, curr_user_course)
+    else
+      virtual_entries = course.lesson_plan_virtual_entries(start_date, end_date, curr_user_course).select { |entry| entry.is_published }
+    end
+
+    after_start = if start_date then "AND start_at > :start_date " else "" end
+    before_end = if end_date then "AND end_at < :end_date" else "" end
+
+    actual_entries = course.lesson_plan_entries.where("TRUE " + after_start + before_end,
+                                                       :start_date => start_date, :end_date => end_date)
+
+    entries_in_range = virtual_entries + actual_entries
+    entries_in_range.sort_by { |e| e.start_at }
+  end
+
+  def self.create_other_items_milestone(all_milestones, course, can_manage_mission, curr_user_course)
+    last_milestone = if all_milestones.length > 0 then
+                       all_milestones[all_milestones.length - 1]
+                     else
+                       nil
+                     end
+
+    other_entries = if last_milestone and last_milestone.end_at then
+                      entries_between_date_range(last_milestone.end_at.advance(:days =>1), nil, course, can_manage_mission, curr_user_course)
+                    elsif last_milestone
+                      []
+                    else
+                      entries_between_date_range(nil, nil, course, can_manage_mission, curr_user_course)
+                    end
+
+    other_entries_milestone = LessonPlanMilestone.create_virtual("Other Items", other_entries)
+    other_entries_milestone.previous_milestone = last_milestone
+    other_entries_milestone
+  end
+
+  def self.create_prior_items_milestone(all_milestones, course, can_manage_mission, curr_user_course)
+    first_milestone = if all_milestones.length > 0 then
+                        all_milestones[0]
+                      else
+                        nil
+                      end
+
+    if first_milestone
+      entries_before_first = entries_between_date_range(nil, first_milestone.start_at, course, can_manage_mission, curr_user_course)
+      prior_entries_milestone = LessonPlanMilestone.create_virtual("Prior Items", entries_before_first)
+      prior_entries_milestone.next_milestone = first_milestone
+      prior_entries_milestone
+    end
   end
 end

@@ -114,12 +114,12 @@ class Course < ActiveRecord::Base
   # Note: this method returns entries in the closed interval
   # of from and to: i.e. entries starting at both from and to
   # are included. [from, to]
-  def lesson_plan_virtual_entries(from = nil, to = nil)
+  def lesson_plan_virtual_entries(from = nil, to = nil, curr_user_course = nil)
     self.assessments.where("TRUE " +
                                (if from then "AND assessments.open_at >= :from " else "" end) +
                                (if to then "AND assessments.open_at <= :to" else "" end),
                            :from => from, :to => to
-    ).map { |m| m.as_lesson_plan_entry }
+    ).map { |m| m.as_lesson_plan_entry(self, curr_user_course) }
   end
 
   def materials_virtual_entries

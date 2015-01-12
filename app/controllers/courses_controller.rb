@@ -218,33 +218,33 @@ class CoursesController < ApplicationController
   end
 
   def import_ivle_student
-    count = 0
-    existing = ""
+    count_import_student = 0
+    count_join_course = 0
+    count_existing = 0
+    #existing = ""
     if params["import_ivle_student"] && params["import_ivle_student"]["chose"]
       params["import_ivle_student"]["chose"].each do |e|
           email = params["import_ivle_student"]["email"][e]=="" ? (e + "@nus.edu.sg") : params["import_ivle_student"]["email"][e]
-          name = params["import_ivle_student"]["name"][e]
+          name = params["import_ivle_student"]["name"][e]=="" ? e : params["import_ivle_student"]["name"][e]
           password = User.new(password: e).encrypted_password
           user = User.where(:provider => "ivle", :uid => e).first
           unless user
             user = User.new(:name => name, :email => email, :student_id => e, :provider => "ivle" ,:uid => e, :password => password, :password_confirmation => password)
             user.skip_confirmation!
             user.save
-            count = count+1
+            count_import_student = count_import_student+1
           else
-            existing += " #{e},"
+            #existing += " #{e},"
+            count_existing = count_existing+1
           end
           user_course = @course.user_courses.find_by_user_id_and_course_id(user.id, @course.id)
           unless user_course
             @course.enrol_user(user, Role.find_by_name("student"))
+            count_join_course = count_join_course+1
           end
       end
       respond_to do |format|
-        if ( count > 0 || !existing.empty? )
-          format.html { redirect_to course_manage_students_path(@course), notice: ( count > 0 ? "Imported #{count} students." : "" ) + ( existing.empty? ? "" : "<br />Student Numbers existed: #{existing[0..-2]}") }
-        else
-          format.html { redirect_to course_manage_students_path(@course)}
-        end
+        format.html { redirect_to course_manage_students_path(@course), notice: ( "Imported #{count_import_student} student(s) to EduTech.") + ("<br />Added #{count_join_course} student(s) to course.") }
       end
     else
       if (session["ivle_login_data"] && @course.module_id)

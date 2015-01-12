@@ -56,3 +56,13 @@ $(document).ready(function() {
         }, "json");
     });
 });
+function set_show_hide_discussion() {
+    $('div#discussion-wrapper a.a_discussion').click(function () {
+        $('div#discussion-wrapper .forum').toggle();
+        if ($('div#discussion-wrapper a.a_discussion').text() == "Show Discussion") {
+            $('div#discussion-wrapper a.a_discussion').text("Hide Discussion");
+        } else {
+            $('div#discussion-wrapper a.a_discussion').text("Show Discussion");
+        }
+    });
+}

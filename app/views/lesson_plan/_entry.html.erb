@@ -20,7 +20,8 @@
         <% else %>
               <%= link_to "",:id => "virtual-entity-#{entry.assessment.id}",  :class => "btn_entry" do %>
                   <span class="entry_title"><%= entry.title %></span>
-                  <input type="hidden" class="entry_url" value="<%= course_lesson_plan_submission_path(@course, entry.assessment )  %>">
+                  <input type="hidden" class="entry_action" value="<%= entry.submission[:action]  %>">
+                  <input type="hidden" class="entry_url" value="<%= entry.submission[:url]  %>">
                   <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
                   <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
                   <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
@@ -62,90 +63,7 @@
                     </span>
                <% end %>
                <div class="discussion" style="display: none">
-                  <% topic = ForumTopic.where(:discussable_type => 'LessonPlanEntry', :discussable_id => entry.id).first %>
-                  <% if !topic.nil? %>
-                      <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
-                      <div class="forum" style="display: none">
-                        <div class="posts">
-                          <%
-                             posts = topic.posts.all.sort do |a, b|
-                               if not a.parent then
-                                 -1
-                               elsif not b.parent then
-                                 1
-                               else
-                                 a.parent.id <=> b.parent.id
-                               end
-                             end
-
-                             # This is basically a DFS: we have to emit the conversation style layout without the
-                             # tree information from the database.
-                             level_iter = lambda do |common_parent, level|
-                               this_level = posts.select {|p| p.parent == common_parent}
-                               this_level.each do |p|
-                          %><%= render partial: 'forums/posts/post', locals: { post: p } %><%
-
-                           # We start a new thread only if the current level has more than one post so that we do not
-                           # indent at every reply, only those with forks.
-                           child_level = posts.select {|c| c.parent == p}
-                           fork = level < 3 && (this_level.length > 1 || child_level.length > 1)
-                           if fork then %>
-                                      <div class="thread"><% level_iter.call(p, level + 1) %></div>
-                                  <% else %>
-                                      <% level_iter.call(p, level) %>
-                                  <% end
-                                     end
-                                     end
-
-                                     level_iter.call(nil, 1)
-                                  %>
-                        </div>
-
-                        <% if topic.can_be_replied_to? %>
-                            <hr />
-
-                            <div class="quick-reply">
-                              <h3>Post a Reply</h3>
-
-                              <% new_post = ForumPost.new %>
-                              <% new_post.title = replize_title(topic.posts.last.title) %>
-                              <%= form_for new_post, url: course_forum_topic_posts_path(@course, topic.forum, topic, new_post),
-                                           html: { class: 'form-horizontal' } do |f| %>
-                                  <%= render partial: 'forums/posts/form', locals: { reply_to: topic.posts.last, form: f } %>
-                                  <input type="hidden" name="redirect_link" value='<%= "entity-#{entry.id}"%>' />
-                                  <div class="form-actions">
-                                    <%= f.submit 'Reply', class: 'btn btn-primary' %>
-                                  </div>
-                              <% end %>
-                            </div>
-                        <% end %>
-                      </div>
-                  <% else %>
-                     <div style="margin-top: 50px;"><p style=""><a class="a_discussion btn btn-success">Show Discussion</a></p></div>
-                     <div class="forum" style="display: none">
-                         <div class="quick-reply">
-                           <h3>Post a Dicussion</h3>
-
-                           <% new_topic = ForumTopic.new %>
-                           <% new_topic.forum = @course.forums.first %>
-                           <% new_topic.title = entry.entry_real_type + ' ' + entry.title %>
-                           <% new_topic.discussable_type = 'LessonPlanEntry' %>
-                           <% new_topic.discussable_id = entry.id %>
-                           <% new_post = ForumPost.new %>
-                           <%= form_for new_post, url: course_forum_topics_path(@course, @course.forums.first),
-                                        html: { class: 'form-horizontal' } do |f| %>
-                               <%= render partial: 'forums/posts/form', locals: { reply_to: new_topic.posts.last, form: f } %>
-                               <input type="hidden" name="topic_type" value='<%= entry.entry_real_type%>' />
-                               <input type="hidden" name="topic_title" value='<%= entry.title%>' />
-                               <input type="hidden" name="redirect_link" value='<%= "entity-#{entry.id}"%>' />
-                               <div class="form-actions">
-                                 <%= f.submit 'Reply', class: 'btn btn-primary' %>
-                               </div>
-                           <% end %>
-                         </div>
-                     </div>
-                  <% end %>
-
+                    <%= render partial: 'forums/topics/discussion', locals: { owner: entry, title: (entry.entry_real_type + ' ' + entry.title) } %>
                </div>
             <% else %>
                 <%= entry.title %>

@@ -39,6 +39,11 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     end
     @summary = {questions: questions, finalised: finalised, step: step,
                 current: current, next_undone: next_undone, prefilled: prefilled_code}
+
+    #Training in lesson plan
+    if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+      render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
+    end
   end
 
   def submit

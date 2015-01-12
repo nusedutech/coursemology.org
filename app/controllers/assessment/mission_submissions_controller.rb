@@ -19,6 +19,11 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
       grading = @submission.gradings.first
       redirect_to course_assessment_submission_grading_path(@course, @assessment, @submission,grading)
     end
+
+    #Mission in lesson plan - Show view
+    if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+      render_lesson_plan_view(@course, @assessment, params, true, @curr_user_course)
+    end
   end
 
 
@@ -30,6 +35,11 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
     @mission = @assessment.as_assessment
     @questions = @assessment.questions
     @submission.build_initial_answers
+
+    #Mission in lesson plan - Edit view
+    if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+      render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
+    end
   end
 
   def update
@@ -94,10 +104,10 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
 
   def no_update_after_submission
     unless @submission.attempting?
-      respond_to do |format|
-        format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission),
-                                  notice: "Your have already submitted this mission." }
-      end
+     respond_to do |format|
+        format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission, :from_lesson_plan => params['from_lesson_plan'], :discuss => params['discuss']),
+                                notice: "Your have already submitted this mission." }
+     end
     end
   end
 

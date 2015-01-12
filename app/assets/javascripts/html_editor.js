@@ -56,9 +56,13 @@ $(document).ready(function() {
           '</li>'
   };
   options.parserRules.classes['coursemology-code'] = 1;
+  options.parserRules.tags['table'] = 1;
+  options.parserRules.tags['tr'] = 1;
+  options.parserRules.tags['td'] = 1;
 
   options.customTemplates = {};
-
+  options.color = true;
+  //options.table = true;
   options.html = true;
 
   if (imgUploadHtml) {
@@ -100,4 +104,6 @@ $(document).ready(function() {
   $(document).on('DOMNodeInserted', function(e) {
     $('textarea.html-editor', e.target).each(handler);
   });
+
+
 });

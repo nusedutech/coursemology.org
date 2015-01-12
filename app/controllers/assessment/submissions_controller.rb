@@ -22,7 +22,7 @@ class Assessment::SubmissionsController < ApplicationController
       @reattempt = @course.training_reattempt
       #continue unfinished training, or go to finished training of can't reattempt
       if sbm && (!sbm.graded? ||  !@reattempt || !@reattempt.display)
-        redirect_to edit_course_assessment_submission_path(@course, @assessment, sbm)
+        redirect_to_edit params
         return
       end
       sbm_count = @assessment.submissions.where(std_course_id: curr_user_course).count
@@ -34,11 +34,10 @@ class Assessment::SubmissionsController < ApplicationController
     end
 
 		#Processing permutation for policy levels
-		if @assessment.is_policy_mission? 
+		if @assessment.is_policy_mission?
       if sbm && sbm.submitted?
         redirect_to edit_course_assessment_submission_path(@course, @assessment, sbm)
       end
-      
 			if @assessment.getPolicyMission.progression_policy.isForwardPolicy?
 				forward_policy = @assessment.getPolicyMission.progression_policy.getForwardPolicy
 				sortedPolicyLevels = forward_policy.getSortedPolicyLevels
@@ -54,9 +53,8 @@ class Assessment::SubmissionsController < ApplicationController
 					#If not set (forward_policy.overall_wrong_threshold == 0), set to -1 to avoid confusion in decrement later
 					forward_group.wrong_qn_left = forward_policy.overall_wrong_threshold == 0 ? -1 : forward_policy.overall_wrong_threshold
 					forward_group.save
-					respond_to do |format|
-		    		format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission)}
-		  		end
+
+          redirect_to_edit params
 				else
 					respond_to do |format|
 					  format.html { redirect_to course_assessment_policy_mission_path(@course, @assessment),
@@ -65,9 +63,29 @@ class Assessment::SubmissionsController < ApplicationController
 				end
 			end
     elsif @submission.save
-      respond_to do |format|
+      redirect_to_edit params
+    end
+  end
+
+  def redirect_to_edit params
+    caller_flag = params[:from_lesson_plan]
+    respond_to do |format|
+      if caller_flag.nil?
         format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission)}
+      else
+        format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission, :from_lesson_plan => true, :discuss => params['discuss'])}
       end
+    end
+  end
+
+  def render_lesson_plan_view (course, assessment, params, mission_show, user_course)
+    respond_to do |format|
+      @from_lesson_plan = params[:from_lesson_plan]
+      @current_id = assessment.nil? ? '0' : "virtual-entity-#{assessment.id}"
+      @discuss = params[:discuss]
+      @mission_show = mission_show
+      @milestones = LessonPlanEntry.get_milestones_for_course(course, current_ability, (can? :manage, Assessment::Mission), user_course)
+       format.html { render "lesson_plan/submission" }
     end
   end
 

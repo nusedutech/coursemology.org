@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
   # :lockable, :timeoutable and :omniauthable
   devise :confirmable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
-         :omniauthable, :omniauth_providers => [:facebook,:ivle]
+         :omniauthable, :omniauth_providers => [:facebook,:ivle,:open_id]
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me
@@ -99,15 +99,34 @@ class User < ActiveRecord::Base
     user = User.where(:provider => auth.provider, :uid => auth.uid).first
     unless user
       user = User.find_by_email(auth.info.email)
-      if user
-        user.provider = auth.provider
-        user.uid = auth.uid
-      else
+      #if user
+      #  user.provider = auth.provider
+      #  user.uid = auth.uid
+      unless user
         user = User.create(name: auth.extra.profile.Name,
                            provider: auth.provider,
                            uid: auth.uid,
                            email: auth.info.email,
                            student_id: auth.uid,
+                           password: Devise.friendly_token[0,20]
+        )
+        user.skip_confirmation!
+      end
+      user.save
+    end
+    user
+  end
+
+  def self.find_for_openid_oauth(auth, signed_in_resource = nil)
+    user = User.where(:provider => auth.provider, :uid => auth.uid).first
+    unless user
+      user = User.find_by_email(auth.info.email)
+      unless user
+        user = User.create(name: auth.info.name,
+                           provider: auth.provider,
+                           uid: auth.info.nickname,
+                           email: auth.info.email,
+                           student_id: auth.info.nickname,
                            password: Devise.friendly_token[0,20]
         )
         user.skip_confirmation!

@@ -8,6 +8,13 @@ class Assessment::Question < ActiveRecord::Base
   attr_accessible :title, :description, :max_grade, :attempt_limit, :staff_comments
   attr_accessible :auto_graded
 
+  scope :general_question, -> { where(as_question_type: "Assessment::GeneralQuestion") }
+  scope :coding_question, -> { where(as_question_type: "Assessment::CodingQuestion") }
+  scope :mcq_question, -> { where(as_question_type: "Assessment::McqQuestion") }
+  scope :mpq_question, -> { where(as_question_type: "Assessment::MpqQuestion") }
+  scope :general_and_coding_question, -> { where(as_question_type: ["Assessment::GeneralQuestion", "Assessment::CodingQuestion"]) }
+  scope :mcq_and_coding_question, -> { where(as_question_type: ["Assessment::McqQuestion", "Assessment::CodingQuestion"]) }
+
   belongs_to  :course
   belongs_to  :creator, class_name: "User"
   belongs_to  :dependent_on, class_name: "Assessment::Question", foreign_key: "dependent_id"

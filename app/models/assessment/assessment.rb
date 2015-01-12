@@ -173,7 +173,7 @@ class Assessment < ActiveRecord::Base
 		end
   end
 
-  def as_lesson_plan_entry
+  def as_lesson_plan_entry (course, user_course)
     entry = LessonPlanEntry.create_virtual
     entry.title = self.title
     entry.description = self.description
@@ -183,7 +183,31 @@ class Assessment < ActiveRecord::Base
     entry.url = get_path
     entry.assessment = self
     entry.is_published = self.published
+    entry.submission = user_course ? get_submission(course, user_course) : nil
     entry
+  end
+
+  #2014-12-18 refactoring from index method of assessment controller (line 50 - 87)
+  def get_submission(course, user_course)
+    result = Hash.new
+    sub = self.submissions.where(std_course_id: user_course.id).order('updated_at DESC').first
+    dependent_ast_sub = self.dependent_on.nil? ? nil : self.dependent_on.submissions.where(std_course_id: user_course.id).order('updated_at DESC').first
+    if sub
+      result[:action] = sub.attempting? ? "Edit" : "Review"
+      result[:url] = edit_course_assessment_submission_path(course, self, sub, from_lesson_plan: true)
+    elsif (self.opened? and (self.as_assessment.class == Assessment::Training or
+        self.dependent_id.nil? or self.dependent_id == 0 or
+        (!dependent_ast_sub.nil? and !dependent_ast_sub.attempting?))) or
+        can?(:manage, self)
+      result[:action] = "Attempt"
+      result[:url] = new_course_assessment_submission_path(course, self, from_lesson_plan: true)
+    else
+      result[:action] = nil
+    end
+    result[:new] = false
+    result[:opened] = self.opened?
+    result[:published] = self.published
+    result
   end
 
   def add_tags(tags)

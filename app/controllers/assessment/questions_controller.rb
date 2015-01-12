@@ -74,7 +74,6 @@ class Assessment::QuestionsController < ApplicationController
         end
         selected_taggable_tags = selected_taggable_tags.uniq
 
-
 				#Link broken for question to taggable_tag - temp fix
         selected_taggable_tags.each do |taggable_tag|
           questions = questions + @course.questions.where(query_string + " and assessment_questions.id = ? ", taggable_tag.taggable_id)
@@ -91,6 +90,16 @@ class Assessment::QuestionsController < ApplicationController
     else
       @questions = @course.questions
     end
+
+    #filter question by kind of assessment
+    if @assessment.is_mission?
+      @questions = @questions.general_and_coding_question
+    elsif @assessment.is_training?
+      @questions = @questions.mcq_and_coding_question
+    elsif @assessment.is_policy_mission?
+      @questions = @questions.mcq_question
+    end
+
   end
 
   def import

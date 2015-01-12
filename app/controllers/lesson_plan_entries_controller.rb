@@ -6,7 +6,7 @@ class LessonPlanEntriesController < ApplicationController
 
 
   def index
-    @milestones = get_milestones_for_course(@course)
+    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course)
     @current_id = params["eid"].nil? ? '' : params["eid"]
     if (session["ivle_login_data"] && @course.module_id)
       @ivle_token = session["ivle_login_data"].credentials.token
@@ -57,7 +57,7 @@ class LessonPlanEntriesController < ApplicationController
       end
 
       respond_to do |format|
-        format.html { redirect_to course_lesson_plan_path(@course), notice: "Import IVLE events successfully." }
+       format.html { redirect_to course_lesson_plan_path(@course), notice: "Import IVLE events successfully." }
       end
     else
       respond_to do |format|
@@ -68,93 +68,20 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def submission
-    @milestones = get_milestones_for_course(@course)
+    #old version
+    #@milestones = get_milestones_for_course(@course)
+    #@current_id = @assessment.nil? ? '0' : "virtual-entity-#{@assessment.id}"
+    #@is_lesson_plan_submission = true
+    #@mission_show = params['show']
+    #@discuss = params['discuss']
+
+    #call new method of Submission
     @assessment = Assessment.find_by_id(params['assessment_id'])
-    @current_id = @assessment.nil? ? '0' : "virtual-entity-#{@assessment.id}"
-
-    @is_lesson_plan_submission = true
-    @mission_show = params['show'];
-    @discuss = params['discuss'];
-
-    sbm = @assessment.submissions.where(std_course_id: curr_user_course).last
-    if curr_user_course.is_student? && sbm.nil?
-      Activity.attempted_asm(curr_user_course, @assessment)
-    end
-
-    if sbm
-      @submission = sbm
-    else
-      if @submission.nil?
-        @submission = Assessment::Submission.new
-        @submission.assessment = @assessment
-      end
-      @submission.std_course = curr_user_course
-    end
-
-    if @assessment.is_a?(Assessment::Training)
-      @reattempt = @course.training_reattempt
-      #continue unfinished training, or go to finished training of can't reattempt
-      if sbm && (!sbm.graded? ||  !@reattempt || !@reattempt.display)
-        submission_edit
-        return
-      end
-      sbm_count = @assessment.submissions.where(std_course_id: curr_user_course).count
-      if sbm_count > 0
-        @submission.multiplier = @reattempt.prefer_value.to_f / 100
-      end
-      @submission.save
-      @submission.gradings.create({grade: 0, std_course_id: curr_user_course.id})
-    end
-
-    if @submission.save
-      submission_edit
-    end
-  end
-
-  def submission_edit
-    #1. half way, redirect to next undone question, or finalised one if requested, or requested one if stuff or skippable
-    #2. finished, list all submissions
-
-    #implementation, build step control UI separately
-    # @next_undone
-    if !@assessment.nil?
-      if @assessment.is_a?(Assessment::Training)
-        @training = @assessment.specific
-        questions = @assessment.questions
-        finalised = @assessment.questions.finalised(@submission)
-        current =  (questions - finalised).first
-        next_undone = (questions.index(current) || questions.length) + 1
-        request_step = (params[:step] || next_undone).to_i
-        step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
-        step = step > questions.length ? next_undone : step
-        current = step > questions.length ? current : questions[step - 1]
-
-        current = current.specific if current
-        if current && current.class == Assessment::CodingQuestion
-          prefilled_code = current.template
-          if current.dependent_on
-            std_answer = current.dependent_on.answers.where("correct = 1 AND std_course_id = ?", curr_user_course.id).last
-            code = std_answer ? std_answer.content : ""
-            prefilled_code = "#Answer from your previous question \n" + code + (prefilled_code.empty? ? "" : ("\n\n#prefilled code \n" + prefilled_code))
-          end
-        end
-        @summary = {questions: questions, finalised: finalised, step: step,
-                    current: current, next_undone: next_undone, prefilled: prefilled_code}
-
-      elsif @assessment.is_a?(Assessment::Mission)
-        if(@mission_show.nil?)
-          unless @submission.attempting?
-            respond_to do |format|
-              format.html { redirect_to course_lesson_plan_submission_path(@course, @assessment, show: true),
-                                        notice: "Your have already submitted this mission." }
-            end
-          end
-        end
-        @mission = @assessment.as_assessment
-        @questions = @assessment.questions
-        @submission.build_initial_answers
-      end
-    end
+    redirect_to new_course_assessment_submission_path(@course,
+                                                      @assessment,
+                                                      :from_lesson_plan => true,
+                                                      :discuss => params['discuss']
+                )
   end
 
   def mission_update
@@ -264,7 +191,7 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def overview
-    @milestones = get_milestones_for_course(@course)
+    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course)
     render "/lesson_plan/overview"
   end
 
@@ -287,73 +214,6 @@ private
     }
 
     resources
-  end
-
-  def get_milestones_for_course(course)
-    milestones = course.lesson_plan_milestones.accessible_by(current_ability).order("start_at")
-
-
-    other_entries_milestone = create_other_items_milestone(milestones)
-    prior_entries_milestone = create_prior_items_milestone(milestones)
-
-    milestones <<= other_entries_milestone
-    if prior_entries_milestone
-      milestones.insert(0, prior_entries_milestone)
-    end
-
-    milestones
-  end
-
-  def entries_between_date_range(start_date, end_date)
-    if can? :manage, Assessment::Mission
-      virtual_entries = @course.lesson_plan_virtual_entries(start_date, end_date)
-    else
-      virtual_entries = @course.lesson_plan_virtual_entries(start_date, end_date).select { |entry| entry.is_published }
-    end
-
-    after_start = if start_date then "AND start_at > :start_date " else "" end
-    before_end = if end_date then "AND end_at < :end_date" else "" end
-
-    actual_entries = @course.lesson_plan_entries.where("TRUE " + after_start + before_end,
-      :start_date => start_date, :end_date => end_date)
-
-    entries_in_range = virtual_entries + actual_entries
-    entries_in_range.sort_by { |e| e.start_at }
-  end
-
-  def create_other_items_milestone(all_milestones)
-    last_milestone = if all_milestones.length > 0 then
-      all_milestones[all_milestones.length - 1]
-    else 
-      nil
-    end
-
-    other_entries = if last_milestone and last_milestone.end_at then
-      entries_between_date_range(last_milestone.end_at.advance(:days =>1), nil)
-    elsif last_milestone
-      []
-    else
-      entries_between_date_range(nil, nil)
-    end
-
-    other_entries_milestone = LessonPlanMilestone.create_virtual("Other Items", other_entries)
-    other_entries_milestone.previous_milestone = last_milestone
-    other_entries_milestone
-  end
-
-  def create_prior_items_milestone(all_milestones)
-    first_milestone = if all_milestones.length > 0 then
-      all_milestones[0]
-    else
-      nil
-    end
-
-    if first_milestone
-      entries_before_first = entries_between_date_range(nil, first_milestone.start_at)
-      prior_entries_milestone = LessonPlanMilestone.create_virtual("Prior Items", entries_before_first)
-      prior_entries_milestone.next_milestone = first_milestone
-      prior_entries_milestone
-    end
   end
 
   def update_tag(original_tags, new_tags, group)

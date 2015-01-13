@@ -48,58 +48,62 @@ class Assessment::QuestionsController < ApplicationController
     query_string = "assessment_questions.title like '%#{search_string}%' or assessment_questions.description like '%#{search_string}%'"
 
     questions = []
-    if !filter.nil? and !filter.empty?
-      filter_tags = filter.split(",")      
-      if filter_tags.count > 0
-        @summary = {selected_tags: filter_tags || []}
-
-        tag_query_string = ""
-        filter_tags.each do |t|
-          tag_query_string += tag_query_string.empty? ? "tags.name = '#{t}'" : " or tags.name = '#{t}'"
-        end
-        selected_tags =  @course.tags.where(tag_query_string)
-
-        topicconcepts_query_string = ""
-        filter_tags.each do |t|
-          topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
-        end
-        selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
-
-        selected_taggable_tags = []
-        selected_tags.each do |tag|
-          selected_taggable_tags = selected_taggable_tags + tag.taggable_tags
-        end
-        selected_topicconcepts.each do |topicconcept|
-          selected_taggable_tags = selected_taggable_tags + topicconcept.taggable_tags
-        end
-        selected_taggable_tags = selected_taggable_tags.uniq
-
-				#Link broken for question to taggable_tag - temp fix
-        selected_taggable_tags.each do |taggable_tag|
-          questions = questions + @course.questions.where(query_string + " and assessment_questions.id = ? ", taggable_tag.taggable_id)
-        end  
-      end
-    else
-      questions = questions + @course.questions.where(query_string)
-    end
-
-    if questions.count > 0
-      #Add questions in the assessment already to filter criteria
-      questions = questions + @assessment.questions
-      @questions = questions.uniq
-    else
-      @questions = @course.questions
-    end
-
+    assessment_based_questions = [];
     #filter question by kind of assessment
     if @assessment.is_mission?
-      @questions = @questions.general_and_coding_question
+      assessment_based_questions = @course.questions.general_and_coding_question
     elsif @assessment.is_training?
-      @questions = @questions.mcq_and_coding_question
+      assessment_based_questions = @course.questions.mcq_and_coding_question
     elsif @assessment.is_policy_mission?
-      @questions = @questions.mcq_question
+      assessment_based_questions = @course.questions.mcq_question
     end
 
+    if !assessment_based_questions.empty?
+      if !filter.nil? and !filter.empty?
+        filter_tags = filter.split(",")
+        if filter_tags.count > 0
+          @summary = {selected_tags: filter_tags || []}
+
+          tag_query_string = ""
+          filter_tags.each do |t|
+            tag_query_string += tag_query_string.empty? ? "tags.name = '#{t}'" : " or tags.name = '#{t}'"
+          end
+          selected_tags =  @course.tags.where(tag_query_string)
+
+          topicconcepts_query_string = ""
+          filter_tags.each do |t|
+            topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
+          end
+          selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
+
+          selected_taggable_tags = []
+          selected_tags.each do |tag|
+            selected_taggable_tags = selected_taggable_tags + tag.taggable_tags
+          end
+          selected_topicconcepts.each do |topicconcept|
+            selected_taggable_tags = selected_taggable_tags + topicconcept.taggable_tags
+          end
+          selected_taggable_tags = selected_taggable_tags.uniq
+
+          #Link broken for question to taggable_tag - temp fix
+          selected_taggable_tags.each do |taggable_tag|
+            questions = questions + assessment_based_questions.where(query_string + " and assessment_questions.id = ? ", taggable_tag.taggable_id)
+          end
+        end
+      else
+        questions = questions + assessment_based_questions.where(query_string)
+      end
+
+      if questions.count > 0
+        #Add questions in the assessment already to filter criteria
+        questions = questions + @assessment.questions
+        @questions = questions.uniq
+      else
+        @questions = assessment_based_questions
+      end
+    else
+      @questions = []
+    end
   end
 
   def import

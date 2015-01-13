@@ -19,7 +19,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 
 			@summary[:forwardContent] = {}
 			@summary[:forwardContent][:status] = true
-			@summary[:forwardContent][:highestLevel] = "Invalid"
+			@summary[:forwardContent][:highestLevel] = "None"
 			@summary[:forwardContent][:wrongCount] = 0
 			forwardLevelsContent = []	
 			allProgressionGroups.each do |progressionGroup|
@@ -95,7 +95,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
         end
       else
         respond_to do |format|
-        		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment, from_lesson_plan: true)}
+        		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment)}
         end
       end
     else

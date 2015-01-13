@@ -59,6 +59,8 @@ $(document).ready(function() {
   options.parserRules.tags['table'] = 1;
   options.parserRules.tags['tr'] = 1;
   options.parserRules.tags['td'] = 1;
+  options.parserRules.tags['sub'] = 1;
+  options.parserRules.tags['sup'] = 1;
 
   options.customTemplates = {};
   options.color = true;

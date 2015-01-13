@@ -45,4 +45,19 @@ class Assessment::Mission < ActiveRecord::Base
     super || self.parent.reflect_on_association(association)
   end
 
+  def as_lesson_plan_entry (course, user_course)
+    entry = LessonPlanEntry.create_virtual
+    entry.title = self.title
+    entry.description = self.description
+    entry.entry_type = 4
+    entry.entry_real_type = course.customized_title("Mission")
+    entry.start_at = self.open_at
+    entry.end_at = self.close_at  if self.respond_to? :close_at
+    entry.url = get_path
+    entry.assessment = self
+    entry.is_published = self.published
+    entry.submission = user_course ? get_submission(course, user_course) : nil
+    entry
+  end
+
 end

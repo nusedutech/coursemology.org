@@ -46,8 +46,11 @@
     </div>
     <hr/>
 
-
+    <% if !@from_lesson_plan.nil? and @from_lesson_plan == "true"  %>
+    <form id="training-step-form" action="<%= edit_course_assessment_submission_path(@course, @assessment, @submission, anchor: 'step-list-top', :from_lesson_plan => "true" ) %>" method="post">
+    <% else %>
     <form id="training-step-form" action="<%= edit_course_assessment_submission_path(@course, @assessment, @submission, anchor: 'step-list-top') %>" method="post">
+    <% end %>
       <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />
 
       <% if @summary[:current].class == Assessment::McqQuestion %>

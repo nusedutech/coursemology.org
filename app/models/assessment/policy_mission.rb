@@ -21,4 +21,27 @@ class Assessment::PolicyMission < ActiveRecord::Base
     super || self.parent.reflect_on_association(association)
   end
 
+  def as_lesson_plan_entry (course, user_course)
+    entry = LessonPlanEntry.create_virtual
+    entry.title = self.title
+    entry.description = self.description
+    entry.entry_real_type = course.customized_title("Training")
+    entry.start_at = self.open_at
+    entry.end_at = self.close_at  if self.respond_to? :close_at
+    entry.url = get_path
+    entry.assessment = self
+    entry.is_published = self.published
+    entry.submission = user_course ? get_submission(course, user_course) : nil
+
+    lastSbm = self.submissions.where(std_course_id: user_course).last
+    if self.multipleAttempts? and lastSbm and lastSbm.submitted?
+      entry.entry_type = 5
+      entry.submission[:actionSecondary] = "Reattempt"
+      entry.submission[:urlSecondary] = reattempt_course_assessment_submissions_path(course, self, from_lesson_plan: true)
+    else
+      entry.entry_type = 4
+    end
+    entry
+  end
+
 end

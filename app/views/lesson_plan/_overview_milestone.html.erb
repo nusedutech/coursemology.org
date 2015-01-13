@@ -57,7 +57,7 @@
   <% end %>
 </div>
 
-<% if (milestone.entries.select { |m| not(m.is_virtual?) }).length > 0 %>
+<% if (milestone.entries(false, @curr_user_course, can?(:manage, Assessment)).select { |m| not(m.is_virtual?) }).length > 0 %>
     <div>
       <h3 class="muted">Entries</h3>
 
@@ -80,7 +80,7 @@
       </div>
 
       <hr class="hr-shrink-margin">
-      <% sorted_entries = milestone.entries.sort_by { |e| e.start_at  } %>
+      <% sorted_entries = milestone.entries(false, @curr_user_course, can?(:manage, Assessment)).sort_by { |e| e.start_at  } %>
       <% sorted_entries.each { |entry| %>
           <% if !entry.is_virtual? %>
               <%= render :partial => "lesson_plan/overview_entry", :locals => { :entry => entry } %>

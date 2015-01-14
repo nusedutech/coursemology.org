@@ -36,7 +36,7 @@ class Assessment::Training < ActiveRecord::Base
     course_assessment_training_path(self.course, self)
   end
 
-  def as_lesson_plan_entry (course, user_course, manage_assessment))
+  def as_lesson_plan_entry (course, user_course, manage_assessment)
     entry = LessonPlanEntry.create_virtual
     entry.title = self.title
     entry.description = self.description
@@ -47,7 +47,7 @@ class Assessment::Training < ActiveRecord::Base
     entry.url = get_path
     entry.assessment = self
     entry.is_published = self.published
-    entry.submission = user_course ? get_submission(course, user_course, manage_assessment)) : nil
+    entry.submission = user_course ? get_submission(course, user_course, manage_assessment) : nil
     entry
   end
 

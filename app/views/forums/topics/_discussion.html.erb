@@ -63,7 +63,7 @@
           <h3>Post a Dicussion</h3>
 
           <% topic = ForumTopic.new %>
-          <%= form_for topic, url: course_forum_topics_path(@course, @course.forums.first),
+          <%= form_for topic, url: course_forum_topics_path(@course, @course.forums.first, :submission => sub),
                        html: { class: 'form-horizontal' } do |f| %>
               <%= f.fields_for :posts do |post| %>
                 <%= render partial: 'forums/posts/form', locals: { reply_to: nil, form: post } %>

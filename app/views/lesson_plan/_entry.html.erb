@@ -63,7 +63,7 @@
                     </span>
                <% end %>
                <div class="discussion" style="display: none">
-                    <%= render partial: 'forums/topics/discussion', locals: { owner: entry, title: (entry.entry_real_type + ' ' + entry.title) } %>
+                    <%= render partial: 'forums/topics/discussion', locals: { owner: entry, title: (entry.entry_real_type + ' ' + entry.title), sub: false } %>
                </div>
             <% else %>
                 <%= entry.title %>

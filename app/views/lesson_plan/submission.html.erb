@@ -265,6 +265,7 @@
             }
 
         });
+
         //Hide menubar default
         if ($('#lesson-plan-content').length) {
             $('.span2.sidebar').hide();
@@ -390,30 +391,12 @@
             //return false;
         });
 
+        //set event for discussion of entry after clicking menubar
         function show_discussion(discussion){
-            var entry_form = "";
-            $('section#detail-content').append(entry_form);
-            $('section#detail-content').append(discussion);
-            $('section#detail-content a.a_discussion').click(function() {
-                $('section#detail-content .forum').toggle('slow');
-                if ($('section#detail-content a.a_discussion').text()=="Show Discussion"){
-                    $('section#detail-content a.a_discussion').text("Hide Discussion");
-                }else{
-                    $('section#detail-content a.a_discussion').text("Show Discussion");
-                }
-            });
+            $('section#detail-content').append($("<div id='discussion-wrapper'></div>"));
+            $('div#discussion-wrapper').append(discussion);
+            set_show_hide_discussion();
         }
-
-        $('#lesson-plan-content #detail-content a.a_discussion').click(function() {
-            $('#lesson-plan-content #detail-content .forum').toggle('slow');
-            if($('#lesson-plan-content #detail-content a.a_discussion').text()=='Hide Discussion'){
-                $('#lesson-plan-content #detail-content a.a_discussion').text('Show Discussion');
-            }else{
-                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
-            }
-
-        });
-        //$('#lesson-plan-content #detail-content a.a_discussion').click();
 
         if($('#active-entity').val()!=""){
             $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();

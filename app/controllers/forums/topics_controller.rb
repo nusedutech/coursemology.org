@@ -56,11 +56,13 @@ class Forums::TopicsController < ApplicationController
     end
 
     respond_to do |format|
-      if params[:forum_topic][:discussable_id].nil?
-        format.html { redirect_to course_forum_topic_path(@course, @forum, @topic),
-                                notice: 'The topic was successfully created.' }
+      if (@topic.discussable && @topic.discussable.class.name == "LessonPlanEntry")
+        format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=#{params["redirect_link"]}" + "#post-#{post.id}") }
+      elsif (@topic.discussable && @topic.discussable.class.name == "Assessment::Question")
+        format.html { redirect_to params["assessment_redirect_link"] + ((params["assessment_redirect_link"].to_s.include? "step") ? "&discuss=true" : "?discuss=true") }
       else
-        format.html { redirect_to (request.referrer + (params[:submission] == "true" ? "&" : "?") + "eid=#{params["redirect_link"]}" + "#post-#{post.id}") }
+        format.html { redirect_to course_forum_topic_path(@course, @forum, @topic),
+                                  notice: 'The topic was successfully created.' }
       end
     end
 

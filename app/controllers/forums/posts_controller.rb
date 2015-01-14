@@ -34,9 +34,9 @@ class Forums::PostsController < ApplicationController
       end
 
       respond_to do |format|
-        if params["redirect_link"]
+        if (@topic.discussable && @topic.discussable.class.name == "LessonPlanEntry")
           format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=#{params["redirect_link"]}" + "#post-#{@post.id}") }
-        elsif params["assessment_redirect_link"]
+        elsif (@topic.discussable && @topic.discussable.class.name == "Assessment::Question")
           format.html { redirect_to params["assessment_redirect_link"] + ((params["assessment_redirect_link"].to_s.include? "step") ? "&discuss=true" : "?discuss=true") }
         else
           format.html { redirect_to course_forum_topic_path(@course, @forum, @topic, anchor: "post-#{@post.id}"),

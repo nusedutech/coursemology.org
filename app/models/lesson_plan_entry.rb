@@ -38,7 +38,10 @@ class LessonPlanEntry < ActiveRecord::Base
         @title = title
       end
       def entry_type
-        4
+        @type
+      end
+      def entry_type=(type)
+        @type = type
       end
       def entry_real_type
         @real_type

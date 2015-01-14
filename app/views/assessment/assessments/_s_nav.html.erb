@@ -6,6 +6,6 @@
     <a href="<%= submissions_course_assessment_trainings_path(@course) %>"><%= "#{@course.customized_title('training').singularize} #{ title }" %></a>
   </li>
 	<li class="<%= "active" if current_page?(:submissions_course_assessment_policy_missions) %>">
-    <a href="<%= submissions_course_assessment_policy_missions_path(@course) %>"><%= "Policy Mission #{ title }" %></a>
+    <a href="<%= submissions_course_assessment_policy_missions_path(@course) %>"><%= "Regulated Training #{ title }" %></a>
   </li>
 </ul>

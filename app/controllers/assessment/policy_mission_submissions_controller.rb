@@ -19,7 +19,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 
 			@summary[:forwardContent] = {}
 			@summary[:forwardContent][:status] = true
-			@summary[:forwardContent][:highestLevel] = "Invalid"
+			@summary[:forwardContent][:highestLevel] = "None"
 			@summary[:forwardContent][:wrongCount] = 0
 			forwardLevelsContent = []	
 			allProgressionGroups.each do |progressionGroup|
@@ -88,7 +88,12 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
     if @policy_mission.multipleAttempts? and lastSbm and lastSbm.submitted?
       @submission = @assessment.submissions.new
       @submission.std_course = curr_user_course
-      if @submission.save
+      @submission.save
+      if params.has_key?(:from_lesson_plan) && params[:from_lesson_plan] == "true"
+        respond_to do |format|
+        		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment, from_lesson_plan: true)}
+        end
+      else
         respond_to do |format|
         		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment)}
         end
@@ -178,7 +183,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
         end
 
         #Mission in lesson plan - Edit view
-        if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+        if params.has_key?(:from_lesson_plan) && params[:from_lesson_plan] == "true"
           render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
         end
 			else

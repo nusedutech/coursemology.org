@@ -57,9 +57,12 @@ class Forums::TopicsController < ApplicationController
 
     respond_to do |format|
       if (@topic.discussable && @topic.discussable.class.name == "LessonPlanEntry")
-        format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=#{params["redirect_link"]}" + "#post-#{post.id}") }
+        format.html { redirect_to (course_lesson_plan_path(@course) + "?eid=entity-#{@topic.discussable.id}" + "#post-#{post.id}") }
       elsif (@topic.discussable && @topic.discussable.class.name == "Assessment::Question")
-        format.html { redirect_to params["assessment_redirect_link"] + ((params["assessment_redirect_link"].to_s.include? "step") ? "&discuss=true" : "?discuss=true") }
+        submission = Assessment::Submission.find_by_id(params[:sub])
+        additional_params = params[:from_lesson_plan].nil? ? "" : "from_lesson_plan=true" + "&eid=entity-#{@topic.discussable.id}" + "#post-#{post.id}"
+        format.html { redirect_to (edit_course_assessment_submission_path(@course, submission.assessment, submission) +
+            (params[:step].nil? ? ("?" + additional_params) : ("?step=" + params[:step] + (additional_params!="" ? "&" + additional_params : ""))))}
       else
         format.html { redirect_to course_forum_topic_path(@course, @forum, @topic),
                                   notice: 'The topic was successfully created.' }

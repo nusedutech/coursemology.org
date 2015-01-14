@@ -60,7 +60,7 @@
     </div>
     <section id="detail-content">
       <% if @assessment.is_a?(Assessment::Training) %>
-        <%= render partial:"assessment/training_submissions/edit_form" %>
+        <%= render partial:"assessment/training_submissions/edit_form", locals: { :from_lesson_plan => true } %>
       <% elsif @assessment.is_a?(Assessment::Mission)%>
           <% if @mission_show.nil? %>
               <%= render partial: 'assessment/mission_submissions/summary' %>

@@ -37,7 +37,7 @@ class UserCoursesController < ApplicationController
     else
       tt = @course.tutorial_groups.build
       tt.std_course = @user_course
-      tt.tut_course_id =  params[:tutor].first
+      #tt.tut_course_id =  params[:tutor].first
       tt.group_id = params[:group][0].to_i
       tt.save
     end

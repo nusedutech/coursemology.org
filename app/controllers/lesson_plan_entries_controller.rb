@@ -6,7 +6,7 @@ class LessonPlanEntriesController < ApplicationController
 
 
   def index
-    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course)
+    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course, can?(:manage, Assessment))
     @current_id = params["eid"].nil? ? '' : params["eid"]
     if (session["ivle_login_data"] && @course.module_id)
       @ivle_token = session["ivle_login_data"].credentials.token
@@ -67,6 +67,7 @@ class LessonPlanEntriesController < ApplicationController
 
   end
 
+  #TODO: can remove
   def submission
     #old version
     #@milestones = get_milestones_for_course(@course)
@@ -191,7 +192,7 @@ class LessonPlanEntriesController < ApplicationController
   end
 
   def overview
-    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course)
+    @milestones = LessonPlanEntry.get_milestones_for_course(@course, current_ability, (can? :manage, Assessment::Mission), @curr_user_course, can?(:manage, Assessment))
     render "/lesson_plan/overview"
   end
 

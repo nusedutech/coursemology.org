@@ -21,7 +21,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
     super || self.parent.reflect_on_association(association)
   end
 
-  def as_lesson_plan_entry (course, user_course)
+  def as_lesson_plan_entry (course, user_course, manage_assessment))
     entry = LessonPlanEntry.create_virtual
     entry.title = self.title
     entry.description = self.description
@@ -31,7 +31,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
     entry.url = get_path
     entry.assessment = self
     entry.is_published = self.published
-    entry.submission = user_course ? get_submission(course, user_course) : nil
+    entry.submission = user_course ? get_submission(course, user_course, manage_assessment)) : nil
 
     lastSbm = self.submissions.where(std_course_id: user_course).last
     if self.multipleAttempts? and lastSbm and lastSbm.submitted?

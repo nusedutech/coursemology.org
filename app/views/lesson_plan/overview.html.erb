@@ -15,7 +15,7 @@
 
   <div>
   <% @milestones.each { |milestone| %>
-    <% actual_entries = milestone.entries.select { |e| !e.is_virtual?  } %>
+    <% actual_entries = milestone.entries(false, @curr_user_course, can?(:manage, Assessment)).select { |e| !e.is_virtual?  } %>
     <% if !milestone.is_virtual? || actual_entries.length  > 0 %>
       <%= render :partial => 'lesson_plan/overview_milestone', locals: { :milestone => milestone } %>
     <% end %>

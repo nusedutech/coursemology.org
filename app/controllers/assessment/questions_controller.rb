@@ -42,6 +42,8 @@ class Assessment::QuestionsController < ApplicationController
   end
   
   def add_question
+    authorize! :manage, Course
+
     filter = params[:tags]
     search_string = ""
     search_string = params[:search_string]

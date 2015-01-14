@@ -36,6 +36,10 @@
                           <% end %>
                       <% end %>
                   <% end %>
+                  <% if entry.entry_type == 5 %>
+		                <input type="hidden" class="entry_action_secondary" value="<%= entry.submission[:actionSecondary] %>">
+		                <input type="hidden" class="entry_url_secondary" value="<%= entry.submission[:urlSecondary]  %>">
+                  <% end %>
               <% end %>
         <% end %>
       <% else %>

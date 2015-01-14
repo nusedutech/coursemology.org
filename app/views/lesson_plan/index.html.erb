@@ -257,8 +257,9 @@
                 show_video(title, type, des, loc);
             }else if(entry_type =='4'){
                 show_mission_training(this,title, type, des, loc, $resource);
+            }else if(entry_type == '5'){
+                show_policymission_with_reattempt(this,title, type, des, loc, $resource);
             }
-
             show_discussion(dis);
         });
 
@@ -352,6 +353,53 @@
             $('section#detail-content').append("<div><a class='attempt-assessment btn " + (action=="Attempt" ? "btn-success" : (action=="Edit" ? "" : "btn-info")) + "' href='" + url + "'>" + action + "</a></div>");
 
         }
+
+        //show entry for policy mission with reattempt option
+        function show_policymission_with_reattempt(entry, title, type, des, loc, $resource){
+            var start  = $(entry).find('input.entry_start').val();
+            var end  = $(entry).find('input.entry_end').val();
+            var action = $(entry).find('input.entry_action').val();
+            var url  = $(entry).find('input.entry_url').val();
+            var actionSecondary = $(entry).find('input.entry_action_secondary').val();
+            var urlSecondary  = $(entry).find('input.entry_url_secondary').val();
+
+            var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
+            entry_form += "<div><p style=''>" + des + "</p></div>";
+            entry_form += "<div><p style=''>" + loc + "</p></div>";
+            entry_form += "<div><p style=''><h4>" + (start ? "<span class='icon-calendar'></span>" + " " + start : "") + (end ? " to " + end : "") + "</h4></p></div>";
+            $('section#detail-content').append(entry_form);
+
+            //Show resource - files
+            if($resource.length){
+                $('section#detail-content').append($("<table class='material_list'></table>"));
+                $resource.children().each(function(){
+                    var parts = $(this).find('a').text().split('.');
+                    var ext = parts[parts.length - 1];
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+                });
+
+                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
+                $('section#detail-content .material_list .open-viewer').click(function() {
+                    if($(this).text()=="View Online") {
+                        $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});
+                        $(this).text("Hide");
+                    }else if ($(this).text()=="Show"){
+                        $(this).parent().parent().next().show();
+                        $(this).text("Hide");
+                    }else{
+                        $(this).parent().parent().next().hide();
+                        $(this).text("Show");
+                    }
+                    //return false;
+                });
+            }
+
+            //Show link
+            $('section#detail-content').append("<div><a class='attempt-assessment btn " + (action=="Attempt" ? "btn-success" : (action=="Edit" ? "" : "btn-info")) + "' href='" + url + "'>" + action + "</a> <a class='attempt-assessment btn " + "' href='" + urlSecondary + "'>" + actionSecondary + "</a></div>");
+
+        }
+
 
         $('#lesson-plan-content a.attempt-assessment').click(function() {
             //alert("abc");

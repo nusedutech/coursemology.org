@@ -173,20 +173,6 @@ class Assessment < ActiveRecord::Base
 		end
   end
 
-  def as_lesson_plan_entry (course, user_course, manage_assessment)
-    entry = LessonPlanEntry.create_virtual
-    entry.title = self.title
-    entry.description = self.description
-    entry.entry_real_type = course.customized_title(is_mission? ? "Mission" : "Training")
-    entry.start_at = self.open_at
-    entry.end_at = self.close_at  if self.respond_to? :close_at
-    entry.url = get_path
-    entry.assessment = self
-    entry.is_published = self.published
-    entry.submission = user_course ? get_submission(course, user_course, manage_assessment) : nil
-    entry
-  end
-
   #2014-12-18 refactoring from index method of assessment controller (line 50 - 87)
   def get_submission(course, user_course, manage_assessment)
     result = Hash.new
@@ -338,3 +324,4 @@ class Assessment < ActiveRecord::Base
     end
   end
 end
+

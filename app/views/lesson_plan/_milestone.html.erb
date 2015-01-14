@@ -2,7 +2,7 @@
     <a class="lesson-plan-anchor" name="milestone-<%= milestone.id %>"></a>
 <% end %>
 
-<% entries = milestone.entries(true,@curr_user_course).sort { |a, b| a.start_at <=> b.start_at } %>
+<% entries = milestone.entries(true, @curr_user_course, can?(:manage, Assessment)).sort { |a, b| a.start_at <=> b.start_at } %>
 <% if cannot? :manage, Assessment %>
     <% entries = entries.select { |entry| entry.is_published } %>
 <% end %>

@@ -84,7 +84,7 @@ class Assessment::SubmissionsController < ApplicationController
       @current_id = assessment.nil? ? '0' : "virtual-entity-#{assessment.id}"
       @discuss = params[:discuss]
       @mission_show = mission_show
-      @milestones = LessonPlanEntry.get_milestones_for_course(course, current_ability, (can? :manage, Assessment::Mission), user_course)
+      @milestones = LessonPlanEntry.get_milestones_for_course(course, current_ability, (can? :manage, Assessment::Mission), user_course, can?(:manage, Assessment))
        format.html { render "lesson_plan/submission" }
     end
   end

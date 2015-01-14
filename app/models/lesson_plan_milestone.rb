@@ -22,7 +22,7 @@ class LessonPlanMilestone < ActiveRecord::Base
         def description
           nil
         end
-        def entries (include_virtual = true, user_course = nil)
+        def entries (include_virtual = true, user_course = nil, manage_assessment = false)
           @other_entries
         end
         def start_at
@@ -57,7 +57,7 @@ class LessonPlanMilestone < ActiveRecord::Base
     self.course.lesson_plan_milestones.where("start_at > :start_at", :start_at => self.start_at).order("start_at ASC").first
   end
 
-  def entries(include_virtual = true, user_course = nil)
+  def entries(include_virtual = true, user_course = nil, manage_assessment = false)
     next_milestone = self.next_milestone
     cutoff_time = if self.end_at then self.end_at.end_of_day end
     start_date = self.start_at
@@ -88,7 +88,7 @@ class LessonPlanMilestone < ActiveRecord::Base
     end
 
     if include_virtual
-      virtual_entries = course.lesson_plan_virtual_entries(start_date, cutoff_time, user_course)
+      virtual_entries = course.lesson_plan_virtual_entries(start_date, cutoff_time, user_course, manage_assessment)
       virtual_strictly_before_cutoff = virtual_entries.select do |e|
         if cutoff_time
           e.start_at < cutoff_time

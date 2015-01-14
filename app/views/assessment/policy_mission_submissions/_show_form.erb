@@ -33,10 +33,6 @@
             <td><%= render partial: "layouts/user_name_link", locals: {user_course: @submission.std_course} %></td>
           </tr>
           <tr>
-            <td><strong>Status:</strong> </td>
-            <td><%= @summary[:forwardContent][:status] ? "Passed" : "Failed" %></td>
-          </tr>
-          <tr>
             <td><strong>Highest level:</strong> </td>
             <td><%= @summary[:forwardContent][:highestLevel] %></td>
           </tr>

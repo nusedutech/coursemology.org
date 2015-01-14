@@ -4,7 +4,7 @@
     <% if can? :see_all, Assessment::Submission %>
         <th width="20%">Student</th>
     <% end %>
-    <th><%= assign_display_name %></th>
+    <th>Regulated Training</th>
     <th>Submitted at </th>
     <th width="10%">Action</th>
   </tr>
@@ -21,7 +21,7 @@
         <td><%= datetime_format(sub.submitted_at || sub.created_at) %> </td>
         <!--TODO: refactoring-->
         <% if can? :manage, Assessment::Grading %>
-            <% if sub.gradings.empty? %>
+            <% if !sub.submitted? %>
                 <td>
                   Uncompleted
                 </td>

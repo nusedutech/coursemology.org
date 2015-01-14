@@ -7,7 +7,7 @@ class Assessment::QuestionsController < ApplicationController
   before_filter :load_general_course_data, only: [:index, :new, :edit,:show, :add_question]
 
   def index
-
+    authorize! :manage, Course
     filter = params[:tags]
     #search_string = params[:search_string]
     questions = nil

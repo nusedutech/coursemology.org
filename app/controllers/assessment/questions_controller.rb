@@ -9,31 +9,45 @@ class Assessment::QuestionsController < ApplicationController
   def index
     authorize! :manage, Course
     filter = params[:tags]
-    #search_string = params[:search_string]
-    questions = nil
+    search_string = params[:search_string].nil? ? "" : params[:search_string]
 
-=begin
+    #TODO: refactoring using query join
     if (!filter.nil? && !filter.empty?)
+      questions = []
       filter_tags = filter.split(",")
       q = ''
       if filter_tags.count > 0
         @summary = {selected_tags: filter_tags || []}
+
+        #find in tag
+        tag_query_string = ""
         filter_tags.each do |t|
-          q += q.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
+          tag_query_string += tag_query_string.empty? ? "tags.name = '#{t}'" : " or tags.name = '#{t}'"
+        end
+        selected_tags =  @course.tags.where(tag_query_string)
+
+        #find in concept
+        topicconcepts_query_string = ""
+        filter_tags.each do |t|
+          topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
+        end
+        selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
+
+        selected_tags.each do |tag|
+          questions = questions + tag.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+        end
+        selected_topicconcepts.each do |topicconcept|
+          questions = questions + topicconcept.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
         end
       end
+      @questions = questions.uniq
 
-      if !search_string.empty?
-        @questions = @course.questions.where(q).where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
-      else
-        @questions = @course.questions.where(q).uniq
-      end
     elsif (!search_string.nil? && !search_string.empty?)
       @questions = @course.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
     else
       @questions = @course.questions.uniq
     end
-=end    
+
 
     respond_to do |format|
       format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }} + @course.tags.map {|t| {id: t.id, name: t.name }}}

@@ -247,7 +247,7 @@
             var type  = $(this).find('input.entry_text_type').val();
             var des  = $(this).find('input.entry_description').val();
             var loc  = $(this).find('input.entry_location').val();
-            var dis = $(this).next('div.discussion').html();
+            var $dis = $(this).next('div.discussion');
             var $resource = $(this).parent().parent().find('div.resource-hide ul');
             var entry_start_end = $(this).find('span.entry_start_end').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
@@ -260,7 +260,7 @@
             }else if(entry_type == '5'){
                 show_policymission_with_reattempt(this,title, type, des, loc, $resource);
             }
-            show_discussion(dis);
+            show_discussion($dis);
         });
 
         //show entry lecture, recitation, tutorial
@@ -406,10 +406,12 @@
             //return false;
         });
 
-        function show_discussion(discussion){
-            $('section#detail-content').append($("<div id='discussion-wrapper'></div>"));
-            $('div#discussion-wrapper').append(discussion);
-            set_show_hide_discussion();
+        function show_discussion($discussion){
+            if($discussion != null) {
+                $('section#detail-content').append($("<div id='discussion-wrapper'></div>"));
+                $('div#discussion-wrapper').append($discussion.children().clone(true));
+                set_show_hide_discussion();
+            }
         }
 
         if($('#active-entity').val()){

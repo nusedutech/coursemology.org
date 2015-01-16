@@ -3,8 +3,9 @@ $(document).ready(function(){
     //initiate event for discussion
     set_show_hide_discussion();
 
-    $('#submit-btn').click(function(evt){
-        $('#submit-btn').addClass('disabled');
+    //#new code for normal training, just add '#continue-btn' to ajax selection right below
+    $('#submit-btn, #continue-btn').click(function(evt){
+        $(this).addClass('disabled');
         var form = $("#training-step-form");
         var update_url = form.children("input[name=update_url]").val();
         var qid = form.children("input[name=qid]").val();
@@ -31,7 +32,10 @@ $(document).ready(function(){
             // update result form
             // change submit to continue if the answer is correct
             $.get(update_url, data, function(resp) {
-                $('#submit-btn').removeClass('disabled');
+                //#new code for normal training
+                $('#continue-btn').removeClass('disabled');
+                //old training, disable for normal training
+                //$("submit-btn").removeClass('disabled');
 
                 $('#explanation .result').html(resp.result);
                 $('#explanation .reason').html(resp.explanation);
@@ -47,17 +51,26 @@ $(document).ready(function(){
                 } else {
                     $('#explanation').addClass('mcq-ans-incorrect');
                 }
+                window.location.href = $('#continue-btn').attr('href');
             }, 'json');
         }
 
-        return false; // prevent default
+
+        //#new code for normal training
+        //return true;
+        //old training, disable for normal training
+        //return false; // prevent default
     });
 
+    //old training, disable for normal training
+    /*
     $('#continue-btn').click(function(evt) {
         if ($(this).hasClass('disabled')) {
             evt.preventDefault();
         }
     });
+    */
+
     $("#pathrun").bind("click",submitCode);
     $(document).keydown(function(evt){
         if(evt.altKey && evt.which == 82){

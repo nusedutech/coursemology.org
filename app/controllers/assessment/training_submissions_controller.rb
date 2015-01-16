@@ -23,10 +23,14 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     finalised = @assessment.questions.finalised(@submission)
     current =  (questions - finalised).first
     next_undone = (questions.index(current) || questions.length) + 1
-    request_step = (params[:step] || next_undone).to_i
-    step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
-    step = step > questions.length ? next_undone : step
-    current = step > questions.length ? current : questions[step - 1]
+
+    #new code for normal training
+    step = next_undone
+    #old training, disable for normal training
+    #request_step = (params[:step] || next_undone).to_i
+    #step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
+    #step = step > questions.length ? next_undone : step
+    #current = step > questions.length ? current : questions[step - 1]
 
     current = current.specific if current
     if current && current.class == Assessment::CodingQuestion

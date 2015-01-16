@@ -45,15 +45,22 @@
       <% end %>
 
       <div class="form-actions">
+
+        <!--#old training, disable for normal training
         <% if @summary[:current].class == Assessment::McqQuestion %>
             <%= link_to "Submit", '#', :class => 'btn btn-primary', :id => 'submit-btn' %>
         <% elsif @summary[:current].class == Assessment::CodingQuestion %>
             <%= link_to "Run (ALT+R)", '#', class:'btn btn-danger', id:"pathrun" %>
-            <!--<input id="pathrun" class="path_button" type="button" value="Run (ALT+R)" />-->
-        <% end %>
 
+        <% end %>
         <%= link_to "Continue",
                     edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
+                    :id => 'continue-btn' %>
+        -->
+
+        <!--#new code for normal training-->
+        <%= link_to "Continue",
+                    edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn btn-primary',
                     :id => 'continue-btn' %>
       </div>
     </form>

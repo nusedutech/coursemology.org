@@ -172,12 +172,22 @@ class Assessment::Question < ActiveRecord::Base
 
   #TODO: i hope mysql is smart enough to optimize this
   def self.finalised(sbm)
+
+    #new code for normal training
     grouped_answers = "SELECT *, MIN(created_at)
                       FROM assessment_answers
-                      WHERE assessment_answers.finalised = 1 and assessment_answers.submission_id = #{sbm.id}
+                      WHERE assessment_answers.submission_id = #{sbm.id}
                       GROUP BY  assessment_answers.question_id"
     self.joins("INNER JOIN (#{grouped_answers}) uaaq ON assessment_questions.id = uaaq.question_id")
+
+    #old training, disable for normal training
+    #grouped_answers = "SELECT *, MIN(created_at)
+    #                  FROM assessment_answers
+    #                  WHERE assessment_answers.finalised = 1 and assessment_answers.submission_id = #{sbm.id}
+    #                  GROUP BY  assessment_answers.question_id"
+    #self.joins("INNER JOIN (#{grouped_answers}) uaaq ON assessment_questions.id = uaaq.question_id"
   end
+
 
   #overrides
   def dup

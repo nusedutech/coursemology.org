@@ -10,7 +10,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
    
     if @policy_mission.multipleAttempts?
       #Get all attempts for displaying later
-      @allSubmissions = @assessment.submissions.where(std_course_id: @submission.std_course)
+      @allSubmissions = @assessment.submissions.where(std_course_id: @submission.std_course, status: :submitted)
     end
 
 		if @policy_mission.progression_policy.isForwardPolicy?
@@ -89,19 +89,16 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
       @submission = @assessment.submissions.new
       @submission.std_course = curr_user_course
       @submission.save
-      if params.has_key?(:from_lesson_plan) && params[:from_lesson_plan] == "true"
-        respond_to do |format|
-        		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment, from_lesson_plan: true)}
-        end
-      else
-        respond_to do |format|
-        		format.html { redirect_to new_course_assessment_submission_path(@course, @assessment)}
-        end
+      new_policy_mission
+    elsif lastSbm and lastSbm.attempting?
+      respond_to do |format|
+        format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, lastSbm),
+                      notice: "Your have not finished this mission." }
       end
     else
 		  respond_to do |format|
-					format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
-												notice: "Invalid policy mission attempted" }
+			  format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
+                      notice: "Invalid policy mission attempted" }
 			end
     end
   end
@@ -109,87 +106,118 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
   def edit
 		@policy_mission = @assessment.specific
 		if @policy_mission.progression_policy.isForwardPolicy?
-			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
-			psuedo_groups = @submission.progression_groups.where("is_completed = 0")
-			#Getting progress attributes and next question id
-			if psuedo_groups.size == 1
-				forwardGroup = psuedo_groups[0].getForwardGroup
+			edit_for_forward_policy
+      return
+    else
+      redirect_for_invalid_policy_mission "Invalid mission progression type."
+		end
+  end
 
-				@summary = {}
-				current = forwardGroup.getTopQuestion @assessment
-				if (params.has_key?(:qid) && params[:qid].to_i == current.id)
-					question = @assessment.questions.find_by_id(params[:qid]).specific
-					response = submit_mcq(question)
-					forwardGroup.removeTopQuestion
-					forwardGroup.recordAnswer(response[:answer_id])
-					forwardGroup.save
-					#Correct Answer - Move on!
-					if response[:is_correct]
-						forwardGroup.correct_amount_left = forwardGroup.correct_amount_left - 1
-						if forwardGroup.correct_amount_left <= 0
-							forwardGroup.is_completed = true
-							forwardGroup.save
-							wrongQnLeft = forwardGroup.wrong_qn_left 
-							#set next forward level
-							nextForwardPolicyLevel = forwardPolicy.nextPolicyLevel forwardGroup.getCorrespondingLevel
-							if nextForwardPolicyLevel != nil
-								forwardGroup = Assessment::ForwardGroup.new
-								forwardGroup.submission_id = @submission.id
-								forwardGroup.forward_policy_level_id = nextForwardPolicyLevel.id
-								forwardGroup.correct_amount_left = nextForwardPolicyLevel.progression_threshold
-								forwardGroup.uncompleted_questions = nextForwardPolicyLevel.getAllQuestionsString @assessment
-								forwardGroup.is_consecutive = nextForwardPolicyLevel.is_consecutive
-								forwardGroup.wrong_qn_left = wrongQnLeft
-								forwardGroup.save
-								@summary[:promoted] = true
-							else
-								forwardGroup = nil
-							end
-						else
-							forwardGroup.save
-						end
-					#If consecutive and wrong question, reset progress
-					elsif forwardGroup.is_consecutive
-						forwardPolicyLevel = forwardGroup.getCorrespondingLevel
-						forwardGroup.correct_amount_left = forwardPolicyLevel.progression_threshold
-						@summary[:reset] = true
-						forwardGroup.wrong_qn_left -= 1
-						forwardGroup.save
-					#If just wrong question
-					else
-						forwardGroup.wrong_qn_left -= 1
-						forwardGroup.save
-					end
-					@summary[:lastResult] = response[:result]
-					@summary[:explanation] = response[:explanation]
-				end
+  def edit_for_forward_policy
+    forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+		psuedo_groups = @submission.progression_groups.where("is_completed = 0")
+		#Getting progress attributes and next question id
+		if psuedo_groups.size == 1
+			forwardGroup = psuedo_groups[0].getForwardGroup
 
-			  if forwardGroup != nil && forwardGroup.wrong_qn_left != 0
-					forwardPolicyLevel = forwardGroup.getCorrespondingLevel
-					tag = forwardPolicyLevel.getTag
-					@summary[:tagName] = tag.name
-					@summary[:consecutive] = forwardGroup.is_consecutive
-					@summary[:completedQuestions] = forwardPolicyLevel.progression_threshold - forwardGroup.correct_amount_left
-					@summary[:totalQuestions] = forwardPolicyLevel.progression_threshold
-					current = forwardGroup.getTopQuestion @assessment
-					@summary[:current] = current.specific
-				else
-					if forwardGroup != nil
+			@summary = {}
+			current = forwardGroup.getTopQuestion @assessment
+      #Forward group might not been initialised due to a bug, reinitialise it
+      if current.nil?
+        sortedPolicyLevels = forwardPolicy.getSortedPolicyLevels
+        forwardGroup.forward_policy_level_id = sortedPolicyLevels[0].id
+				forwardGroup.correct_amount_left = sortedPolicyLevels[0].progression_threshold
+				forwardGroup.uncompleted_questions = sortedPolicyLevels[0].getAllQuestionsString @assessment
+				forwardGroup.is_consecutive = sortedPolicyLevels[0].is_consecutive
+        forwardGroup.wrong_qn_left = forwardPolicy.overall_wrong_threshold == 0 ? -1 : forwardPolicy.overall_wrong_threshold
+				forwardGroup.save
+        current = forwardGroup.getTopQuestion @assessment
+      end
+
+			if !current.nil? && (params.has_key?(:qid) && params[:qid].to_i == current.id)
+				question = @assessment.questions.find_by_id(params[:qid]).specific
+				response = submit_mcq(question)
+				forwardGroup.removeTopQuestion
+				forwardGroup.recordAnswer(response[:answer_id])
+				forwardGroup.save
+				#Correct Answer - Move on!
+				if response[:is_correct]
+					forwardGroup.correct_amount_left = forwardGroup.correct_amount_left - 1
+					if forwardGroup.correct_amount_left <= 0
 						forwardGroup.is_completed = true
 						forwardGroup.save
+						wrongQnLeft = forwardGroup.wrong_qn_left 
+						#set next forward level
+						nextForwardPolicyLevel = forwardPolicy.nextPolicyLevel forwardGroup.getCorrespondingLevel
+						if nextForwardPolicyLevel != nil
+							forwardGroup = Assessment::ForwardGroup.new
+							forwardGroup.submission_id = @submission.id
+							forwardGroup.forward_policy_level_id = nextForwardPolicyLevel.id
+							forwardGroup.correct_amount_left = nextForwardPolicyLevel.progression_threshold
+							forwardGroup.uncompleted_questions = nextForwardPolicyLevel.getAllQuestionsString @assessment
+							forwardGroup.is_consecutive = nextForwardPolicyLevel.is_consecutive
+							forwardGroup.wrong_qn_left = wrongQnLeft
+							forwardGroup.save
+							@summary[:promoted] = true
+						else
+							forwardGroup = nil
+						end
+					else
+						forwardGroup.save
 					end
-					@submission.set_submitted
-					#@submission.update_grade
-        end
-
-        #Mission in lesson plan - Edit view
-        if params.has_key?(:from_lesson_plan) && params[:from_lesson_plan] == "true"
-          render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
-        end
-			else
-				respond_to do |format|
-					format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission, :from_lesson_plan => params['from_lesson_plan'], :discuss => params['discuss']) }
+				#If consecutive and wrong question, reset progress
+				elsif forwardGroup.is_consecutive
+					forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+					forwardGroup.correct_amount_left = forwardPolicyLevel.progression_threshold
+					@summary[:reset] = true
+					forwardGroup.wrong_qn_left -= 1
+					forwardGroup.save
+				#If just wrong question
+				else
+					forwardGroup.wrong_qn_left -= 1
+					forwardGroup.save
 				end
+				@summary[:lastResult] = response[:result]
+				@summary[:explanation] = response[:explanation]
+      elsif current.nil?
+        redirect_for_invalid_policy_mission "Current level does not contain any questions."
+        return
+			end
+
+		  if forwardGroup != nil && forwardGroup.wrong_qn_left != 0
+				forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+				tag = forwardPolicyLevel.getTag
+				@summary[:tagName] = tag.name
+				@summary[:consecutive] = forwardGroup.is_consecutive
+				@summary[:completedQuestions] = forwardPolicyLevel.progression_threshold - forwardGroup.correct_amount_left
+				@summary[:totalQuestions] = forwardPolicyLevel.progression_threshold
+				current = forwardGroup.getTopQuestion @assessment
+				@summary[:current] = current.specific
+			else
+				if forwardGroup != nil
+					forwardGroup.is_completed = true
+					forwardGroup.save
+				end
+				@submission.set_submitted
+				#@submission.update_grade
+      end
+
+      #Mission in lesson plan - Edit view
+      if params.has_key?(:from_lesson_plan) && params[:from_lesson_plan] == "true"
+        render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
+      end
+    #Invalid situation where no completed and uncompleted progression groups - invoke creator again
+    elsif psuedo_groups.size == 0 && @submission.progression_groups.where("is_completed = 1").size == 0
+      new_policy_mission
+    #No size means all are done
+		elsif psuedo_groups.size == 0
+      @submission.set_submitted
+      @submission.save
+      redirect_to course_assessment_submission_path(@course, @assessment, @submission)
+    #More than one cleanup
+    else
+			respond_to do |format|
+				format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission, :from_lesson_plan => params['from_lesson_plan'], :discuss => params['discuss']) }
 			end
 		end
   end
@@ -249,6 +277,10 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
     }
   end
 
+  def progression_group_cleanup
+    @submission.progression_groups.where("is_completed = 0").destroy_all
+  end
+
 	def no_update_after_submission
     unless @submission.attempting?
       respond_to do |format|
@@ -265,7 +297,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
                                   notice: "Your have not finished this mission." }
       end
     end
-  end  
+  end
 
   def authorize
     if curr_user_course.is_staff?

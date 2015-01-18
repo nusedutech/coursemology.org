@@ -179,7 +179,7 @@ class Assessment < ActiveRecord::Base
     sub = self.submissions.where(std_course_id: user_course.id).order('updated_at DESC').first
     dependent_ast_sub = self.dependent_on.nil? ? nil : self.dependent_on.submissions.where(std_course_id: user_course.id).order('updated_at DESC').first
     if sub
-      result[:action] = sub.attempting? ? "Edit" : "Review"
+      result[:action] = sub.attempting? ? "Resume" : "Review"
       result[:url] = edit_course_assessment_submission_path(course, self, sub, from_lesson_plan: true)
     elsif (self.opened? and (self.as_assessment.class == Assessment::Training or
         self.dependent_id.nil? or self.dependent_id == 0 or
@@ -210,7 +210,7 @@ class Assessment < ActiveRecord::Base
   #TODO
   def can_start?(curr_user_course)
     if open_at > Time.now
-      return  false
+      return false
     end
     if dependent_on
       sbm = assessment.submissions.where(assessment_id: dependent_id, std_course_id: curr_user_course).first

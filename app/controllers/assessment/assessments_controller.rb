@@ -59,15 +59,22 @@ class Assessment::AssessmentsController < ApplicationController
 
     #TODO:bug fix for training action, it's rather complicated
     action_map = {}
+    if assessment_type == 'policy_mission'
+      @listed_tags = {}
+    end
     @assessments.each do |ast|
       if sub_ids.include? ast.id
         attempting = sub_map[ast.id].attempting?
-        action_map[ast.id] = { action: attempting ? "Edit" : "Review",
+        action_map[ast.id] = { action: attempting ? "Resume" : "Review",
                                url: edit_course_assessment_submission_path(@course, ast, sub_map[ast.id]) }
 
         if ast.is_policy_mission? and !attempting and ast.specific.multipleAttempts?
           action_map[ast.id][:actionSecondary] = "Reattempt"
           action_map[ast.id][:urlSecondary] = reattempt_course_assessment_submissions_path(@course, ast)
+        end
+
+        if ast.is_policy_mission?
+          @listed_tags[ast.id] = sub_map[ast.id].getHighestProgressionGroupLevelName
         end
 
         #potential bug
@@ -79,6 +86,10 @@ class Assessment::AssessmentsController < ApplicationController
 
         action_map[ast.id] = {action: "Attempt",
                               url: new_course_assessment_submission_path(@course, ast)}
+
+        if ast.is_policy_mission?
+          @listed_tags[ast.id] = nil
+        end
       else
         action_map[ast.id] = {action: nil}
       end

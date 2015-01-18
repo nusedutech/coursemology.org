@@ -2,7 +2,7 @@
     <% submission = ast.last_submission(curr_user_course) %>
     <% if submission %>
         <% if submission.attempting? %>
-            <%= link_to 'Edit', edit_course_assessment_submission_path(@course, ast, submission),
+            <%= link_to 'Resume', edit_course_assessment_submission_path(@course, ast, submission),
                         class: 'btn btn-info' %>
         <% else %>
             <%= link_to 'Review', course_assessment_submission_path(@course, ast, submission),

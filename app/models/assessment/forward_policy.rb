@@ -25,4 +25,8 @@ class Assessment::ForwardPolicy < ActiveRecord::Base
 			return nil
 		end
 	end
+
+
+  def getHighestLevelReached
+  end
 end

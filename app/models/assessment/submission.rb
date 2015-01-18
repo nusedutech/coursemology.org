@@ -177,6 +177,27 @@ class Assessment::Submission < ActiveRecord::Base
     end
   end
 
+  #Note that policy mission submissions must only have 1 open submission at one time
+  def invalid_open_policy_mission_submission?
+    psuedo_groups = self.progression_groups.where("is_completed = 0")
+    psuedo_groups != 1
+  end
+
+  def getHighestProgressionGroupLevelName
+    levelName = nil
+    allProgressionGroups = self.progression_groups.where("is_completed = 1")
+    allProgressionGroups.each do |progressionGroup|
+
+			forwardGroup = progressionGroup.getForwardGroup
+			forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+			tag = forwardPolicyLevel.getTag
+		  if progressionGroup.correct_amount_left == 0
+		    levelName = tag.name
+			end
+    end
+    levelName
+  end  
+
   #callbacks
   def status_change_tasks
     if assessment.is_mission? && status_was == 'attempting' && status == 'submitted'

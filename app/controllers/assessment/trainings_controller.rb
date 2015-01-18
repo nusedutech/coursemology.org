@@ -57,11 +57,6 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
 
   def update
     respond_to do |format|
-      if !params[:assessment].nil?
-        update_questions params[:assessment][:question_assessments]
-      else
-        update_questions []
-      end
       if @training.update_attributes(params[:assessment_training])
         format.html { redirect_to course_assessment_training_url(@course, @training),
                                   notice: "The training '#{@training.title}' has been updated." }
@@ -71,7 +66,13 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     end
   end
 
-  def update_questions ques_list
+  def update_questions
+    if !params[:assessment].nil?
+      ques_list = params[:assessment][:question_assessments]
+    else
+      ques_list = []
+    end
+
     if (!ques_list.nil?)
       old_list = @training.question_assessments
       ques_list.each do |q|
@@ -87,6 +88,15 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
         if !ques_list.include? qa.question.id.to_s
           qa.destroy
         end
+      end
+    end
+
+    respond_to do |format|
+      if @training.update_attributes(params[:assessment_training])
+        format.html { redirect_to course_assessment_training_url(@course, @training),
+                                  notice: "The training '#{@training.title}' has been updated." }
+      else
+        format.html { render action: "edit" }
       end
     end
   end

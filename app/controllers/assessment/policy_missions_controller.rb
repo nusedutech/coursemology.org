@@ -93,12 +93,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 
 	def update
 		@assessment = @policy_mission.assessment
-    respond_to do |format|
-      if !params[:assessment].nil? 
-        update_questions params[:assessment][:question_assessments]
-      #else
-        #update_questions []
-      end      
+    respond_to do |format|     
 		  invalidPublish = false
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
 				if @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
@@ -132,14 +127,20 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
         end
 
         format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
-                                  notice: "The policy mission #{@policy_mission.title} has been updated." + additionalPublishNotice}
+                                  notice: "The regulated training #{@policy_mission.title} has been updated." + additionalPublishNotice}
       else
         format.html {redirect_to edit_course_assessment_policy_mission_path(@course, @policy_mission) }
       end
     end
   end
 	
-	def update_questions ques_list
+	def update_questions
+    if !params[:assessment].nil?
+      ques_list = params[:assessment][:question_assessments]
+    else
+      ques_list = []
+    end
+
     if (!ques_list.nil?)
       old_list = @policy_mission.as_assessment.question_assessments
       ques_list.each do |q|
@@ -156,14 +157,23 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
           qa.destroy
         end
       end
-    end      
+    end
+
+    respond_to do |format|      
+      if @policy_mission.update_attributes(params[:assessment_policy_mission])  
+        format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
+                                  notice: "The regulated training #{@policy_mission.title} has been updated."}
+      else
+        format.html {redirect_to edit_course_assessment_policy_mission_path(@course, @policy_mission) }
+      end
+    end 
   end
 
 	def destroy
     @policy_mission.destroy
     respond_to do |format|
       format.html { redirect_to course_assessment_trainings_url,
-                                notice: "The mission #{@policy_mission.title} has been removed." }
+                                notice: "The regulated training #{@policy_mission.title} has been removed." }
     end
   end
 

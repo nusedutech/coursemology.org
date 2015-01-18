@@ -1,4 +1,4 @@
-<%- display_name = "Policy Mission" -%>
+<%- display_name = "Regulated Training" -%>
 <%= simple_form_for [@course, @policy_mission],
                     :html => { :class => 'form-horizontal' },
                     defaults: { input_html: { class: 'span7' } } do |f| %>
@@ -76,7 +76,7 @@
 		</div>
 		<hr/>
 
-    <%= f.button :form_submit,
+    <%= f.button :form_submit, value: "Update Regulated Training",
                  cancel: @policy_mission.persisted? ? course_assessment_policy_mission_path(@course, @policy_mission) :
                          course_assessment_policy_missions_path(@course) %>
 

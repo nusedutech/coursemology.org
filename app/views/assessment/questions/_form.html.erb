@@ -1,6 +1,11 @@
 <%- if @assessment.nil? %>
 	<%- qs_path = course_assessment_questions_path %>
 <%- else %>
+  <%- if @assessment.is_training? %>
+    <%- update_question_path = update_questions_course_assessment_training_path(@course, @assessment.specific) %>
+  <%- elsif @assessment.is_policy_mission? %>
+    <%- update_question_path = update_questions_course_assessment_policy_mission_path(@course, @assessment.specific) %>
+  <%- end %>
 	<%- qs_path = course_assessment_path(@course,@assessment) + '/questions/add_question' %>
 <%- end %>
 <%= form_tag qs_path, :method => 'get', class: "form-inline" do %>
@@ -42,11 +47,14 @@
     <p>Import Question (<%= link_to "Download Template",download_import_question_template_course_assessment_questions_path %>) </p>
     <%= render partial: "import", locals: {url: import_course_assessment_questions_path}%>
 	<%= render partial: "fields"%>
-<%- else%>
+<%- elsif @assessment.is_mission? %>
 	<%= simple_form_for [@course,@assessment.as_assessment] do |f| %>
 		<%= render partial: "fields", locals: {fi: f}%>
 	<% end %>
+<%- elsif @assessment.is_training? or @assessment.is_policy_mission? %>
+  <%= simple_form_for [@course,@assessment.as_assessment], url: update_question_path do |f| %>
+		<%= render partial: "fields", locals: {fi: f}%>
+	<% end %>
 <%- end %>	
-
 
  

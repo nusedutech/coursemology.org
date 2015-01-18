@@ -134,6 +134,10 @@ class Assessment::Question < ActiveRecord::Base
     title && !title.empty? ? title : "Question #{question_assessments.first.position}"
   end
 
+  def get_title_for_nil
+    title && !title.nil? ? ' - ' +  title : ""
+  end
+
   #callback methods
 
   def clean_up_description

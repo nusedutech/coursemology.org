@@ -147,16 +147,16 @@ class StatsController < ApplicationController
 
 			#Record each submission separately - completed first
       @policy_mission.submissions.where(status: :submitted).each do |singleSubmission|
-        student = singleSubmission.std_course.user
-        next if !student.is_student?
-        unit = process_submission_excel student, true, singleSubmission
+        student_course = singleSubmission.std_course
+        next if !student_course.is_student?
+        unit = process_submission_excel student_course.user, true, singleSubmission
 				@summary[:forwardContent][:studentSubmissions] << unit
 			end
       #Record each submission separately - uncompleted second
       @policy_mission.submissions.where(status: :attempting).each do |singleSubmission|
-        student = singleSubmission.std_course.user
-        next if !student.is_student?
-        unit = process_submission_excel student, false, singleSubmission
+        student_course = singleSubmission.std_course
+        next if !student_course.is_student?
+        unit = process_submission_excel student_course.user, false, singleSubmission
 				@summary[:forwardContent][:studentSubmissions] << unit
 			end
 

@@ -45,7 +45,7 @@ class User < ActiveRecord::Base
   end
 
   def is_student?
-    self.system_role && self.system_role.name == 'normal'
+    self.system_role && self.system_role.name == 'student'
   end
 
   def self.admins

@@ -37,8 +37,13 @@
 					<div class = "sort-table-entry multi-field">
 						<i class="icon-move move-icon"></i>
 						<select class = "tag-name" name="forward[tag_id][]">
+              <option disabled="disabled"><b>Tags</b></option>
 							<%- @tags.each do |tag| -%>
-								<option value="<%= tag.id %>"><%= tag.name %></option>
+								<option value="{ &quot;Name&quot; : &quot;<%= tag.name %>&quot;, &quot;Class&quot; : &quot;<%= tag.class.name %>&quot; }" ><%= tag.name %></option>
+							<%- end -%>
+              <option disabled="disabled"><b>Concepts</b></option>
+              <%- @topicconcepts.each do |topicconcept| -%>
+							  <option value="{ &quot;Name&quot; : &quot;<%= topicconcept.name %>&quot;, &quot;Class&quot; : &quot;<%= topicconcept.class.name %>&quot; }"><%= topicconcept.name %></option> 
 							<%- end -%>
 						</select>
 						<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="1">
@@ -53,12 +58,21 @@
 						<div class = "sort-table-entry multi-field">
 							<i class="icon-move move-icon"></i>
 							<select class = "tag-name" name="forward[tag_id][]">
+                <option disabled="disabled"><b>Tags</b></option>
 								<%- @tags.each do |tag| -%>
-									<option value="<%= tag.id %>" 
-									<% if tag.id == level.tag_id %>
+									<option value="{ &quot;Name&quot; : &quot;<%= tag.name %>&quot;, &quot;Class&quot; : &quot;<%= tag.class.name %>&quot; }" 
+									<% if tag == level.tag %>
 									selected="selected"
 									<% end %>
 									><%= tag.name %></option>
+								<%- end -%>
+                <option disabled="disabled"><b>Concepts</b></option>
+                <%- @topicconcepts.each do |topicconcept| -%>
+									<option value="{ &quot;Name&quot; : &quot;<%= topicconcept.name %>&quot;, &quot;Class&quot; : &quot;<%= topicconcept.class.name %>&quot; }" 
+									<% if topicconcept == level.tag %>
+									selected="selected"
+									<% end %>
+									><%= topicconcept.name %></option>
 								<%- end -%>
 							</select>
 							<input type="number" name="forward[value][]" style="margin-bottom:0px;" class="input-small foward-question-input" min="1" value="<%= level.progression_threshold %>">

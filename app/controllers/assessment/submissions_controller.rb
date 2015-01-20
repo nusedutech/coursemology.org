@@ -44,6 +44,7 @@ class Assessment::SubmissionsController < ApplicationController
       end
     elsif @assessment.is_policy_mission?
       new_policy_mission
+      return
     elsif @submission.save
       redirect_to_edit params
     end

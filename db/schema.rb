@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141225211009) do
+ActiveRecord::Schema.define(:version => 20150120113847) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -206,6 +206,7 @@ ActiveRecord::Schema.define(:version => 20141225211009) do
     t.datetime "updated_at",                               :null => false
     t.integer  "forward_policy_id"
     t.boolean  "is_consecutive",        :default => false
+    t.string   "tag_type"
   end
 
   add_index "assessment_forward_policy_levels", ["forward_policy_id"], :name => "index_assessment_forward_policy_levels_on_forward_policy_id"

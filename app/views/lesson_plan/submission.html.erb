@@ -60,7 +60,7 @@
     </div>
     <section id="detail-content">
       <% if @assessment.is_a?(Assessment::Training) %>
-        <%= render partial:"assessment/training_submissions/edit_form" %>
+        <%= render partial:"assessment/training_submissions/edit_form", locals: { :from_lesson_plan => true } %>
       <% elsif @assessment.is_a?(Assessment::Mission)%>
           <% if @mission_show.nil? %>
               <%= render partial: 'assessment/mission_submissions/summary' %>
@@ -265,6 +265,7 @@
             }
 
         });
+
         //Hide menubar default
         if ($('#lesson-plan-content').length) {
             $('.span2.sidebar').hide();
@@ -279,7 +280,7 @@
             var type  = $(this).find('input.entry_text_type').val();
             var des  = $(this).find('input.entry_description').val();
             var loc  = $(this).find('input.entry_location').val();
-            var dis = $(this).next('div.discussion').html();
+            var $dis = $(this).next('div.discussion');
             var $resource = $(this).parent().parent().find('div.resource-hide ul');
             var entry_start_end = $(this).find('span.entry_start_end').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
@@ -293,7 +294,7 @@
                 show_policymission_with_reattempt(this,title, type, des, loc, $resource);
             }
 
-            show_discussion(dis);
+            show_discussion($dis);
         });
 
         //show entry lecture, recitation, tutorial
@@ -438,30 +439,14 @@
             //return false;
         });
 
-        function show_discussion(discussion){
-            var entry_form = "";
-            $('section#detail-content').append(entry_form);
-            $('section#detail-content').append(discussion);
-            $('section#detail-content a.a_discussion').click(function() {
-                $('section#detail-content .forum').toggle('slow');
-                if ($('section#detail-content a.a_discussion').text()=="Show Discussion"){
-                    $('section#detail-content a.a_discussion').text("Hide Discussion");
-                }else{
-                    $('section#detail-content a.a_discussion').text("Show Discussion");
-                }
-            });
-        }
-
-        $('#lesson-plan-content #detail-content a.a_discussion').click(function() {
-            $('#lesson-plan-content #detail-content .forum').toggle('slow');
-            if($('#lesson-plan-content #detail-content a.a_discussion').text()=='Hide Discussion'){
-                $('#lesson-plan-content #detail-content a.a_discussion').text('Show Discussion');
-            }else{
-                $('#lesson-plan-content #detail-content a.a_discussion').text('Hide Discussion');
+        //set event for discussion of entry after clicking menubar
+        function show_discussion($discussion){
+            if($discussion != null) {
+                $('section#detail-content').append($("<div id='discussion-wrapper'></div>"));
+                $('div#discussion-wrapper').append($discussion.children().clone(true));
+                set_show_hide_discussion();
             }
-
-        });
-        //$('#lesson-plan-content #detail-content a.a_discussion').click();
+        }
 
         if($('#active-entity').val()!=""){
             $("a#"+$('#active-entity').val()).parent().parent().parent().parent().parent().parent().find(".lesson-plan-header.span8").click();

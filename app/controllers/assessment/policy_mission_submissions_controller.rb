@@ -214,6 +214,9 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
       @submission.set_submitted
       @submission.save
       redirect_to course_assessment_submission_path(@course, @assessment, @submission)
+    elsif psuedo_groups.size > 1
+      psuedo_groups.destroy_all
+      new_policy_mission
     #More than one cleanup
     else
 			respond_to do |format|

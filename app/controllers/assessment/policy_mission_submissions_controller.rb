@@ -1,6 +1,6 @@
 class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsController
 
-	before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt]
+	before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt, :edit]
   before_filter :no_showing_before_submission, only: [:show, :show_export_excel]
   before_filter :no_update_after_submission, only: [:edit, :update]
 

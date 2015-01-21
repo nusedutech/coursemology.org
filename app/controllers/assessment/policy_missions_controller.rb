@@ -1,5 +1,7 @@
 class Assessment::PolicyMissionsController < Assessment::AssessmentsController
+  require 'csv'
 	load_and_authorize_resource :policy_mission, class: "Assessment::PolicyMission", through: :course
+
 
 	def show
     @assessment = @policy_mission.assessment
@@ -19,6 +21,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 	
 	def edit
 		@tags = @course.tags
+    @topicconcepts = @course.topicconcepts.concepts
 		@fwdPolicyLevels = @policy_mission.progression_policy.getForwardPolicy.getSortedPolicyLevels
 
 		@forwardWrong = @policy_mission.progression_policy.getForwardPolicy.overall_wrong_threshold
@@ -32,6 +35,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     @policy_mission.course_id = @course.id
 
 		@tags = @course.tags
+    @topicconcepts = @course.topicconcepts.concepts
 		respond_to do |format|
 			format.html
 		end
@@ -57,8 +61,14 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
           #Cannot publish if no policy levels exist
           invalidPublish = (params[:forward][:tag_id].size <= 0)
 					params[:forward][:tag_id].each_with_index do |tag_id, index|
+            tagElement = getTagElement tag_id
+            if tagElement.nil?
+              invalidPublish = true
+              break
+            end
+
 						forward_policy_level = Assessment::ForwardPolicyLevel.new
-						forward_policy_level.tag_id = tag_id
+						forward_policy_level.tag = tagElement
 						forward_policy_level.progression_threshold = params[:forward][:value][index]
 						forward_policy_level.order = index
 						forward_policy_level.forward_policy_id = forward_policy.id
@@ -91,14 +101,22 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     end
   end
 
+  def getTagElement tagString
+    tagHash = JSON.parse tagString
+    if tagHash.has_key?("Class") and tagHash.has_key?("Name") and tagHash["Class"] == "Tag"
+      tagElements = @course.tags.where(name: tagHash["Name"])
+      tagElements.size > 0 ? tagElements.first : nil
+    elsif tagHash.has_key?("Class") and tagHash.has_key?("Name") and tagHash["Class"] == "Topicconcept"
+      tagElements = @course.topicconcepts.where(name: tagHash["Name"])
+      tagElements.size > 0 ? tagElements.first : nil
+    else
+      nil
+    end 
+  end
+
 	def update
 		@assessment = @policy_mission.assessment
-    respond_to do |format|
-      if !params[:assessment].nil? 
-        update_questions params[:assessment][:question_assessments]
-      #else
-        #update_questions []
-      end      
+    respond_to do |format|     
 		  invalidPublish = false
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
 				if @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
@@ -110,8 +128,14 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
           #Cannot publish if no policy levels exist
           invalidPublish = params[:forward][:tag_id].size <= 0
 					params[:forward][:tag_id].each_with_index do |tag_id, index|
+            tagElement = getTagElement tag_id
+            if tagElement.nil?
+              invalidPublish = true
+              break
+            end
+
 						forward_policy_level = Assessment::ForwardPolicyLevel.new
-						forward_policy_level.tag_id = tag_id
+						forward_policy_level.tag = tagElement
 						forward_policy_level.progression_threshold = params[:forward][:value][index]
 						forward_policy_level.order = index
 						forward_policy_level.forward_policy_id = forward_policy.id
@@ -132,14 +156,20 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
         end
 
         format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
-                                  notice: "The policy mission #{@policy_mission.title} has been updated." + additionalPublishNotice}
+                                  notice: "The regulated training #{@policy_mission.title} has been updated." + additionalPublishNotice}
       else
         format.html {redirect_to edit_course_assessment_policy_mission_path(@course, @policy_mission) }
       end
     end
   end
 	
-	def update_questions ques_list
+	def update_questions
+    if !params[:assessment].nil?
+      ques_list = params[:assessment][:question_assessments]
+    else
+      ques_list = []
+    end
+
     if (!ques_list.nil?)
       old_list = @policy_mission.as_assessment.question_assessments
       ques_list.each do |q|
@@ -156,14 +186,40 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
           qa.destroy
         end
       end
-    end      
+    end
+
+    respond_to do |format|      
+      if @policy_mission.update_attributes(params[:assessment_policy_mission])
+        invalidPublish = false  
+        forward_policy_levels = @policy_mission.progression_policy.getForwardPolicy.forward_policy_levels
+        forward_policy_levels.each do |single_level|
+          #Cannot publish as long as one single level is missing a question to do
+          if single_level.getAllRelatedQuestions(@assessment).size  <= 0
+            invalidPublish = true
+            break
+          end
+        end
+       
+        additionalPublishNotice = @policy_mission.published && invalidPublish ? " Cannot be published as missing forward levels with questions." : ""
+				
+				if @policy_mission.published
+          @policy_mission.published = !invalidPublish
+          @policy_mission.save
+        end
+
+        format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
+                                  notice: "The regulated training #{@policy_mission.title} has been updated." + additionalPublishNotice}
+      else
+        format.html {redirect_to edit_course_assessment_policy_mission_path(@course, @policy_mission) }
+      end
+    end 
   end
 
 	def destroy
     @policy_mission.destroy
     respond_to do |format|
       format.html { redirect_to course_assessment_trainings_url,
-                                notice: "The mission #{@policy_mission.title} has been removed." }
+                                notice: "The regulated training #{@policy_mission.title} has been removed." }
     end
   end
 

@@ -59,7 +59,9 @@
           <% end %>
           "><%= val %></th>
       <% end %>
-
+      <% if @summary[:module] == "Policy mission" %>
+          <th width="10%">Latest Level Achieved</th>
+      <% end %>
       <% if curr_user_course.id && can?(:manage, Assessment::Submission) %>
           <th width="10%"></th>
       <% end %>
@@ -142,7 +144,13 @@
                 <% end %>
               </td>
           <% end %>
-
+          <% if @summary[:module] == "Policy mission" %>
+            <td>
+              <% if !@listed_tags[ast.id].nil? %>
+                <span class="label label-info"><%= @listed_tags[ast.id] %></span>
+              <% end %>
+            </td>
+          <% end %>
           <% if curr_user_course.id %>
 							<td>
 								<div id="<%= ast.id %>"></div>

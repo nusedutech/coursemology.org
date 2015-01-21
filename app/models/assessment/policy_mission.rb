@@ -37,7 +37,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
     if self.multipleAttempts? and lastSbm and lastSbm.submitted?
       entry.entry_type = 5
       entry.submission[:actionSecondary] = "Reattempt"
-      entry.submission[:urlSecondary] = reattempt_course_assessment_submissions_path(course, self, from_lesson_plan: true)
+      entry.submission[:urlSecondary] = reattempt_course_assessment_submissions_path(course, self.assessment, from_lesson_plan: true)
     else
       entry.entry_type = 4
     end

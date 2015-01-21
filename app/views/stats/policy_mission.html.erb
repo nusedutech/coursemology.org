@@ -65,6 +65,48 @@
 	<% end %>
 <% end %>
 <hr/>
+
+<h3>Summary</h3>
+<table class="table table-bordered">
+  <tr>
+    <th width="15%">Current Step</th>
+    <th>Count</th>
+    <th>Students</th>
+  </tr>
+  <tr>
+    <td>Submitted</td>
+    <td><%= @summary[:submitted].size %></td>
+    <td>
+      <% @summary[:submitted].each do |std_course| %>
+          <%= render partial: "user_courses/short_name_display",
+                     locals: { user_course: std_course } %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td>Attempting</td>
+    <td><%= @summary[:attempting].size %></td>
+    <td>
+      <% @summary[:attempting].each do |std_course| %>
+          <%= render partial: "user_courses/short_name_display",
+                     locals: { user_course: std_course } %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td>Not attempted</td>
+    <td><%= @summary[:unsubmitted].size %></td>
+    <td>
+      <% @summary[:unsubmitted].each do |std_course| %>
+          <%= render partial: "user_courses/short_name_display",
+                     locals: { user_course: std_course } %>
+      <% end %>
+    </td>
+  </tr>
+</table>
+<hr/>
+
+
 <p>View detail statistics of other assignment:</p>
 <table class="table-basic">
   <tr>

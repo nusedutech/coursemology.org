@@ -21,5 +21,6 @@ class Topicconcept < ActiveRecord::Base
   has_many :included_topicconcepts, :through => :topic_edge_included_topicconcepts, class_name: "Topicconcept", :source => :included_topicconcept
   
   has_many :taggable_tags, as: :tag, dependent: :destroy
+  has_many :forward_policy_levels, dependent: :destroy
   has_many :questions, through: :taggable_tags, source: :taggable, source_type: "Assessment::Question"
 end

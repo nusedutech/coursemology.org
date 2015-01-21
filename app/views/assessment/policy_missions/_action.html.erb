@@ -2,8 +2,13 @@
     <% submission = ast.last_submission(curr_user_course) %>
     <% if submission %>
         <% if submission.attempting? %>
-            <%= link_to 'Edit', edit_course_assessment_submission_path(@course, ast, submission),
+            <%= link_to 'Resume', edit_course_assessment_submission_path(@course, ast, submission),
                         class: 'btn btn-info' %>
+        <% elsif ast.is_policy_mission? && submission.submitted? && ast.specific.multipleAttempts? %>
+            <%= link_to 'Review', course_assessment_submission_path(@course, ast, submission),
+                        class: 'btn btn-info' %>
+            <%= link_to 'Reattempt', reattempt_course_assessment_submissions_path(@course, ast),
+                        class: 'btn' %>
         <% else %>
             <%= link_to 'Review', course_assessment_submission_path(@course, ast, submission),
                         class: 'btn btn-info' %>

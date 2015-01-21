@@ -175,6 +175,9 @@ Coursemology::Application.routes.draw do
         get 'stats' => 'policy_missions#stats'
 				get 'submissions' => 'assessments#listall', type: 'policy_mission'
 			end
+      member do
+        put 'update_questions' => 'policy_missions#update_questions'
+      end
 		end
 
     resources :assessment_trainings, path: 'trainings', controller: :trainings, module: :assessment do
@@ -184,6 +187,9 @@ Coursemology::Application.routes.draw do
         get 'overview' => 'trainings#overview'
         get 'stats' => 'trainings#stats'
         get 'submissions' => 'assessments#listall', type: 'training'
+      end
+      member do
+        put 'update_questions' => 'trainings#update_questions'
       end
     end
 

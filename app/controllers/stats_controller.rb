@@ -106,6 +106,15 @@ class StatsController < ApplicationController
 			end
 		end
 
+    @sbms = @policy_mission.submissions.where(std_course_id: @course.student_courses)
+    @summary[:submitted] = @sbms.where(status: 'submitted').map { |sbm| sbm.std_course }
+    @summary[:submitted] = @summary[:submitted].uniq
+    @summary[:attempting] = @sbms.where(status: 'attempting').map { |sbm| sbm.std_course } - @summary[:submitted]
+    @summary[:attempting] = @summary[:attempting].uniq
+    @summary[:unsubmitted] = @course.student_courses - @summary[:submitted] - @summary[:attempting]
+    #unsubmittedEmails = @summary[:unsubmitted].map { |stdCourse| stdCourse.user.email }
+    #@summary[:unsubmittedEmails] = unsubmittedEmails.join(";")
+
 		@missions = @course.missions
     @trainings = @course.trainings
 		@policy_missions = @course.policy_missions
@@ -136,58 +145,29 @@ class StatsController < ApplicationController
 			#Overall statistics for each student
 			@summary[:forwardContent][:studentSubmissions] = []
 
-			#Record each submission separately
-			@policy_mission.submissions.each do |singleSubmission|
-
-				student = singleSubmission.std_course.user
-				packageSubmissionUser = {}
-				packageSubmissionUser[:id] = student.id
-				packageSubmissionUser[:name] = student.name
-				packageSubmissionUser[:status] = "Pass" #default pass - we check for failing condition and overwrite
-				packageSubmissionUser[:highestLevel] = "All mastered" #default all mastered - check for lower mastery and overwrite
-        packageSubmissionUser[:masteryString] = ""
-				packageSubmissionUser[:levelInfos] = []
-				previousTiming = singleSubmission.created_at
-
-				allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
-				#Separate each entries by the progression levels
-				allProgressionGroups.each do |progressionGroup|
-					forwardGroup = progressionGroup.getForwardGroup
-					tagName = progressionGroup.getTagName	
-					allMcqAnswers = forwardGroup.getAllAnswers
-					numCorrect = 0
-					numTotal = 0
-
-					#Counting right answers
-					allMcqAnswers.each do |singleAnsweredQn|
-						packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + tagName
-            mcqQuestion = singleAnsweredQn.question.specific
-            
-						if singleAnsweredQn.correct
-							numCorrect += 1
-              packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "1"
-            else
-              packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "0"
-						end
-						numTotal += 1
-						
-						#Calculate timing to answer question from previous timing
-						timingQn = (singleAnsweredQn.created_at - previousTiming)
-					  #Update timing for next question
-						previousTiming = singleAnsweredQn.created_at
-						packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + mcqQuestion.id.to_s + "," + timingQn.to_s + ";"
-					end
-
-					#Validate student's mastery level
-          if progressionGroup.correct_amount_left > 0
-            packageSubmissionUser[:status] = "Fail"
-          	packageSubmissionUser[:highestLevel] = tagName
-          end
-
-					packageSubmissionUser[:levelInfos] << numCorrect.to_s + " / " + numTotal.to_s
-				end
-				@summary[:forwardContent][:studentSubmissions] << packageSubmissionUser
+			#Record each submission separately - completed first
+      @policy_mission.submissions.where(status: :submitted).each do |singleSubmission|
+        student_course = singleSubmission.std_course
+        next if !student_course.is_student?
+        unit = process_submission_excel student_course.user, true, singleSubmission
+				@summary[:forwardContent][:studentSubmissions] << unit
 			end
+      #Record each submission separately - uncompleted second
+      @policy_mission.submissions.where(status: :attempting).each do |singleSubmission|
+        student_course = singleSubmission.std_course
+        next if !student_course.is_student?
+        unit = process_submission_excel student_course.user, false, singleSubmission
+				@summary[:forwardContent][:studentSubmissions] << unit
+			end
+
+      @sbms = @policy_mission.submissions
+      @submitted = @sbms.where(status: 'submitted').map { |sbm| sbm.std_course }
+      @attempting = @sbms.where(status: 'attempting').map { |sbm| sbm.std_course }
+      all_std = @course.student_courses
+      @unsubmitted = all_std -  @attempting -  @submitted
+      @summary[:forwardContent][:unsubmitted] = @unsubmitted
+      unsubmittedEmails = @unsubmitted.map { |stdCourse| stdCourse.user.email }
+      @summary[:forwardContent][:unsubmittedEmails] = unsubmittedEmails.join(";")
 		end
 
 		respond_to do |format|
@@ -196,4 +176,56 @@ class StatsController < ApplicationController
 			format.xls
 		end
 	end
+
+  def process_submission_excel (student, is_completed, singleSubmission)
+		packageSubmissionUser = {}
+		packageSubmissionUser[:id] = student.id
+		packageSubmissionUser[:name] = student.name
+		packageSubmissionUser[:status] = "Pass" #default pass - we check for failing condition and overwrite
+		packageSubmissionUser[:highestLevel] = "None" #default none
+    packageSubmissionUser[:masteryString] = ""
+    packageSubmissionUser[:completionStatus] = is_completed ? "Completed" : "Not completed"
+		packageSubmissionUser[:levelInfos] = []
+		previousTiming = singleSubmission.created_at
+
+		allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
+		#Separate each entries by the progression levels
+		allProgressionGroups.each do |progressionGroup|
+			forwardGroup = progressionGroup.getForwardGroup
+			tagName = progressionGroup.getTagName	
+			allMcqAnswers = forwardGroup.getAllAnswers
+			numCorrect = 0
+			numTotal = 0
+
+			#Counting right answers
+			allMcqAnswers.each do |singleAnsweredQn|
+				packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + tagName
+        mcqQuestion = singleAnsweredQn.question.specific
+        
+				if singleAnsweredQn.correct
+					numCorrect += 1
+          packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "1"
+        else
+          packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "0"
+				end
+				numTotal += 1
+				
+				#Calculate timing to answer question from previous timing
+				timingQn = (singleAnsweredQn.created_at - previousTiming)
+			  #Update timing for next question
+				previousTiming = singleAnsweredQn.created_at
+				packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + mcqQuestion.id.to_s + "," + timingQn.to_s + ";"
+			end
+
+			#Validate student's mastery level
+      if progressionGroup.correct_amount_left > 0
+        packageSubmissionUser[:status] = "Fail"
+      else
+      	packageSubmissionUser[:highestLevel] = tagName
+      end
+
+			packageSubmissionUser[:levelInfos] << numCorrect.to_s + " / " + numTotal.to_s
+		end
+    packageSubmissionUser
+  end
 end

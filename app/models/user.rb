@@ -44,6 +44,10 @@ class User < ActiveRecord::Base
     self.is_admin? || (self.system_role && self.system_role.name == 'lecturer')
   end
 
+  def is_student?
+    self.system_role && self.system_role.name == 'student'
+  end
+
   def self.admins
     User.where(system_role_id: Role.admin.first)
   end

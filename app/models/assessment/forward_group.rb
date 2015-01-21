@@ -26,9 +26,13 @@ class Assessment::ForwardGroup < ActiveRecord::Base
 			allQuestions = CSV.parse_line(newQuestions)
 		end
 		
-		#remove one question
-		questionId = allQuestions.shift
-		todoQuestion = assessment.questions.find_by_id(questionId)
+		#remove one question when valid question string retrieved
+    if allQuestions != nil && !allQuestions.nil?
+		  questionId = allQuestions.shift
+		  todoQuestion = assessment.questions.find_by_id(questionId)
+    else
+      return nil
+    end
 	end
 
 	def removeTopQuestion

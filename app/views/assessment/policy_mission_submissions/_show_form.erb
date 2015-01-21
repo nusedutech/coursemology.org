@@ -12,7 +12,7 @@
         <td>
           <select id="select-submission">
             <%= @allSubmissions.each do |sbm| %>
-                <option value="<%= course_assessment_submission_path(@course, @assessment, sbm) %>"><%= sbm.submitted_at %></option>
+                <option value="<%= course_assessment_submission_path(@course, @assessment, sbm) %>" <%= @submission == sbm ? "selected" : "selected" %>><%= sbm.submitted_at %></option>
             <% end %>
           </select>
         </td>
@@ -42,7 +42,7 @@
           </tr>
           <tr>
             <td><strong>Submitted at:</strong> </td>
-            <td><%= time_ago_in_words(@submission.created_at) %> ago</td>
+            <td><%= time_ago_in_words(@submission.updated_at) %> ago</td>
           </tr>
         </table>
       </div>

@@ -15,15 +15,17 @@ $(document).ready(function() {
   }
 
   $('.forum .btn.reply').click(function(e) {
+
     // Set the post we are replying to.
     var post_id = parseInt($(this).data('postId'));
     var post_title = replize_title($(this).data('postTitle'));
-    var $quick_reply = $('.forum .quick-reply');
+    //var $quick_reply = $('.forum .quick-reply');
+    var $quick_reply = $(this).closest('.forum').find('.quick-reply');
     $('#forum_post_title', $quick_reply).val(post_title);
     $('#forum_post_parent_id', $quick_reply).val(post_id);
 
     // Reattach the form beneath the post we are replying to.
-    var $post = $('.forum div#post-' + post_id);
+    var $post = $(this).closest('.forum').find('div#post-' + post_id);
     $quick_reply.hide();
     $quick_reply.detach();
     $quick_reply.appendTo($('div.contents', $post));
@@ -34,7 +36,7 @@ $(document).ready(function() {
     }, 500);
 
     e.preventDefault();
-  })
+  });
     var icon_toggle = $('.forum .subscribe-icon');
     icon_toggle.hover(function(){
         $(this).removeClass('icon-ok').addClass('icon-remove');

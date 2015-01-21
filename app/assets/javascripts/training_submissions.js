@@ -1,4 +1,8 @@
 $(document).ready(function(){
+
+    //initiate event for discussion
+    set_show_hide_discussion();
+
     $('#submit-btn').click(function(evt){
         $('#submit-btn').addClass('disabled');
         var form = $("#training-step-form");
@@ -129,8 +133,6 @@ $(document).ready(function(){
                 $("#pathrun").attr("disabled",false);
             }, 'json')
     }
-
-    set_show_hide_discussion();
 });
 
 

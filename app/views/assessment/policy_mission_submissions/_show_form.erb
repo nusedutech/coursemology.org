@@ -12,7 +12,7 @@
         <td>
           <select id="select-submission">
             <%= @allSubmissions.each do |sbm| %>
-                <option value="<%= course_assessment_submission_path(@course, @assessment, sbm) %>" <%= @submission == sbm ? "selected" : "selected" %>><%= sbm.submitted_at %></option>
+                <option value="<%= course_assessment_submission_path(@course, @assessment, sbm) %>" <%= @submission == sbm ? "selected" : "" %>><%= sbm.submitted_at %></option>
             <% end %>
           </select>
         </td>

@@ -16,62 +16,41 @@
 
     <tbody class="table-hover">
     	<% @questions.each_with_index do |q, index| %>
-	        <tr id="ques-<%= q.id %>">
-                <td><%= index + 1 %></td>
-	        	<td>
-                  <div class="ellipsis">
-                    <p class="p-bold"><%= q.title %></p>
-                    <% if q.as_question.class == Assessment::McqQuestion %>
-                        <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
-                    <% elsif q.as_question.class == Assessment::MpqQuestion %>
-                        <%= style_format(q.description) %>
-                        <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
-                    <% else %>
-                        <%= style_format(q.description) %>
-                    <% end %>
-                  </div>
-                  <a class="show-more small-text float-right">Show More</a>
-                </td>
-	        	<td>
-	              	<% q.topicconcepts.uniq.each do |tag| %>
-	                    <a>
-	                        <span class="label label-info"><%= tag.name %></span>
-	                    </a>
-	                <% end %>
-	                <% diffg = @course.tag_groups.where(:name => 'Difficulty')%>
-	                <% diffs = diffg.count > 0 ? diffg[0].tags : [] %>
-	                <% (q.tags.uniq - diffs).each do |tag| %>
-	                    <%= link_to course_tag_path(@course, tag) do %>
-	                        <span class="label label-info"><%= tag.name %></span>
-	                    <% end %>
-	                <% end %>
-	            </td>
-	            <td>
-	            	<% diff = q.tags.uniq & diffs%>
-	            	<% if (!diff.nil? && !diff[0].nil?) %>
-	            		<a><span class="label label-info label-green"><%= diff[0].name %></span></a>
-	            	<% end %>
-	           	</td>
-	            <td>
-	            	<%- if @assessment.nil? %>
-		                <%= link_to polymorphic_path([@course, q.as_question], action: :edit), class: 'btn' do %>
-	                        <i class="icon-edit"></i>
-	                    <% end %>
-	                    <%= link_to url_for([@course, q.as_question]),
-	                                method: :delete,
-	                                data: { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => "Are you sure to delete 'Question #{q.title}'?")) },
-	                                class: 'btn btn-danger' do %>
-	                        <i class="icon-trash"></i>
-	                    <% end %>
-	                <% else %>
-	                	<%= check_box_tag 'question_#{q.id}', q.id, @assessment.questions.include?(q), :name => 'assessment[question_assessments][]', class: 'question_option' %>
-                    <% end %>             
-			
-	            </td>
-	        </tr>
+	      <%= render partial: "single_question_field", locals: {q: q, index:index+@qn_paging_index_offset} %>
 	    <% end %>
     </tbody>
 </table>
+
+<div style="display:block; margin-left: auto; margin-right:0;">
+	<% if @qn_paging.display? %>
+		<%= paginate @questions %>
+	<% end %>
+</div>
+
+<%- if !@assessment.nil? && @assessment.questions.size > 0 %>
+	<table class="table assignments missions-list-table ver-ali-top">
+		  <thead>
+			  <tr>
+		          <th width="3%"></th>
+			  	<th width="65%">Selected Questions</th>
+			  	<th width="15%">Tags</th>
+			  	<th width="7%"><%= sortable 'level', course_assessment_questions_path, @phantom ? 'phantom=true' : 'phantom=false' %></th>
+
+			  	<%- if @assessment.nil? %>
+			  	<th width="10%">Action</th>
+			  	<%- else %>
+			  	<th width="10%">Add <input type="checkbox" class="selectall_question_option" ></th>
+			  	<%- end %>
+			</tr>
+		  </thead>
+		  <tbody class="table-hover">
+		    <% @assessment.questions.each_with_index do |q, index| %>
+			    <%= render partial: "single_question_field", locals: {q: q, index:index} %>
+			  <% end %>
+		  </tbody>
+	</table>
+<%- end %>
+
 	<%- if !@assessment.nil? %>
 		<div class="form-action">
 		<%= fi.submit "update", :class => 'btn btn-primary form-submit' %>
@@ -91,7 +70,6 @@
     });
 
     $('input.selectall_question_option').click(function() {
-        $('input.question_option').prop('checked', $(this).prop('checked'));
-        console.log("cats");
+        $(this).closest('table').find('input.question_option').prop('checked', $(this).prop('checked'));
     });
 </script>

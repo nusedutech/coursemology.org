@@ -159,6 +159,16 @@
                             });
                         });
                     });
+            user.get("Webcasts", {CourseID: id, TitleOnly: false})
+                    .success(function (data) {
+                        $.each(data.Results, function (ind, val) {
+                            $.each(val.ItemGroups, function (ind_it, ig) {
+                                $.each(ig.Files, function (inf, fi) {
+                                    $('#link_list').append('<option value="' + fi.FileName + '">IS3102 - ' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                });
+                            });
+                        });
+                    });
         }
     }
 

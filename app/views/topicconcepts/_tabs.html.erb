@@ -1,0 +1,8 @@
+<ul class="nav nav-tabs">
+	<li class="<%= "active" if current_page? :course_topicconcepts %>">
+    <a href="<%= course_topicconcepts_path(@course) %>" ><h4>Topic & Concepts</h4></a>
+  </li>
+  <li class="<%= "active" if current_page? :concept_questions_course_topicconcepts %>">
+    <a href="<%= concept_questions_course_topicconcepts_path(@course) %>" ><h4>Concept questions</h4></a>
+  </li>
+</ul>

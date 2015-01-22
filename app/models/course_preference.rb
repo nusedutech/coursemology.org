@@ -41,6 +41,10 @@ class CoursePreference < ActiveRecord::Base
       item('Paging')
     end
 
+    def login_url
+      item('Login URL')
+    end
+
     def reattempt
       training.item_type('Re-attempt')
     end

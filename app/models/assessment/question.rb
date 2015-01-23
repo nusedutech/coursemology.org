@@ -171,6 +171,7 @@ class Assessment::Question < ActiveRecord::Base
   end
 
   #TODO: i hope mysql is smart enough to optimize this
+  #finalise for normal training or old training (one kind of traning, allow come back questions)
   def self.finalised(sbm)
     grouped_answers = "SELECT *, MIN(created_at)
                       FROM assessment_answers
@@ -179,6 +180,15 @@ class Assessment::Question < ActiveRecord::Base
     self.joins("INNER JOIN (#{grouped_answers}) uaaq ON assessment_questions.id = uaaq.question_id")
   end
 
+  #finalise for test (one kind of traning)
+  def self.finalised_for_test(sbm)
+    #new code for normal training
+    grouped_answers = "SELECT *, MIN(created_at)
+                      FROM assessment_answers
+                      WHERE assessment_answers.submission_id = #{sbm.id}
+                      GROUP BY  assessment_answers.question_id"
+    self.joins("INNER JOIN (#{grouped_answers}) uaaq ON assessment_questions.id = uaaq.question_id")
+  end
   #overrides
   def dup
     s = self.specific

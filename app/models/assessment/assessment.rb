@@ -29,7 +29,16 @@ class Assessment < ActiveRecord::Base
   scope :future, -> { where("open_at > ? ", Time.now) }
   scope :published, -> { where(published: true) }
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") }
-  scope :training, -> { where(as_assessment_type: "Assessment::Training") }
+  scope :training, -> { where(as_assessment_type: "Assessment::Training") } do
+    def retry_training
+      joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")
+      .where("assessment_trainings.test is null or assessment_trainings.test = 0")
+    end
+    def test
+      joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")
+      .where(:assessment_trainings => {:test => true})
+    end
+  end
 	scope :policy_mission, -> { where(as_assessment_type: "Assessment::PolicyMission") }
 
   belongs_to  :tab

@@ -24,16 +24,25 @@ module AutoGrader
 
     unless ag.grade
       std_answers = submission.answers.where(question_id: ans.question_id)
-      if pref_grader != 'two-one-zero' || std_answers.count == 0
-        ag.grade = mcq.max_grade
-      elsif mcq.specific.select_all?
-        ag.grade = mcq.max_grade / 2.0
+      if submission.assessment.as_assessment.is_a?(Assessment::Training) and submission.assessment.as_assessment.test
+        answer = std_answers.first
+        if answer.nil? || !answer.correct
+          ag.grade = 0
+        else
+          ag.grade = mcq.max_grade
+        end
       else
-        num_wrong_choices = mcq.options.find_all_by_correct(false).count
-        uniq_wrong_attempts = std_answers.unique_attempts(false).count
-        ag.grade = (num_wrong_choices <= uniq_wrong_attempts) ? 0 : 1
-      end
-      ag.save
+        if pref_grader != 'two-one-zero' || std_answers.count == 0
+          ag.grade = mcq.max_grade
+        elsif mcq.specific.select_all?
+          ag.grade = mcq.max_grade / 2.0
+        else
+          num_wrong_choices = mcq.options.find_all_by_correct(false).count
+          uniq_wrong_attempts = std_answers.unique_attempts(false).count
+          ag.grade = (num_wrong_choices <= uniq_wrong_attempts) ? 0 : 1
+    end
+  end
+  ag.save
     end
 
     return ag.grade

@@ -24,6 +24,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     if Tab.find_by_id(tab_id)
       @training.tab_id = tab_id
     end
+    @test_flag = params[:test] == "true" ? true : false
     @training.exp = 200
     @training.open_at = DateTime.now.beginning_of_day
     @training.bonus_exp = 0
@@ -36,6 +37,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     @training.position = @course.trainings.count + 1
     @training.creator = current_user
     @training.course_id = @course.id
+    @training.test = @training.skippable.nil? ? true : false
     if params[:files]
       @training.attach_files(params[:files].values)
     end
@@ -44,7 +46,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
       if @training.save
         @training.create_local_file
         format.html { redirect_to course_assessment_training_path(@course, @training),
-                                  notice: "The training '#{@training.title}' has been created." }
+                                  notice: "The #{@training.test ? 'test' : 'training'} '#{@training.title}' has been created." }
       else
         format.html { render action: "new" }
       end
@@ -59,7 +61,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     respond_to do |format|
       if @training.update_attributes(params[:assessment_training])
         format.html { redirect_to course_assessment_training_url(@course, @training),
-                                  notice: "The training '#{@training.title}' has been updated." }
+                                  notice: "The #{@training.test ? 'test' : 'training'} '#{@training.title}' has been updated." }
       else
         format.html { render action: "edit" }
       end

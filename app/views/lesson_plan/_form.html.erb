@@ -155,7 +155,17 @@
                     .success(function (data) {
                         $.each(data.Results, function (ind, val) {
                             $.each(val.Files, function (inf, fi) {
-                                $('#link_list').append('<option value="' + fi.FileName + '">IS3102 - ' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                $('#link_list').append('<option value="' + fi.FileName + '">' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                            });
+                        });
+                    });
+            user.get("Webcasts", {CourseID: id, TitleOnly: false})
+                    .success(function (data) {
+                        $.each(data.Results, function (ind, val) {
+                            $.each(val.ItemGroups, function (ind_it, ig) {
+                                $.each(ig.Files, function (inf, fi) {
+                                    $('#link_list').append('<option value="' + (fi.MP4.length ? fi.MP4 : fi.FileName) + '">' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                });
                             });
                         });
                     });

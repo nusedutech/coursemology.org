@@ -238,6 +238,15 @@ class Course < ActiveRecord::Base
     self.course_preferences.join_items.paging
   end
 
+  def login_url_pref(type)
+    login_urls = login_url_prefs
+    login_urls.item_type(type.pluralize).first || login_urls.item_type(type).first ||(raise type + " has no url preference")
+  end
+
+  def login_url_prefs
+    self.course_preferences.join_items.login_url
+  end
+
   def training_reattempt
     self.course_preferences.join_items.training.reattempt.first
   end

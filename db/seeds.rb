@@ -823,3 +823,21 @@ if PreferableItem.count == 67
                          default_display: true
 
 end
+
+if PreferableItem.count == 73
+	PreferableItem.create! item:            "Paging",
+                         item_type:       "Questions",
+                         name:            "Question bank (related pages)",
+                         default_value:   "10",
+                         description:     "Number of questions to display per page",
+                         default_display: true
+end
+
+if PreferableItem.count == 74
+	PreferableItem.create! item:            "Login URL",
+                         item_type:       "Students",
+                         name:            "Student login url",
+                         default_value:   "",
+                         description:     "Number of questions to display per page",
+                         default_display: true
+end

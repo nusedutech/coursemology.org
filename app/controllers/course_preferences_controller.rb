@@ -27,7 +27,14 @@ class CoursePreferencesController < ApplicationController
         @tab = "OtherPreference"
         @preferences = @course.home_sections
         @no_preferences = @course.course_home_events_no_pref << @course.leaderboard_no_pef
-        @achievement_pref = @course.achievements_locked_display
+        @achievement_pref = @course.achievements_locked_display       
+ 
+        default_url_item = NavbarPreferableItem.new
+        default_url_item.name = "Course Index"
+        default_url_item.item = ""
+        @url_items = [default_url_item] + @course.navbar_tabs(false)
+        @url_pref = @course.login_url_pref('Students')
+
       when 'paging'
         @tab = 'PagingPreference'
         @preferences = @course.paging_prefs

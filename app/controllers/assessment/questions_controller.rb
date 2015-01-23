@@ -5,7 +5,7 @@ class Assessment::QuestionsController < ApplicationController
   before_filter :build_resource
   before_filter :extract_tags, only: [:update]
   before_filter :load_general_course_data, only: [:index, :new, :edit,:show, :add_question]
-
+  
   def index
     authorize! :manage, Course
     filter = params[:tags]
@@ -48,11 +48,13 @@ class Assessment::QuestionsController < ApplicationController
       @questions = @course.questions.uniq
     end
 
+    paging_setup
 
     respond_to do |format|
       format.json { render json: @course.topicconcepts.concepts.map {|t| {id: t.id, name: t.name }} + @course.tags.map {|t| {id: t.id, name: t.name }}}
       format.html
     end
+
   end
   
   def add_question
@@ -112,13 +114,25 @@ class Assessment::QuestionsController < ApplicationController
 
       if questions.count > 0
         #Add questions in the assessment already to filter criteria
-        questions = questions + @assessment.questions
+        questions = questions - @assessment.questions
         @questions = questions.uniq
       else
-        @questions = assessment_based_questions
+        @questions = assessment_based_questions - @assessment.questions
       end
     else
       @questions = []
+    end
+
+    paging_setup
+  end
+
+  def paging_setup
+    @qn_paging = @course.paging_pref('Questions')
+    @qn_paging_index_offset = 0;
+    if @qn_paging.display?
+      pageNum = (params.has_key?(:page) && (params[:page] =~ /^\d+$/)) ? params[:page].to_i : 1
+      @questions = Kaminari.paginate_array(@questions).page(pageNum).per(@qn_paging.prefer_value.to_i)
+      @qn_paging_index_offset = @qn_paging.prefer_value.to_i * (pageNum-1)
     end
   end
 

@@ -2,7 +2,7 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index]
+  before_filter :load_general_course_data, only: [:index, :concept_questions]
   def index   
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
@@ -49,6 +49,10 @@ class TopicconceptsController < ApplicationController
     end
   end
   
+  def concept_questions
+    @meow = "cats"
+  end
+
   def get_topic_tree(parent ,included_topicconcepts)
     included_topicconcepts.each do |itc|      
       @topics_concepts_with_info << {

@@ -261,6 +261,41 @@ class ApplicationController < ActionController::Base
     [url, icon]
   end
 
+  def get_url(item)
+    url = main_app.course_path(@course)
+    case item
+      when 'announcements'
+        url = main_app.course_announcements_path(@course)
+      when 'missions'
+        url = main_app.course_assessment_missions_url(@course)
+      when 'trainings'
+        url = main_app.course_assessment_trainings_url(@course)
+      when 'submissions'
+        url = main_app.submissions_course_assessment_missions_path(@course)
+      when 'achievements'
+        url = main_app.course_achievements_url(@course)
+      when 'leaderboard'
+        url =  main_app.course_leaderboards_url(@course)
+      when 'students'
+        url = main_app.course_students_url(@course)
+      when 'comments'
+        url = main_app.course_comments_url(@course)
+      when 'surveys'
+        url = main_app.course_surveys_path(@course)
+      when 'forums'
+        url = main_app.course_forums_url(@course)
+      when 'lesson_plan'
+        url = main_app.course_lesson_plan_path(@course)
+      when 'materials'
+        url = main_app.course_materials_path(@course)
+      when 'comics'
+        url = main_app.course_comics_path(@course)
+      when 'topicconcepts'
+        url = main_app.course_topicconcepts_path(@course)
+    end
+    url
+  end
+
   def not_found
     raise ActionController::RoutingError.new('Not Found')
   end

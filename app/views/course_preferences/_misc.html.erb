@@ -76,6 +76,22 @@
             </td>
           </tr>
       <% end %>
+      <tr>
+        <td>
+          Student login main page
+        </td>
+        <td>
+          Main page for students when logged in
+        </td>
+        <td>
+          <select name="preferences[<%= @url_pref.id %>][prefer_value]">
+            <% @url_items.each do |url_item| %>
+              <option <%= @url_pref.prefer_value == url_item.item ? "selected=\"selected\"":"" %> value="<%= url_item.item %>"><%= url_item.name %></option>
+            <% end %>
+          </select>
+        </td>
+      </tr>
+     
       </tbody>
     </table>
 

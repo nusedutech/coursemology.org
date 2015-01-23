@@ -6,7 +6,7 @@ class Assessment::ForwardPolicyLevel < ActiveRecord::Base
 
 	belongs_to :forward_policy, class_name: "Assessment::ForwardPolicy"
 	belongs_to :tag, class_name: "Tag", polymorphic: true
-	has_many	:forward_groups, class_name: "Assessment::ForwardGroup"
+	has_many	:forward_groups, class_name: "Assessment::ForwardGroup", dependent: :destroy, foreign_key: :forward_policy_level_id
 
   def tag_is_tag_type?
     self.tag_type == "Tag"

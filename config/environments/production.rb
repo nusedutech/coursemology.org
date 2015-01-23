@@ -9,7 +9,7 @@ Coursemology::Application.configure do
   config.action_controller.perform_caching = true
 
   # Disable Rails's static asset server (Apache or nginx will already do this)
-  config.serve_static_assets = false
+  config.serve_static_assets = true
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
@@ -70,42 +70,55 @@ Coursemology::Application.configure do
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   # Config mailer
-  config.action_mailer.default_url_options = { :host => 'coursemology.com' }
+  config.action_mailer.default_url_options = { :host => 'https://edutech.comp.nus.edu.sg' }
   # ActionMailer Config
   # Setup for production - deliveries, no errors raised
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = false
   config.action_mailer.default :charset => "utf-8"
-
-  ActionMailer::Base.smtp_settings = {
-      :address => "smtp.mandrillapp.com",
-      :port => 587,
-      :authentication => :plain,
-      :domain => ENV['MANDRILL_SMTP_USER'],
-      :user_name => ENV['MANDRILL_SMTP_USER'],
-      :password => ENV['MANDRILL_SMTP_PASSWORD'],
-  }
-
-  config.paperclip_defaults = {
-      preserve_files: true,
-      storage:        :s3,
-      s3_credentials: {
-          bucket:             ENV['AWS_BUCKET'],
-          access_key_id:      ENV['AWS_ACCESS_KEY_ID'],
-          secret_access_key:  ENV['AWS_SECRET_ACCESS_KEY']
-      }
-  }
+  
+  #Setting host mail MANDRILL
+  #ActionMailer::Base.smtp_settings = {
+  #    :address => "smtp.mandrillapp.com",
+  #    :port => 587,
+  #    :authentication => :plain,
+  #    :domain => ENV['MANDRILL_SMTP_USER'],
+  #    :user_name => ENV['MANDRILL_SMTP_USER'],
+  #    :password => ENV['MANDRILL_SMTP_PASSWORD'],
+  #}
+  
+	ActionMailer::Base.smtp_settings = {
+		:address => "smtp.gmail.com",
+		:port => 587,
+		:authentication => :plain,
+		:domain => ENV['GMAIL_SMTP_USER'],
+		:user_name => ENV['GMAIL_SMTP_USER'],
+		:password => ENV['GMAIL_SMTP_PASSWORD'],
+	}
+	
+  #Setting for paperclip with s3 - amazon cloud storage (Not used for local storage)
+  #config.paperclip_defaults = {
+  #    preserve_files: true,
+  #    storage:        :s3,
+  #    s3_credentials: {
+  #        bucket:             ENV['AWS_BUCKET'],
+  #        access_key_id:      ENV['AWS_ACCESS_KEY_ID'],
+  #        secret_access_key:  ENV['AWS_SECRET_ACCESS_KEY']
+  #    }
+  #}
   config.middleware.use ExceptionNotification::Rack,
                         :email => {
                             :email_prefix => "[ERROR]",
                             :sender_address => %{"Coursemology Exception" <exception.notifier@coursemology.com>},
-                            :exception_recipients => "coursemology@gmail.com"
+                            :exception_recipients => "nusedutech@gmail.com"
                         }
 
-  #ivle login config
+  #ivle login, NUS openID login
   config.middleware.use OmniAuth::Builder do
     provider :ivle, api_key: "mHy1mEcwwWvlHYqc9bNdO"
+    provider :open_id, :identifier => "https://openid.nus.edu.sg"
   end
   config.ivle_api_key = "mHy1mEcwwWvlHYqc9bNdO"
+
 end

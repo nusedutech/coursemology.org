@@ -116,7 +116,11 @@ class Assessment::Submission < ActiveRecord::Base
   end
 
   def done?
-    self.assessment.questions.finalised(self).count == self.assessment.questions.count
+    if self.assessment.as_assessment.is_a?(Assessment::Training) and self.assessment.as_assessment.test
+      self.assessment.questions.finalised_for_test(self).count == self.assessment.questions.count
+    else
+      self.assessment.questions.finalised(self).count == self.assessment.questions.count
+    end
   end
 
   def update_grade

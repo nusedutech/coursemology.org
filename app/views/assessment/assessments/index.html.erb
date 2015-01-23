@@ -2,11 +2,15 @@
   <%- if @summary[:module] == "Policy mission" %>
   	<%- model_name = "policy_mission" %>
   	<%- title =  "Regulated Trainings" %>
-		<%- singularTitle = "Regulated Training" %>
+	<%- singularTitle = "Regulated Training" %>
+  <%- elsif  @tab_id == "Tests" %>
+    <%- model_name = "Training" %>
+    <%- title =  "Tests" %>
+    <%- singularTitle = "Test" %>
   <%- else %>
   	<%- model_name = @summary[:module] %>
-  	<%- title =  @course.customized_title(model_name).pluralize %>
-		<%- singularTitle = @course.customized_title(model_name).singularize %>
+  	<%- title = @course.customized_title(model_name).pluralize %>
+	<%- singularTitle = @course.customized_title(model_name).singularize %>
   <%- end %>
   <div class="page-header">
     <h1><%=t '.title', :default => title %></h1>
@@ -14,7 +18,7 @@
 
   <% if model_name == 'Training' %>
       <%= render  partial: "assessment/trainings/tabs" %>
-      <%- new_url = new_course_assessment_training_path(@course) %>
+      <%- new_url = new_course_assessment_training_path(@course) + (@tab_id==="Tests" ? "?test=true" : "" ) %>
       <%- ast_path = lambda { |c, a| course_assessment_training_path(c, a) } %>
       <%- asts_path = course_assessment_trainings_path %>
   <% elsif model_name == 'Mission' %>
@@ -22,10 +26,10 @@
       <%- new_url = new_course_assessment_mission_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_mission_path(c, a) } %>
       <%- asts_path = course_assessment_missions_path %>
-	<% elsif model_name == "policy_mission" %>
+  <% elsif model_name == "policy_mission" %>
       <%= render  partial: "assessment/trainings/tabs" %>
-			<%- new_url = new_course_assessment_policy_mission_path(@course) %>
-			<%- ast_path = lambda { |c, a| course_assessment_policy_mission_path(c, a) } %>
+	  <%- new_url = new_course_assessment_policy_mission_path(@course) %>
+	  <%- ast_path = lambda { |c, a| course_assessment_policy_mission_path(c, a) } %>
       <%- asts_path = course_assessment_policy_missions_path %>
   <% end %>
   <% to_display = @summary[:columns].keys %>
@@ -57,7 +61,7 @@
           <% elsif key == 'title' %>
           25%
           <% end %>
-          "><%= val %></th>
+          "><%= key == 'title' ? (@tab_id == 'Tests' ? @tab_id : val) : val %></th>
       <% end %>
       <% if @summary[:module] == "Policy mission" %>
           <th width="10%">Latest Level Achieved</th>

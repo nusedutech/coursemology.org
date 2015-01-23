@@ -3,8 +3,7 @@ $(document).ready(function(){
     //initiate event for discussion
     set_show_hide_discussion();
 
-    //#new code for normal training, just add '#continue-btn' to ajax selection right below
-    $('#submit-btn, #continue-btn').click(function(evt){
+    $('#submit-btn, #test-next-btn').click(function(evt){
         $(this).addClass('disabled');
         var form = $("#training-step-form");
         var update_url = form.children("input[name=update_url]").val();
@@ -13,7 +12,7 @@ $(document).ready(function(){
         var choices = [];
         var aids = [];
         var step = form.children("input[name=step]").val();
-
+        var btn_id = $(this).attr('id');
         $.each(checkboxes, function(i, cb) {
             choices.push($(cb).val());
             if ($(cb).is(":checked")) {
@@ -33,9 +32,7 @@ $(document).ready(function(){
             // change submit to continue if the answer is correct
             $.get(update_url, data, function(resp) {
                 //#new code for normal training
-                $('#continue-btn').removeClass('disabled');
-                //old training, disable for normal training
-                //$("submit-btn").removeClass('disabled');
+                $('#submit-btn, #test-next-btn').removeClass('disabled');
 
                 $('#explanation .result').html(resp.result);
                 $('#explanation .reason').html(resp.explanation);
@@ -51,25 +48,22 @@ $(document).ready(function(){
                 } else {
                     $('#explanation').addClass('mcq-ans-incorrect');
                 }
-                window.location.href = $('#continue-btn').attr('href');
+                //To next question right after answering pre one
+                if(btn_id=='test-next-btn') {
+                    window.location.href = $('#test-next-btn').attr('href');
+                }
             }, 'json');
         }
-
-
-        //#new code for normal training
-        //return true;
-        //old training, disable for normal training
-        //return false; // prevent default
+        if(btn_id=='submit-btn') {
+            return false; // prevent default
+        }
     });
 
-    //old training, disable for normal training
-    /*
     $('#continue-btn').click(function(evt) {
         if ($(this).hasClass('disabled')) {
             evt.preventDefault();
         }
     });
-    */
 
     $("#pathrun").bind("click",submitCode);
     $(document).keydown(function(evt){

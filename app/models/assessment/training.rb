@@ -2,7 +2,7 @@ class Assessment::Training < ActiveRecord::Base
   acts_as_paranoid
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
-  attr_accessible :skippable
+  attr_accessible :skippable, :test
 
   #TODO, fix
   attr_accessible :exp, :bonus_exp

@@ -45,23 +45,23 @@
       <% end %>
 
       <div class="form-actions">
+        <% if !@assessment.as_assessment.test %>
+            <!--show buttons for normal training-->
+            <% if @summary[:current].class == Assessment::McqQuestion %>
+                <%= link_to "Submit", '#', :class => 'btn btn-primary', :id => 'submit-btn' %>
+            <% elsif @summary[:current].class == Assessment::CodingQuestion %>
+                <%= link_to "Run (ALT+R)", '#', class:'btn btn-danger', id:"pathrun" %>
 
-        <!--#old training, disable for normal training
-        <% if @summary[:current].class == Assessment::McqQuestion %>
-            <%= link_to "Submit", '#', :class => 'btn btn-primary', :id => 'submit-btn' %>
-        <% elsif @summary[:current].class == Assessment::CodingQuestion %>
-            <%= link_to "Run (ALT+R)", '#', class:'btn btn-danger', id:"pathrun" %>
-
-        <% end %>
-        <%= link_to "Continue",
-                    edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
-                    :id => 'continue-btn' %>
-        -->
-
-        <!--#new code for normal training-->
-        <%= link_to "Continue",
+            <% end %>
+            <%= link_to "Continue",
+                        edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
+                        :id => 'continue-btn' %>
+        <% else %>
+            <!--show button for test-->
+            <%= link_to "Next",
                     edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn btn-primary',
-                    :id => 'continue-btn' %>
+                    :id => 'test-next-btn' %>
+        <% end %>
       </div>
     </form>
 

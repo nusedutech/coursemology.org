@@ -31,12 +31,14 @@ class Assessment::AssessmentsController < ApplicationController
       elsif @tabs.length > 0
         @tab_id = @tabs.first.id.to_s
         @assessments= @tabs.first.assessments
-      else
-        @tab_id='Trainings'
-      end
-
-      if assessment_type == 'policy_mission'
+      elsif assessment_type == 'policy_mission'
         @tab_id='Policy Missions'
+      elsif params['_tab'] and params['_tab'] == 'Tests'
+        @tab_id = params['_tab']
+        @assessments = @assessments.test
+      else
+        @tab_id = 'Trainings'
+        @assessments = @assessments.retry_training
       end
     end
     @assessments = @assessments.includes(:as_assessment)

@@ -1,6 +1,6 @@
 class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsController
 
-	before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt, :edit]
+	before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt, :edit, :destroy]
   before_filter :no_showing_before_submission, only: [:show, :show_export_excel]
   before_filter :no_update_after_submission, only: [:edit, :update]
 
@@ -312,4 +312,12 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
     end
   end
 
+  def destroy
+    @policy_mission = @assessment.specific
+    @submission.destroy
+    respond_to do |format|
+			format.html { redirect_to submissions_course_assessment_policy_missions_path(@course),
+                    notice: "Submission by " + @submission.std_course.name + " has been deleted."}
+	  end
+  end
 end

@@ -29,6 +29,9 @@
 		</div>
 
 		<hr/>
+
+
+<% if !@policy_mission.published %>
 		<h4>Forward Tags</h4>
 		<hr/>
 		<div class = "multi-field-wrapper">
@@ -88,6 +91,11 @@
 			<hr/>
 			<a class="btn add-fields">Add new tag</a>
 		</div>
+<% else %>
+  <h4>Cannot edit forward tags as assessment is already published.</h4>
+	<hr/>
+<% end %>
+
 		<hr/>
 
     <%= f.button :form_submit, value: "Update Regulated Training",

@@ -116,10 +116,14 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 
 	def update
 		@assessment = @policy_mission.assessment
-    respond_to do |format|     
+    respond_to do |format|
+      previouslyPublished = @policy_mission.published       
 		  invalidPublish = false
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
-				if @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
+				if !previouslyPublished and @policy_mission.progression_policy.isForwardPolicy? and params.has_key?(:forward)
+          #Remove all submissions - This is a reset to allow students to reattempt new forward policy format
+          @assessment.submissions.destroy_all
+
 					forward_policy = @policy_mission.progression_policy.getForwardPolicy
 					forward_policy.overall_wrong_threshold = params[:forward][:totalWrong]
 					forward_policy.deleteAllPolicyLevels

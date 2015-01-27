@@ -143,6 +143,8 @@ class CourseAbility  < Ability
       cannot :set_lock, ForumTopic
       cannot :set_hidden, ForumTopic
 
+      cannot :destroy, [Assessment::Submission]
+
       can :read, [LessonPlanEntry]
       can :read, [LessonPlanMilestone], is_publish: true
       can :submission, LessonPlanEntry
@@ -150,7 +152,7 @@ class CourseAbility  < Ability
 
       can :read, Assessment, published: true
       can :access_denied, Assessment
-      can :read, [Assessment::Mission, Assessment::Training], assessment: {published: true}
+      can :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission], assessment: {published: true}
       can :read, Survey, publish: true
 
       # can :read, [Mcq, Question, CodingQuestion]

@@ -41,7 +41,7 @@
             <td><%= @summary[:forwardContent][:wrongCount] %></td>
           </tr>
           <tr>
-            <td><strong>Submitted at:</strong> </td>
+            <td><strong><%= @submission.submitted? ? "Submitted at:" : "Last updated at:" %></strong> </td>
             <td><%= time_ago_in_words(@submission.updated_at) %> ago</td>
           </tr>
         </table>

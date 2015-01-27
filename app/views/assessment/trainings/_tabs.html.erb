@@ -22,6 +22,12 @@
       <li class="<%= "active" if @tab_id == 'Trainings' %>">
         <a href="<%=  course_assessment_trainings_path(@course) %>?_tab=Trainings"><h4><%= @course.customized_title_by_model(Assessment::Training).pluralize %></h4></a>
       </li>
+      <li class="<%= "active" if current_page? :course_assessment_policy_missions %>">
+        <a href="<%= course_assessment_policy_missions_path(@course) %>" ><h4>Regulated Trainings</h4></a>
+      </li>
+      <li class="<%= "active" if @tab_id == 'Tests' %>">
+        <a href="<%= course_assessment_trainings_path(@course, _tab: 'Tests') %>" ><h4>Tests</h4></a>
+      </li>
   <% else %>
       <% @tabs.each do |tab| %>
           <li class="<%= "active" if @tab_id == tab.id.to_s %>">
@@ -29,9 +35,6 @@
           </li>
       <% end %>
   <% end %>
-	<li class="<%= "active" if current_page? :course_assessment_policy_missions %>">
-    <a href="<%= course_assessment_policy_missions_path(@course) %>" ><h4>Regulated Trainings</h4></a>
-  </li>
   <% if can? :bulk_update, Assessment %>
       <li class="<%= "active" if current_page? :overview_course_assessment_trainings %>">
         <a href="<%= overview_course_assessment_trainings_path %>" ><h4>Overview</h4></a>

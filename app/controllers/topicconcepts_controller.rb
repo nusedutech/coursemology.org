@@ -99,7 +99,7 @@ class TopicconceptsController < ApplicationController
 
   def topic_concept_data_rename
     tc = Topicconcept.find params[:id]
-    tc.name = params[:name]
+    tc.name = params[:name].empty? ? "undefined" : params[:name]
     respond_to do |format|
       if tc.save
         format.json { render :json => { :result => '1'}}

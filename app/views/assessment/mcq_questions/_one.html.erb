@@ -5,7 +5,7 @@
   <% q.options.each do |opt| %>
     <li class="checkbox-text">
     <input type="checkbox" disabled <%= "checked" if opt.correct? %> />
-    <span><%= style_format opt.text %></span>
+    <span><%= style_format(h(opt.text)) %></span>
   </li>
 <% end %>
 </ul>

@@ -164,6 +164,15 @@ class Assessment::Question < ActiveRecord::Base
     end
   end
 
+  def existingAssessments
+    if self and self.id
+      Assessment.joins("LEFT JOIN  question_assessments ON question_assessments.assessment_id = assessments.id")
+      .where("question_assessments.question_id = ?", self.id).uniq
+    else
+      []
+    end
+  end
+
   #proxy methods
   def self.assessments
     Assessment.joins("LEFT JOIN  question_assessments ON question_assessments.assessment_id = assessments.id")

@@ -35,8 +35,7 @@
 			<% end %>
 	 	</td>
     <td>
-      <% q.question_assessments.each do |qaLink| %>
-        <% curAssessment = qaLink.assessment %>
+      <% q.existingAssessments.each do |curAssessment| %>
         <% if curAssessment.is_mission? %>
           <%= link_to course_assessment_mission_path(@course, curAssessment.specific) do %>
 				    <span class="label label-active" style="">Mission: <%= curAssessment.title %></span>

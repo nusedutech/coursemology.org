@@ -3,7 +3,7 @@ class Forums::ForumsController < ApplicationController
   before_filter :load_general_course_data, except: [:destroy, :mark_read, :mark_all_read, :next_unread, :next_unanswered, :subscribe, :unsubscribe, :toggle_lock]
 
   before_filter :load_forum, except: [:index, :mark_all_read, :next_unread, :next_unanswered]
-  load_and_authorize_resource :forum, except: [:index, :mark_all_read, :next_unread, :next_unanswered]
+  load_and_authorize_resource :forum, except: [:index, :mark_read, :mark_all_read, :next_unread, :next_unanswered]
 
   def index
     @forums = @course.forums.accessible_by(current_ability)

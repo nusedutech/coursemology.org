@@ -828,7 +828,7 @@ if PreferableItem.count == 73
 	PreferableItem.create! item:            "Paging",
                          item_type:       "Questions",
                          name:            "Question bank (related pages)",
-                         default_value:   "10",
+                         default_value:   "20",
                          description:     "Number of questions to display per page",
                          default_display: true
 end

@@ -75,7 +75,11 @@
           </h2>
       <% end %>
       <% if (can? :manage, LessonPlanEntry) %>
-          <h3><%= entry.location %></h3>
+          <%if entry.entry_type === 3%>
+              <a href="<%= entry.location %>"><%= entry.location %></a>
+          <% else %>
+              <h3><%= entry.location %></h3>
+          <% end %>
           <h4>
             <% if entry.start_at %>
               <span class="icon-calendar"></span>

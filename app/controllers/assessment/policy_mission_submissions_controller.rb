@@ -123,6 +123,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 			@summary = {}
 			current = forwardGroup.getTopQuestion @assessment
       #Forward group might not been initialised due to a bug, reinitialise it
+      #This also helps with resetting unintentional changes when questions are removed
       if current.nil?
         sortedPolicyLevels = forwardPolicy.getSortedPolicyLevels
         forwardGroup.forward_policy_level_id = sortedPolicyLevels[0].id

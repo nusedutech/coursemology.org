@@ -58,8 +58,14 @@ class Assessment::ForwardGroup < ActiveRecord::Base
 		allAnswers = []
 		if self.completed_answers.present?
 			allAnswerIds = CSV.parse_line(self.completed_answers)
+      answer = nil
 			allAnswerIds.each do |answerId|
-				allAnswers << Assessment::McqAnswer.find(answerId)
+        answer = Assessment::McqAnswer.find_by_id(answerId)
+        #Check to prevent invalid answer and question links
+        #this helps to circumvent bugs surfaced from multi inheritance gem
+        if !answer.nil? and !answer.question.nil?
+					allAnswers << answer
+        end
 			end
 		end
 

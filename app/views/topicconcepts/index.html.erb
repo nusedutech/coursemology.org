@@ -328,7 +328,7 @@
 	  
 	  d3.selectAll("g.node.enter").on('click', function(d, i){
 	  	  if(selected_node !=null && d==selected_node.id){
-		  	window.location.replace("<%= course_path(@course)%>" + "/topicconcepts/"+ d +"/master");
+		  	//window.location.replace("<%= course_path(@course)%>" + "/topicconcepts/"+ d +"/master");
 		  }
 	  	  $("#div_tree").jstree(true).deselect_node(selected_node, true);
 		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);		  
@@ -364,7 +364,7 @@
 
 	  d3.selectAll("g.node.enter").on('click', function(d, i){
 	  	  if(selected_node !=null && d==selected_node.id){
-		  	window.location.replace("<%= course_path(@course)%>" + "/topicconcepts/"+ d +"/master");
+		  	//window.location.replace("<%= course_path(@course)%>" + "/topicconcepts/"+ d +"/master");
 		  }
 	  	  $("#div_tree").jstree(true).deselect_node(selected_node, true);
 		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);

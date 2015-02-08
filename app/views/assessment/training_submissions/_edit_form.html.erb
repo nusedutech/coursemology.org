@@ -20,6 +20,9 @@
           <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-disabled'}" %>
       <% end %>
   <% end %>
+  <% if @assessment.as_assessment.test and @summary[:current] %>
+    <div id="div-timer" class="countdown-right countdown-15 countdown-me"></div>
+  <% end %>
 </div>
 <hr/>
 
@@ -78,3 +81,15 @@
         </div>
     <% end %>
 <% end %>
+
+<script>
+    $(document).ready(function() {
+        $("#div-timer").countdown({until: +<%= @summary[:remain_time] %>, format: 'MS', onExpiry: time_up});
+        function time_up() {
+            $("#test-next-btn").text("Time up! Close Test");
+            $( "#test-next-btn").unbind( "click" );
+            //alert('Time up! Please close Test');
+        }
+    });
+
+</script>

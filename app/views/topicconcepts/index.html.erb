@@ -334,6 +334,12 @@
 		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);		  
 		  
 	  });
+
+    d3.selectAll("g.node")
+      .attr("title", get_topic_info)
+      .each(function(d, i){
+        $(this).tipsy({gravity: "w", opacity: 0.7, html: true});
+    });
 	}
 	
 	function generate_dependency_map(node,json_required_data){
@@ -369,7 +375,13 @@
 	  	  $("#div_tree").jstree(true).deselect_node(selected_node, true);
 		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);
 		  
-	  });  
+	  });
+
+    d3.selectAll("g.node")
+      .attr("title", get_topic_info)
+      .each(function(d, i){
+        $(this).tipsy({gravity: "w", opacity: 0.7, html: true});
+    });  
 	}
 	
 	//function redraw() {;
@@ -528,5 +540,21 @@
 	  return result;
 	}
 		
-	
+	function get_topic_info(concept_id, index){
+    var result;
+		$.ajax({
+	    type: "POST",
+	    dataType: "json",
+	    async: false,
+	    url: "<%= course_path(@course)%>" + "/topicconcepts/"+concept_id+"/get_topicconcept_rated_data",
+	    success: function(json) {
+	    	result = json; 
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+
+	  return "<p>"+result.right+" / "+result.total+"</p>";
+  }
 </script>

@@ -277,4 +277,18 @@ class TopicconceptsController < ApplicationController
     end    
   end
   
+  def get_topicconcept_rated_data
+    result = {}
+    if @topicconcept.is_concept?
+      result[:right] = "0";
+      result[:total] = "1";
+    else
+      result[:right] = "nil";
+      result[:total] = "nil";
+    end
+    
+    respond_to do |format|
+      format.json { render json: result}
+    end 
+  end
 end

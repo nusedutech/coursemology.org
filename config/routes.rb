@@ -234,6 +234,7 @@ Coursemology::Application.routes.draw do
     
     resources :topicconcepts do
         post 'get_topicconcept_data', :on => :collection
+        post 'get_topicconcept_rated_data', :on => :member
         post 'topic_concept_data_create', :on => :collection
         post 'topic_concept_data_rename', :on => :collection
         post 'topic_concept_data_delete', :on => :collection

@@ -173,7 +173,12 @@ class Assessment::Question < ActiveRecord::Base
     end
   end
 
-  #proxy methods
+  def relatedAnswers
+    if self and self.id
+      Assessment::Answer.where(question_id: self.id)
+    end
+  end
+
   def self.assessments
     Assessment.joins("LEFT JOIN  question_assessments ON question_assessments.assessment_id = assessments.id")
     .where("question_assessments.question_id IN (?)", self.all).uniq

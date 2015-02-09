@@ -26,7 +26,9 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
 
     if @training.test #test - one kind of training - do one question once
       #process next question
-      if ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @assessment.duration * 60
+      if @assessment.duration == 0
+        step = next_undone
+      elsif ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @assessment.duration * 60
         step = next_undone
         if session[:attempt_flag] and @submission.answers.count == 0
           remain_time = @assessment.duration * 60
@@ -87,7 +89,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
   def submit_mcq(question)
     #check test (kind of training) submit for the same question
     if @submission.assessment.as_assessment.test and
-      ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @submission.assessment.as_assessment.duration * 60 and
+      (@submission.assessment.as_assessment.duration == 0  or ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @submission.assessment.as_assessment.duration * 60) and
       Assessment::Answer.where({std_course_id: curr_user_course.id,
                                                   question_id: question.question.id,
                                                   submission_id: @submission.id}).first
@@ -96,7 +98,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
          explanation: "Answered"
         }
     # check test (kind of training) time up
-    elsif @submission.assessment.as_assessment.test and
+    elsif @submission.assessment.as_assessment.test and @submission.assessment.as_assessment.duration != 0 and
         ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i >= @submission.assessment.as_assessment.duration * 60
       if !@submission.graded?
         @submission.update_grade

@@ -111,7 +111,7 @@ Coursemology::Application.configure do
                         :email => {
                             :email_prefix => "[ERROR]",
                             :sender_address => %{"Coursemology Exception" <exception.notifier@coursemology.com>},
-                            :exception_recipients => "nusedutech@gmail.com"
+                            :exception_recipients => "eduthsoc@comp.nus.edu.sg"
                         }
 
   #ivle login, NUS openID login

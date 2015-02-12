@@ -92,7 +92,7 @@ Coursemology::Application.configure do
 		:address => "smtp.gmail.com",
 		:port => 587,
 		:authentication => :plain,
-		:domain => ENV['COMP_SMTP_USER'],
+		:domain => ENV['GMAIL_SMTP_USER'],
 		:user_name => ENV['GMAIL_SMTP_USER'],
 		:password => ENV['GMAIL_SMTP_PASSWORD'],
 	}

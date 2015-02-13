@@ -155,7 +155,13 @@
                     .success(function (data) {
                         $.each(data.Results, function (ind, val) {
                             $.each(val.Files, function (inf, fi) {
-                                $('#link_list').append('<option value="' + fi.FileName + '">' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                if(fi.MP4 != null) {
+                                    $('#link_list').append('<option value="' + fi.MP4 + '">' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                }else if(fi.MP4 == null && fi.FileName.indexOf("http://") >= 0 && fi.FileName.indexOf(".mp4") >= 0){
+                                    $('#link_list').append('<option value="' + fi.FileName + '">' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                }else if(fi.MP4 == null && fi.FileName.indexOf("http://") < 0 && fi.BankCatID != null){
+                                    $('#link_list').append('<option value="http://ivle.nus.edu.sg/media/media_download.aspx?ChannelID=' + val.ID + '&MediaItemID=' + fi.ID + '&bankCatID='+ fi.BankCatID +'&fileName=' + fi.FileName + '">' + val.Title + ' - ' + fi.FileTitle + '</option>');
+                                }
                             });
                         });
                     });

@@ -200,6 +200,14 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     eval_summary
   end
 
+  def destroy
+    @submission.destroy
+    respond_to do |format|
+      format.html { redirect_to submissions_course_assessment_trainings_path(@course),
+                                notice: "Submission by " + @submission.std_course.name + " has been deleted."}
+    end
+  end
+
   private
   def authorize
     if curr_user_course.is_staff?

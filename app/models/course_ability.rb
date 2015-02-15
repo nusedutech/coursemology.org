@@ -162,6 +162,7 @@ class CourseAbility  < Ability
       
       
       can :read, Topicconcept
+      can :get_topicconcept_rated_data, Topicconcept
       can :get_topicconcept_data, Topicconcept
       can :master, Topicconcept
       can :submit_answer, Topicconcept

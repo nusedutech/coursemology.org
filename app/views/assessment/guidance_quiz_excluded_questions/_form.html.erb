@@ -1,0 +1,26 @@
+<%= form_tag exclude_questions_course_assessment_guidance_quiz_excluded_questions_path(course), :method => 'get', class: "form-inline" do %>
+	<table class="table-search">
+        <tr>
+            <td><label>Search with:</label></td>
+            <td><%= text_field_tag 'search_string',nil, class: 'question_search' %></td>
+        </tr>
+        <tr>
+            <td><label>Filter by Concept:</label></td>
+            <td><div class="tag" style="display: inline; width: 350px">
+            <input type="tag" name="tags"
+                   allowFreeTagging="false"
+                   url="<%= get_tags_course_assessment_guidance_quiz_excluded_questions_path(course) %>"
+                   value="<%= !@summary.nil? ? @summary[:selected_tags].map {|s| {id: 0, name:s}}.to_json : '[]'%>">
+            </div></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><button type="submit" class="btn">Search</button></td>
+        </tr></table>
+<% end %>   
+
+<%= simple_form_for @course, url: update_questions_course_assessment_guidance_quiz_excluded_questions_path(course) do |f| %>
+	<%= render partial: "fields", locals: {fi: f}%>
+<% end %>
+
+ 

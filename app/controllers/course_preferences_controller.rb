@@ -41,6 +41,9 @@ class CoursePreferencesController < ApplicationController
       when 'sidebar'
         @tab = 'Sidebar'
         @ranking = @course.student_sidebar_ranking
+      when 'topicconcept'
+        @tab = 'TopicconceptPreference'
+        @enable = Assessment::GuidanceQuiz.is_enabled?(@course)
       else
         @tab = 'CoursePreference'
         atts = []

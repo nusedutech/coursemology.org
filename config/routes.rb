@@ -159,6 +159,14 @@ Coursemology::Application.routes.draw do
       end
     end
     
+    resources :assessment_guidance_quiz_excluded_questions, path: :guidance_quiz_excluded_questions, controller: :guidance_quiz_excluded_questions , module: :assessment do
+      collection do
+        get :exclude_questions, to: 'guidance_quiz_excluded_questions#exclude_questions'
+        get :get_tags, to: 'guidance_quiz_excluded_questions#get_tags'
+        put :update_questions, to: 'guidance_quiz_excluded_questions#update_questions'
+      end
+    end
+
     resources :assessment_missions, path: 'missions', controller: :missions, module: :assessment do
       collection do
         get :index, to: 'assessments#index', type: 'mission'
@@ -178,6 +186,15 @@ Coursemology::Application.routes.draw do
 			end
       member do
         put 'update_questions' => 'policy_missions#update_questions'
+      end
+		end
+
+    resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
+			collection do
+        post :set_enabled, to: 'guidance_quizzes#set_enabled'
+			end
+      member do
+        put 'exclude_questions', to: 'guidance_quizzes#exclude_questions'
       end
 		end
 
@@ -244,8 +261,7 @@ Coursemology::Application.routes.draw do
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'master'
         post 'submit_answer', :on => :collection
-        get 'ivleapi'
-        get 'concept_questions', :on => :collection        
+        get 'ivleapi'       
     end
     
     resources :achievements

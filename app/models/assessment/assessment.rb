@@ -140,6 +140,10 @@ class Assessment < ActiveRecord::Base
 		as_assessment_type == Assessment::PolicyMission.name
 	end
 
+  def is_guidance_quiz?
+		as_assessment_type == Assessment::GuidanceQuiz.name
+	end
+
 	def getPolicyMission
 		Assessment::PolicyMission.find(self.as_assessment_id)
 	end
@@ -295,6 +299,10 @@ class Assessment < ActiveRecord::Base
 
   #callbacks
   def update_opening_tasks
+    if is_guidance_quiz?
+      return
+    end
+
     #1. pending actions
     #2. auto submission
     #3. email notifications
@@ -310,6 +318,10 @@ class Assessment < ActiveRecord::Base
   end
 
   def update_closing_tasks
+    if is_guidance_quiz?
+      return
+    end
+
     #1. remainder
     type = :mission_due
     if (is_mission? || is_policy_mission?) and self.close_at >= Time.now and course.email_notify_enabled?(type.to_s)
@@ -325,6 +337,10 @@ class Assessment < ActiveRecord::Base
   end
 
   def create_or_destroy_tasks
+    if is_guidance_quiz?
+      return
+    end
+
     if published?
       update_opening_tasks
       update_closing_tasks

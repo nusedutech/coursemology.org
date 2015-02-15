@@ -277,3 +277,31 @@ g.node {
     position: relative;
     z-index: 10;
 }
+
+input.btnmargined {
+    margin: 2px;
+}
+
+.tipsy .name {
+    font-size: 25px;
+    font-weight: bold;
+    color: #60B1FC;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.tipsy .subtop {
+    font-size: 15px;
+    color: #AAF;
+    text-align: right;
+}
+
+.tipsy .sub {
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12px;
+    color: #FFF;
+    text-align: right;
+}

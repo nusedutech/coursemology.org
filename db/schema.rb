@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150121130035) do
+ActiveRecord::Schema.define(:version => 20150215155601) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -246,6 +246,44 @@ ActiveRecord::Schema.define(:version => 20150121130035) do
     t.datetime "deleted_at"
     t.datetime "created_at",                             :null => false
     t.datetime "updated_at",                             :null => false
+  end
+
+  create_table "assessment_guidance_concept_criteria_correct_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "assessment_guidance_concept_criterias", :force => true do |t|
+    t.integer  "assessment_guidance_concept_option_id"
+    t.integer  "guidance_concept_criteria_id"
+    t.string   "guidance_concept_criteria_type"
+    t.datetime "deleted_at"
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
+  end
+
+  create_table "assessment_guidance_concept_options", :force => true do |t|
+    t.boolean  "enabled",         :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+    t.integer  "concept_edge_id"
+  end
+
+  create_table "assessment_guidance_quiz_excluded_questions", :force => true do |t|
+    t.boolean  "excluded"
+    t.datetime "deleted_at"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+    t.integer  "question_id"
+  end
+
+  create_table "assessment_guidance_quizzes", :force => true do |t|
+    t.datetime "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "assessment_mcq_answers", :force => true do |t|

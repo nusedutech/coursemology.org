@@ -36,7 +36,8 @@
 				<% if can? :manage, Topicconcept%>		
 				<div id="div_edit_dpd" style="display: none;">
 					<div id="div_action">
-						<input style="float: right" type="button" id="btn_show_edit_required_concepts" class="btn btn-success" value="Edit Required Concepts" onclick="show_edit_required_concepts()"/>
+						<input style="float: right" type="button" id="btn_show_edit_required_concepts" class="btn btn-success btnmargined" value="Edit Required Concepts" onclick="show_edit_required_concepts()"/>
+            <input style="float: right" type="button" id="btn_show_edit_concept_criterias" class="btn btnmargined" value="Edit Concept Progress Criteria" onclick="show_edit_required_concepts()"/>
 					</div>
 					<div id="div_edit" style="display: none">
 						<div>
@@ -53,7 +54,6 @@
 		</tr>
 	</tbody>
 </table>
-
 <script>
 	
 
@@ -541,6 +541,7 @@
 	}
 		
 	function get_topic_info(concept_id, index){
+
     var result;
 		$.ajax({
 	    type: "POST",
@@ -555,6 +556,10 @@
     	}
 	  });
 
-	  return "<p>"+result.right+" / "+result.total+"</p>";
+	  return "<p class='name'>"+result.name+"</p>" + 
+           "<div><p class='subtop'> Raw : <em class='sub'>"+result.raw_right+" / "+result.raw_total+"</em></p></div>" + 
+           "<div><p class='subtop'> Latest : <em class='sub'>"+result.latest_right+" / "+result.latest_total+"</em></p></div>" + 
+           "<div><p class='subtop'> Optimistic : <em class='sub'>"+result.optimistic_right+" / "+result.optimistic_total+"</em></p></div>" + 
+           "<div><p class='subtop'> Pessimistic : <em class='sub'>"+result.pessimistic_right+" / "+result.pessimistic_total+"</em></p></div>";
   }
 </script>

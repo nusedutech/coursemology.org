@@ -1,0 +1,68 @@
+
+<% if @questions.count > 0 %>
+<table class="table assignments missions-list-table ver-ali-top">
+    <thead>
+	    <tr>
+        <th width="3%"></th>
+	    	<th width="45%">Question</th>
+	    	<th width="15%">Tags</th>
+	    	<th width="7%">Level</th>
+        <th width="20%">Featured in</th>
+	    	<th width="10%">Exclude <input type="checkbox" class="selectall_question_option" ></th>
+		</tr>
+    </thead>
+
+    <tbody class="table-hover">
+    	<% @questions.each_with_index do |q, index| %>
+	      <%= render partial: "single_question_field", locals: {q: q, index:index+@qn_paging_index_offset, status: false} %>
+	    <% end %>
+    </tbody>
+</table>
+
+<div style="display:block; margin-left: auto; margin-right:0;">
+	<% if @qn_paging.display? %>
+		<%= paginate @questions %>
+	<% end %>
+</div>
+<% end %>
+
+<% if @excluded_questions.count > 0 %>
+<table class="table assignments missions-list-table ver-ali-top">
+	  <thead>
+		  <tr>
+	      <th width="3%"></th>
+		  	<th width="45%">Selected Questions</th>
+		  	<th width="15%">Tags</th>
+		  	<th width="7%"><%= sortable 'level', course_assessment_questions_path, @phantom ? 'phantom=true' : 'phantom=false' %></th>
+        <th width="20%">Featured in</th>
+		  	<th width="10%">Exclude <input type="checkbox" class="selectall_question_option" ></th>
+		</tr>
+	  </thead>
+	  <tbody class="table-hover">
+	    <% @excluded_questions.each_with_index do |q, index| %>
+		    <%= render partial: "single_question_field", locals: {q: q, index:index, status: true} %>
+		  <% end %>
+	  </tbody>
+</table>
+<% end %>
+
+<div class="form-action">
+    <%= fi.submit "Update", :class => 'btn btn-primary form-submit' %>
+    <%= link_to 'Cancel', :back, class: 'btn' %>
+</div>
+
+<script>
+    $('a.show-more').click(function() {
+        if($(this).text()==='Show More') {
+            $(this).prev().addClass("show-max-height");
+            $(this).text('Hide');
+        }else{
+            $(this).prev().removeClass("show-max-height");
+            $(this).text('Show More');
+        }
+    });
+
+    $('input.selectall_question_option').click(function() {
+        $(this).closest('table').find('input.question_option').prop('checked', $(this).prop('checked'));
+    });
+</script>

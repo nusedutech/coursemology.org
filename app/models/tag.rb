@@ -112,7 +112,7 @@ class Tag < ActiveRecord::Base
   def all_raw_correct_answer_attempts user_course
     answers = []
     self.questions.find_each do |question|
-      answers = answers + question.answers.where(std_course_id: 52, correct: 1)
+      answers = answers + question.answers.where(std_course_id: user_course, correct: 1)
     end
     answers
   end
@@ -120,7 +120,7 @@ class Tag < ActiveRecord::Base
   def all_raw_wrong_answer_attempts user_course
     answers = []
     self.questions.find_each do |question|
-      answers = answers + question.answers.where(std_course_id: 52, correct: 0)
+      answers = answers + question.answers.where(std_course_id: user_course, correct: 0)
     end
     answers
   end
@@ -129,7 +129,7 @@ class Tag < ActiveRecord::Base
     correctAnswers = []
     wrongAnswers = []
     self.questions.find_each do |question|
-      answers = question.answers.where(std_course_id: 52).order('created_at DESC').limit(1)
+      answers = question.answers.where(std_course_id: user_course).order('created_at DESC').limit(1)
       if answers.size == 1 and answers[0].correct
         correctAnswers << answers[0]
       elsif answers.size == 1 and !answers[0].correct
@@ -147,11 +147,11 @@ class Tag < ActiveRecord::Base
     correctAnswers = []
     wrongAnswers = []
     self.questions.find_each do |question|
-      answers = question.answers.where(std_course_id: 52, correct: 1).limit(1)
+      answers = question.answers.where(std_course_id: user_course, correct: 1).limit(1)
       if answers.size == 1
         correctAnswers << answers[0]
       else
-        answers = question.answers.where(std_course_id: 52, correct: 0).limit(1)
+        answers = question.answers.where(std_course_id: user_course, correct: 0).limit(1)
         if answers.size == 1
           wrongAnswers << answers[0]
         end
@@ -168,11 +168,11 @@ class Tag < ActiveRecord::Base
     correctAnswers = []
     wrongAnswers = []
     self.questions.find_each do |question|
-      answers = question.answers.where(std_course_id: 52, correct: 0).limit(1)
+      answers = question.answers.where(std_course_id: user_course, correct: 0).limit(1)
       if answers.size == 1
         wrongAnswers << answers[0]
       else
-        answers = question.answers.where(std_course_id: 52, correct: 1).limit(1)
+        answers = question.answers.where(std_course_id: user_course, correct: 1).limit(1)
         if answers.size == 1
           correctAnswers << answers[0]
         end

@@ -2,7 +2,7 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions]
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data]
   def index   
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
@@ -279,12 +279,28 @@ class TopicconceptsController < ApplicationController
   
   def get_topicconcept_rated_data
     result = {}
+    result[:name] = @topicconcept.name;
     if @topicconcept.is_concept?
-      result[:right] = "0";
-      result[:total] = "1";
+      result[:raw_right] = @topicconcept.all_raw_correct_answer_attempts(curr_user_course.id).size
+      result[:raw_total] = @topicconcept.all_raw_wrong_answer_attempts(curr_user_course.id).size
+      latest_answers = @topicconcept.all_latest_answer_attempts(curr_user_course.id)
+      result[:latest_right] = latest_answers[:correct].size
+      result[:latest_total] = latest_answers[:correct].size + latest_answers[:wrong].size
+      optimistic_answers = @topicconcept.all_optimistic_answer_attempts(curr_user_course.id)
+      result[:optimistic_right] = optimistic_answers[:correct].size
+      result[:optimistic_total] = optimistic_answers[:correct].size + optimistic_answers[:wrong].size
+      pessimistic_answers = @topicconcept.all_pessimistic_answer_attempts(curr_user_course.id)
+      result[:pessimistic_right] = pessimistic_answers[:correct].size
+      result[:pessimistic_total] = pessimistic_answers[:correct].size + pessimistic_answers[:wrong].size
     else
-      result[:right] = "nil";
-      result[:total] = "nil";
+      result[:raw_right] = "nil"
+      result[:raw_total] = "nil"
+      result[:latest_right] = "nil"
+      result[:latest_total] = "nil"
+      result[:optimistic_right] = "nil"
+      result[:optimistic_total] = "nil"
+      result[:pessimistic_right] = "nil"
+      result[:pessimistic_total] = "nil"
     end
     
     respond_to do |format|

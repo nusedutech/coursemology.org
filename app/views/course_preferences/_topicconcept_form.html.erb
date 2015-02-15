@@ -1,0 +1,10 @@
+<h3>Enable Guidance Quiz (Training):</h3>
+<p>Only enable if you want the students to access the training. The excluded questions can be set here.</p>
+<div class="info-block checkbox-text">
+  <input type="checkbox"
+         name="guidance_quiz_enable"
+         <%= "checked" if @enable %>> Enabled
+  <input type="hidden"
+         value="<%= set_enabled_course_assessment_guidance_quizzes_path(@course) %>">
+</div>
+

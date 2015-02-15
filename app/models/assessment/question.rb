@@ -29,6 +29,8 @@ class Assessment::Question < ActiveRecord::Base
   has_many :taggable_tags, as: :taggable, dependent: :destroy
   has_many :tags, through: :taggable_tags, source: :tag, source_type: "Tag"
   has_many :topicconcepts, through: :taggable_tags, source: :tag, source_type: "Topicconcept"
+
+  has_one :exclusion_status, class_name: Assessment::GuidanceQuizExcludedQuestion, dependent: :destroy
   
   before_update :clean_up_description, :if => :description_changed?
   after_update  :update_assessment_grade, if: :max_grade_changed?

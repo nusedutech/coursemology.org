@@ -14,7 +14,7 @@ class Assessment::GuidanceQuizExcludedQuestion < ActiveRecord::Base
     end
 
     exclusion_status.excluded = true
-    exclusion_status.save!
+    exclusion_status.save
   end
 
   def self.including(question)
@@ -23,6 +23,17 @@ class Assessment::GuidanceQuizExcludedQuestion < ActiveRecord::Base
       exclusion_status.excluded = false
       exclusion_status.save
     end
+  end
+
+  def self.is_excluded?(question)
+    exclusion_status = question.exclusion_status
+    result = true
+    if !exclusion_status.nil?
+      result = exclusion_status.excluded
+    else
+      result = true
+    end
+    result
   end
 
   def cur_including

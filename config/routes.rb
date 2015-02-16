@@ -192,10 +192,9 @@ Coursemology::Application.routes.draw do
     resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
 			collection do
         post :set_enabled, to: 'guidance_quizzes#set_enabled'
+        post :set_concept_relation, to: 'guidance_quizzes#set_concept_relation'
+        post :get_concept_relation, to: 'guidance_quizzes#get_concept_relation'
 			end
-      member do
-        put 'exclude_questions', to: 'guidance_quizzes#exclude_questions'
-      end
 		end
 
     resources :assessment_trainings, path: 'trainings', controller: :trainings, module: :assessment do
@@ -258,6 +257,7 @@ Coursemology::Application.routes.draw do
         post 'topic_concept_data_move', :on => :collection
         post 'topic_concept_data_dependency', :on => :collection
         post 'get_concepts_list', :on => :collection
+        post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'master'
         post 'submit_answer', :on => :collection

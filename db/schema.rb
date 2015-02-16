@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150215155601) do
+ActiveRecord::Schema.define(:version => 20150216155342) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -178,6 +178,13 @@ ActiveRecord::Schema.define(:version => 20150215155601) do
     t.datetime "updated_at",   :null => false
   end
 
+  create_table "assessment_correct_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
   create_table "assessment_forward_groups", :force => true do |t|
     t.integer  "forward_policy_level_id"
     t.integer  "correct_amount_left",     :default => -1
@@ -248,20 +255,13 @@ ActiveRecord::Schema.define(:version => 20150215155601) do
     t.datetime "updated_at",                             :null => false
   end
 
-  create_table "assessment_guidance_concept_criteria_correct_thresholds", :force => true do |t|
-    t.integer  "threshold"
+  create_table "assessment_guidance_concept_criteria", :force => true do |t|
+    t.integer  "guidance_concept_option_id"
+    t.integer  "guidance_concept_criterion_id"
+    t.string   "guidance_concept_criterion_type"
     t.datetime "deleted_at"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-  end
-
-  create_table "assessment_guidance_concept_criterias", :force => true do |t|
-    t.integer  "assessment_guidance_concept_option_id"
-    t.integer  "guidance_concept_criteria_id"
-    t.string   "guidance_concept_criteria_type"
-    t.datetime "deleted_at"
-    t.datetime "created_at",                            :null => false
-    t.datetime "updated_at",                            :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
   end
 
   create_table "assessment_guidance_concept_options", :force => true do |t|

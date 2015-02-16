@@ -7,6 +7,8 @@ class TopicconceptsController < ApplicationController
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
     @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+
+    @user_course = curr_user_course
     Rails.cache.clear
   end
   
@@ -214,7 +216,7 @@ class TopicconceptsController < ApplicationController
     dc = Topicconcept.find params[:id]
     tc = Topicconcept.where(:course_id => @course.id, :typename => 'concept').select(:name)
     respond_to do |format|
-      format.json { render :json => { :dependencies => dc.required_concepts, :concepts_list => tc.map { |e| e.name } }}      
+      format.json { render :json => { :dependencies => dc.required_concepts, :concepts_list => tc.map { |e| e.name }}}      
     end
   end
   
@@ -306,5 +308,18 @@ class TopicconceptsController < ApplicationController
     respond_to do |format|
       format.json { render json: result}
     end 
+  end
+
+  #Get the edges from a concept where it is the dependent party
+  def get_concept_required_edges
+    concept = @course.topicconcepts.concepts.where(id: params[:id]).first
+    if !concept.nil?
+      required_concept_edges = concept.concept_edge_required_concepts
+      respond_to do |format|
+        format.json { render :json => { :current_concept => concept, :dependencies => required_concept_edges.map { |e| { concept_edge_id: e.id, required_concept_name: e.required_concept.name} }}}      
+      end
+    else
+      raise "Concept id is invalid"
+    end
   end
 end

@@ -1,5 +1,7 @@
 class Assessment::GuidanceQuizExcludedQuestionsController < ApplicationController
   load_and_authorize_resource :course
+  load_and_authorize_resource :question, class: "Assessment::Question", through: :course
+  load_and_authorize_resource :excluded_question, class: "Assessment::GuidanceQuizExcludedQuestion", through: :question
   before_filter :load_general_course_data, only: [:exclude_questions, :update_questions]
 
   def get_tags

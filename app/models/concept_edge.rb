@@ -4,5 +4,5 @@ class ConceptEdge < ActiveRecord::Base
   belongs_to :dependent_concept, class_name: "Topicconcept", foreign_key: "dependent_id"
   belongs_to :required_concept, class_name: "Topicconcept", foreign_key: "required_id"
 
-  has_one :guidance_concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy
+  has_one :concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy
 end

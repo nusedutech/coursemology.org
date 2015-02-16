@@ -160,7 +160,6 @@ class CourseAbility  < Ability
       can :read, Tag
       can :read, Achievement
       
-      
       can :read, Topicconcept
       can :get_topicconcept_rated_data, Topicconcept
       can :get_topicconcept_data, Topicconcept

@@ -38,7 +38,8 @@ class Course < ActiveRecord::Base
   has_many :exclusion_statuses, through: :questions, class_name: "Assessment::GuidanceQuizExcludedQuestion"
   has_many :topicconcepts, dependent: :destroy
   has_many :tagged_questions, through: :topicconcepts, source: :questions, dependent: :destroy
-  
+  has_many :concept_edges, class_name: "ConceptEdge", through: :topicconcepts, source: :concept_edge_dependent_concepts
+
   has_many  :missions, class_name: "Assessment::Mission", through: :assessments,
             source: :as_assessment, source_type: "Assessment::Mission" do
     def published

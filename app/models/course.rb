@@ -120,7 +120,7 @@ class Course < ActiveRecord::Base
   # of from and to: i.e. entries starting at both from and to
   # are included. [from, to]
   def lesson_plan_virtual_entries(from = nil, to = nil, curr_user_course = nil, manage_assessment = false)
-    self.assessments.where("TRUE " +
+    self.assessments.exclude_guidance_quiz.where("TRUE " +
                                (if from then "AND assessments.open_at >= :from " else "" end) +
                                (if to then "AND assessments.open_at <= :to" else "" end),
                            :from => from, :to => to

@@ -75,6 +75,11 @@ class Assessment::AssessmentsController < ApplicationController
           action_map[ast.id][:urlSecondary] = reattempt_course_assessment_submissions_path(@course, ast)
         end
 
+        if ast.is_policy_mission? and ast.specific.revealAnswers?
+          action_map[ast.id][:actionTertiary] = "Answers"
+          action_map[ast.id][:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(@course, ast.specific)
+        end
+
         if ast.is_policy_mission?
           @listed_tags[ast.id] = sub_map[ast.id].getHighestProgressionGroupLevelName
         end

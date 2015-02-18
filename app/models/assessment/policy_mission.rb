@@ -3,7 +3,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
 	attr_accessible  :title, :description, :exp, :open_at, :close_at, :published, :comment_per_qn,
-                   :dependent_id, :display_mode_id, :multiple_submissions
+                   :dependent_id, :display_mode_id, :multiple_submissions, :reveal_answers
 
   validates_presence_of :title, :exp, :open_at, :close_at
 	
@@ -12,8 +12,12 @@ class Assessment::PolicyMission < ActiveRecord::Base
   def multipleAttempts?
     self.multiple_submissions
   end
+
+  def revealAnswers?
+    self.reveal_answers and self.close_at < Time.now
+  end
 	
-	def full_title
+  def full_title
     "Regulated Trainings : #{self.title}"
   end
 

@@ -28,6 +28,7 @@ class Assessment < ActiveRecord::Base
   scope :opened, -> { where("open_at <= ? ", Time.now) }
   scope :future, -> { where("open_at > ? ", Time.now) }
   scope :published, -> { where(published: true) }
+  scope :exclude_guidance_quiz, -> { where("as_assessment_type != ?", "Assessment::GuidanceQuiz") }
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") }
   scope :training, -> { where(as_assessment_type: "Assessment::Training") } do
     def retry_training

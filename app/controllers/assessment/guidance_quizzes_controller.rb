@@ -32,6 +32,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         Assessment::GuidanceConceptOption.disable(concept_edge)
         result = "Concept-edge is disabled - with the following criteria:"
       end
+      #Reload Concept Edge to get the child relation
+      concept_edge = @course.concept_edges.where(id: params["concept_edge_id"]).first
       concept_option = concept_edge.concept_option
       if params.has_key?(:correct_threshold)
         result += "\n" + set_concept_correct_threshold(concept_option, params[:correct_threshold])

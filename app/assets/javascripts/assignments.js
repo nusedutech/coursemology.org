@@ -39,6 +39,11 @@ $(document).ready(function() {
                     $divSecondary.html('<a href="' + actions_map[mid].urlSecondary + '" class="btn ' + klass + '" >' + actions_map[mid].actionSecondary + '</a>')
                 }
 
+                var $divTertiary = $("#"+mid+"-tertiary");
+                if ($divTertiary.length > 0 && actions_map[mid].actionTertiary) {
+                    $divTertiary.html('<a href="' + actions_map[mid].urlTertiary + '" class="btn" >' + actions_map[mid].actionTertiary + '</a>')
+                }
+
                 var $title = $("#title-"+mid);
                 if ($title.length > 0) {
                     var to_add = "";

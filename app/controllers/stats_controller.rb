@@ -88,23 +88,23 @@ class StatsController < ApplicationController
 		@policy_missions = @course.policy_missions
   end
 
-	def policy_mission
-		@policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
+  def policy_mission
+    @policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
     authorize! :manage, @policy_mission
 
-		@summary = {}
-		if @policy_mission.progression_policy.isForwardPolicy?
-			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
-			forwardPolicyLevels = forwardPolicy.forward_policy_levels
-			@summary[:forwardContent] = {}
-			@summary[:forwardContent][:tagGroup] = []
-			forwardPolicyLevels.each do |singleLevel|
-				packagedLevelQuestions = {}
-				packagedLevelQuestions[:name] = singleLevel.getTag.name
-				packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
-				@summary[:forwardContent][:tagGroup] << packagedLevelQuestions
-			end
-		end
+    @summary = {}
+    if @policy_mission.progression_policy.isForwardPolicy?
+      forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+      forwardPolicyLevels = forwardPolicy.forward_policy_levels
+      @summary[:forwardContent] = {}
+      @summary[:forwardContent][:tagGroup] = []
+      forwardPolicyLevels.each do |singleLevel|
+        packagedLevelQuestions = {}
+        packagedLevelQuestions[:name] = singleLevel.getTag.name
+        packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
+        @summary[:forwardContent][:tagGroup] << packagedLevelQuestions
+      end
+    end
 
     @sbms = @policy_mission.submissions.where(std_course_id: @course.student_courses)
     @summary[:submitted] = @sbms.where(status: 'submitted').map { |sbm| sbm.std_course }
@@ -115,50 +115,49 @@ class StatsController < ApplicationController
     #unsubmittedEmails = @summary[:unsubmitted].map { |stdCourse| stdCourse.user.email }
     #@summary[:unsubmittedEmails] = unsubmittedEmails.join(";")
 
-		@missions = @course.missions
+    @missions = @course.missions
     @trainings = @course.trainings
-		@policy_missions = @course.policy_missions
-	end
+    @policy_missions = @course.policy_missions
+  end
 
-	#Extract all policy mission statistics via excel
-	def policy_mission_export_excel
-		@policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
+  #Extract all policy mission statistics via excel
+  def policy_mission_export_excel
+    @policy_mission = Assessment::PolicyMission.find(params[:policy_mission_id])
     authorize! :manage, @policy_mission
 
-		@summary = {}
-		#Extract all of the students data
-		#student_courses = @course.user_courses.student.order('lower(name)')
+    @summary = {}
+    #Extract all of the students data
+    #student_courses = @course.user_courses.student.order('lower(name)')
 
-		if @policy_mission.progression_policy.isForwardPolicy?
-			
-			forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
-			forwardPolicyLevels = forwardPolicy.forward_policy_levels
-			@summary[:forwardContent] = {}
-			@summary[:forwardContent][:tagGroup] = []
-			forwardPolicyLevels.each do |singleLevel|
-				packagedLevelQuestions = {}
-				packagedLevelQuestions[:name] = singleLevel.getTag.name
-				packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
-				@summary[:forwardContent][:tagGroup] << packagedLevelQuestions
-			end
+    if @policy_mission.progression_policy.isForwardPolicy?
+      forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
+      forwardPolicyLevels = forwardPolicy.forward_policy_levels
+      @summary[:forwardContent] = {}
+      @summary[:forwardContent][:tagGroup] = []
+      forwardPolicyLevels.each do |singleLevel|
+        packagedLevelQuestions = {}
+        packagedLevelQuestions[:name] = singleLevel.getTag.name
+        packagedLevelQuestions[:questions] = singleLevel.getAllRelatedQuestions @policy_mission.assessment
+        @summary[:forwardContent][:tagGroup] << packagedLevelQuestions
+      end
 
-			#Overall statistics for each student
-			@summary[:forwardContent][:studentSubmissions] = []
+      #Overall statistics for each student
+      @summary[:forwardContent][:studentSubmissions] = []
 
-			#Record each submission separately - completed first
+      #Record each submission separately - completed first
       @policy_mission.submissions.where(status: :submitted).each do |singleSubmission|
         student_course = singleSubmission.std_course
         next if !student_course.is_student?
         unit = process_submission_excel student_course.user, true, singleSubmission
-				@summary[:forwardContent][:studentSubmissions] << unit
-			end
+	@summary[:forwardContent][:studentSubmissions] << unit
+      end
       #Record each submission separately - uncompleted second
       @policy_mission.submissions.where(status: :attempting).each do |singleSubmission|
         student_course = singleSubmission.std_course
         next if !student_course.is_student?
         unit = process_submission_excel student_course.user, false, singleSubmission
-				@summary[:forwardContent][:studentSubmissions] << unit
-			end
+	@summary[:forwardContent][:studentSubmissions] << unit
+      end
 
       @sbms = @policy_mission.submissions
       @submitted = @sbms.where(status: 'submitted').map { |sbm| sbm.std_course }
@@ -168,64 +167,64 @@ class StatsController < ApplicationController
       @summary[:forwardContent][:unsubmitted] = @unsubmitted
       unsubmittedEmails = @unsubmitted.map { |stdCourse| stdCourse.user.email }
       @summary[:forwardContent][:unsubmittedEmails] = unsubmittedEmails.join(";")
-		end
+    end
 
-		respond_to do |format|
-			headers["Content-Disposition"] = "attachment; filename=\"Assignment #{@policy_mission.title}\""
-			headers["Content-Type"] = "xls"
-			format.xls
-		end
-	end
+    respond_to do |format|
+      headers["Content-Disposition"] = "attachment; filename=\"Assignment #{@policy_mission.title}\""
+      headers["Content-Type"] = "xls"
+      format.xls
+    end
+  end
 
   def process_submission_excel (student, is_completed, singleSubmission)
-		packageSubmissionUser = {}
-		packageSubmissionUser[:id] = student.id
-		packageSubmissionUser[:name] = student.name
-		packageSubmissionUser[:status] = "Pass" #default pass - we check for failing condition and overwrite
-		packageSubmissionUser[:highestLevel] = "None" #default none
+    packageSubmissionUser = {}
+    packageSubmissionUser[:id] = student.id
+    packageSubmissionUser[:name] = student.name
+    packageSubmissionUser[:status] = "Pass" #default pass - we check for failing condition and overwrite
+    packageSubmissionUser[:highestLevel] = "None" #default none
     packageSubmissionUser[:masteryString] = ""
     packageSubmissionUser[:completionStatus] = is_completed ? "Completed" : "Not completed"
-		packageSubmissionUser[:levelInfos] = []
-		previousTiming = singleSubmission.created_at
+    packageSubmissionUser[:levelInfos] = []
+    previousTiming = singleSubmission.created_at
 
-		allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
-		#Separate each entries by the progression levels
-		allProgressionGroups.each do |progressionGroup|
-			forwardGroup = progressionGroup.getForwardGroup
-			tagName = progressionGroup.getTagName	
-			allMcqAnswers = forwardGroup.getAllAnswers
-			numCorrect = 0
-			numTotal = 0
+    allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
+    #Separate each entries by the progression levels
+    allProgressionGroups.each do |progressionGroup|
+      forwardGroup = progressionGroup.getForwardGroup
+      tagName = progressionGroup.getTagName	
+      allMcqAnswers = forwardGroup.getAllAnswers
+      numCorrect = 0
+      numTotal = 0
 
-			#Counting right answers
-			allMcqAnswers.each do |singleAnsweredQn|
-				packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + tagName
+      #Counting right answers
+      allMcqAnswers.each do |singleAnsweredQn|
+        packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + tagName
         mcqQuestion = singleAnsweredQn.question.specific
         
-				if singleAnsweredQn.correct
-					numCorrect += 1
+        if singleAnsweredQn.correct
+	  numCorrect += 1
           packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "1"
         else
           packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + "0"
-				end
-				numTotal += 1
+        end
+        numTotal += 1
 				
-				#Calculate timing to answer question from previous timing
-				timingQn = (singleAnsweredQn.created_at - previousTiming)
-			  #Update timing for next question
-				previousTiming = singleAnsweredQn.created_at
-				packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + mcqQuestion.id.to_s + "," + timingQn.to_s + ";"
-			end
+        #Calculate timing to answer question from previous timing
+        timingQn = (singleAnsweredQn.created_at - previousTiming)
+        #Update timing for next question
+        previousTiming = singleAnsweredQn.created_at
+        packageSubmissionUser[:masteryString] = packageSubmissionUser[:masteryString] + "," + mcqQuestion.id.to_s + "," + timingQn.to_s + ";"
+      end
 
-			#Validate student's mastery level
+      #Validate student's mastery level
       if progressionGroup.correct_amount_left > 0
         packageSubmissionUser[:status] = "Fail"
       else
-      	packageSubmissionUser[:highestLevel] = tagName
+        packageSubmissionUser[:highestLevel] = tagName
       end
 
-			packageSubmissionUser[:levelInfos] << numCorrect.to_s + " / " + numTotal.to_s
-		end
+      packageSubmissionUser[:levelInfos] << numCorrect.to_s + " / " + numTotal.to_s
+    end
     packageSubmissionUser
   end
 end

@@ -13,6 +13,9 @@
     <%= f.input :published, as: :boolean, label: "Publish?",
                 input_html: {class: ""},
                 inline_label:"Check to publish regulated training"%>
+    <%= f.input :reveal_answers, as: :boolean, label: "Reveal answers?",
+                input_html: {class: ""},
+                inline_label:"Reveal answers after closing date"%>
     <%= f.input :comment_per_qn, as: :boolean, label: "Comment Mode",
                 input_html: {class: ""},
                 inline_label:"Check to have comment box per question (Otherwise per mission)"%>

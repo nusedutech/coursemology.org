@@ -102,6 +102,13 @@
     $('#div_action').hide();
   }
 
+  function default_edit_console(){
+    $('#div_edit').hide();
+    $('#div_criteria_update').hide();
+    $('#div_criteria_update_next').hide();
+    $('#div_action').show();
+  }
+
 	function finish_edit_required_concepts(){
 		is_editing_required_concepts = false;
 		$('#div_edit, #div_action').toggle();
@@ -361,7 +368,7 @@
 	  //select event handler
 	  $('#div_tree').on('select_node.jstree', function (e, data) {
 	  	if(data.node.type == 'concept'){
-	  		
+	  		default_edit_console();
 	  		if(tcdata.user_ability === 'manage'){
 		  		//show dependency map
 		  		if(!is_editing_required_concepts){

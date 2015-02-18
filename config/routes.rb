@@ -122,7 +122,7 @@ Coursemology::Application.routes.draw do
         end
       end
 
-			resources :assessment_submissions,
+      resources :assessment_submissions,
                 path:       :submissions,
                 as:         :submissions,
                 controller: :policy_mission_submissions,
@@ -178,16 +178,17 @@ Coursemology::Application.routes.draw do
       get 'dump_code' => 'missions#dump_code'
     end
 
-		resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
-			collection do
-				get :index, to: 'assessments#index', type: 'policy_mission'
+    resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
+      collection do
+	get :index, to: 'assessments#index', type: 'policy_mission'
         get 'stats' => 'policy_missions#stats'
-				get 'submissions' => 'assessments#listall', type: 'policy_mission'
-			end
+	get 'submissions' => 'assessments#listall', type: 'policy_mission'
+      end
       member do
         put 'update_questions' => 'policy_missions#update_questions'
+        get 'answer_sheet' => 'policy_missions#answer_sheet'
       end
-		end
+    end
 
     resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
 			collection do

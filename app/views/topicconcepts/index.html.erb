@@ -1,12 +1,8 @@
 <link rel="stylesheet" href="dist/themes/default/style.min.css" />
-<%= render  partial: "tabs" %>
 
-<div class="page-header">
-  <h1>Topics & Concepts</h1>
-</div>
 
 <% if @user_course.is_student? %>
-
+  <%= render  partial: "student_interface" %>
 <% else %>
-  <%= render  partial: "topicconcept_map" %>
+  <%= render  partial: "staff_interface" %>
 <% end %>

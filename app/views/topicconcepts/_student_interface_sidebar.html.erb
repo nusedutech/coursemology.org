@@ -1,10 +1,12 @@
-<% menuItemSelected = 1 %>
-
+<% menuItemSelected = 0 %>
+<% if current_page? :course_topicconcepts %>
+   <% menuItemSelected = 0; %>
+<% end %>
 
 <div class="slimScrollDiv">
   <ul>
     <li class="required-concept-node <%= menuItemSelected == 0 ? "selected" : "" %> <%= menuItemSelected > 0 ? "completed" : "" %>">
-  		<a>
+  		<a href="<%= course_topicconcepts_path(@course) %>">
       	<div class="subway-icon">
           <div class="pipe"></div>							
           <div class="status exercise-node"></div>						

@@ -257,7 +257,9 @@ Coursemology::Application.routes.draw do
     resources :levels
     
     resources :topicconcepts do
+        post 'index', :on => :collection
         post 'get_topicconcept_data', :on => :collection
+        get 'get_all_concepts', :on => :collection
         post 'get_topicconcept_rated_data', :on => :member
         post 'topic_concept_data_create', :on => :collection
         post 'topic_concept_data_rename', :on => :collection

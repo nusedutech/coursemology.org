@@ -235,6 +235,18 @@ class Assessment < ActiveRecord::Base
     true
   end
 
+  def has_ended?
+    return !self.close_at.nil? && self.close_at < Time.now
+  end
+
+  def can_access_with_end_check? (curr_user_course)
+    if curr_user_course.is_staff?
+      return true
+    end
+   
+    return !has_ended?
+  end
+
   #TOFIX: it's better to have callback rather than currently directly call this in
   #create. Can't use after_create because files association won't be updated upon save
   def create_local_file

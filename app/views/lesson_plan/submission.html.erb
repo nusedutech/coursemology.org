@@ -291,7 +291,7 @@
             }else if(entry_type =='4'){
                 show_mission_training(this,title, type, des, loc, $resource);
             }else if(entry_type == '5'){
-                show_policymission_with_reattempt(this,title, type, des, loc, $resource);
+                show_policymission_with_additional_details(this,title, type, des, loc, $resource);
             }
 
             show_discussion($dis);
@@ -389,13 +389,15 @@
         }
 
         //show entry for policy mission with reattempt option
-        function show_policymission_with_reattempt(entry, title, type, des, loc, $resource){
+        function show_policymission_with_additional_details(entry, title, type, des, loc, $resource){
             var start  = $(entry).find('input.entry_start').val();
             var end  = $(entry).find('input.entry_end').val();
             var action = $(entry).find('input.entry_action').val();
             var url  = $(entry).find('input.entry_url').val();
             var actionSecondary = $(entry).find('input.entry_action_secondary').val();
             var urlSecondary  = $(entry).find('input.entry_url_secondary').val();
+            var actionTertiary = $(entry).find('input.entry_action_tertiary').val();
+            var urlTertiary  = $(entry).find('input.entry_url_tertiary').val();
 
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";
@@ -430,7 +432,18 @@
             }
 
             //Show link
-            $('section#detail-content').append("<div><a class='attempt-assessment btn " + (action=="Attempt" ? "btn-success" : (action=="Edit" ? "" : "btn-info")) + "' href='" + url + "'>" + action + "</a> <a class='attempt-assessment btn " + "' href='" + urlSecondary + "'>" + actionSecondary + "</a></div>");
+            var appendBtns = ""
+            if (action && url) {
+                appendBtns += "<a class='attempt-assessment btn " + (action=="Attempt" ? "btn-success" : (action=="Resume" ? "" : "btn-info")) + "' href='" + url + "'>" + action + "</a> ";
+            }
+            if (actionSecondary && urlSecondary) {
+                appendBtns += "<a class='attempt-assessment btn btn-success '" + " href='" + urlSecondary + "'>" + actionSecondary + "</a> ";
+            }
+            if (actionTertiary && urlTertiary) {
+                appendBtns += "<a class='attempt-assessment btn '" + " href='" + urlTertiary + "'>" + actionTertiary + "</a>";
+            }
+
+            $('section#detail-content').append( "<div>" + appendBtns + "</div>");
 
         }
 

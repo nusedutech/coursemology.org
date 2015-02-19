@@ -4,7 +4,7 @@ class TopicconceptsController < ApplicationController
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data]
 
-	before_filter :set_student_layout, only:[:index]
+	before_filter :set_viewing_permissions, only:[:index]
 
   def index   
     @topics_concepts_with_info = []
@@ -52,10 +52,6 @@ class TopicconceptsController < ApplicationController
       end
           
     end
-  end
-  
-  def concept_questions
-    @meow = "cats"
   end
 
   def get_topic_tree(parent ,included_topicconcepts)
@@ -267,7 +263,7 @@ class TopicconceptsController < ApplicationController
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
-      if can? :manage, Topicconcept
+      if can? :manage, Topicconcept and !session[:topicconcept_student_view]
         user_ability = 'manage'
         format.json { render :json =>{:user_ability => user_ability, :topictrees => @topics_concepts_with_info}}
       else
@@ -313,6 +309,16 @@ class TopicconceptsController < ApplicationController
     end 
   end
 
+  def get_all_concepts
+    respond_to do |format|
+      format.json { 
+        render json: {
+          concepts: @course.topicconcepts.concepts
+        }
+      }
+    end
+  end
+
   #Get the edges from a concept where it is the dependent party
   def get_concept_required_edges
     concept = @course.topicconcepts.concepts.where(id: params[:id]).first
@@ -327,6 +333,29 @@ class TopicconceptsController < ApplicationController
   end
 
 	def set_student_layout
-		self.class.layout "topicconcept_student_interface" if curr_user_course.is_student?
+		if cannot? :manage, Topicconcept or @student_view
+      self.class.layout "topicconcept_student_interface"
+    else
+      self.class.layout "application"
+    end
+  end
+
+  def set_student_view
+    session[:topicconcept_student_view] = !params[:student_view].nil? and params[:student_view] == "true"
+    @student_view = session[:topicconcept_student_view]
+  end
+
+  def set_hidden_sidebar_params
+    @hidden = !params[:hideSideBar].nil? and params[:hideSideBar] == "true"
+  end
+
+  #Set viewing permission and parameters of user
+  def set_viewing_permissions
+    set_student_view
+    @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
+    if @gqEnabled
+      set_student_layout
+      set_hidden_sidebar_params
+    end
   end
 end

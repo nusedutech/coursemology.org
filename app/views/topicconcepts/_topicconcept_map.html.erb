@@ -1,9 +1,10 @@
-<table style="width: 100%">
+
+<table style="width: 99%">
 	<thead>
 		<tr>
 			<th style="line-height: 30px;">
 				Topic Trees
-				<% if can? :manage, Topicconcept%>
+				<% if manage_permission%>
 				<input type="button" class="btn btn-primary btn_add_topic_tree" value="Add Topic Tree" style="float: right">
 				<% end %>
 			</th>
@@ -13,7 +14,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
+		<tr class="white-row">
 			<td style="width: 35%; padding-left: 10px; border: 1px solid #dddddd; vertical-align: top ">
 				<div style="height: 400px; overflow-y: scroll">
 					<div id="div_tree"></div>
@@ -25,11 +26,12 @@
 						<g/>
 					</svg>
 				</div>
-				<% if can? :manage, Topicconcept%>		
+				<% if manage_permission%>		
 				<div id="div_edit_dpd" style="display: none;">
 					<div id="div_action">
 						<input style="float: right" type="button" id="btn_show_edit_required_concepts" class="btn btn-success btnmargined" value="Edit Required Concepts" onclick="show_edit_required_concepts()"/>
-            <input style="float: right" type="button" id="btn_show_edit_concept_criterias" class="btn btnmargined" value="Edit Concept Progress Criteria" onclick="show_edit_concept_criterias();"/>
+            <input style="float: right" type="button" id="btn_show_edit_concept_criterias" class="btn btnmargined" value="Edit Progress Criteria" onclick="show_edit_concept_criterias();"/>
+            <input style="float: right" type="button" id="btn_show_edit_concept_fail_criterias" class="btn btn-info btnmargined" value="Edit Failing Criteria" onclick="show_edit_concept_fail_criteria();"/>
 					</div>
 					<div id="div_edit" style="display: none">
 						<div>
@@ -78,6 +80,18 @@
 							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
 						</div>
 					</div>
+
+          <div id="div_criteria_fail_update" style="display: none">
+            <hr>
+            <select id="concept_select" class="full-width">
+            </select>
+            <hr>
+						<div style="margin-top: 2px;">
+							<input style="float: right" type="button" id="btn_next_concept_criterias" class="btn btn-success" value="Next" onclick=""/>
+							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
+						</div>
+					</div>
+
 				</div>
 				<% end %>
 			</td>
@@ -93,19 +107,17 @@
 	var required_concepts = [];
 	var concepts_list = [];
 	
-  <% if can? :manage, Topicconcept%>
 
   function reset_edit_console(){
     $('#div_edit').hide();
     $('#div_criteria_update').hide();
     $('#div_criteria_update_next').hide();
     $('#div_action').hide();
+    $('#div_criteria_fail_update').hide();
   }
 
   function default_edit_console(){
-    $('#div_edit').hide();
-    $('#div_criteria_update').hide();
-    $('#div_criteria_update_next').hide();
+    reset_edit_console();
     $('#div_action').show();
   }
 
@@ -114,6 +126,7 @@
 		$('#div_edit, #div_action').toggle();
     $('#div_criteria_update').hide();
     $('#div_criteria_update_next').hide();
+    $('#div_criteria_fail_update').hide();
 		agoras = $('#txtar_required_concepts').textext()[0].hiddenInput().val();
 		if(selected_node != null){
 			var result = topic_concept_data_save_dependency(selected_node.id, JSON.stringify(required_concepts), JSON.stringify(JSON.parse(agoras)));
@@ -130,6 +143,7 @@
 		$('#div_edit, #div_action').toggle();
     $('#div_criteria_update').hide();
     $('#div_criteria_update_next').hide();
+    $('#div_criteria_fail_update').hide();
 		var tree = $("#div_tree").jstree(true);
 		tree.open_all();
 		$('li.jstree-leaf a').css('border', '1px solid white');
@@ -156,14 +170,13 @@
 		$('#div_edit, #div_action').toggle();
     $('#div_criteria_update').hide();
     $('#div_criteria_update_next').hide();
+    $('#div_criteria_fail_update').hide();
 		$('li.jstree-leaf a').css('border', '0px');
 		$('li.jstree-leaf a').css('background-color', '');
 	}
 	
   function cancel_concept_criterias(){
-    $('#div_edit').hide();
-    $('#div_criteria_update').hide();
-    $('#div_criteria_update_next').hide();
+    reset_edit_console();
     $('#div_action').show();
   }
 
@@ -189,9 +202,7 @@
         $("#correct_threshold").prop("value", result.correct_threshold);
         $("#concept_edge_id").prop("value", result.concept_edge_id);
 
-		    $('#div_edit').hide();
-		    $('#div_action').hide();
-		    $('#div_criteria_update').hide();
+		    reset_edit_console();
 		    $('#div_criteria_update_next').show();
 			}
       else
@@ -216,9 +227,7 @@
           $('#criteria_relation_select').append('<option value="'+dependency.concept_edge_id+'">'+dependency.required_concept_name+' DEPENDENT ON '+result.current_concept.name+"</option>");
         }); 
         
-        $('#div_edit').hide();
-        $('#div_action').hide();
-        $('#div_criteria_update_next').hide();
+        reset_edit_console();
         $('#div_criteria_update').show();
       }
       else {
@@ -228,7 +237,24 @@
     }
   }
 
-  <% end %>
+  function show_edit_concept_fail_criteria(){
+    if(selected_node != null){
+      var result = get_all_concepts();
+      if (result.concepts.length != 0) {
+        
+        $.each(result.concepts, function(i, concept) {
+          $('#concept_select').append('<option value="'+concept.id+'">'+concept.name+'</option>');
+        });
+
+        reset_edit_console();
+        $('#div_criteria_fail_update').show();
+      }
+      else {
+        alert('No concepts found');
+        cancel_concept_criterias();
+      }
+    }
+  }
 
 	$(document).ready(function(){
 		//set up add button
@@ -693,6 +719,23 @@
       data: data,
 	    async: false,
 	    url: "<%= get_concept_edge_relation_course_assessment_guidance_quizzes_path(@course) %>",
+	    success: function(json) {
+	    	result = json;
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+    return result;
+	}
+
+  function get_all_concepts(){
+    var result;
+    $.ajax({
+	    type: "GET",
+	    dataType: "json",
+	    async: false,
+	    url: "<%= get_all_concepts_course_topicconcepts_path(@course) %>",
 	    success: function(json) {
 	    	result = json;
 	    },

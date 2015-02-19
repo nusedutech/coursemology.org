@@ -1,6 +1,8 @@
 class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsController
 
   before_filter :authorize, only: [:new, :create, :update, :show, :show_export_excel, :reattempt, :edit, :destroy]
+  before_filter :authorize_for_end, only: [:new, :create, :update, :reattempt, :edit, :destroy]
+
   before_filter :no_showing_before_submission, only: [:show, :show_export_excel]
   before_filter :no_update_after_submission, only: [:edit, :update]
 
@@ -314,6 +316,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
     end
   end
 
+
   def authorize
     if curr_user_course.is_staff?
       return true
@@ -324,12 +327,24 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
     end
   end
 
+  def authorize_for_end
+    if curr_user_course.is_staff?
+      return true
+    end
+
+    if @assessment.has_ended?
+      redirect_to access_denied_course_assessment_path(@course, @assessment)
+    end
+  end
+
   def destroy
-    @policy_mission = @assessment.specific
-    @submission.destroy
-    respond_to do |format|
-      format.html { redirect_to submissions_course_assessment_policy_missions_path(@course),
-                    notice: "Submission by " + @submission.std_course.name + " has been deleted."}
+    if can? :manage, Assessment::PolicyMission
+		  @policy_mission = @assessment.specific
+		  @submission.destroy
+		  respond_to do |format|
+		    format.html { redirect_to submissions_course_assessment_policy_missions_path(@course),
+		                  notice: "Submission by " + @submission.std_course.name + " has been deleted."}
+		  end
     end
   end
 end

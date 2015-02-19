@@ -1,0 +1,7 @@
+<%= render  partial: "tabs" %>
+
+<div class="page-header">
+  <h1>Topics & Concepts</h1>
+</div>
+
+<%= render  partial: "topicconcept_map", locals:{manage_permission: (can? :manage, Topicconcept)} %>

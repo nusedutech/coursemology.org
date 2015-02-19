@@ -1,7 +1,7 @@
 class Assessment::PolicyMissionsController < Assessment::AssessmentsController
   require 'csv'
   load_and_authorize_resource :policy_mission, class: "Assessment::PolicyMission", through: :course
-  before_filter :load_general_course_data, only: :answer_sheet
+  before_filter :load_general_course_data, only: [:show, :index, :new, :edit, :access_denied, :stats, :overview, :listall, :answer_sheet]
 
   def show
     @assessment = @policy_mission.assessment
@@ -228,7 +228,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
   end
 
   def answer_sheet
-    if @policy_mission.revealAnswers?
+    if @policy_mission.revealAnswers? (curr_user_course)
       @pmAnswers = {}
       if @policy_mission.progression_policy.isForwardPolicy?
         forwardPolicy = @policy_mission.progression_policy.getForwardPolicy

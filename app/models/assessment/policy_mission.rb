@@ -13,8 +13,8 @@ class Assessment::PolicyMission < ActiveRecord::Base
     self.multiple_submissions
   end
 
-  def revealAnswers?
-    self.reveal_answers and self.close_at < Time.now
+  def revealAnswers? (curr_user_course)
+    (curr_user_course.is_staff? or self.close_at < Time.now) and self.reveal_answers
   end
 	
   def full_title
@@ -36,14 +36,19 @@ class Assessment::PolicyMission < ActiveRecord::Base
     entry.assessment = self
     entry.is_published = self.published
     entry.submission = user_course ? get_submission(course, user_course, manage_assessment) : nil
+    entry.entry_type = 4
 
     lastSbm = self.submissions.where(std_course_id: user_course).last
     if self.multipleAttempts? and lastSbm and lastSbm.submitted?
       entry.entry_type = 5
       entry.submission[:actionSecondary] = "Reattempt"
       entry.submission[:urlSecondary] = reattempt_course_assessment_submissions_path(course, self.assessment, from_lesson_plan: true)
-    else
-      entry.entry_type = 4
+    end
+    
+    if !user_course.nil? and self.revealAnswers? (user_course)
+      entry.entry_type = 5
+      entry.submission[:actionTertiary] = "Answers"
+      entry.submission[:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(course, self)
     end
     entry
   end

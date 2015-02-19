@@ -153,6 +153,7 @@ class CourseAbility  < Ability
       can :read, Assessment, published: true
       can :access_denied, Assessment
       can :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission], assessment: {published: true}
+      can :answer_sheet, Assessment::PolicyMission
       can :read, Survey, publish: true
 
       # can :read, [Mcq, Question, CodingQuestion]

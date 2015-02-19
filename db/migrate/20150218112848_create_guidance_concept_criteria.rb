@@ -1,4 +1,4 @@
-class CreateAssessmentGuidanceConceptCriteria < ActiveRecord::Migration
+class CreateGuidanceConceptCriteria < ActiveRecord::Migration
   def up
     create_table :assessment_guidance_concept_criteria do |t|
       t.references  :assessment_guidance_concept_options, index: true

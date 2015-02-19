@@ -3,6 +3,9 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :topicconcept, through: :course
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data]
+
+	before_filter :set_student_layout, only:[:index]
+
   def index   
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
@@ -321,5 +324,9 @@ class TopicconceptsController < ApplicationController
     else
       raise "Concept id is invalid"
     end
+  end
+
+	def set_student_layout
+		self.class.layout "topicconcept_student_interface" if curr_user_course.is_student?
   end
 end

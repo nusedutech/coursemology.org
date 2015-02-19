@@ -137,17 +137,17 @@ class Assessment < ActiveRecord::Base
     as_assessment_type == Assessment::Training.name
   end
 
-	def is_policy_mission?
-		as_assessment_type == Assessment::PolicyMission.name
-	end
+  def is_policy_mission?
+    as_assessment_type == Assessment::PolicyMission.name
+  end
 
   def is_guidance_quiz?
-		as_assessment_type == Assessment::GuidanceQuiz.name
-	end
+    as_assessment_type == Assessment::GuidanceQuiz.name
+  end
 
-	def getPolicyMission
-		Assessment::PolicyMission.find(self.as_assessment_id)
-	end
+  def getPolicyMission
+    Assessment::PolicyMission.find(self.as_assessment_id)
+  end
 
   def single_question?
     questions.count == 1

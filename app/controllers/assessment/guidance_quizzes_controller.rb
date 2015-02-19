@@ -20,23 +20,23 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end
   end
 
-  def set_concept_relation
+  def set_concept_edge_relation
     concept_edge = @course.concept_edges.where(id: params["concept_edge_id"]).first
     if !concept_edge.nil?
       result = ""
       #Initialise / create concept option (if not created before)
       if params[:enabled] == "true"
-		    Assessment::GuidanceConceptOption.enable(concept_edge)
+		    Assessment::GuidanceConceptEdgeOption.enable(concept_edge)
         result = "Concept-edge is enabled - with the following criteria:"
       else
-        Assessment::GuidanceConceptOption.disable(concept_edge)
+        Assessment::GuidanceConceptEdgeOption.disable(concept_edge)
         result = "Concept-edge is disabled - with the following criteria:"
       end
       #Reload Concept Edge to get the child relation
       concept_edge = @course.concept_edges.where(id: params["concept_edge_id"]).first
-      concept_option = concept_edge.concept_option
+      concept_edge_option = concept_edge.concept_edge_option
       if params.has_key?(:correct_threshold)
-        result += "\n" + set_concept_correct_threshold(concept_option, params[:correct_threshold])
+        result += "\n" + set_concept_edge_correct_threshold(concept_edge_option, params[:correct_threshold])
       end
 
       respond_to do |format| 
@@ -49,7 +49,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end
   end
 
-  def get_concept_relation
+  def get_concept_edge_relation
     concept_edge = @course.concept_edges.where(id: params["concept_edge_id"]).first
     if !concept_edge.nil?
       result = {
@@ -57,10 +57,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
                  enabled: false,
                  correct_threshold: 0
                }
-      concept_option = concept_edge.concept_option
-      if !concept_option.nil?
-        result[:enabled] = concept_option.enabled
-        correct_threshold = concept_option.concept_criteria.correct_threshold_subcriteria.first
+      concept_edge_option = concept_edge.concept_edge_option
+      if !concept_edge_option.nil?
+        result[:enabled] = concept_edge_option.enabled
+        correct_threshold = concept_edge_option.concept_edge_criteria.correct_threshold_subcriteria.first
         if !correct_threshold.nil?
           result[:correct_threshold] = correct_threshold.threshold
         end
@@ -74,16 +74,16 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end
   end
 
-  def set_concept_correct_threshold(concept_option, correct_threshold_amt)
+  def set_concept_edge_correct_threshold(concept_edge_option, correct_threshold_amt)
 
     result = "\n[ Correct Threshold ]"
-    correct_threshold_single = concept_option.concept_criteria.correct_threshold_subcriteria.first
+    correct_threshold_single = concept_edge_option.concept_edge_criteria.correct_threshold_subcriteria.first
 
     if !correct_threshold_single.nil?
       correct_threshold_criterion = correct_threshold_single.specific
     else
       correct_threshold_criterion = Assessment::CorrectThreshold.new
-      correct_threshold_criterion.guidance_concept_option = concept_option
+      correct_threshold_criterion.guidance_concept_edge_option = concept_edge_option
     end
 
     #Match integers only
@@ -94,7 +94,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         correct_threshold_criterion.save
         result += "\n - " + "Positive integer entered. Criteria updated."
       else
-        Assessment::GuidanceConceptCriterion.delete_with_new correct_threshold_criterion
+        Assessment::GuidanceConceptEdgeCriterion.delete_with_new correct_threshold_criterion
         result += "\n - " + "Negative integer entered. Criteria deleted."
       end
     else

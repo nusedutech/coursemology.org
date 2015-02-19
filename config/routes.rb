@@ -130,11 +130,18 @@ Coursemology::Application.routes.draw do
                 constraints: PolicyMissionConstraint.new do
         member do
           post 'edit' => 'policy_mission_submissions#edit'
-					get 'export' => 'policy_mission_submissions#show_export_excel'
+	  get 'export' => 'policy_mission_submissions#show_export_excel'
           delete 'destroy' => 'policy_mission_submissions#destroy'
         end
         collection do
           get 'reattempt' => 'policy_mission_submissions#reattempt'
+        end
+      end
+
+      resources :assessment_submissions,
+                path:       :guidance_quiz_submissions,
+                controller: :quidance_quiz_submissions do
+        collection do
         end
       end
     end
@@ -191,12 +198,12 @@ Coursemology::Application.routes.draw do
     end
 
     resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
-			collection do
+      collection do
         post :set_enabled, to: 'guidance_quizzes#set_enabled'
-        post :set_concept_relation, to: 'guidance_quizzes#set_concept_relation'
-        post :get_concept_relation, to: 'guidance_quizzes#get_concept_relation'
-			end
-		end
+        post :set_concept_edge_relation, to: 'guidance_quizzes#set_concept_edge_relation'
+        post :get_concept_edge_relation, to: 'guidance_quizzes#get_concept_edge_relation'
+      end
+    end
 
     resources :assessment_trainings, path: 'trainings', controller: :trainings, module: :assessment do
       collection do

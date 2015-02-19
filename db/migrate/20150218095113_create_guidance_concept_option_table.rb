@@ -1,7 +1,6 @@
-class CreateAssessmentGuidanceConceptOptions < ActiveRecord::Migration
+class CreateGuidanceConceptOptionTable < ActiveRecord::Migration
   def up
     create_table :assessment_guidance_concept_options do |t|
-      t.references  :assessment_guidance_quizzes, index: true
       t.references  :topicconcept, index: true
       t.boolean :enabled, default: false
 

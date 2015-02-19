@@ -1,62 +1,17 @@
+<% hidden = true %>
 
 <div class="concept-tutorial">
-	<div class="tutorial-nav">
-		<div class="nav-head-container">
-			<div class="nav-head-concept">
-        <h4>Progress</h4>
-				<div class="progress">
-          <div class="bar bar-success" role="progressbar" style="width: 60%">
-          </div>
-          <div class="bar bar-warning" role="progressbar" style="width: 20%">
-          </div>
-        </div>		
-			</div>
-		</div>
-		<div class="slimScrollDiv">
-			<ul>
-				<li class="required-concept-node completed">
-					<a>
-						<div class="subway-icon">
-							<div class="pipe"></div>							
-							<div class="status exercise-node"> </div>						
-						</div>
-						<span class="progress-title">Select</span>
-					</a>
-				</li>
-        <li class="required-concept-node selected">
-					<a>
-						<div class="subway-icon">
-							<div class="pipe"></div>							
-							<div class="status exercise-node"> </div>						
-						</div>
-						<span class="progress-title">Solve</span>
-					</a>
-				</li>
-        <li class="required-concept-node">
-					<a>
-						<div class="subway-icon">
-							<div class="pipe"></div>							
-							<div class="status exercise-node"> </div>						
-						</div>
-						<span class="progress-title">Review</span>
-					</a>
-				</li>
-				<li class="main-concept">
-					<a>
-						<div class="subway-icon">
-							<div class="pipe"></div>							
-							<div class="status exercise-node"> </div>						
-						</div>
-						<span class="progress-title">Discuss</span>
-					</a>
-				</li>
-			</ul>
-		</div>
+	<div id="tutorial-nav" class="tutorial-nav <%= hidden ? "post-animate-tutorial-nav" : "pre-animate-tutorial-nav" %> ">
+		<%= render  partial: "student_interface_progressbar" %>
+		<%= render  partial: "student_interface_sidebar" %>
 	</div>
-	<div class="tutorial-content">
+	<div id="tutorial-content" class="tutorial-content <%= hidden ? "post-animate-tutorial-content" : "pre-animate-tutorial-content" %> ">
 		<div class="task-header-container">
 			<div class="cur-concept-title">
-				<h2>HTML</h2>			
+        <a class="btn btn-info btn-navbar collapsed stud-int-sidebar-collapse"><span class="icon-align-justify"></span></a>
+        <div class="cur-concept-title-slave">
+					<h2>HTML</h2>
+				</div>			
 			</div>
 			<div class="in-a-row">
 				<div><h4>Get 2 correct in a row</h4>
@@ -117,28 +72,47 @@
 <script>
 	
 	$(document).ready(function(){
-		$('input#check-answer-button').click(function() {
-			var ans_id = $('input:radio[name=answers]:checked').val();
-			var question_id = $('input#cur-question').val();
-			var result = submit_answer(question_id, ans_id);
-			var add_flag = true;
-			if (add_flag){
-				if (result == 'correct') {
-					$('.cur-std-got').append('<div class="img-correct-item"></div>');
-					$('input#check-answer-button').val("Check Answer");
-					$('input#check-answer-button').toggle();
-					$('input#next-question').toggle();
-				}else{
-					$('input#check-answer-button').val("Wrong! try again");
-					$('.cur-std-got').append('<div class="img-wrong-item"></div>');
-				}
-			}
+		$(".sidebar-collapse").click(function () {
+	  	var mainControls = $('#mainscreen-control');
+    	if(mainControls.hasClass("span10")) {
+		    $('.span2.sidebar').toggle('slow', function() {      
+          $('#mainscreen-control').removeClass("span10").addClass("span12");
+        });
+    	}
+	  	else if (mainControls.hasClass("span12")){
+        $('#mainscreen-control').removeClass("span12").addClass("span10");
+        $('.span2.sidebar').toggle('slow', function() {      
+        });
+    	}
+
+		});
+
+    $(".stud-int-sidebar-collapse").click(function () {
+	  	var tutorialContent = $('#tutorial-content');
+    	if(tutorialContent.css("margin-left") == "200px") {
+		    
+        $( "#tutorial-nav" ).animate({
+          width: "0px"
+        }, 500, function() {
+          $(this).hide();
+        });
+        tutorialContent.animate({
+          marginLeft: "0px"
+        }, 500);
+        //tutorialContent.css("margin-left", "0px");
+    	}
+	  	else if (tutorialContent.css("margin-left") == "0px"){
+        $( "#tutorial-nav" ).show();
+        $( "#tutorial-nav" ).animate({
+          width: "200px"
+        }, 500);
+        tutorialContent.animate({
+          marginLeft: "200px"
+        }, 500);
+        //tutorialContent.css("margin-left", "200px");
+    	}
+
 		});
 	});
 	
-	function submit_answer(question_id, ans_id){
-		var result;
-		$.ajax({
-	  
-	}
 </script>

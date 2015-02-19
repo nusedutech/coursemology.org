@@ -1,6 +1,11 @@
 // Place all the styles related to the Topicconcepts controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+footer.compress {
+	margin-top: 0px;
+}
+
 svg {
     overflow: hidden;
 }
@@ -26,12 +31,26 @@ g.node {
 .concept-tutorial {
   position: relative;
   top: -20px;
-  left: -20px;
-  width: 970px;  
+  left: -20px;  
+}
+
+.tutorial-nav, .tutorial-content {
+  padding-bottom: 130px;
+} 
+
+.concept-tutorial .post-animate-tutorial-nav, {
+    width:0px;
+}
+
+.concept-tutorial .pre-animate-tutorial-nav, {
+    width:200px;
+}
+
+.concept-tutorial .tutorial-nav .nav-head-concept .progress, {
+    width:172px;
 }
 
 .concept-tutorial .tutorial-nav {    
-    width:200px;
     min-height: 500px;
     vertical-align: top;
     border-right: 1px solid #ddd;
@@ -145,11 +164,21 @@ g.node {
     top: -34px;
 }
 
-.concept-tutorial .tutorial-content {
+.concept-tutorial .post-animate-tutorial-content {
+    margin-left: 0px;   
+}
+
+.concept-tutorial .pre-animate-tutorial-content {
     margin-left: 200px;   
+}
+
+.concept-tutorial .tutorial-content {
+
     min-height: 500px;
     background-color: #eee;
     -webkit-box-shadow: -5px -1px 20px -6px #000;
+    -moz-box-shadow: -5px -1px 20px -6px #000;
+    box-shadow: -5px -1px 20px -6px #000;
     position: relative;
 }
 
@@ -320,4 +349,15 @@ select.full-width{
 div.pseudo-pull-right-child {
     width: 100%;
     text-align: right;
+}
+
+.stud-int-sidebar-collapse {
+    position: absolute;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+}
+
+.cur-concept-title-slave {
+    margin-left: 45px;
 }

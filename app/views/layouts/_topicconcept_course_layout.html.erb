@@ -1,9 +1,15 @@
 <div class="row main-content" >
+	<div style="position: relative; margin-left: 30px;">
+		<a class="btn btn-navbar collapsed sidebar-collapse">
+			<span class="icon-chevron-down"></span>
+		</a>
+	</div>
+
   <div class="span2 sidebar">
     <%= render "layouts/course_side_bar" %>
   </div>
 
-  <div class="span10 span-content">
+  <div id="mainscreen-control" class="span10 span-content">
     <div class="course-title">
       <a href="<%= main_app.course_path(@course) %>">
         <%= @course.title %>
@@ -19,7 +25,7 @@
           <%= flash[:error].html_safe %>
         </div>
     <% end %>
-    <div class="content"/>
+    <div class="content" style="width:100%; margin-bottom:-48px;"/>
     <%= yield %>
   </div>
   <%= render "layouts/course_popup" %>

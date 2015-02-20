@@ -5,7 +5,8 @@ class Assessment::GuidanceConceptEdgeOption < ActiveRecord::Base
   validates_presence_of :concept_edge_id 
 
   belongs_to :concept_edge, class_name: ConceptEdge, foreign_key: "concept_edge_id"
-  has_many :concept_edge_criteria, class_name: Assessment::GuidanceConceptEdgeCriterion, dependent: :destroy
+
+  has_many  :concept_edge_criteria, class_name: Assessment::GuidanceConceptEdgeCriterion, dependent: :destroy 
 
   def self.enable(concept_edge)
     enable_status = concept_edge.concept_edge_option

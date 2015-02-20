@@ -60,7 +60,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
         if forward_policy.save
           #Cannot publish if no policy levels exist
           invalidPublish = (params[:forward][:tag_id].size <= 0)
-	  params[:forward][:tag_id].each_with_index do |tag_id, index|
+	        params[:forward][:tag_id].each_with_index do |tag_id, index|
             tagElement = getTagElement tag_id
             if tagElement.nil?
               invalidPublish = true
@@ -68,7 +68,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
             end
 
             forward_policy_level = Assessment::ForwardPolicyLevel.new
-            forward_policy_level.tag = tagElement
+            forward_policy_level.forward_policy_theme = tagElement
             forward_policy_level.progression_threshold = params[:forward][:value][index]
             forward_policy_level.order = index
             forward_policy_level.forward_policy_id = forward_policy.id
@@ -96,7 +96,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
         format.html { render action: "new" }
       else
         format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
-                      notice: "The policy mission #{@policy_mission.title} has been created." + additionalPublishNotice}
+                      notice: "The regulated training #{@policy_mission.title} has been created." + additionalPublishNotice}
       end
     end
   end
@@ -139,7 +139,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
             end
 
 						forward_policy_level = Assessment::ForwardPolicyLevel.new
-						forward_policy_level.tag = tagElement
+						forward_policy_level.forward_policy_theme = tagElement
 						forward_policy_level.progression_threshold = params[:forward][:value][index]
 						forward_policy_level.order = index
 						forward_policy_level.forward_policy_id = forward_policy.id

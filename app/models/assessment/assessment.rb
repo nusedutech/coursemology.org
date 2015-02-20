@@ -157,6 +157,10 @@ class Assessment < ActiveRecord::Base
     self.submissions.where(std_course_id: user_course_id).order(created_at: :desc).first
   end
 
+  def one_submission(user_course_id)
+    self.submissions.where(std_course_id: user_course_id).last
+  end
+
   def get_final_sbm_by_std(std_course_id)
     self.submissions.find_by_std_course_id(std_course_id)
   end

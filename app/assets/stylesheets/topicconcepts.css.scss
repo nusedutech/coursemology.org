@@ -31,12 +31,9 @@ g.node {
 .concept-tutorial {
   position: relative;
   top: -20px;
-  left: -20px;  
+  left: -20px;
+  background-color: #e1e1e1;  
 }
-
-.tutorial-nav, .tutorial-content {
-  padding-bottom: 130px;
-} 
 
 .concept-tutorial .post-animate-tutorial-nav, {
     width:0px;
@@ -173,7 +170,7 @@ g.node {
 
 .concept-tutorial .tutorial-content,
 .concept-tutorial .tutorial-nav {
-    min-height: 600px;
+    min-height: 750px;
 }
 
 .concept-tutorial .tutorial-content {
@@ -246,9 +243,10 @@ g.node {
   left: 140px;
 }
 .tutorial-content .task-content-container {
-  min-height:230px;
-  padding-left: 10px;
-  padding-right: 5px;
+    min-height:230px;
+    padding-left: 10px;
+    padding-right: 5px; 
+
 }
 #problemarea {
     float: left;

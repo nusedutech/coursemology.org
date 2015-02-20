@@ -58,7 +58,7 @@
               <%= form_tag '/', class: 'form-horizontal' do %>
                 <input type="hidden" id="concept_edge_id" name="concept_edge_id" value=""/>
                 <div class='control-group'>
-							    <%= label_tag 'enabled', 'Enabled:', class: 'control-label' %>
+							    <%= label_tag 'enabled', 'Enabled? :', class: 'control-label' %>
                   <div class='controls'>
 							      <%= check_box_tag 'enabled', 'yes' %>
                   </div>
@@ -76,18 +76,53 @@
 						</div>
             <hr>
 						<div style="margin-top: 2px;">
-							<input style="float: right" type="button" id="btn_next_concept_criterias" class="btn btn-warning" value="Back" onclick="show_edit_concept_criterias();"/>
+							<input style="float: right" type="button" id="btn_back_concept_criterias" class="btn btn-warning" value="Back" onclick="show_edit_concept_criterias();"/>
 							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
 						</div>
 					</div>
 
           <div id="div_criteria_fail_update" style="display: none">
             <hr>
-            <select id="concept_select" class="full-width">
+            <select id="fail_concept_select" class="full-width">
             </select>
             <hr>
 						<div style="margin-top: 2px;">
-							<input style="float: right" type="button" id="btn_next_concept_criterias" class="btn btn-success" value="Next" onclick=""/>
+							<input style="float: right" type="button" id="btn_next_concept_fail_criterias" class="btn btn-success" value="Next" onclick="edit_concept_fail_criteria();"/>
+							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
+						</div>
+					</div>
+
+          <div id="div_criteria_fail_update_next" style="display: none">
+            <hr>
+            <div>
+              <%= form_tag '/', class: 'form-horizontal' do %>
+                <input type="hidden" id="fail_concept_id" name="fail_concept_id" value=""/>
+                <div class='control-group'>
+							    <%= label_tag 'fail_enabled', 'Enabled? :', class: 'control-label' %>
+                  <div class='controls'>
+							      <%= check_box_tag 'fail_enabled', 'yes' %>
+                  </div>
+                </div>
+                <div class='control-group'>
+							    <%= label_tag 'fail_is_entry', 'Is Entry Concept? :', class: 'control-label' %>
+                  <div class='controls'>
+							      <%= check_box_tag 'fail_is_entry', 'yes' %>
+                  </div>
+                </div>
+                <div class='control-group'>
+							    <%= label_tag 'fail_wrong_threshold', 'Failing threshold:', class: 'control-label' %>
+                  <div class='controls'>
+							      <%= number_field_tag 'fail_wrong_threshold', '0', class: 'input-medium' %>
+                  </div>
+                </div>
+              <% end %>
+              <div class="pseudo-pull-right-child">
+                <input type="button" class="btn" value="Finish" onclick="finish_edit_concept_fail_criteria()"/>
+              </div>
+						</div>
+            <hr>
+						<div style="margin-top: 2px;">
+							<input style="float: right" type="button" id="btn_back_concept_fail_criterias" class="btn btn-warning" value="Back" onclick="show_edit_concept_fail_criteria();"/>
 							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
 						</div>
 					</div>
@@ -98,6 +133,7 @@
 		</tr>
 	</tbody>
 </table>
+
 <script>
 	
 
@@ -114,6 +150,7 @@
     $('#div_criteria_update_next').hide();
     $('#div_action').hide();
     $('#div_criteria_fail_update').hide();
+    $('#div_criteria_fail_update_next').hide();
   }
 
   function default_edit_console(){
@@ -198,9 +235,9 @@
       var result = get_concept_edge_relation({concept_edge_id : value});
       if (result != null)
 			{
-        $("#enabled").prop("checked", result.enabled);
-        $("#correct_threshold").prop("value", result.correct_threshold);
         $("#concept_edge_id").prop("value", result.concept_edge_id);
+        $("#enabled").prop("checked", result.enabled);
+        $("#correct_threshold").prop("value", result.criteria.correct_threshold);
 
 		    reset_edit_console();
 		    $('#div_criteria_update_next').show();
@@ -241,9 +278,9 @@
     if(selected_node != null){
       var result = get_all_concepts();
       if (result.concepts.length != 0) {
-        
+        $('#fail_concept_select').find('option').remove();
         $.each(result.concepts, function(i, concept) {
-          $('#concept_select').append('<option value="'+concept.id+'">'+concept.name+'</option>');
+          $('#fail_concept_select').append('<option value="'+concept.id+'">'+concept.name+'</option>');
         });
 
         reset_edit_console();
@@ -254,6 +291,50 @@
         cancel_concept_criterias();
       }
     }
+  }
+
+  function edit_concept_fail_criteria(){
+    var value = $('#fail_concept_select').prop('value');
+    if (value != null){
+      var result = get_concept_criteria({concept_id : value});
+      if (result != null)
+			{
+        $("#fail_enabled").prop("checked", result.enabled);
+        $("#fail_is_entry").prop("checked", result.is_entry);
+        $("#fail_wrong_threshold").prop("value", result.criteria.wrong_threshold);
+        $("#fail_concept_id").prop("value", result.concept_id);
+
+		    reset_edit_console();
+		    $('#div_criteria_fail_update_next').show();
+			}
+      else
+      {
+        alert('Criterias cannot be retrieved');
+        cancel_concept_criterias();
+      }
+    }
+    else {
+      alert('No dependency selected');
+      cancel_concept_criterias();
+    }
+  }
+
+  function finish_edit_concept_fail_criteria(){
+    reset_edit_console();
+
+    var enabled = $("#fail_enabled").prop("checked");
+    var is_entry = $("#fail_is_entry").prop("checked");
+    var wrong_threshold = $("#fail_wrong_threshold").prop("value");
+    var concept_id = $("#fail_concept_id").prop("value");
+    console.log({concept_id      : concept_id,
+                          wrong_threshold : wrong_threshold,
+                          enabled         : enabled,
+                          is_entry        : is_entry });
+    set_concept_criteria({concept_id      : concept_id,
+                          wrong_threshold : wrong_threshold,
+                          enabled         : enabled,
+                          is_entry        : is_entry });
+    show_edit_concept_fail_criteria();
   }
 
 	$(document).ready(function(){
@@ -762,6 +843,22 @@
 	  });
 	}
 
+   function set_concept_criteria(data){
+    $.ajax({
+	    type: "POST",
+	    dataType: "json",
+      data: data,
+	    async: false,
+	    url: "<%= set_concept_criteria_course_assessment_guidance_quizzes_path(@course) %>",
+	    success: function(json) {
+	    	alert(json.result);
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+	}
+
   function get_concept_required_edges(id){
 		var result;
 		$.ajax({
@@ -778,5 +875,23 @@
     	}
 	  });
 	  return result;
+	}
+
+  function get_concept_criteria(data){
+    var result;
+    $.ajax({
+	    type: "POST",
+	    dataType: "json",
+      data: data,
+	    async: false,
+	    url: "<%= get_concept_criteria_course_assessment_guidance_quizzes_path(@course) %>",
+	    success: function(json) {
+	    	result = json;
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+    return result;
 	}
 </script>

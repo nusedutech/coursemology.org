@@ -180,15 +180,20 @@ class StatsController < ApplicationController
     packageSubmissionUser = {}
     packageSubmissionUser[:id] = student.id
     packageSubmissionUser[:name] = student.name
-    packageSubmissionUser[:status] = "Pass" #default pass - we check for failing condition and overwrite
     packageSubmissionUser[:highestLevel] = "None" #default none
     packageSubmissionUser[:masteryString] = ""
+    packageSubmissionUser[:status] = ""
     packageSubmissionUser[:completionStatus] = is_completed ? "Completed" : "Not completed"
     packageSubmissionUser[:levelInfos] = []
     previousTiming = singleSubmission.created_at
 
     allProgressionGroups = singleSubmission.progression_groups.where("is_completed = 1")
     #Separate each entries by the progression levels
+
+    if allProgressionGroups.count > 0
+      packageSubmissionUser[:status] = "Pass" #default Pass
+    end
+
     allProgressionGroups.each do |progressionGroup|
       forwardGroup = progressionGroup.getForwardGroup
       tagName = progressionGroup.getTagName	

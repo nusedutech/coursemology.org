@@ -37,25 +37,25 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
           @summary[:forwardContent][:highestLevel] = tag.name
         end
 
-        allMcqAnswers = forwardGroup.getAllAnswers
         questions = []
+        allMcqAnswers = forwardGroup.getAllAnswers
         allMcqAnswers.each do |singleAnsweredQn|
           mcqQuestion = singleAnsweredQn.question.specific
-  	  questionSummary = {}
+  	      questionSummary = {}
           questionSummary[:correct] = singleAnsweredQn.correct
-	  questionSummary[:description] = mcqQuestion.description
-	  questionSummary[:rightOption] = mcqQuestion.getCorrectOptions 
+	        questionSummary[:description] = mcqQuestion.description
+	        questionSummary[:rightOption] = mcqQuestion.getCorrectOptions 
 
-	  #For incorrectly answered questions only
-	  if !singleAnsweredQn.correct
-	    @summary[:forwardContent][:wrongCount] += 1
-	    questionSummary[:chosenOption] = []						
-	    singleAnsweredQn.answer_options.each do |answerToOptionMapping|
-              questionSummary[:chosenOption] << answerToOptionMapping.option
-	    end
-	  end
+	        #For incorrectly answered questions only
+	       if !singleAnsweredQn.correct
+	         @summary[:forwardContent][:wrongCount] += 1
+	         questionSummary[:chosenOption] = []						
+	         singleAnsweredQn.answer_options.each do |answerToOptionMapping|
+             questionSummary[:chosenOption] << answerToOptionMapping.option
+	         end
+	       end
 
-	  questions << questionSummary
+	      questions << questionSummary
         end
 		
         summarizedContent = {}
@@ -99,7 +99,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
     else
       respond_to do |format|
         format.html { redirect_to course_assessment_policy_mission_path(@course, @policy_mission),
-                      notice: "Invalid policy mission attempted" }
+                      notice: "Invalid regulated training attempted" }
       end
     end
   end

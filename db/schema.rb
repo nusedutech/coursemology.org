@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150218175149) do
+ActiveRecord::Schema.define(:version => 20150220151812) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -203,17 +203,17 @@ ActiveRecord::Schema.define(:version => 20150218175149) do
   end
 
   create_table "assessment_forward_policy_levels", :force => true do |t|
-    t.integer  "order",                 :default => 0
-    t.integer  "progression_threshold", :default => -1
-    t.integer  "wrong_threshold",       :default => -1
-    t.integer  "seconds_to_complete",   :default => -1
-    t.integer  "tag_id"
+    t.integer  "order",                     :default => 0
+    t.integer  "progression_threshold",     :default => -1
+    t.integer  "wrong_threshold",           :default => -1
+    t.integer  "seconds_to_complete",       :default => -1
+    t.integer  "forward_policy_theme_id"
     t.datetime "deleted_at"
-    t.datetime "created_at",                               :null => false
-    t.datetime "updated_at",                               :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
     t.integer  "forward_policy_id"
-    t.boolean  "is_consecutive",        :default => false
-    t.string   "tag_type"
+    t.boolean  "is_consecutive",            :default => false
+    t.string   "forward_policy_theme_type"
   end
 
   add_index "assessment_forward_policy_levels", ["forward_policy_id"], :name => "index_assessment_forward_policy_levels_on_forward_policy_id"
@@ -257,11 +257,11 @@ ActiveRecord::Schema.define(:version => 20150218175149) do
 
   create_table "assessment_guidance_concept_criteria", :force => true do |t|
     t.integer  "guidance_concept_option_id"
-    t.integer  "guidance_concept_criteria_id"
-    t.string   "guidance_concept_criteria_type"
+    t.integer  "guidance_concept_criterion_id"
+    t.string   "guidance_concept_criterion_type"
     t.datetime "deleted_at"
-    t.datetime "created_at",                     :null => false
-    t.datetime "updated_at",                     :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
   end
 
   create_table "assessment_guidance_concept_edge_criteria", :force => true do |t|
@@ -433,6 +433,13 @@ ActiveRecord::Schema.define(:version => 20150218175149) do
     t.datetime "created_at",                    :null => false
     t.datetime "updated_at",                    :null => false
     t.boolean  "test",       :default => false
+  end
+
+  create_table "assessment_wrong_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "assessments", :force => true do |t|

@@ -81,11 +81,6 @@ class Assessment::AssessmentsController < ApplicationController
           action_map[ast.id][:actionSecondary] = "Reattempt"
           action_map[ast.id][:urlSecondary] = reattempt_course_assessment_submissions_path(@course, ast)
         end
-       
-        if ast.is_policy_mission? and ast.specific.revealAnswers? (curr_user_course)
-          action_map[ast.id][:actionTertiary] = "Answers"
-          action_map[ast.id][:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(@course, ast.specific)
-        end
 
         if ast.is_policy_mission?
           @listed_tags[ast.id] = sub_map[ast.id].getHighestProgressionGroupLevelName
@@ -103,13 +98,14 @@ class Assessment::AssessmentsController < ApplicationController
 
         if ast.is_policy_mission?
           @listed_tags[ast.id] = nil
-        end
-      elsif ast.is_policy_mission? and ast.specific.revealAnswers? (curr_user_course)
-        action_map[ast.id] = {}
-        action_map[ast.id][:actionTertiary] = "Answers"
-        action_map[ast.id][:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(@course, ast.specific)  
+        end 
       else
         action_map[ast.id] = {action: nil}
+      end
+
+      if ast.is_policy_mission? and ast.specific.revealAnswers? (curr_user_course)
+        action_map[ast.id][:actionTertiary] = "Answers"
+        action_map[ast.id][:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(@course, ast.specific)
       end
 
       action_map[ast.id][:new] = false

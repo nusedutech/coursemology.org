@@ -39,7 +39,7 @@
 		<hr/>
 		<div class = "multi-field-wrapper">
 			<div class = "sort-table multi-fields">
-				<% if (defined?(@fwdPolicyLevels)).nil? or @fwdPolicyLevels.nil? %>
+				<% if (defined?(@fwdPolicyLevels)).nil? or @fwdPolicyLevels.nil? or @fwdPolicyLevels.count <= 0 %>
 					<div class = "sort-table-entry multi-field">
 						<i class="icon-move move-icon"></i>
 						<select class = "tag-name" name="forward[tag_id][]">

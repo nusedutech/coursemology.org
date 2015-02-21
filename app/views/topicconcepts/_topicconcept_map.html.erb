@@ -142,7 +142,11 @@
 	var selected_node;
 	var required_concepts = [];
 	var concepts_list = [];
-	
+
+  //Constants
+	var DATA_HOVER_KEY = "data-hover-status";
+	var DATA_HIDE_STATUS = "hide";
+	var DATA_SHOW_STATUS = "show";
 
   function reset_edit_console(){
     $('#div_edit').hide();
@@ -489,15 +493,16 @@
 		  		}
 	  		}else{ // redaw dependency map	  	
 	  			
-			    var svgGroup = d3.select("svg#svg-concept g");	  
+			    var svgGroup = d3.select("svg#svg-concept g");	 
 			    loc_x = parseInt($('#svg-concept').parent().width())/2 - parseInt(layout._nodes[data.node.id].value.x);
 			    loc_y = parseInt($('#svg-concept').parent().height())/2 - parseInt(layout._nodes[data.node.id].value.y);
 			    
 			    zoom.scale(1);
 	  			zoom.translate([loc_x, loc_y]);
-	  			svgGroup.transition().duration(500).attr('transform', 'translate(' + zoom.translate() + ') scale(' + zoom.scale() + ')')
+	  			svgGroup.transition().duration(250).attr('transform', 'translate(' + zoom.translate() + ') scale(' + zoom.scale() + ')')
 	  			selected_node = data.node;
 
+          reset_all_tooltips();
 	  		}
 	  	}
 	  });	  
@@ -514,7 +519,8 @@
 		  });
 		  
 		  //delete event handler
-		  $('#div_tree').on('delete_node.jstree', function (e, data) {		  
+		  $('#div_tree').on('delete_node.jstree', function (e, data) {
+      		  
 			var result = topic_concept_data_delete(data.node.id, data.parent);
 			if(isNaN(result)){
 				alert("delete fails");
@@ -527,7 +533,8 @@
 		  	var result = topic_concept_data_move(data.node.id, data.parent,data.old_parent, data.position);
 			if(isNaN(result)){
 				alert("delete fails");
-			}		 
+			}
+
 		  });
 	   }
 	});
@@ -555,20 +562,36 @@
 	  });
 	  svg.call(zoom);	  
 	  
-	  d3.selectAll("g.node.enter").on('click', function(d, i){
-	  	  if(selected_node !=null && d==selected_node.id){
-		  	window.location.replace("<%= course_path(@course)%>" + "/topicconcepts/"+ d +"/master");
-		  }
-	  	  $("#div_tree").jstree(true).deselect_node(selected_node, true);
-		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);		  
-		  
-	  });
+	  
 
-    d3.selectAll("g.node")
-      .attr("title", get_topic_info)
-      .each(function(d, i){
-        $(this).tipsy({gravity: "w", opacity: 0.7, html: true});
+    d3.selectAll("g.node.enter").each(function(d, i){
+      $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+      //Note that trigger details are loaded into jstree select_node callback
+      $(this).tipsy({ trigger: "manual",
+                      gravity: "w", 
+                      opacity: 0.7, 
+                      html: true,
+                      fade: true,
+                      title: generate_tooltip_details
+      });
+
+      $(this).on("click", function(){
+        
+        toggle_tooltip(this);
+        return false;
+      });
+
+      //Overwrite to prevent tooltip interference from outside mousedown
+      $(this).on("mousedown", function(){
+        
+        return false;
+      });
     });
+
+    //Clear when dragging
+    $("#svg-concept").on("mousedown", function(){
+      reset_all_tooltips(this);
+    }); 
 	}
 	
 	function generate_dependency_map(node,json_required_data){
@@ -584,7 +607,7 @@
 	  var renderer = new dagreD3.Renderer();	  
 	  var layout_setting = dagreD3.layout();
 	  var layout1 = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-concept g"));	
-
+    ons
 	  var svg = d3.select("svg#svg-concept");
 	  var svgGroup = d3.select("svg#svg-concept g");	  
 	  var change_x = parseInt($('#svg-concept').parent().width())/2 - parseInt(layout1._nodes[node.id].value.x);
@@ -597,20 +620,17 @@
 		+ " scale(" + d3.event.scale + ")");
 	  }));		
 
-	  d3.selectAll("g.node.enter").on('click', function(d, i){
-	  	  if(selected_node !=null && d==selected_node.id){
-		  	window.location.replace("<%= course_path(@course)%>" + "/topicconcepts/"+ d +"/master");
-		  }
-	  	  $("#div_tree").jstree(true).deselect_node(selected_node, true);
+	  d3.selectAll("g.node").on('click', function(d, i){
+      $("#div_tree").jstree(true).deselect_node(selected_node, true);
 		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);
-		  
-	  });
-
+	  })
+     
     d3.selectAll("g.node")
       .attr("title", get_topic_info)
       .each(function(d, i){
-        $(this).tipsy({gravity: "w", opacity: 0.7, html: true});
-    });  
+        $(this).tipsy({gravity: "w", opacity: 1.0, html: true, fade: true});
+    });
+
 	}
 	
 	//function redraw() {;
@@ -769,7 +789,7 @@
 	  return result;
 	}
 		
-	function get_topic_info(concept_id, index){
+	function get_topic_info(concept_id){
 
     var result;
 		$.ajax({
@@ -894,4 +914,40 @@
 	  });
     return result;
 	}
+
+  //Setup tooltip information dynamically
+  function generate_tooltip_details () {
+    return get_topic_info(this.__data__);
+  }
+
+  //Toggle show/hide status of tooltip of param element
+  function toggle_tooltip (elem) {
+
+    d3.selectAll("g.node.enter").each(function(d, i){
+      if (this != elem && $(this).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+        $(this).tipsy("hide");
+        $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+      }
+    });
+
+    if ($(elem).attr(DATA_HOVER_KEY) == DATA_HIDE_STATUS) {
+      $(elem).tipsy("show");
+      $(elem).attr(DATA_HOVER_KEY, DATA_SHOW_STATUS);
+    }
+    else if ($(elem).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+      $(elem).tipsy("hide");
+      $(elem).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+    } 
+  }
+
+  function reset_all_tooltips() {
+    d3.selectAll("g.node.enter").each(function(d, i){
+      if ($(this).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+        $(this).tipsy("hide");
+        $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+      }
+    });
+  }
+
+
 </script>

@@ -1,7 +1,6 @@
 <link rel="stylesheet" href="dist/themes/default/style.min.css" />
 
 
-
 <% if ((cannot? :manage, Topicconcept) or @student_view) and @gqEnabled %>
 
   <% if !@user_course.is_student? %>
@@ -18,3 +17,5 @@
 
   <%= render  partial: "regular_interface" %>
 <% end %>
+
+

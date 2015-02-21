@@ -13,7 +13,7 @@ class Tag < ActiveRecord::Base
   
   has_many :taggable_tags, as: :tag, dependent: :destroy
  
-  has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy
+  has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy, class_name: "Assessment::ForwardPolicyLevel"
   
 	has_many :taggings, dependent: :destroy, class_name: 'TaggableTag'
   

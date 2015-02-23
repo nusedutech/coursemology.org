@@ -205,6 +205,11 @@ Coursemology::Application.routes.draw do
         
         post 'get_concept_criteria', to: 'guidance_quizzes#get_concept_criteria'
         post 'set_concept_criteria', to: 'guidance_quizzes#set_concept_criteria'
+
+        post 'get_guidance_concept_data', to: 'guidance_quizzes#get_guidance_concept_data'
+        post 'get_guidance_concept_edge_data', to: 'guidance_quizzes#get_guidance_concept_edge_data'
+
+        get 'get_topicconcept_data_with_criteria', to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
       end
     end
 

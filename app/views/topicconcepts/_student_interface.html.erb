@@ -6,35 +6,20 @@
 	</div>
 	<div id="tutorial-content" class="tutorial-content <%= hidden ? "post-animate-tutorial-content" : "pre-animate-tutorial-content" %> ">
 		<div class="task-header-container">
-			<div class="cur-concept-title">
-        <a class="btn btn-info btn-navbar collapsed stud-int-sidebar-collapse"><span class="icon-align-justify"></span></a>
-        <div class="cur-concept-title-slave">
-					<h2>HTML</h2>
-				</div>			
-			</div>
-			<div class="in-a-row">
-				<div><h4>Get 2 correct in a row</h4>
-					<div class="row-img">
-						<div class="img-correct-item"></div>
-						<div class="img-correct-item"></div>
-					</div>
-				</div>
-				<div class="cur-std-got"></div>
-			</div>
+			<%= render  partial: "student_interface_titlebar" %>
 		</div>
 		<div class="task-content-container">
-			<%= render  partial: "topicconcept_map", locals:{manage_permission: false} %>
+			<%= render  partial: "topicconcept_for_guidance_map" %>
 		</div>
 	</div>
 <div>
 
 <div class="topicconcept-loading-modal hide fade" id="processing-halt-all" data-backdrop="static" data-keyboard="true">
-  <h1>Processing.... Please wait</h1>
+  <h1 id="processing-halt-all-message">Processing.... Please wait</h1>
   <div class="processing-ball"></div>
   <div class="inner-processing-ball"></div>
 </div>
 
-<input type="hidden" id="cur-question" value="1">
 <script>
 	
 	$(document).ready(function(){
@@ -81,4 +66,14 @@
 		});
 	});
 	
+  function halt(message) {
+    var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
+    $('#processing-halt-all-message').html(parsedMessage);
+    $('#processing-halt-all').modal();
+  }
+
+  function resume() {
+    $('#processing-halt-all').modal('hide');
+  }
+
 </script>

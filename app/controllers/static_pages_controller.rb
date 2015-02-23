@@ -22,6 +22,11 @@ class StaticPagesController < ApplicationController
       url = session[:request_url]
       session[:request_url] = nil
       redirect_to url
+    else
+      respond_to do |format|
+        format.html
+        format.json { render json: { access_denied: flash[:alert] }}
+      end
     end
   end
 end

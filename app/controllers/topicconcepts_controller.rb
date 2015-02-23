@@ -283,7 +283,7 @@ class TopicconceptsController < ApplicationController
     result[:name] = @topicconcept.name;
     if @topicconcept.is_concept?
       result[:raw_right] = @topicconcept.all_raw_correct_answer_attempts(curr_user_course.id).size
-      result[:raw_total] = @topicconcept.all_raw_wrong_answer_attempts(curr_user_course.id).size
+      result[:raw_total] = result[:raw_right] + @topicconcept.all_raw_wrong_answer_attempts(curr_user_course.id).size
       latest_answers = @topicconcept.all_latest_answer_attempts(curr_user_course.id)
       result[:latest_right] = latest_answers[:correct].size
       result[:latest_total] = latest_answers[:correct].size + latest_answers[:wrong].size
@@ -351,9 +351,9 @@ class TopicconceptsController < ApplicationController
 
   #Set viewing permission and parameters of user
   def set_viewing_permissions
-    set_student_view
     @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
     if @gqEnabled
+      set_student_view
       set_student_layout
       set_hidden_sidebar_params
     end

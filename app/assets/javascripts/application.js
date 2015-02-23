@@ -425,3 +425,12 @@ if (!String.prototype.format) {
         });
     };
 };
+
+function access_denied_redirect(message, redirectURL){
+    var confirmationMessage = message + "\n\nPress Ok to go back to be redirected.";
+    var url = (typeof redirectURL == 'string' && redirectURL !== '') ? redirectURL : '/'
+ 
+    if (confirm(confirmationMessage) == true) {
+        window.location.href = url;
+    }
+}

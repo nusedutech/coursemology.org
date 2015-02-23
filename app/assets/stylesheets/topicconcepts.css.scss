@@ -183,16 +183,17 @@ g.node {
 }
 
 .tutorial-content .task-header-container {
-    height:70px;
+    min-height:70px;
     background-color: #1c758a;
 }
 
 .tutorial-content .task-header-container div.cur-concept-title{
-  height: 40px;
+  min-height: 40px;
   position: relative;
   top:13px;
+  padding-bottom: 13px;
   left:10px;
-  width: 200px;
+  width: 100%;
 }
 
 .tutorial-content .task-header-container h2 {
@@ -345,6 +346,85 @@ input.btnmargined {
     text-align: right;
 }
 
+.tipsy .tipsy-passWhen{
+    margin-top: 10px;
+    color: #0F0;
+}
+
+.tipsy .tipsy-failWhen{
+    color: #F00;
+}
+
+.tipsy .tipsy-passWhen,
+.tipsy .tipsy-failWhen{
+    text-align: left;
+    font-size: 18px;
+}
+
+.tipsy .tipsy-pass-statement,
+.tipsy .tipsy-fail-statement{
+    font-size: 16px;
+    text-align: left;
+    display: inline-block;
+}
+
+.tipsy .tipsy-passstrikeout{
+    text-decoration: line-through;
+}
+
+.tipsy .tipsy-failstrikeout{
+    text-decoration: line-through;
+}
+
+.tipsy .tipsy-passIcon,
+.tipsy .tipsy-failIcon{
+    font-size: 16px;
+    text-align: left;
+    margin-right: 5px;
+}
+
+.tipsy .tipsy-passIcon{
+    color: #0A0;
+}
+
+.tipsy .tipsy-failIcon{
+    color: #A00;
+}
+
+.tipsy .tipsy-passWord,
+.tipsy .tipsy-failWord{
+    font-weight: normal;
+    font-style: normal;
+    font-size: 16px;
+    text-align: left;
+}
+
+.tipsy .tipsy-fail-statement,
+.tipsy .tipsy-passWord{
+    color: #0F0;
+}
+
+.tipsy .tipsy-pass-statement,
+.tipsy .tipsy-failWord{
+    color: #F00;
+}
+
+.tipsy .tipsy-failstrikeout,
+.tipsy-failstrikeout .tipsy-passWord,
+.tipsy-failstrikeout .tipsy-failWord{
+    color: #A00;
+}
+
+.tipsy .tipsy-passstrikeout,
+.tipsy-passstrikeout .tipsy-passWord,
+.tipsy-passstrikeout .tipsy-failWord{
+    color: #0A0;
+}
+
+.tipsy .tipsy-condition-margin{
+    margin-bottom: 8px;
+}
+
 select.full-width{
     width: 100%;
 }
@@ -448,4 +528,126 @@ div.inner-processing-ball {
 
     margin-bottom: 20px;
 }
+
+g.node.enter.entry rect {
+  fill: #99FF99; 
+  stroke: #008000;
+}
+
+g.node.enter.entry text {
+  fill: #008000;
+  font-weight: normal;
+}
+
+g.node.enter.entry:hover rect {
+  fill: #77EE77; 
+  stroke: #007000;
+  stroke-width: 3px;
+}
+
+g.node.enter.entry:hover text {
+  fill: #007000;
+  font-weight: bold;
+}
+
+g.node.enter.disabled rect {
+  fill: #AAAAAA; 
+  stroke: #000000;
+  opacity: 0.3;
+}
+
+g.node.enter.disabled text {
+  fill: #000000;
+  font-weight: normal;
+  opacity: 0.3;
+}
+
+g.node.enter.enabled rect {
+  fill: #CCCCCC; 
+  stroke: #000000;
+}
+
+g.node.enter.enabled text {
+  fill: #000000;
+  font-weight: normal;
+}
+
+g.node.enter.enabled:hover rect {
+  fill: #BBBBBB; 
+  stroke-width: 3px;
+}
+
+g.node.enter.enabled:hover text {
+  font-weight: bold;
+}
+
+g.edgeLabel.enter {
+  cursor: pointer;
+}
+
+g.edgePath.enter.entrystart.entryend {
+  stroke: #008000;
+  stroke-width: 2;
+}
+
+g.edgePath.enter.enabledstart.enabledend {
+  stroke: #000000;
+  stroke-width: 2;
+}
+
+g.edgePath.enter.entrystart.enabledend,
+g.edgePath.enter.enabledstart.entryend {
+  stroke: #CCCC00;
+  stroke-width: 2;
+}
+
+g.edgePath.enter.entrystart.disabledend,
+g.edgePath.enter.enabledstart.disabledend,
+g.edgePath.enter.disabledstart.entryend,
+g.edgePath.enter.disabledstart.enabledend,
+g.edgePath.enter.disabledstart.disabledend {
+  stroke: #000000;
+  opacity: 0.3;
+  stroke-dasharray: 5,5;
+  stroke-width: 2;
+}
+
+
+g.edgeLabel.enter.entrystart.entryend text{
+  fill: #008000;
+}
+
+g.edgeLabel.enter.entrystart.entryend:hover text{
+  fill: #007000;
+  font-weight: bold;
+}
+
+g.edgeLabel.enter.enabledstart.enabledend text{
+  fill: #000000;
+}
+
+g.edgeLabel.enter.enabledstart.enabledend:hover text{
+  font-weight: bold;
+}
+
+g.edgeLabel.enter.entrystart.enabledend text,
+g.edgeLabel.enter.enabledstart.entryend text{
+  fill: #A0A000;
+}
+
+g.edgeLabel.enter.entrystart.enabledend:hover text,
+g.edgeLabel.enter.enabledstart.entryend:hover text{
+  fill: #909000;
+  font-weight:bold;
+}
+
+g.edgeLabel.enter.entrystart.disabledend text,
+g.edgeLabel.enter.enabledstart.disabledend text,
+g.edgeLabel.enter.disabledstart.entryend text,
+g.edgeLabel.enter.disabledstart.enabledend text,
+g.edgeLabel.enter.disabledstart.disabledend text {
+  fill: #000000;
+  opacity: 0.3
+}
+
 

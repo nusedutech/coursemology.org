@@ -12,9 +12,11 @@
   <li class="<%= "active" if @tab == "TrainingPreference" %>">
     <a href="<%= course_preferences_path(@course) %>?_tab=training">Training</a>
   </li>
+  <% if false %>
   <li class="<%= "active" if @tab == "TopicconceptPreference" %>">
     <a href="<%= course_preferences_path(@course) %>?_tab=topicconcept">Topic - Concept</a>
   </li>
+  <% end %>
   <li class="<%= "active" if @tab == "McqPreference" %>">
     <a href="<%= course_preferences_path(@course) %>?_tab=mcq">MCQ</a>
   </li>

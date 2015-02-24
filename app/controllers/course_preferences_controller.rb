@@ -44,6 +44,8 @@ class CoursePreferencesController < ApplicationController
       when 'topicconcept'
         @tab = 'TopicconceptPreference'
         @enable = Assessment::GuidanceQuiz.is_enabled?(@course)
+        @passing_edge_lock = Assessment::GuidanceQuiz.is_passing_edge_lock?(@course)
+        @neighbour_entry_lock = Assessment::GuidanceQuiz.is_neighbour_entry_lock?(@course)
       else
         @tab = 'CoursePreference'
         atts = []

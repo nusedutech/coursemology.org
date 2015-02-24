@@ -200,6 +200,9 @@ Coursemology::Application.routes.draw do
     resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
       collection do
         post :set_enabled, to: 'guidance_quizzes#set_enabled'
+        post :set_passing_edge_lock, to: 'guidance_quizzes#set_passing_edge_lock'
+        post :set_neighbour_entry_lock, to: 'guidance_quizzes#set_neighbour_entry_lock'
+
         post :set_concept_edge_relation, to: 'guidance_quizzes#set_concept_edge_relation'
         post :get_concept_edge_relation, to: 'guidance_quizzes#get_concept_edge_relation'
         

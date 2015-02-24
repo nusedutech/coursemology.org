@@ -7,13 +7,31 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
   def set_enabled
-    enabled = params[:enable]
+    enabled = params[:data]
 
     if enabled == "true"
 		  Assessment::GuidanceQuiz.enable(@course)
     else
       Assessment::GuidanceQuiz.disable(@course)
     end
+    
+    respond_to do |format| 
+      format.json { render json: { result: true}}
+    end
+  end
+
+  def set_passing_edge_lock
+    enabled = params[:data]
+		Assessment::GuidanceQuiz.set_passing_edge_lock(@course, enabled == "true")
+    
+    respond_to do |format| 
+      format.json { render json: { result: true}}
+    end
+  end
+
+  def set_neighbour_entry_lock
+    enabled = params[:data]
+		Assessment::GuidanceQuiz.set_neighbour_entry_lock(@course, enabled == "true")
     
     respond_to do |format| 
       format.json { render json: { result: true}}

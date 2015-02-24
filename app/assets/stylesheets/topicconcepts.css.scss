@@ -399,12 +399,18 @@ input.btnmargined {
     text-align: left;
 }
 
-.tipsy .tipsy-fail-statement,
+.tipsy .tipsy-fail-statement{
+    color: #080;
+}
+
 .tipsy .tipsy-passWord{
     color: #0F0;
 }
 
-.tipsy .tipsy-pass-statement,
+.tipsy .tipsy-pass-statement{
+    color: #800;
+}
+
 .tipsy .tipsy-failWord{
     color: #F00;
 }
@@ -650,4 +656,12 @@ g.edgeLabel.enter.disabledstart.disabledend text {
   opacity: 0.3
 }
 
+input[type = checkbox].normalized-topicconcept {
+  margin-top: 4px;
+  margin-right: 5px;
+}
 
+div.normalized-topicconcept{
+  display:block; 
+  padding: 10px 0;
+}

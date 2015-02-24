@@ -62,13 +62,13 @@ class Assessment::PolicyMission < ActiveRecord::Base
       result[:action] = nil
     elsif sub
       result[:action] = sub.attempting? ? "Resume" : "Review"
-      result[:url] = edit_course_assessment_submission_path(course, self, sub, from_lesson_plan: true)
+      result[:url] = edit_course_assessment_submission_path(course, self.assessment, sub, from_lesson_plan: true)
     elsif (self.opened? and (self.as_assessment.class == Assessment::Training or
         self.dependent_id.nil? or self.dependent_id == 0 or
         (!dependent_ast_sub.nil? and !dependent_ast_sub.attempting?))) or
         manage_assessment
       result[:action] = "Attempt"
-      result[:url] = new_course_assessment_submission_path(course, self, from_lesson_plan: true)
+      result[:url] = new_course_assessment_submission_path(course, self.assessment, from_lesson_plan: true)
     else
       result[:action] = nil
     end

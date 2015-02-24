@@ -1,0 +1,45 @@
+<% menuItemSelected = 0 %>
+<% if current_page? :course_topicconcepts %>
+   <% menuItemSelected = 0; %>
+<% end %>
+
+<div class="slimScrollDiv">
+  <ul>
+    <li class="required-concept-node <%= menuItemSelected == 0 ? "selected" : "" %> <%= menuItemSelected > 0 ? "completed" : "" %>">
+  		<a href="<%= course_topicconcepts_path(@course) %>">
+      	<div class="subway-icon">
+          <div class="pipe"></div>							
+          <div class="status exercise-node"></div>						
+      	</div>
+      	<span class="progress-title">Select</span>
+  		</a>
+    </li>
+    <li class="required-concept-node <%= menuItemSelected == 1 ? "selected" : "" %> <%= menuItemSelected > 1 ? "completed" : "" %>">
+  		<a>
+      	<div class="subway-icon">
+          <div class="pipe"></div>							
+          <div class="status exercise-node"></div>						
+      	</div>
+      	<span class="progress-title">Solve</span>
+  		</a>
+    </li>
+    <li class="required-concept-node <%= menuItemSelected == 2 ? "selected" : "" %> <%= menuItemSelected > 2 ? "completed" : "" %>">
+  		<a>
+      	<div class="subway-icon">
+          <div class="pipe"></div>							
+          <div class="status exercise-node"></div>						
+      	</div>
+      	<span class="progress-title">Review</span>
+  		</a>
+    </li>
+    <li class="main-concept <%= menuItemSelected == 3 ? "selected" : "" %> <%= menuItemSelected > 3 ? "completed" : "" %>">
+  		<a>
+    		<div class="subway-icon">
+        	<div class="pipe"></div>							
+        	<div class="status exercise-node"></div>						
+    		</div>
+    		<span class="progress-title">Discuss</span>
+  		</a>
+    </li>
+  </ul>
+</div>

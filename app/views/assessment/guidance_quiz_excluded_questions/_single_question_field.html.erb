@@ -1,0 +1,59 @@
+<tr id="ques-<%= q.id %>">
+  <td><%= index + 1 %></td>
+	<td>
+    <div class="ellipsis">
+      <p class="p-bold"><%= q.title %></p>
+      <% if q.as_question.class == Assessment::McqQuestion %>
+          <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+      <% elsif q.as_question.class == Assessment::MpqQuestion %>
+          <%= style_format(q.description) %>
+          <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
+      <% else %>
+          <%= style_format(q.description) %>
+      <% end %>
+    </div>
+    <a class="show-more small-text float-right">Show More</a>
+  </td>
+	<td>
+		  	<% q.topicconcepts.uniq.each do |tag| %>
+		        <a>
+		            <span class="label label-info"><%= tag.name %></span>
+		        </a>
+		    <% end %>
+		    <% diffg = @course.tag_groups.where(:name => 'Difficulty')%>
+		    <% diffs = diffg.count > 0 ? diffg[0].tags : [] %>
+		    <% (q.tags.uniq - diffs).each do |tag| %>
+		        <%= link_to course_tag_path(@course, tag) do %>
+		            <span class="label label-info"><%= tag.name %></span>
+		        <% end %>
+		    <% end %>
+		</td>
+		<td>
+			<% diff = q.tags.uniq & diffs%>
+			<% if (!diff.nil? && !diff[0].nil?) %>
+				<a><span class="label label-info label-green"><%= diff[0].name %></span></a>
+			<% end %>
+	 	</td>
+    <td>
+      <% q.existingAssessments.each do |curAssessment| %>
+        <% if curAssessment.is_mission? %>
+          <%= link_to course_assessment_mission_path(@course, curAssessment.specific) do %>
+				    <span class="label label-active" style="">Mission: <%= curAssessment.title %></span>
+		      <% end %>
+        <% elsif curAssessment.is_training? %>
+          <%= link_to course_assessment_training_path(@course, curAssessment.specific) do %>
+				    <span class="label label-active">Training: <%= curAssessment.title %></span>
+		      <% end %>
+        <% elsif curAssessment.is_policy_mission? %>
+          <%= link_to course_assessment_policy_mission_path(@course, curAssessment.specific) do %>
+				    <span class="label label-active">Regulated Trainings: <%= curAssessment.title %></span>
+		      <% end %>
+        <% end %> 
+        <br/>   
+      <% end %>
+    </td>
+		<td>
+		    <%= check_box_tag 'question_#{q.id}', q.id, status, :name => 'gq[exclusion][]', class: 'question_option' %>           
+
+		</td>
+	</tr>

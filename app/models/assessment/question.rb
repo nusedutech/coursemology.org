@@ -29,6 +29,8 @@ class Assessment::Question < ActiveRecord::Base
   has_many :taggable_tags, as: :taggable, dependent: :destroy
   has_many :tags, through: :taggable_tags, source: :tag, source_type: "Tag"
   has_many :topicconcepts, through: :taggable_tags, source: :tag, source_type: "Topicconcept"
+
+  has_one :exclusion_status, class_name: Assessment::GuidanceQuizExcludedQuestion, dependent: :destroy
   
   before_update :clean_up_description, :if => :description_changed?
   after_update  :update_assessment_grade, if: :max_grade_changed?
@@ -164,7 +166,21 @@ class Assessment::Question < ActiveRecord::Base
     end
   end
 
-  #proxy methods
+  def existingAssessments
+    if self and self.id
+      Assessment.joins("LEFT JOIN  question_assessments ON question_assessments.assessment_id = assessments.id")
+      .where("question_assessments.question_id = ?", self.id).uniq
+    else
+      []
+    end
+  end
+
+  def relatedAnswers
+    if self and self.id
+      Assessment::Answer.where(question_id: self.id)
+    end
+  end
+
   def self.assessments
     Assessment.joins("LEFT JOIN  question_assessments ON question_assessments.assessment_id = assessments.id")
     .where("question_assessments.question_id IN (?)", self.all).uniq

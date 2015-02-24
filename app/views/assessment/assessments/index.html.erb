@@ -157,9 +157,10 @@
           <% end %>
           <% if curr_user_course.id %>
 							<td>
-								<div id="<%= ast.id %>"></div>
+								<div id="<%= ast.id %>" style="margin-top: 4px; margin-bottom: 4px;"></div>
                 <% if model_name == "policy_mission" %>
-                  <div id="<%= ast.id %>-secondary"></div>
+                  <div id="<%= ast.id %>-secondary" style="margin-top: 4px; margin-bottom: 4px;"></div>
+                  <div id="<%= ast.id %>-tertiary" style="margin-top: 4px; margin-bottom: 4px;"></div>
                 <% end %>
               </td>
           <% end %>

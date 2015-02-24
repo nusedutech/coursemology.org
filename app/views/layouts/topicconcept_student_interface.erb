@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html ng-app="coursemologyApp">
+<head>
+  <title>Coursemology</title>
+  <!--[if lt IE 9]>
+  <script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/images/favicon.png">
+
+  <%= stylesheet_link_tag    "application", :media => "all" , :debug => false %>
+  <%= javascript_include_tag "application", :debug => false %>
+
+  <%= include_gon %>
+  <%= csrf_meta_tags %>
+  <% if @course && @course.id && (can? :participate, Course) %>
+      <% if @course.course_themes.count > 0 %>
+          <% theme = @course.course_themes.first %>
+          <% if File.exist?("#{theme.theme_folder_url}/style.css") %>
+              <link href="<%= "#{theme.theme_folder_url}/style.css" %>" media="all"
+                    rel="stylesheet" type="text/css" />
+          <% end %>
+      <% end %>
+      <% if @theme_settings %>
+          <style>
+              <%= @theme_settings['Custom CSS'] %>
+              <% if @theme_settings['Background Color'] && @theme_settings['Background Color'] != '' %>
+              body {
+                  background-color: <%= @theme_settings['Background Color'] %>
+              }
+              <% end %>
+              <% if @theme_settings['Background Image'] && @theme_settings['Background Image'] != '' %>
+              body {
+                  background-image: url(<%= @theme_settings['Background Image'] %>);
+                  background-position: bottom left;
+                  background-repeat: no-repeat;
+              }
+              <% end %>
+              <% if @theme_settings['Sidebar Link Color'] && @theme_settings['Sidebar Link Color'] != '' %>
+              .sidebar a, .sidebar {
+                  color: <%= @theme_settings['Sidebar Link Color'] %>;
+              }
+              .sidenav-count {
+                  background-color: <%= @theme_settings['Sidebar Link Color'] %>;
+              }
+              <% end %>
+          </style>
+      <% end %>
+  <% else %>
+      <style>
+          body {
+              background-color: white;
+          }
+      </style>
+  <% end %>
+
+  <%= render partial: "layouts/google_analytics" %>
+  <%= render partial: "layouts/facebook_login" %>
+  <script async src='http://www.google.com/jsapi'></script>
+</head>
+<body>
+<div class="modal_loading"></div>
+<%= render "layouts/header" %>
+<% if @setting %>
+    <div class="container-fluid">
+      <%= render "layouts/setting_layout" %>
+    </div>
+<% elsif @admin %>
+    <div class="container-fluid">
+      <%= render "layouts/admin_layout" %>
+    </div>
+<% elsif @course && @course.id && (can? :participate, Course) %>
+    <div class="container course-content">
+      <%= render "layouts/topicconcept_course_layout" %>
+    </div>
+<% else %>
+    <div class="container-fluid">
+      <%= yield %>
+    </div>
+<% end %>
+<footer class="compress">
+  <hr/>
+  <div class="navbar-bottom">
+    <div class="container-fluid">
+      <p class="pull-left">&copy; 2013 - 2014 Coursemology.org. All Rights Reserved.</p>
+      <nav class="pull-right">
+        <ul class="nav">
+          <li><%= link_to "Term of Service", terms_of_service_path %></li>
+          <li><%= link_to "About Us", about_path %></li>
+          <li><%= link_to "Privacy Policy", privacy_policy_path %></li>
+          <li><%= link_to "Contact Us", contact_us_path %></li>
+          <li><a href="https://github.com/Coursemology/coursemology.org.git">Source code</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</footer>
+<%= debug(params) if Rails.env.development? %>
+</body>
+</html>
+

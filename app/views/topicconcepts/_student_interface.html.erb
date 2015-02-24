@@ -1,0 +1,79 @@
+
+<div class="concept-tutorial">
+	<div id="tutorial-nav" class="tutorial-nav <%= hidden ? "post-animate-tutorial-nav" : "pre-animate-tutorial-nav" %> ">
+		<%= render  partial: "student_interface_progressbar" %>
+		<%= render  partial: "student_interface_sidebar" %>
+	</div>
+	<div id="tutorial-content" class="tutorial-content <%= hidden ? "post-animate-tutorial-content" : "pre-animate-tutorial-content" %> ">
+		<div class="task-header-container">
+			<%= render  partial: "student_interface_titlebar" %>
+		</div>
+		<div class="task-content-container">
+			<%= render  partial: "topicconcept_for_guidance_map" %>
+		</div>
+	</div>
+<div>
+
+<div class="topicconcept-loading-modal hide fade" id="processing-halt-all" data-backdrop="static" data-keyboard="true">
+  <h1 id="processing-halt-all-message">Processing.... Please wait</h1>
+  <div class="processing-ball"></div>
+  <div class="inner-processing-ball"></div>
+</div>
+
+<script>
+	
+	$(document).ready(function(){
+		$(".sidebar-collapse").click(function () {
+	  	var mainControls = $('#mainscreen-control');
+    	if(mainControls.hasClass("span10")) {
+		    $('.span2.sidebar').toggle('slow', function() {      
+          $('#mainscreen-control').removeClass("span10").addClass("span12");
+        });
+    	}
+	  	else if (mainControls.hasClass("span12")){
+        $('#mainscreen-control').removeClass("span12").addClass("span10");
+        $('.span2.sidebar').toggle('slow', function() {      
+        });
+    	}
+
+		});
+
+    $(".stud-int-sidebar-collapse").click(function () {
+	  	var tutorialContent = $('#tutorial-content');
+    	if(tutorialContent.css("margin-left") == "200px") {
+		    
+        $( "#tutorial-nav" ).animate({
+          width: "0px"
+        }, 500, function() {
+          $(this).hide();
+        });
+        tutorialContent.animate({
+          marginLeft: "0px"
+        }, 500);
+        //tutorialContent.css("margin-left", "0px");
+    	}
+	  	else if (tutorialContent.css("margin-left") == "0px"){
+        $( "#tutorial-nav" ).show();
+        $( "#tutorial-nav" ).animate({
+          width: "200px"
+        }, 500);
+        tutorialContent.animate({
+          marginLeft: "200px"
+        }, 500);
+        //tutorialContent.css("margin-left", "200px");
+    	}
+
+		});
+	});
+	
+  function halt(message) {
+    var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
+    $('#processing-halt-all-message').html(parsedMessage);
+    $('#processing-halt-all').modal();
+  }
+
+  function resume() {
+    $('#processing-halt-all').modal('hide');
+  }
+
+</script>

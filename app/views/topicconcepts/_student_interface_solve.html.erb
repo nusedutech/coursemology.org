@@ -1,0 +1,41 @@
+<form id="answerform" name="answerform">
+	<div id="problemarea" class="problemarea">
+		<div id="workarea" class="workarea"><%= render "do_mcq" %></div>
+		<div id="hintsarea" class="hintsarea"></div>
+	</div>
+	<div id="answer_area_wrap">
+		<div id="answercontent" class="info-box">
+			<span class="info-box-header">Answer</span>
+			<div id="solutionarea" class="fancy-scrollbar solutionarea">
+				<div data-reactid=".w">
+					<div class="paragraph" data-reactid=".w.0">
+						<div data-reactid=".w.0.0">
+							<span data-reactid=".w.0.0.0:0">Select the correct answer.</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<ul id="examples" style="display: none"></ul>
+			<div class="answer-buttons">
+				<div class="check-answer-wrapper">
+					<input id="check-answer-button" class="btn btn-success" type="button" value="Check Answer">
+					<input id="next-question" style="display: none" class="btn btn-success" type="button" value="Next Question">
+				</div>
+					<input id="next-question-button" class="simple-button green" type="button" value="" name="correctnextbutton" style="display:none;">
+				<div id="positive-reinforcement" style="display: none;">
+					<img src="/images/face-smiley.png">
+				</div>
+					<span id="show-solution-button-container"></span>
+				<div id="check-answer-results">
+					<p class="check-answer-message info-box-sub-description"></p>
+				</div>
+			</div>
+			
+		</div>
+		<div class="info-box hint-box" style="top: 0px;">
+			<span class="info-box-header">Show me how</span>
+			<div id="get-hint-button-container"></div>
+			<span id="hint-remainder"></span>
+		</div>
+	</div>
+</form>

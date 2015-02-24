@@ -41,6 +41,11 @@ class CoursePreferencesController < ApplicationController
       when 'sidebar'
         @tab = 'Sidebar'
         @ranking = @course.student_sidebar_ranking
+      when 'topicconcept'
+        @tab = 'TopicconceptPreference'
+        @enable = Assessment::GuidanceQuiz.is_enabled?(@course)
+        @passing_edge_lock = Assessment::GuidanceQuiz.is_passing_edge_lock?(@course)
+        @neighbour_entry_lock = Assessment::GuidanceQuiz.is_neighbour_entry_lock?(@course)
       else
         @tab = 'CoursePreference'
         atts = []

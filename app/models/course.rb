@@ -35,9 +35,11 @@ class Course < ActiveRecord::Base
   has_many  :course_navbar_preferences, dependent: :destroy
 
   has_many :questions, class_name: "Assessment::Question", dependent: :destroy
+  has_many :exclusion_statuses, through: :questions, class_name: "Assessment::GuidanceQuizExcludedQuestion"
   has_many :topicconcepts, dependent: :destroy
   has_many :tagged_questions, through: :topicconcepts, source: :questions, dependent: :destroy
-  
+  has_many :concept_edges, class_name: "ConceptEdge", through: :topicconcepts, source: :concept_edge_dependent_concepts
+
   has_many  :missions, class_name: "Assessment::Mission", through: :assessments,
             source: :as_assessment, source_type: "Assessment::Mission" do
     def published
@@ -50,6 +52,9 @@ class Course < ActiveRecord::Base
 
   has_many  :trainings, class_name: "Assessment::Training", through: :assessments,
             source: :as_assessment, source_type: "Assessment::Training"
+
+  has_many   :guidance_quizzes, class_name: "Assessment::GuidanceQuiz", through: :assessments,
+            source: :as_assessment, source_type: "Assessment::GuidanceQuiz"
 
   amoeba do
     include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences,
@@ -115,7 +120,7 @@ class Course < ActiveRecord::Base
   # of from and to: i.e. entries starting at both from and to
   # are included. [from, to]
   def lesson_plan_virtual_entries(from = nil, to = nil, curr_user_course = nil, manage_assessment = false)
-    self.assessments.where("TRUE " +
+    self.assessments.exclude_guidance_quiz.where("TRUE " +
                                (if from then "AND assessments.open_at >= :from " else "" end) +
                                (if to then "AND assessments.open_at <= :to" else "" end),
                            :from => from, :to => to

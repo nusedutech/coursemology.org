@@ -2,11 +2,16 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions]
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data]
+
+	before_filter :set_viewing_permissions, only:[:index]
+
   def index   
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
     @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+
+    @user_course = curr_user_course
     Rails.cache.clear
   end
   
@@ -47,10 +52,6 @@ class TopicconceptsController < ApplicationController
       end
           
     end
-  end
-  
-  def concept_questions
-    @meow = "cats"
   end
 
   def get_topic_tree(parent ,included_topicconcepts)
@@ -214,7 +215,7 @@ class TopicconceptsController < ApplicationController
     dc = Topicconcept.find params[:id]
     tc = Topicconcept.where(:course_id => @course.id, :typename => 'concept').select(:name)
     respond_to do |format|
-      format.json { render :json => { :dependencies => dc.required_concepts, :concepts_list => tc.map { |e| e.name } }}      
+      format.json { render :json => { :dependencies => dc.required_concepts, :concepts_list => tc.map { |e| e.name }}}      
     end
   end
   
@@ -262,7 +263,7 @@ class TopicconceptsController < ApplicationController
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
-      if can? :manage, Topicconcept
+      if can? :manage, Topicconcept and !session[:topicconcept_student_view]
         user_ability = 'manage'
         format.json { render :json =>{:user_ability => user_ability, :topictrees => @topics_concepts_with_info}}
       else
@@ -277,4 +278,84 @@ class TopicconceptsController < ApplicationController
     end    
   end
   
+  def get_topicconcept_rated_data
+    result = {}
+    result[:name] = @topicconcept.name;
+    if @topicconcept.is_concept?
+      result[:raw_right] = @topicconcept.all_raw_correct_answer_attempts(curr_user_course.id).size
+      result[:raw_total] = result[:raw_right] + @topicconcept.all_raw_wrong_answer_attempts(curr_user_course.id).size
+      latest_answers = @topicconcept.all_latest_answer_attempts(curr_user_course.id)
+      result[:latest_right] = latest_answers[:correct].size
+      result[:latest_total] = latest_answers[:correct].size + latest_answers[:wrong].size
+      optimistic_answers = @topicconcept.all_optimistic_answer_attempts(curr_user_course.id)
+      result[:optimistic_right] = optimistic_answers[:correct].size
+      result[:optimistic_total] = optimistic_answers[:correct].size + optimistic_answers[:wrong].size
+      pessimistic_answers = @topicconcept.all_pessimistic_answer_attempts(curr_user_course.id)
+      result[:pessimistic_right] = pessimistic_answers[:correct].size
+      result[:pessimistic_total] = pessimistic_answers[:correct].size + pessimistic_answers[:wrong].size
+    else
+      result[:raw_right] = "nil"
+      result[:raw_total] = "nil"
+      result[:latest_right] = "nil"
+      result[:latest_total] = "nil"
+      result[:optimistic_right] = "nil"
+      result[:optimistic_total] = "nil"
+      result[:pessimistic_right] = "nil"
+      result[:pessimistic_total] = "nil"
+    end
+    
+    respond_to do |format|
+      format.json { render json: result}
+    end 
+  end
+
+  def get_all_concepts
+    respond_to do |format|
+      format.json { 
+        render json: {
+          concepts: @course.topicconcepts.concepts
+        }
+      }
+    end
+  end
+
+  #Get the edges from a concept where it is the dependent party
+  def get_concept_required_edges
+    concept = @course.topicconcepts.concepts.where(id: params[:id]).first
+    if !concept.nil?
+      required_concept_edges = concept.concept_edge_required_concepts
+      respond_to do |format|
+        format.json { render :json => { :current_concept => concept, :dependencies => required_concept_edges.map { |e| { concept_edge_id: e.id, required_concept_name: e.required_concept.name} }}}      
+      end
+    else
+      raise "Concept id is invalid"
+    end
+  end
+
+	def set_student_layout
+		if cannot? :manage, Topicconcept or @student_view
+      self.class.layout "topicconcept_student_interface"
+    else
+      self.class.layout "application"
+    end
+  end
+
+  def set_student_view
+    session[:topicconcept_student_view] = !params[:student_view].nil? and params[:student_view] == "true"
+    @student_view = session[:topicconcept_student_view]
+  end
+
+  def set_hidden_sidebar_params
+    @hidden = !params[:hideSideBar].nil? and params[:hideSideBar] == "true"
+  end
+
+  #Set viewing permission and parameters of user
+  def set_viewing_permissions
+    @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
+    if @gqEnabled
+      set_student_view
+      set_student_layout
+      set_hidden_sidebar_params
+    end
+  end
 end

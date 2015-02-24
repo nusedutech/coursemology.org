@@ -122,7 +122,7 @@ Coursemology::Application.routes.draw do
         end
       end
 
-			resources :assessment_submissions,
+      resources :assessment_submissions,
                 path:       :submissions,
                 as:         :submissions,
                 controller: :policy_mission_submissions,
@@ -130,11 +130,18 @@ Coursemology::Application.routes.draw do
                 constraints: PolicyMissionConstraint.new do
         member do
           post 'edit' => 'policy_mission_submissions#edit'
-					get 'export' => 'policy_mission_submissions#show_export_excel'
+	  get 'export' => 'policy_mission_submissions#show_export_excel'
           delete 'destroy' => 'policy_mission_submissions#destroy'
         end
         collection do
           get 'reattempt' => 'policy_mission_submissions#reattempt'
+        end
+      end
+
+      resources :assessment_submissions,
+                path:       :guidance_quiz_submissions,
+                controller: :quidance_quiz_submissions do
+        collection do
         end
       end
     end
@@ -159,6 +166,14 @@ Coursemology::Application.routes.draw do
       end
     end
     
+    resources :assessment_guidance_quiz_excluded_questions, path: :guidance_quiz_excluded_questions, controller: :guidance_quiz_excluded_questions , module: :assessment do
+      collection do
+        get :exclude_questions, to: 'guidance_quiz_excluded_questions#exclude_questions'
+        get :get_tags, to: 'guidance_quiz_excluded_questions#get_tags'
+        put :update_questions, to: 'guidance_quiz_excluded_questions#update_questions'
+      end
+    end
+
     resources :assessment_missions, path: 'missions', controller: :missions, module: :assessment do
       collection do
         get :index, to: 'assessments#index', type: 'mission'
@@ -170,16 +185,36 @@ Coursemology::Application.routes.draw do
       get 'dump_code' => 'missions#dump_code'
     end
 
-		resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
-			collection do
-				get :index, to: 'assessments#index', type: 'policy_mission'
+    resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
+      collection do
+	get :index, to: 'assessments#index', type: 'policy_mission'
         get 'stats' => 'policy_missions#stats'
-				get 'submissions' => 'assessments#listall', type: 'policy_mission'
-			end
+	get 'submissions' => 'assessments#listall', type: 'policy_mission'
+      end
       member do
         put 'update_questions' => 'policy_missions#update_questions'
+        get 'answer_sheet' => 'policy_missions#answer_sheet'
       end
-		end
+    end
+
+    resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
+      collection do
+        post :set_enabled, to: 'guidance_quizzes#set_enabled'
+        post :set_passing_edge_lock, to: 'guidance_quizzes#set_passing_edge_lock'
+        post :set_neighbour_entry_lock, to: 'guidance_quizzes#set_neighbour_entry_lock'
+
+        post :set_concept_edge_relation, to: 'guidance_quizzes#set_concept_edge_relation'
+        post :get_concept_edge_relation, to: 'guidance_quizzes#get_concept_edge_relation'
+        
+        post 'get_concept_criteria', to: 'guidance_quizzes#get_concept_criteria'
+        post 'set_concept_criteria', to: 'guidance_quizzes#set_concept_criteria'
+
+        post 'get_guidance_concept_data', to: 'guidance_quizzes#get_guidance_concept_data'
+        post 'get_guidance_concept_edge_data', to: 'guidance_quizzes#get_guidance_concept_edge_data'
+
+        get 'get_topicconcept_data_with_criteria', to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
+      end
+    end
 
     resources :assessment_trainings, path: 'trainings', controller: :trainings, module: :assessment do
       collection do
@@ -233,18 +268,21 @@ Coursemology::Application.routes.draw do
     resources :levels
     
     resources :topicconcepts do
+        post 'index', :on => :collection
         post 'get_topicconcept_data', :on => :collection
+        get 'get_all_concepts', :on => :collection
+        post 'get_topicconcept_rated_data', :on => :member
         post 'topic_concept_data_create', :on => :collection
         post 'topic_concept_data_rename', :on => :collection
         post 'topic_concept_data_delete', :on => :collection
         post 'topic_concept_data_move', :on => :collection
         post 'topic_concept_data_dependency', :on => :collection
         post 'get_concepts_list', :on => :collection
+        post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'master'
         post 'submit_answer', :on => :collection
-        get 'ivleapi'
-        get 'concept_questions', :on => :collection        
+        get 'ivleapi'       
     end
     
     resources :achievements

@@ -193,13 +193,12 @@ class Assessment::Submission < ActiveRecord::Base
     levelName = nil
     allProgressionGroups = self.progression_groups.where("is_completed = 1")
     allProgressionGroups.each do |progressionGroup|
-
-			forwardGroup = progressionGroup.getForwardGroup
-			forwardPolicyLevel = forwardGroup.getCorrespondingLevel
-			tag = forwardPolicyLevel.getTag
+		  forwardGroup = progressionGroup.getForwardGroup
+		  forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+		  tag = forwardPolicyLevel.getTag
 		  if progressionGroup.correct_amount_left == 0
-		    levelName = tag.name
-			end
+			  levelName = tag.name
+		  end
     end
     levelName
   end  

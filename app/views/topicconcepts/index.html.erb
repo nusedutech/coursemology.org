@@ -1,8 +1,6 @@
 <link rel="stylesheet" href="dist/themes/default/style.min.css" />
 
-
 <% if ((cannot? :manage, Topicconcept) or @student_view) and @gqEnabled %>
-
   <% if !@user_course.is_student? %>
     <a href="<%= course_topicconcepts_path(@course) %>" class="btn btn-info btn-topicconcept-toggle">Return to regular view</a>
   <% end %>
@@ -17,5 +15,3 @@
 
   <%= render  partial: "regular_interface" %>
 <% end %>
-
-

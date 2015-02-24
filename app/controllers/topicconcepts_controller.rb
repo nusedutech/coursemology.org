@@ -232,7 +232,7 @@ class TopicconceptsController < ApplicationController
     new_required_concepts = JSON.parse(params[:new_array])
     new_required_concepts.each do |obj|
       if(!old_required_concepts.include? obj)
-        tc = Topicconcept.where(:name => obj).first 
+        tc = @course.topicconcepts.where(:name => obj).first
         if(!tc.nil?)        
           concept_edge = ConceptEdge.new
           concept_edge.dependent_id = params[:id]
@@ -243,7 +243,7 @@ class TopicconceptsController < ApplicationController
     end
     old_required_concepts.each do |obj|
       if(!new_required_concepts.include? obj)
-        tc = Topicconcept.where(:name => obj).first 
+        tc = @course.topicconcepts.where(:name => obj).first
         if(!tc.nil?)        
           concept_edge = ConceptEdge.find_by_dependent_id_and_required_id(params[:id],tc.id)
           if(!concept_edge.nil?)

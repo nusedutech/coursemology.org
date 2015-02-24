@@ -15,6 +15,8 @@
         <%= f.input :skippable, as: :boolean, label: "Allow skip?",
                 input_html: {class: ""},
                 inline_label:"Check to allow students to skip steps"%>
+    <% else %>
+        <%= f.input :duration, as: :integer, input_html: {class: "number_field input-medium"}  %>
     <% end %>
     <%= f.input :published, as: :boolean,
                 input_html: {class: ""},

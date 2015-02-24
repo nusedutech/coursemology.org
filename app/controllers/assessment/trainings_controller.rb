@@ -38,6 +38,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     @training.creator = current_user
     @training.course_id = @course.id
     @training.test = @training.skippable.nil? ? true : false
+    @training.duration = @training.duration.nil? ? 0 : @training.duration
     if params[:files]
       @training.attach_files(params[:files].values)
     end

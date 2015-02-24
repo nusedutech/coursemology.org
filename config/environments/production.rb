@@ -70,7 +70,7 @@ Coursemology::Application.configure do
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   # Config mailer
-  config.action_mailer.default_url_options = { :host => 'https://edutech.comp.nus.edu.sg' }
+  config.action_mailer.default_url_options = { :host => 'edutech.comp.nus.edu.sg', :protocol => 'https' }
   # ActionMailer Config
   # Setup for production - deliveries, no errors raised
   config.action_mailer.delivery_method = :smtp
@@ -111,7 +111,7 @@ Coursemology::Application.configure do
                         :email => {
                             :email_prefix => "[ERROR]",
                             :sender_address => %{"Coursemology Exception" <exception.notifier@coursemology.com>},
-                            :exception_recipients => "nusedutech@gmail.com"
+                            :exception_recipients => "eduthsoc@comp.nus.edu.sg"
                         }
 
   #ivle login, NUS openID login

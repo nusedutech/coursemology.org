@@ -435,6 +435,7 @@ ActiveRecord::Schema.define(:version => 20150224033634) do
     t.datetime "created_at",                    :null => false
     t.datetime "updated_at",                    :null => false
     t.boolean  "test",       :default => false
+    t.integer  "duration"
   end
 
   create_table "assessment_wrong_thresholds", :force => true do |t|

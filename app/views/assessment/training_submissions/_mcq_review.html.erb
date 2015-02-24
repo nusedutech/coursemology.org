@@ -12,7 +12,7 @@
   </thead>
   <tbody>
   <% answers.each_with_index do |ans, index| %>
-      <tr class="<%= ans.correct ? "mcq-ans-correct" : "mcq-ans-incorrect" %>">
+      <tr class="<%= (defined?(show_answer) ? show_answer : true) ? (ans.correct ? "mcq-ans-correct" : "mcq-ans-incorrect") : "mcq-ans-hide" %>">
         <td><%= index + 1 %></td>
         <td>
           <% if ans.options.length == 1 %>

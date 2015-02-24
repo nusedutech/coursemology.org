@@ -3,14 +3,15 @@
   <p style="margin-left: 15px">* Select all correct answers</p>
 <% end %>
 <ul>
-  <% mcq.options.shuffle.each do |opt| %>
+  <%# mcq.options.shuffle.each do |opt| %>
+  <% mcq.options.each do |opt| %>
       <li class="checkbox-text">
         <% if mcq.select_all %>
           <input class="choices" type="checkbox" name="answers[]" value="<%= opt.id %>" id="value=<%= opt.id %>"/>
         <% else %>
           <input class="choices" type="radio" name="answers" value="<%= opt.id %>" id="value=<%= opt.id %>"/>
         <% end %>
-        <label for="value=<%= opt.id %>"> <%= style_format opt.text %></label>
+        <label for="value=<%= opt.id %>"> <%= style_format(h(opt.text)) %></label>
       </li>
   <% end %>
 </ul>

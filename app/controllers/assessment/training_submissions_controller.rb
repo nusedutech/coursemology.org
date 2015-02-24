@@ -25,7 +25,23 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     next_undone = (questions.index(current) || questions.length) + 1
 
     if @training.test #test - one kind of training - do one question once
-      step = next_undone
+      #process next question
+      if @assessment.duration == 0
+        step = next_undone
+      elsif ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @assessment.duration * 60
+        step = next_undone
+        if session[:attempt_flag] and @submission.answers.count == 0
+          remain_time = @assessment.duration * 60
+          session[:attempt_flag] = nil
+        else
+          remain_time = (@assessment.duration * 60) - ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i
+        end
+      # time up
+      else
+        if !@submission.graded?
+          @submission.update_grade
+        end
+      end
     else # normal training - old training
       request_step = (params[:step] || next_undone).to_i
       step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
@@ -43,7 +59,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
       end
     end
     @summary = {questions: questions, finalised: finalised, step: step,
-                current: current, next_undone: next_undone, prefilled: prefilled_code}
+                current: (!@submission.graded? ? current : nil), next_undone: next_undone, prefilled: prefilled_code, remain_time: (remain_time ? remain_time : 0)}
 
     #Training in lesson plan
     if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
@@ -71,12 +87,25 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
   end
 
   def submit_mcq(question)
-    if @submission.assessment.as_assessment.test and Assessment::Answer.where({std_course_id: curr_user_course.id,
+    #check test (kind of training) submit for the same question
+    if @submission.assessment.as_assessment.test and
+      (@submission.assessment.as_assessment.duration == 0  or ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @submission.assessment.as_assessment.duration * 60) and
+      Assessment::Answer.where({std_course_id: curr_user_course.id,
                                                   question_id: question.question.id,
                                                   submission_id: @submission.id}).first
+        {is_correct: false,
+         result: "Answered",
+         explanation: "Answered"
+        }
+    # check test (kind of training) time up
+    elsif @submission.assessment.as_assessment.test and @submission.assessment.as_assessment.duration != 0 and
+        ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i >= @submission.assessment.as_assessment.duration * 60
+      if !@submission.graded?
+        @submission.update_grade
+      end
       {is_correct: false,
-       result: "Answered",
-       explanation: "Answered"
+       result: "Time up",
+       explanation: "Time up"
       }
     else
       selected_options = question.options.find_all_by_id(params[:aid])
@@ -169,6 +198,14 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
       end
     end
     eval_summary
+  end
+
+  def destroy
+    @submission.destroy
+    respond_to do |format|
+      format.html { redirect_to submissions_course_assessment_trainings_path(@course),
+                                notice: "Submission by " + @submission.std_course.name + " has been deleted."}
+    end
   end
 
   private

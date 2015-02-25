@@ -1,0 +1,634 @@
+
+<table style="width: 99%">
+	<thead>
+		<tr>
+			<th style="line-height: 30px;">
+				Topic Trees
+			</th>
+			<th style="text-align: center">
+				Dependency Model
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="white-row">
+			<td style="width: 35%; padding-left: 10px; border: 1px solid #dddddd; vertical-align: top ">
+				<div style="height: 400px; overflow-y: scroll">
+					<div id="div_tree"></div>
+				</div>
+			</td>
+			<td style="width: 63%; height:400px; border: 1px solid #dddddd; padding: 5px;">	
+				<div>			
+					<svg id="svg-concept" width=100% height=400>
+						<g/>
+					</svg>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<script>
+	
+
+
+	var is_editing_required_concepts = false;
+	var selected_node;
+	var required_concepts = [];
+	var concepts_list = [];
+
+  //Constants
+	var DATA_HOVER_KEY = "data-hover-status";
+	var DATA_HIDE_STATUS = "hide";
+	var DATA_SHOW_STATUS = "show";
+  var G_NODE_KEY = "g-node-key-"
+  var G_EDGELABEL_REQUIRED_KEY = "g-edgelabel-required-key-";
+  var G_EDGELABEL_DEPENDENT_KEY = "g-edgelabel-dependent-key-";
+  var G_EDGEPATH_REQUIRED_KEY = "g-edgepath-required-key-";
+  var G_EDGEPATH_DEPENDENT_KEY = "g-edgepath-dependent-key-";
+
+  var NODE_ENTRY_CLASS = "node enter entry";
+  var NODE_ENABLED_CLASS = "node enter enabled";
+  var NODE_DISABLED_CLASS = "node enter disabled";
+  var EDGE_ENTRY_START_CLASS = "entrystart";
+  var EDGE_ENABLED_START_CLASS = "enabledstart";
+  var EDGE_DISABLED_START_CLASS = "disabledstart";
+  var EDGE_ENTRY_END_CLASS = "entryend";
+  var EDGE_ENABLED_END_CLASS = "enabledend";
+  var EDGE_DISABLED_END_CLASS = "disabledend";
+
+
+  function reset_edit_console(){
+    $('#div_edit').hide();
+    $('#div_criteria_update').hide();
+    $('#div_criteria_update_next').hide();
+    $('#div_action').hide();
+    $('#div_criteria_fail_update').hide();
+    $('#div_criteria_fail_update_next').hide();
+  }
+
+	$(document).ready(function(){
+				
+	  //Create topic trees
+	  var tcdata = get_topicconcept_data_with_criteria();
+    generate_entire_dependency_map(tcdata.nodelist, 
+                                   tcdata.edgelist,
+                                   tcdata.lastAtmNode,
+                                   tcdata.openAtmNodes,
+                                   tcdata.lastAtmEdges,
+                                   tcdata.openAtmEdges);
+
+	  var topictrees = [];
+	  jQuery.each(tcdata.topictrees, function() {		  
+		  topictrees.push({"id" : this.itc.id, "parent" : this.parent == null ? "#" : this.parent.id, "text" : this.itc.name,"type" : this.itc.typename});
+		});
+		
+	  $('#div_tree').jstree({
+	  	"core" : {
+		    "animation" : 0,
+		    "check_callback" : true,
+		    "themes" : {"icons" : true, "dots" : true },
+	    	'data' : topictrees		    
+	    },
+	    "types" : {
+		    "#" : {
+		      "max_children" : 20, 
+		      "max_depth" : 20, 
+		      "valid_children" : ["topic"]
+		    },
+		    "topic" : {
+		      "icon" : "greentree",
+		      "valid_children" : ["subtopic","concept"]
+		    },
+		    "subtopic" : {
+		      "icon" : "greenbranch",
+		      "valid_children" : ["subtopic","concept"]
+		    },
+		    "concept" : {
+		      "icon" : "greenleaf",
+		      "valid_children" : []
+		    }
+		},
+	    "plugins" : [ "contextmenu","types", "dnd", "crrm","search", "themes"],
+	    "contextmenu" : { "items" : function (node) {} }
+	  });
+	  
+	  //select event handler
+	  $('#div_tree').on('select_node.jstree', function (e, data) {
+	  	if(data.node.type == 'concept'){
+			  var svgGroup = d3.select("svg#svg-concept g");	 
+			  loc_x = parseInt($('#svg-concept').parent().width())/2 - parseInt(layout._nodes[data.node.id].value.x);
+			  loc_y = parseInt($('#svg-concept').parent().height())/2 - parseInt(layout._nodes[data.node.id].value.y);
+			    
+			  zoom.scale(1);
+	  	  zoom.translate([loc_x, loc_y]);
+	  		svgGroup.transition().duration(500).attr('transform', 'translate(' + zoom.translate() + ') scale(' + zoom.scale() + ')')
+	  		selected_node = data.node;
+
+        reset_all_tooltips();
+	  	}
+	  });	  
+	
+	});
+	
+	
+	var zoom = null;
+	var layout = null;
+  var gconcept = null;
+	function generate_entire_dependency_map(nodelist, 
+                                          edgelist, 
+                                          lastAtmNode,
+                                          openAtmNodes,
+                                          lastAtmEdges,
+                                          openAtmEdges){
+    halt();
+
+		//Create graph
+	  gconcept = new dagreD3.Digraph();
+   
+    $.each(nodelist, function(){ 	
+	  	gconcept.addNode(this.concept_id, { label: this.concept_name });
+	  });
+
+    $.each(edgelist, function(){
+	  	gconcept.addEdge(String(this.required_id) + " " + String(this.dependent_id), this.required_id, this.dependent_id, { label: "required by" });
+	  });
+
+    
+	  var renderer = new dagreD3.Renderer();
+    setup_graph_identification(renderer);	  	  
+	  var layout_setting = dagreD3.layout();
+	  layout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-concept g"));
+	  
+	  var svg = d3.select("svg#svg-concept");
+	  var svgGroup = d3.select("svg#svg-concept g");
+	  zoom = d3.behavior.zoom().on("zoom", function redraw() {	  	
+	  	svgGroup.attr("transform","translate(" + (d3.event.translate[0]) + "," + (d3.event.translate[1]) + ")" + " scale(" + d3.event.scale + ")");		
+	  });
+	  svg.call(zoom);	  
+	  
+    if (lastAtmNode == null) {
+      updateTitleBar("<h2>Select a concept</h2>");
+    }
+    else {
+      updateTitleBar("<h2>Resume or select another concept</h2>");
+    }
+
+    setup_node_edges_color(lastAtmNode, nodelist);
+    setup_tooltips();
+
+    resume();
+	}
+
+
+  function get_length(obj) {
+    var count = 0;
+    for (something in obj) {
+      ++count;
+    }
+    return count;
+  }
+
+  //Only for use on svg related elements
+  function remove_class (obj, name) {
+    var classesStr = $(obj).attr("class");
+    var classes = classesStr.split(" ");
+    for (var i = 0; i < classes.length ; i++ ) {
+      if (classes[i] == name) {
+        classes.splice(i,1);
+        $(obj).attr("class", classes.join(" "));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  //Only for use on svg related elements
+  function add_class (obj, name) {
+    var classesStr = $(obj).attr("class");
+    var classes = classesStr.split(" ");
+    for (var i = 0; i < classes.length ; i++ ) {
+      if (classes[i] == name) {
+        return false;
+      }
+    }
+    classes.push(name);
+    $(obj).attr("class", classes.join(" "));
+    return true;
+  }
+
+  //Only for use on svg related elements
+  function has_class (obj, name) {
+    var classesStr = $(obj).attr("class");
+    var classes = classesStr.split(" ");
+    for (var i = 0; i < classes.length ; i++ ) {
+      if (classes[i] == name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function setup_graph_identification(renderer) {
+    var oldDrawNodes = renderer.drawNodes();
+    renderer.drawNodes(function(graph, svg) {
+      var svgNodes = oldDrawNodes(graph, svg);
+      //Set id for adding and removing classes later
+      svgNodes.attr("id", function(u) { return G_NODE_KEY+u ; });
+      svgNodes.select().attr("class", function(u) { return G_NODE_KEY+u ; });
+
+      return svgNodes;
+    });
+
+    var oldDrawLabels = renderer.drawEdgeLabels();
+    renderer.drawEdgeLabels(function(graph, svg) {
+      var svgLabels = oldDrawLabels(graph, svg);
+      //Set classes for identification purposes
+      svgLabels.attr("class", function(u) { 
+        var ids = u.split(" ");
+        return "edgeLabel enter " + G_EDGELABEL_REQUIRED_KEY+ids[0] + " " + G_EDGELABEL_DEPENDENT_KEY+ids[1] ; 
+      });
+
+      return svgLabels;
+    });
+
+    var oldDrawPaths = renderer.drawEdgePaths();
+    renderer.drawEdgePaths(function(graph, svg) {
+      var svgPaths = oldDrawPaths(graph, svg);
+      //Set classes for identification purposes
+      svgPaths.attr("class", function(u) { 
+        var ids = u.split(" ");
+        return "edgePath enter " + G_EDGEPATH_REQUIRED_KEY+ids[0] + " " + G_EDGEPATH_DEPENDENT_KEY+ids[1] ; 
+      });
+
+      return svgPaths;
+    });
+
+  }
+
+  function setup_node_edges_color(lastAtmNode, nodelist) {
+    $.each(nodelist, function(){
+      if (lastAtmNode == null) { 	
+		    if (this.enabled && this.is_entry) { 
+				  $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENTRY_CLASS);
+          $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENTRY_START_CLASS);
+          });
+          $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENTRY_END_CLASS);
+          });
+          $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENTRY_START_CLASS);
+          });
+          $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENTRY_END_CLASS);
+          });
+		    }
+		    else if (this.enabled) {
+		      $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENABLED_CLASS);
+          $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENABLED_START_CLASS);
+          });
+          $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENABLED_END_CLASS);
+          });
+          $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENABLED_START_CLASS);
+          });
+          $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_ENABLED_END_CLASS);
+          });
+		    }
+		    else {
+		      $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_DISABLED_CLASS);
+          $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_DISABLED_START_CLASS);
+          });
+          $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_DISABLED_END_CLASS);
+          });
+          $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_DISABLED_START_CLASS);
+          });
+          $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+            add_class(this, EDGE_DISABLED_END_CLASS);
+          });
+		    }
+
+        $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path").each(function(){
+          $(this).attr("marker-end", "url(#arrowGreen)");
+        });
+
+        $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
+          "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path").each(function(){
+          $(this).attr("marker-end", "url(#arrowYellow)");
+        });
+
+        $("g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path").each(function(){
+          $(this).attr("marker-end", "url(#arrowBlack)");
+        });
+
+        $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
+          "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
+          "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
+          "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
+          "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path").each(function(){
+          $(this).attr("marker-end", "url(#arrowBlack)");
+        });
+      }
+	  });
+  }
+
+  function setup_tooltips() {
+    d3.selectAll("g.node.enter").each(function(d, i){
+      $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+
+      //Note that trigger details are loaded into jstree select_node callback
+      $(this).tipsy({ trigger: "manual",
+                      gravity: "w", 
+                      opacity: 0.95, 
+                      html: true,
+                      fade: true,
+                      title: generate_concept_tooltip_details
+      });
+
+      $(this).on("click", function(){      
+        toggle_tooltip(this);
+        return false;
+      });
+
+      //Overwrite to prevent tooltip interference from outside mousedown
+      $(this).on("mousedown", function(){
+        
+        return false;
+      });
+    });
+
+    d3.selectAll("g.edgeLabel.enter").each(function(d, i){
+      $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+
+      //Note that trigger details are loaded into jstree select_node callback
+      $(this).tipsy({ trigger: "manual",
+                      gravity: "w", 
+                      opacity: 0.95, 
+                      html: true,
+                      fade: true,
+                      title: generate_concept_edge_tooltip_details
+      });
+
+      $(this).on("click", function(){      
+        toggle_tooltip(this);
+        return false;
+      });
+
+      //Overwrite to prevent tooltip interference from outside mousedown
+      $(this).on("mousedown", function(){
+        
+        return false;
+      });
+    });
+
+    //Clear when dragging
+    $("#svg-concept").on("mousedown", function(){
+      reset_all_tooltips(this);
+    });
+  }  
+
+  //Setup tooltip information dynamically
+  function generate_concept_tooltip_details () {
+    var result = get_concept_tooltip_info(this.__data__);
+    var tooltipData = "";
+    if (result != null) {
+      tooltipData = make_concept_tooltip_div_html(result);
+    }
+
+    return tooltipData;
+  }
+
+  //Setup tooltip information dynamically
+  function generate_concept_edge_tooltip_details () {
+    var ids = (this.__data__).split(' ');
+    var result = get_concept_edge_tooltip_info(ids[0], ids[1]);
+    var tooltipData = "";
+    if (result != null) {
+      tooltipData = make_concept_edge_tooltip_div_html(result);
+    }
+
+    return tooltipData;
+  }
+
+  function make_concept_tooltip_div_html (concept_data) {
+
+    return "<p class='name'>"+concept_data.name+"</p>" +
+           make_concept_criteria_html (concept_data.action, concept_data.actionURL, concept_data.actionURLItems, concept_data.criteria) +
+           "<hr>" + 
+           "<div>" + 
+             "<p class='subtop'> Raw : " +
+               "<em class='sub'>"+concept_data.raw_right+" / "+concept_data.raw_total+"</em>" + 
+             "</p>" +
+           "</div>" + 
+           "<div>" + 
+             "<p class='subtop'> Latest : " +
+                "<em class='sub'>"+concept_data.latest_right+" / "+concept_data.latest_total+"</em>" +
+             "</p>" +
+           "</div>" + 
+           "<div>" +
+              "<p class='subtop'> Optimistic : " +
+                "<em class='sub'>"+concept_data.optimistic_right+" / "+concept_data.optimistic_total+"</em>" + 
+              "</p>" + 
+           "</div>" + 
+           "<div>" + 
+             "<p class='subtop'> Pessimistic : " + 
+               "<em class='sub'>"+concept_data.pessimistic_right+" / "+concept_data.pessimistic_total+"</em>" +
+             "</p>" + 
+           "</div>";
+  }
+
+  function make_concept_criteria_html (action, actionURL, actionURLItems, criteria) {
+    result = "";
+
+    if (action != "none") {
+      if (criteria.length > 0) {
+        result += '<p class="tipsy-failWhen">Fail when:</p>';
+      }
+      else {
+        result += '<p class="tipsy-failWhen">No criteria found</p>';
+      }
+      for ( var i = 0; i < criteria.length; i++) {
+        var conditionDiv = document.createElement('div');
+        conditionDiv.className = "tipsy-condition-margin"
+        var iconSpan = document.createElement('span');
+        var statementP = document.createElement('p');
+        statementP.className = "tipsy-fail-statement"
+
+        if (criteria[i].pass) {
+          iconSpan.className = "icon-ok-sign tipsy-passIcon";
+        }
+        else {
+          iconSpan.className = "icon-remove-sign tipsy-failIcon";
+          statementP.className += " tipsy-failstrikeout";
+        }
+
+        if (criteria[i].name == "wrong_threshold") {
+          statementP.innerHTML = ' More than <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+        }
+
+
+        conditionDiv.appendChild(iconSpan);
+        conditionDiv.appendChild(statementP);
+        result += conditionDiv.outerHTML;
+      }
+    }
+
+    if (action == "entry") {
+      result += '<a href="#" onclick="guidance_quiz_post_with_concept_id(\'' + actionURL + '\',\'' + actionURLItems.concept_id + '\');" class="btn btn-large btn-success" >Attempt</a>';
+    }
+    else if (action == "resume") {
+      result += '<a href="' + actionURL + '" class="btn btn-large" >Resume</a>';
+    }
+
+    return result;
+  }
+
+  function make_concept_edge_tooltip_div_html (concept_edge_data) {
+    var result = '';
+    var criteria = concept_edge_data.criteria
+    if (criteria.length > 0) {
+      result += '<p class="tipsy-passWhen">Pass when:</p>';
+    }
+    else {
+      result += '<p class="tipsy-failWhen">No criteria found</p>';
+    }
+    for ( var i = 0; i < criteria.length; i++) {
+      var conditionDiv = document.createElement('div');
+      conditionDiv.className = "tipsy-condition-margin"
+      var iconSpan = document.createElement('span');
+      var statementP = document.createElement('p');
+      statementP.className = "tipsy-pass-statement"
+
+      if (criteria[i].pass) {
+        iconSpan.className = "icon-ok-sign tipsy-passIcon";
+        statementP.className += " tipsy-passstrikeout";
+      }
+      else {
+        iconSpan.className = "icon-remove-sign tipsy-failIcon";
+      }
+
+      if (criteria[i].name == "correct_threshold") {
+        statementP.innerHTML = ' More than <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+      }
+
+
+      conditionDiv.appendChild(iconSpan);
+      conditionDiv.appendChild(statementP);
+      result += conditionDiv.outerHTML;
+    }
+
+    return result;
+  }
+
+  //Toggle show/hide status of tooltip of param element
+  function toggle_tooltip (elem) {
+
+    d3.selectAll("g.node.enter, g.edgeLabel.enter").each(function(d, i){
+      if (this != elem && $(this).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+        $(this).tipsy("hide");
+        $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+      }
+    });
+
+    if ($(elem).attr(DATA_HOVER_KEY) == DATA_HIDE_STATUS) {
+      $(elem).tipsy("show");
+      $(elem).attr(DATA_HOVER_KEY, DATA_SHOW_STATUS);
+    }
+    else if ($(elem).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+      $(elem).tipsy("hide");
+      $(elem).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+    } 
+  }
+
+  function reset_all_tooltips() {
+    d3.selectAll("g.node.enter").each(function(d, i){
+      if ($(this).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+        $(this).tipsy("hide");
+        $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+      }
+    });
+
+    d3.selectAll("g.edgeLabel.enter").each(function(d, i){
+      if ($(this).attr(DATA_HOVER_KEY) == DATA_SHOW_STATUS) {
+        $(this).tipsy("hide");
+        $(this).attr(DATA_HOVER_KEY, DATA_HIDE_STATUS);
+      }
+    });
+  }
+
+  function get_topicconcept_data_with_criteria(){
+		var result;
+		$.ajax({
+	    type: "GET",
+	    dataType: "json",
+	    async: false,
+	    url: "<%= get_topicconcept_data_with_criteria_course_assessment_guidance_quizzes_path(@course)%>",
+	    success: function(json) {	    	
+	    	result = json; 
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+	  return result;
+	}
+
+  function get_concept_tooltip_info(concept_id){
+
+    var result;
+		$.ajax({
+	    type: "POST",
+      data: { concept_id: concept_id },
+	    dataType: "json",
+	    async: false,
+	    url: "<%= get_guidance_concept_data_course_assessment_guidance_quizzes_path(@course) %>",
+	    success: function(json) {
+	    	result = json;
+
+        if (result.access_denied) {
+          access_denied_redirect(result.access_denied);
+          result = null;
+        }
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+    
+	  return result;
+  }
+
+  function get_concept_edge_tooltip_info(required_id, dependent_id){
+
+    var result;
+		$.ajax({
+	    type: "POST",
+      data: { required_concept_id: required_id, 
+              dependent_concept_id: dependent_id },
+	    dataType: "json",
+	    async: false,
+	    url: "<%= get_guidance_concept_edge_data_course_assessment_guidance_quizzes_path(@course) %>",
+	    success: function(json) {
+	    	result = json;
+
+        if (result.access_denied) {
+          access_denied_redirect(result.access_denied);
+          result = null;
+        }
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+    	}
+	  });
+    
+	  return result;
+  }
+
+</script>

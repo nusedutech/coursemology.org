@@ -444,6 +444,49 @@ function defaultPostRender(graph, root) {
           .attr('style', 'fill: #333')
           .append('svg:path')
             .attr('d', 'M 0 0 L 10 5 L 0 10 z');
+    root
+      .append('svg:defs')
+        .append('svg:marker')
+          .attr('id', 'arrowGreen')
+          .attr('viewBox', '0 0 10 10')
+          .attr('refX', 8)
+          .attr('refY', 5)
+          .attr('markerUnits', 'strokeWidth')
+          .attr('markerWidth', 8)
+          .attr('markerHeight', 5)
+          .attr('orient', 'auto')
+          .attr('style', 'fill: #008000')
+          .append('svg:path')
+            .attr('d', 'M 0 0 L 10 5 L 0 10 z');
+    root
+      .append('svg:defs')
+        .append('svg:marker')
+          .attr('id', 'arrowYellow')
+          .attr('viewBox', '0 0 10 10')
+          .attr('refX', 8)
+          .attr('refY', 5)
+          .attr('markerUnits', 'strokeWidth')
+          .attr('markerWidth', 8)
+          .attr('markerHeight', 5)
+          .attr('orient', 'auto')
+          .attr('style', 'fill: #CCCC00')
+          .append('svg:path')
+            .attr('d', 'M 0 0 L 10 5 L 0 10 z');
+    root
+      .append('svg:defs')
+        .append('svg:marker')
+          .attr('id', 'arrowBlack')
+          .attr('viewBox', '0 0 10 10')
+          .attr('refX', 8)
+          .attr('refY', 5)
+          .attr('markerUnits', 'strokeWidth')
+          .attr('markerWidth', 8)
+          .attr('markerHeight', 5)
+          .attr('orient', 'auto')
+          .attr('style', 'fill: #000000;')
+          .append('svg:path')
+            .attr('d', 'M 0 0 L 10 5 L 0 10 z');
+    
   }
 }
 

@@ -19,7 +19,7 @@
 		<% fwd.getSortedPolicyLevels.each_with_index do |level, index| %>
 			<tr>
 				<td><%= level.order %></td>
-				<td><%= level.tag.name %></td>
+				<td><%= level.getTag.name %></td>
 				<td><%= level.progression_threshold %></td>
 				<td><%= level.is_consecutive ? "True" : "False" %></td>
 			</tr>

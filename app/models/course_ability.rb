@@ -23,7 +23,7 @@ class CourseAbility  < Ability
     can :read, UserCourse
     unless user.persisted?
       # not logged in user
-      cannot :read, [Assessment::Mission, Assessment::Training]
+      cannot :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission]
     end
 
     if user.is_lecturer?
@@ -153,6 +153,7 @@ class CourseAbility  < Ability
       can :read, Assessment, published: true
       can :access_denied, Assessment
       can :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission], assessment: {published: true}
+      can :answer_sheet, Assessment::PolicyMission
       can :read, Survey, publish: true
 
       # can :read, [Mcq, Question, CodingQuestion]
@@ -160,14 +161,16 @@ class CourseAbility  < Ability
       can :read, Tag
       can :read, Achievement
       
-      
       can :read, Topicconcept
+      can :get_topicconcept_rated_data, Topicconcept
       can :get_topicconcept_data, Topicconcept
-      can :master, Topicconcept
+      can :diagnostic_exploration, Topicconcept
       can :submit_answer, Topicconcept
       
-      
-      
+      can :get_topicconcept_data_with_criteria , Assessment::GuidanceQuiz
+      can :get_guidance_concept_data, Assessment::GuidanceQuiz   
+      can :get_guidance_concept_edge_data, Assessment::GuidanceQuiz      
+
       can :students, Course
 
       can :manage, [Assessment::Submission], std_course_id: user_course.id

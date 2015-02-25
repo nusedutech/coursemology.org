@@ -28,6 +28,7 @@ class Assessment < ActiveRecord::Base
   scope :opened, -> { where("open_at <= ? ", Time.now) }
   scope :future, -> { where("open_at > ? ", Time.now) }
   scope :published, -> { where(published: true) }
+  scope :exclude_guidance_quiz, -> { where("as_assessment_type != ?", "Assessment::GuidanceQuiz") }
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") }
   scope :training, -> { where(as_assessment_type: "Assessment::Training") } do
     def retry_training
@@ -136,13 +137,17 @@ class Assessment < ActiveRecord::Base
     as_assessment_type == Assessment::Training.name
   end
 
-	def is_policy_mission?
-		as_assessment_type == Assessment::PolicyMission.name
-	end
+  def is_policy_mission?
+    as_assessment_type == Assessment::PolicyMission.name
+  end
 
-	def getPolicyMission
-		Assessment::PolicyMission.find(self.as_assessment_id)
-	end
+  def is_guidance_quiz?
+    as_assessment_type == Assessment::GuidanceQuiz.name
+  end
+
+  def getPolicyMission
+    Assessment::PolicyMission.find(self.as_assessment_id)
+  end
 
   def single_question?
     questions.count == 1
@@ -150,6 +155,10 @@ class Assessment < ActiveRecord::Base
 
   def last_submission(user_course_id)
     self.submissions.where(std_course_id: user_course_id).order(created_at: :desc).first
+  end
+
+  def one_submission(user_course_id)
+    self.submissions.where(std_course_id: user_course_id).last
   end
 
   def get_final_sbm_by_std(std_course_id)
@@ -230,6 +239,18 @@ class Assessment < ActiveRecord::Base
     true
   end
 
+  def has_ended?
+    return !self.close_at.nil? && self.close_at < Time.now
+  end
+
+  def can_access_with_end_check? (curr_user_course)
+    if curr_user_course.is_staff?
+      return true
+    end
+   
+    return !has_ended?
+  end
+
   #TOFIX: it's better to have callback rather than currently directly call this in
   #create. Can't use after_create because files association won't be updated upon save
   def create_local_file
@@ -295,6 +316,10 @@ class Assessment < ActiveRecord::Base
 
   #callbacks
   def update_opening_tasks
+    if is_guidance_quiz?
+      return
+    end
+
     #1. pending actions
     #2. auto submission
     #3. email notifications
@@ -310,6 +335,10 @@ class Assessment < ActiveRecord::Base
   end
 
   def update_closing_tasks
+    if is_guidance_quiz?
+      return
+    end
+
     #1. remainder
     type = :mission_due
     if (is_mission? || is_policy_mission?) and self.close_at >= Time.now and course.email_notify_enabled?(type.to_s)
@@ -325,6 +354,10 @@ class Assessment < ActiveRecord::Base
   end
 
   def create_or_destroy_tasks
+    if is_guidance_quiz?
+      return
+    end
+
     if published?
       update_opening_tasks
       update_closing_tasks

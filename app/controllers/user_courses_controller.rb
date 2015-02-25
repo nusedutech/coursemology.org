@@ -9,6 +9,8 @@ class UserCoursesController < ApplicationController
     uc = @course.tag_groups.uncategorized
     @tag_groups -= [uc]
     @tag_groups << uc
+
+    @concepts = @course.topicconcepts.concepts
   end
 
   def destroy

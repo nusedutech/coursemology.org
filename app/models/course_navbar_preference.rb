@@ -6,6 +6,7 @@ class CourseNavbarPreference < ActiveRecord::Base
 
   after_save :sweep_navbar_cache
 
+  scope :forums, where(navbar_preferable_item_id: NavbarPreferableItem.forums)
 
   def sweep_navbar_cache
     Role.all.each do |role|

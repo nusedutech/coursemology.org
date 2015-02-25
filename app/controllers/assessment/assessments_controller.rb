@@ -67,10 +67,17 @@ class Assessment::AssessmentsController < ApplicationController
     @assessments.each do |ast|
       if sub_ids.include? ast.id
         attempting = sub_map[ast.id].attempting?
-        action_map[ast.id] = { action: attempting ? "Resume" : "Review",
-                               url: edit_course_assessment_submission_path(@course, ast, sub_map[ast.id]) }
+        action_map[ast.id] = {}
+        if !attempting
+					action_map[ast.id][:action] = "Review"
+					action_map[ast.id][:url] = course_assessment_submission_path(@course, ast, sub_map[ast.id])
+        #Ensure controls are not revealed when assessment has ended
+        elsif ast.can_access_with_end_check? (curr_user_course)
+        	action_map[ast.id][:action] = "Resume"
+          action_map[ast.id][:url] = edit_course_assessment_submission_path(@course, ast, sub_map[ast.id])
+        end
 
-        if ast.is_policy_mission? and !attempting and ast.specific.multipleAttempts?
+        if ast.is_policy_mission? and !attempting and ast.specific.multipleAttempts? and ast.can_access_with_end_check? (curr_user_course)
           action_map[ast.id][:actionSecondary] = "Reattempt"
           action_map[ast.id][:urlSecondary] = reattempt_course_assessment_submissions_path(@course, ast)
         end
@@ -81,19 +88,24 @@ class Assessment::AssessmentsController < ApplicationController
 
         #potential bug
         #1, can mange, 2, opened and fulfil the dependency requirements
-      elsif (ast.opened? and (ast.as_assessment.class == Assessment::Training or
+      elsif ((ast.opened? and (ast.as_assessment.class == Assessment::Training or
           ast.dependent_id.nil? or ast.dependent_id == 0 or
           (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or
-          can?(:manage, ast)
+          can?(:manage, ast)) and ast.can_access_with_end_check? (curr_user_course)
 
         action_map[ast.id] = {action: "Attempt",
                               url: new_course_assessment_submission_path(@course, ast)}
 
         if ast.is_policy_mission?
           @listed_tags[ast.id] = nil
-        end
+        end 
       else
         action_map[ast.id] = {action: nil}
+      end
+
+      if ast.is_policy_mission? and ast.specific.revealAnswers? (curr_user_course)
+        action_map[ast.id][:actionTertiary] = "Answers"
+        action_map[ast.id][:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(@course, ast.specific)
       end
 
       action_map[ast.id][:new] = false

@@ -1,0 +1,17 @@
+<% tags.each do |tag| %>
+    <% response = tag.all_optimistic_answer_attempts(@user_course) %>
+    <% earned = response[:correct].size %>
+    <% max = earned + response[:wrong].size %>
+    <% earned =[earned, max].min %>
+    <tr>
+      <td><%= tag.name %></td>
+      <td>
+        <div class="progress" style="margin-bottom: 3px">
+          <div class="bar bar-success" style="width: <%= max == 0 ? 0 : earned / max.to_f * 100%>%"></div>
+        </div>
+      </td>
+      <td><%= earned %></td>
+      <td>/</td>
+      <td><%= max %></td>
+    </tr>
+<% end %>

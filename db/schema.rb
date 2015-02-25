@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150208085701) do
+ActiveRecord::Schema.define(:version => 20150225032607) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -178,6 +178,13 @@ ActiveRecord::Schema.define(:version => 20150208085701) do
     t.datetime "updated_at",   :null => false
   end
 
+  create_table "assessment_correct_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
   create_table "assessment_forward_groups", :force => true do |t|
     t.integer  "forward_policy_level_id"
     t.integer  "correct_amount_left",     :default => -1
@@ -196,17 +203,17 @@ ActiveRecord::Schema.define(:version => 20150208085701) do
   end
 
   create_table "assessment_forward_policy_levels", :force => true do |t|
-    t.integer  "order",                 :default => 0
-    t.integer  "progression_threshold", :default => -1
-    t.integer  "wrong_threshold",       :default => -1
-    t.integer  "seconds_to_complete",   :default => -1
-    t.integer  "tag_id"
+    t.integer  "order",                     :default => 0
+    t.integer  "progression_threshold",     :default => -1
+    t.integer  "wrong_threshold",           :default => -1
+    t.integer  "seconds_to_complete",       :default => -1
+    t.integer  "forward_policy_theme_id"
     t.datetime "deleted_at"
-    t.datetime "created_at",                               :null => false
-    t.datetime "updated_at",                               :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
     t.integer  "forward_policy_id"
-    t.boolean  "is_consecutive",        :default => false
-    t.string   "tag_type"
+    t.boolean  "is_consecutive",            :default => false
+    t.string   "forward_policy_theme_type"
   end
 
   add_index "assessment_forward_policy_levels", ["forward_policy_id"], :name => "index_assessment_forward_policy_levels_on_forward_policy_id"
@@ -246,6 +253,83 @@ ActiveRecord::Schema.define(:version => 20150208085701) do
     t.datetime "deleted_at"
     t.datetime "created_at",                             :null => false
     t.datetime "updated_at",                             :null => false
+  end
+
+  create_table "assessment_guidance_concept_criteria", :force => true do |t|
+    t.integer  "guidance_concept_option_id"
+    t.integer  "guidance_concept_criterion_id"
+    t.string   "guidance_concept_criterion_type"
+    t.datetime "deleted_at"
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+  end
+
+  create_table "assessment_guidance_concept_edge_criteria", :force => true do |t|
+    t.integer  "guidance_concept_edge_option_id"
+    t.integer  "guidance_concept_edge_criterion_id"
+    t.string   "guidance_concept_edge_criterion_type"
+    t.datetime "deleted_at"
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
+  end
+
+  create_table "assessment_guidance_concept_edge_options", :force => true do |t|
+    t.boolean  "enabled",         :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+    t.integer  "concept_edge_id"
+  end
+
+  create_table "assessment_guidance_concept_edge_stage", :force => true do |t|
+    t.integer  "assessment_guidance_concept_stage_id"
+    t.integer  "concept_edge_id"
+    t.integer  "total_right",                          :default => 0
+    t.integer  "total_wrong",                          :default => 0
+    t.boolean  "passed",                               :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                                              :null => false
+    t.datetime "updated_at",                                              :null => false
+  end
+
+  create_table "assessment_guidance_concept_options", :force => true do |t|
+    t.integer  "topicconcept_id"
+    t.boolean  "enabled",         :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+    t.boolean  "is_entry",        :default => false
+  end
+
+  create_table "assessment_guidance_concept_stage", :force => true do |t|
+    t.integer  "assessment_submission_id"
+    t.integer  "topicconcept_id"
+    t.integer  "total_right",              :default => 0
+    t.integer  "total_wrong",              :default => 0
+    t.string   "uncompleted_questions"
+    t.string   "completed_answers"
+    t.integer  "disabled_topicconcept_id"
+    t.datetime "disabled_at"
+    t.datetime "deleted_at"
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
+    t.boolean  "failed",                   :default => false
+  end
+
+  create_table "assessment_guidance_quiz_excluded_questions", :force => true do |t|
+    t.boolean  "excluded"
+    t.datetime "deleted_at"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+    t.integer  "question_id"
+  end
+
+  create_table "assessment_guidance_quizzes", :force => true do |t|
+    t.datetime "deleted_at"
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.boolean  "passing_edge_lock",    :default => false
+    t.boolean  "neighbour_entry_lock", :default => false
   end
 
   create_table "assessment_mcq_answers", :force => true do |t|
@@ -299,6 +383,7 @@ ActiveRecord::Schema.define(:version => 20150208085701) do
     t.datetime "created_at",                              :null => false
     t.datetime "updated_at",                              :null => false
     t.boolean  "multiple_submissions", :default => false
+    t.boolean  "reveal_answers",       :default => false
   end
 
   create_table "assessment_progression_groups", :force => true do |t|
@@ -359,10 +444,17 @@ ActiveRecord::Schema.define(:version => 20150208085701) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+    t.boolean  "test",       :default => false
+    t.integer  "duration"
+  end
+
+  create_table "assessment_wrong_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
-    t.boolean  "test"
-    t.integer  "duration"
   end
 
   create_table "assessments", :force => true do |t|

@@ -1,21 +1,29 @@
 <% if ast.can_start?(curr_user_course) || can?(:manage, Assessment::PolicyMission)%>
-    <% submission = ast.last_submission(curr_user_course) %>
+    <% submission = ast.one_submission(curr_user_course) %>
     <% if submission %>
-        <% if submission.attempting? %>
+        <% if submission.attempting? and ast.can_access_with_end_check?(curr_user_course) %>
             <%= link_to 'Resume', edit_course_assessment_submission_path(@course, ast, submission),
                         class: 'btn btn-info' %>
-        <% elsif ast.is_policy_mission? && submission.submitted? && ast.specific.multipleAttempts? %>
-            <%= link_to 'Review', course_assessment_submission_path(@course, ast, submission),
-                        class: 'btn btn-info' %>
-            <%= link_to 'Reattempt', reattempt_course_assessment_submissions_path(@course, ast),
-                        class: 'btn' %>
-        <% else %>
+        <% end %>
+
+        <% if ast.is_policy_mission? && submission.submitted? %>
             <%= link_to 'Review', course_assessment_submission_path(@course, ast, submission),
                         class: 'btn btn-info' %>
         <% end %>
-    <% else %>
+            
+        <% if ast.is_policy_mission? && ast.can_access_with_end_check?(curr_user_course) && submission.submitted? && ast.specific.multipleAttempts? %>
+            <%= link_to 'Reattempt', reattempt_course_assessment_submissions_path(@course, ast),
+                        class: 'btn btn-success' %>
+        <% end %>
+
+    <% elsif ast.can_access_with_end_check?(curr_user_course) %>
         <%= link_to 'Attempt',
                     new_course_assessment_submission_path(@course, ast),
                     class: 'btn btn-success' %>
+    <% end %>
+
+    <% if ast.specific.revealAnswers? (curr_user_course) %>
+            <%= link_to 'Answers', answer_sheet_course_assessment_policy_mission_path(@course, ast.specific),
+                        class: 'btn' %>
     <% end %>
 <% end %>

@@ -1,6 +1,11 @@
 // Place all the styles related to the Topicconcepts controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+footer.compress {
+	margin-top: 0px;
+}
+
 svg {
     overflow: hidden;
 }
@@ -27,12 +32,22 @@ g.node {
   position: relative;
   top: -20px;
   left: -20px;
-  width: 970px;  
+  background-color: #e1e1e1;  
+}
+
+.concept-tutorial .post-animate-tutorial-nav, {
+    width:0px;
+}
+
+.concept-tutorial .pre-animate-tutorial-nav, {
+    width:200px;
+}
+
+.concept-tutorial .tutorial-nav .nav-head-concept .progress, {
+    width:172px;
 }
 
 .concept-tutorial .tutorial-nav {    
-    width:200px;
-    min-height: 500px;
     vertical-align: top;
     border-right: 1px solid #ddd;
     float: left;    
@@ -40,7 +55,7 @@ g.node {
 }
 
 .tutorial-nav .nav-head-container {
-    height:70px;
+    height:110px;
     color: #999;
     border-bottom: 1px solid #ccc;    
     padding: 0 14px;
@@ -60,6 +75,7 @@ g.node {
 
 .tutorial-nav .slimScrollDiv {
   min-height: 240px;
+  border-top: 5px solid #4fbad4;
 }
 .slimScrollDiv ul {
     margin: 0;
@@ -68,6 +84,10 @@ g.node {
 .slimScrollDiv li {
   padding: 0 0 0 10px;
   height: 50px;
+}
+
+.slimScrollDiv li.completed .status{
+    background-position: 0 25px;  
 }
 
 .slimScrollDiv li.selected {
@@ -118,7 +138,7 @@ g.node {
     top: -16px;  
 }
 
-.slimScrollDiv .pipe.completed, .slimScrollDiv li.selected .pipe {
+.slimScrollDiv .pipe.completed, .slimScrollDiv li.selected .pipe, .slimScrollDiv li.completed .pipe {
     background-color: #4fbad4;
 }
 
@@ -140,23 +160,40 @@ g.node {
     top: -34px;
 }
 
-.concept-tutorial .tutorial-content {
+.concept-tutorial .post-animate-tutorial-content {
+    margin-left: 0px;   
+}
+
+.concept-tutorial .pre-animate-tutorial-content {
     margin-left: 200px;   
-    min-height: 500px;
+}
+
+.concept-tutorial .tutorial-content,
+.concept-tutorial .tutorial-nav {
+    min-height: 750px;
+}
+
+.concept-tutorial .tutorial-content {
+
     background-color: #eee;
+    -webkit-box-shadow: -5px -1px 20px -6px #000;
+    -moz-box-shadow: -5px -1px 20px -6px #000;
+    box-shadow: -5px -1px 20px -6px #000;
+    position: relative;
 }
 
 .tutorial-content .task-header-container {
-  height:70px;
-  background-color: #1c758a;
+    min-height:70px;
+    background-color: #1c758a;
 }
 
 .tutorial-content .task-header-container div.cur-concept-title{
-  height: 40px;
+  min-height: 40px;
   position: relative;
   top:13px;
+  padding-bottom: 13px;
   left:10px;
-  width: 200px;
+  width: 100%;
 }
 
 .tutorial-content .task-header-container h2 {
@@ -207,7 +244,10 @@ g.node {
   left: 140px;
 }
 .tutorial-content .task-content-container {
-  min-height:230px;
+    min-height:230px;
+    padding-left: 10px;
+    padding-right: 5px; 
+
 }
 #problemarea {
     float: left;
@@ -225,9 +265,9 @@ g.node {
     margin-left: 50px;
 }
 
-#answer_area_wrap {
+#criteria_area_wrap {
     float: right;
-    width: 20%;
+    width: 30%;
 }
 
 .info-box-header {
@@ -241,7 +281,7 @@ g.node {
 }
 
 
-#solutionarea {
+.criteria-area {
     border-bottom: 1px solid #c3c3c3;
     margin: 0 -10px;
     min-height: 35px;
@@ -249,13 +289,13 @@ g.node {
     padding: 10px;
 }
 
-.answer-buttons {
+.criteria-buttons {
     border-top: 1px solid #fff;
     margin: 0 -10px;
     padding: 10px 10px 0;
     position: relative;
 }
-.answer-buttons input {
+.criteria-buttons input {
   width: 100%;
 }
 
@@ -276,4 +316,360 @@ g.node {
     padding: 10px;
     position: relative;
     z-index: 10;
+}
+
+input.btnmargined {
+    margin: 2px;
+}
+
+.tipsy .name {
+    font-size: 25px;
+    font-weight: bold;
+    color: #60B1FC;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.tipsy .subtop {
+    font-size: 15px;
+    color: #AAF;
+    text-align: right;
+}
+
+.tipsy .sub {
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12px;
+    color: #FFF;
+    text-align: right;
+}
+
+.tipsy .tipsy-passWhen{
+    margin-top: 10px;
+    color: #0F0;
+}
+
+.tipsy .tipsy-failWhen{
+    color: #F00;
+}
+
+.tipsy .tipsy-passWhen,
+.tipsy .tipsy-failWhen{
+    text-align: left;
+    font-size: 18px;
+}
+
+.tipsy .tipsy-pass-statement,
+.tipsy .tipsy-fail-statement{
+    font-size: 16px;
+    text-align: left;
+    display: inline-block;
+}
+
+.tipsy .tipsy-passstrikeout{
+    text-decoration: line-through;
+}
+
+.tipsy .tipsy-failstrikeout{
+    text-decoration: line-through;
+}
+
+.tipsy .tipsy-passIcon,
+.tipsy .tipsy-failIcon{
+    font-size: 16px;
+    text-align: left;
+    margin-right: 5px;
+}
+
+.tipsy .tipsy-passIcon{
+    color: #0A0;
+}
+
+.tipsy .tipsy-failIcon{
+    color: #A00;
+}
+
+.tipsy .tipsy-passWord,
+.tipsy .tipsy-failWord{
+    font-weight: normal;
+    font-style: normal;
+    font-size: 16px;
+    text-align: left;
+}
+
+.tipsy .tipsy-fail-statement{
+    color: #080;
+}
+
+.tipsy .tipsy-passWord{
+    color: #0F0;
+}
+
+.tipsy .tipsy-pass-statement{
+    color: #800;
+}
+
+.tipsy .tipsy-failWord{
+    color: #F00;
+}
+
+.tipsy .tipsy-failstrikeout,
+.tipsy-failstrikeout .tipsy-passWord,
+.tipsy-failstrikeout .tipsy-failWord{
+    color: #A00;
+}
+
+.tipsy .tipsy-passstrikeout,
+.tipsy-passstrikeout .tipsy-passWord,
+.tipsy-passstrikeout .tipsy-failWord{
+    color: #0A0;
+}
+
+.tipsy .tipsy-condition-margin{
+    margin-bottom: 8px;
+}
+
+select.full-width{
+    width: 100%;
+}
+
+div.pseudo-pull-right-child {
+    width: 100%;
+    text-align: right;
+}
+
+.stud-int-sidebar-collapse {
+    position: absolute;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+}
+
+.cur-concept-title-slave {
+    margin-left: 45px;
+}
+
+tr.white-row {
+    background-color: white;
+}
+
+.topicconcept-loading-modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: 1050;
+	overflow: auto;
+	width: 560px;
+	margin: -250px 0 0 -280px;
+  color: #FFF;
+  text-align: center;
+  min-height: 140px;
+}
+
+div.processing-ball {
+  background-color: rgba(0,0,0,0);
+  border: 5px solid rgba(255,0,0,0.9);
+	border-left: 5px solid rgba(0,0,0,0);
+	border-right: 5px solid rgba(0,0,0,0);
+	border-radius: 50px;
+	box-shadow: 0 0 25px #FF8080;
+	width: 50px;
+	height: 50px;
+  margin: 0 auto;
+  animation: spin 0.8s infinite linear;
+	-moz-animation: spin 0.8s infinite linear;
+	-webkit-animation: spin 0.8s infinite linear;
+}
+
+div.inner-processing-ball {
+  background-color: rgba(0,0,0,0);
+  border: 5px solid rgba(0,255,0,0.9);
+	border-left: 5px solid rgba(0,0,0,0);
+	border-right: 5px solid rgba(0,0,0,0);
+	border-radius: 50px;
+	box-shadow: 0 0 15px #66FF66;
+	width: 34px;
+	height: 34px;
+  margin: 0 auto;
+  top: -50px;
+  position: relative;
+  animation: spin 0.9s infinite linear;
+	-moz-animation: spin 0.9s infinite linear;
+	-webkit-animation: spin 0.9s infinite linear;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    };
+}
+
+@-moz-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    };
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    };
+}
+
+.btn-topicconcept-toggle {
+
+    margin-bottom: 28px;
+}
+
+g.node.enter.entry rect {
+  fill: #99FF99; 
+  stroke: #008000;
+}
+
+g.node.enter.entry text {
+  fill: #008000;
+  font-weight: normal;
+}
+
+g.node.enter.entry:hover rect {
+  fill: #77EE77; 
+  stroke: #007000;
+  stroke-width: 3px;
+}
+
+g.node.enter.entry:hover text {
+  fill: #007000;
+  font-weight: bold;
+}
+
+g.node.enter.disabled rect {
+  fill: #AAAAAA; 
+  stroke: #000000;
+  opacity: 0.3;
+}
+
+g.node.enter.disabled text {
+  fill: #000000;
+  font-weight: normal;
+  opacity: 0.3;
+}
+
+g.node.enter.enabled rect {
+  fill: #CCCCCC; 
+  stroke: #000000;
+}
+
+g.node.enter.enabled text {
+  fill: #000000;
+  font-weight: normal;
+}
+
+g.node.enter.enabled:hover rect {
+  fill: #BBBBBB; 
+  stroke-width: 3px;
+}
+
+g.node.enter.enabled:hover text {
+  font-weight: bold;
+}
+
+g.edgeLabel.enter {
+  cursor: pointer;
+}
+
+g.edgePath.enter.entrystart.entryend {
+  stroke: #008000;
+  stroke-width: 2;
+}
+
+g.edgePath.enter.enabledstart.enabledend {
+  stroke: #000000;
+  stroke-width: 2;
+}
+
+g.edgePath.enter.entrystart.enabledend,
+g.edgePath.enter.enabledstart.entryend {
+  stroke: #CCCC00;
+  stroke-width: 2;
+}
+
+g.edgePath.enter.entrystart.disabledend,
+g.edgePath.enter.enabledstart.disabledend,
+g.edgePath.enter.disabledstart.entryend,
+g.edgePath.enter.disabledstart.enabledend,
+g.edgePath.enter.disabledstart.disabledend {
+  stroke: #000000;
+  opacity: 0.3;
+  stroke-dasharray: 5,5;
+  stroke-width: 2;
+}
+
+
+g.edgeLabel.enter.entrystart.entryend text{
+  fill: #008000;
+}
+
+g.edgeLabel.enter.entrystart.entryend:hover text{
+  fill: #007000;
+  font-weight: bold;
+}
+
+g.edgeLabel.enter.enabledstart.enabledend text{
+  fill: #000000;
+}
+
+g.edgeLabel.enter.enabledstart.enabledend:hover text{
+  font-weight: bold;
+}
+
+g.edgeLabel.enter.entrystart.enabledend text,
+g.edgeLabel.enter.enabledstart.entryend text{
+  fill: #A0A000;
+}
+
+g.edgeLabel.enter.entrystart.enabledend:hover text,
+g.edgeLabel.enter.enabledstart.entryend:hover text{
+  fill: #909000;
+  font-weight:bold;
+}
+
+g.edgeLabel.enter.entrystart.disabledend text,
+g.edgeLabel.enter.enabledstart.disabledend text,
+g.edgeLabel.enter.disabledstart.entryend text,
+g.edgeLabel.enter.disabledstart.enabledend text,
+g.edgeLabel.enter.disabledstart.disabledend text {
+  fill: #000000;
+  opacity: 0.3
+}
+
+input[type = checkbox].normalized-topicconcept {
+  margin-top: 4px;
+  margin-right: 5px;
+}
+
+div.normalized-topicconcept{
+  display:block; 
+  padding: 10px 0;
+}
+
+.topicconcepts-alert{
+  top: -15px;
+  left: -20px;
+  position: relative;
+  margin-left: 10px;
+  margin-right: 10px;
 }

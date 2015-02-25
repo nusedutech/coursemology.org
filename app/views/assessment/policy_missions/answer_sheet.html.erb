@@ -1,0 +1,39 @@
+<div style="float: right">
+  <%= link_to course_assessment_policy_missions_path(@course), class: "btn btn-large-icon" do %>
+      <i class="icon-arrow-left"> Back</i>
+  <% end %>
+</div>
+
+<div class="page-header">
+  <h1> <%= @policy_mission.title %> - Check Answers</h1>
+</div>
+
+<% if @pmAnswers[:forwardContent] %>
+  <% @pmAnswers[:forwardContent][:tagGroup].each do |singleLevel| %>
+    <div class = "well">
+      <h3><%= singleLevel[:name] %></h3><hr/>
+      <% singleLevel[:questions].each_with_index do |qn, i| %>
+        <section id="question_<%= i + 1%>">
+          <div class="grey_background" style="margin: 10px">
+            <strong><%= i + 1 %>. </strong>
+            <%= style_format qn.description %>
+          </div>
+	  <% if qn.specific.class == Assessment::McqQuestion %>
+	    <table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
+	      <colgroup>
+                <col width="5%"/>
+	        <col width="35%"/>
+	      </colgroup>
+	      <% qn.options.each do |opt| %>
+                <tr>
+                  <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
+	          <td><%= opt.text %></td>
+                </tr>
+              <% end %>
+	    </table>
+	  <% end %>
+	</section>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

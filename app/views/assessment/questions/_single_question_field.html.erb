@@ -35,24 +35,21 @@
 			<% end %>
 	 	</td>
     <td>
-      <% q.question_assessments.each do |qaLink| %>
-        <% curAssessment = qaLink.assessment %>
-        <% if curAssessment %>
-            <% if curAssessment.is_mission? %>
-              <%= link_to course_assessment_mission_path(@course, curAssessment.specific) do %>
-                        <span class="label label-active" style="">Mission: <%= curAssessment.title %></span>
-                  <% end %>
-            <% elsif curAssessment.is_training? %>
-              <%= link_to course_assessment_training_path(@course, curAssessment.specific) do %>
-                        <span class="label label-active">Training: <%= curAssessment.title %></span>
-                  <% end %>
-            <% elsif curAssessment.is_policy_mission? %>
-              <%= link_to course_assessment_policy_mission_path(@course, curAssessment.specific) do %>
-                        <span class="label label-active">Regulated Trainings: <%= curAssessment.title %></span>
-                  <% end %>
-            <% end %>
-        <% end %>
-          <br/>
+      <% q.existingAssessments.each do |curAssessment| %>
+        <% if curAssessment.is_mission? %>
+          <%= link_to course_assessment_mission_path(@course, curAssessment.specific) do %>
+				    <span class="label label-active" style="">Mission: <%= curAssessment.title %></span>
+		      <% end %>
+        <% elsif curAssessment.is_training? %>
+          <%= link_to course_assessment_training_path(@course, curAssessment.specific) do %>
+				    <span class="label label-active">Training: <%= curAssessment.title %></span>
+		      <% end %>
+        <% elsif curAssessment.is_policy_mission? %>
+          <%= link_to course_assessment_policy_mission_path(@course, curAssessment.specific) do %>
+				    <span class="label label-active">Regulated Trainings: <%= curAssessment.title %></span>
+		      <% end %>
+        <% end %> 
+        <br/>   
       <% end %>
     </td>
 		<td>

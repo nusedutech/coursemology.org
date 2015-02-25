@@ -6,8 +6,10 @@ class Assessment::PolicyMission < ActiveRecord::Base
                    :dependent_id, :display_mode_id, :multiple_submissions, :reveal_answers
 
   validates_presence_of :title, :exp, :open_at, :close_at
+
+  before_destroy :clear_progression_policies_inheritance
 	
-	has_one :progression_policy, class_name: "Assessment::ProgressionPolicy",  dependent: :destroy
+  has_one :progression_policy, class_name: "Assessment::ProgressionPolicy"
 
   has_one :forward_policy, class_name: "Assessment::ForwardPolicy", through: :progression_policy,
           source: :as_progression_policy, source_type: "Assessment::ForwardPolicy"
@@ -42,7 +44,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
     entry.entry_type = 4
 
     lastSbm = self.submissions.where(std_course_id: user_course).last
-    if self.multipleAttempts? and lastSbm and lastSbm.submitted?
+    if self.multipleAttempts? and lastSbm and lastSbm.submitted? and can_access_with_end_check? user_course
       entry.entry_type = 5
       entry.submission[:actionSecondary] = "Reattempt"
       entry.submission[:urlSecondary] = reattempt_course_assessment_submissions_path(course, self.assessment, from_lesson_plan: true)
@@ -58,18 +60,23 @@ class Assessment::PolicyMission < ActiveRecord::Base
 
   def get_modified_submission(course, user_course, manage_assessment)
     result = Hash.new
+    completed_sub = self.submissions.submitted_format.where(std_course_id: user_course.id).first
     sub = self.submissions.where(std_course_id: user_course.id).order('updated_at DESC').first
     dependent_ast_sub = self.dependent_on.nil? ? nil : self.dependent_on.submissions.where(std_course_id: user_course.id).order('updated_at DESC').first
     
-    if !can_access_with_end_check? user_course
-      result[:action] = nil
-    elsif sub
-      result[:action] = sub.attempting? ? "Resume" : "Review"
+    if sub and sub.attempting? and can_access_with_end_check? user_course
+      result[:action] = "Resume"
       result[:url] = edit_course_assessment_submission_path(course, self.assessment, sub, from_lesson_plan: true)
-    elsif (self.opened? and (self.as_assessment.class == Assessment::Training or
+  	elsif sub and sub.submitted?
+      result[:action] = "Review"  
+      result[:url] = course_assessment_submission_path(course, self.assessment, sub, from_lesson_plan: true)
+    elsif !(can_access_with_end_check? user_course ) and completed_sub
+      result[:action] = "Review"  
+      result[:url] = course_assessment_submission_path(course, self.assessment, completed_sub, from_lesson_plan: true)
+    elsif ((self.opened? and (self.as_assessment.class == Assessment::Training or
         self.dependent_id.nil? or self.dependent_id == 0 or
         (!dependent_ast_sub.nil? and !dependent_ast_sub.attempting?))) or
-        manage_assessment
+        manage_assessment) and can_access_with_end_check? user_course
       result[:action] = "Attempt"
       result[:url] = new_course_assessment_submission_path(course, self.assessment, from_lesson_plan: true)
     else
@@ -81,4 +88,7 @@ class Assessment::PolicyMission < ActiveRecord::Base
     result
   end
 
+  def clear_progression_policies_inheritance
+  	self.progression_policy.specific.destroy
+  end
 end

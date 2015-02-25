@@ -332,6 +332,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
       return true
     end
 
+
     if @assessment.has_ended?
       redirect_to access_denied_course_assessment_path(@course, @assessment)
     end

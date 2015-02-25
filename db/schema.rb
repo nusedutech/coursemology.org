@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150225032607) do
+ActiveRecord::Schema.define(:version => 20150225134415) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -281,7 +281,7 @@ ActiveRecord::Schema.define(:version => 20150225032607) do
     t.integer  "concept_edge_id"
   end
 
-  create_table "assessment_guidance_concept_edge_stage", :force => true do |t|
+  create_table "assessment_guidance_concept_edge_stages", :force => true do |t|
     t.integer  "assessment_guidance_concept_stage_id"
     t.integer  "concept_edge_id"
     t.integer  "total_right",                          :default => 0
@@ -301,7 +301,7 @@ ActiveRecord::Schema.define(:version => 20150225032607) do
     t.boolean  "is_entry",        :default => false
   end
 
-  create_table "assessment_guidance_concept_stage", :force => true do |t|
+  create_table "assessment_guidance_concept_stages", :force => true do |t|
     t.integer  "assessment_submission_id"
     t.integer  "topicconcept_id"
     t.integer  "total_right",              :default => 0

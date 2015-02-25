@@ -4,10 +4,11 @@
         <% if submission.attempting? and ast.can_access_with_end_check?(curr_user_course) %>
             <%= link_to 'Resume', edit_course_assessment_submission_path(@course, ast, submission),
                         class: 'btn btn-info' %>
-        <% end %>
-
-        <% if ast.is_policy_mission? && submission.submitted? %>
+        <% elsif ast.is_policy_mission? && submission.submitted? %>
             <%= link_to 'Review', course_assessment_submission_path(@course, ast, submission),
+                        class: 'btn btn-info' %>
+        <% elsif ast.submissions.submitted_format.where(std_course_id: curr_user_course.id).first %>
+            <%= link_to 'Review', course_assessment_submission_path(@course, ast, ast.submissions.submitted_format.where(std_course_id: curr_user_course.id).first),
                         class: 'btn btn-info' %>
         <% end %>
             

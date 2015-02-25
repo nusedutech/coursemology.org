@@ -432,4 +432,14 @@ class Course < ActiveRecord::Base
     end
     url
   end
+
+
+  def forums_enabled?
+    result = false
+    self.course_navbar_preferences.forums.each do |singleForumPref|
+      result = singleForumPref.is_enabled && singleForumPref.is_displayed
+    end
+
+    result
+  end
 end

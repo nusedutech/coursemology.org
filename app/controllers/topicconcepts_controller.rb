@@ -2,16 +2,17 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data]
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :master]
 
-	before_filter :set_viewing_permissions, only:[:index]
+	before_filter :set_viewing_permissions, only:[:index, :master]
+
+  before_filter :load_general_topicconcept_data
 
   def index   
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
     @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
 
-    @user_course = curr_user_course
     Rails.cache.clear
   end
   
@@ -20,14 +21,17 @@ class TopicconceptsController < ApplicationController
   end
   
   def master
-      @concept = Topicconcept.find(params[:topicconcept_id])
-      @dependencies = @concept.required_concepts
-      @current_dependency = @dependencies.first
-      @firstquestion = @current_dependency.questions.where(:as_question_type => Assessment::McqQuestion).first
-      @select_all = false #raw_query_get_select_all(@firstquestion.as_question_id).to_i == 0 ? false : true      
-      
+    respond_to do |format|
+      format.html {
+        render "topicconcepts/index"
+      }
+    end
   end
   
+  def load_general_topicconcept_data
+    @user_course = curr_user_course
+  end
+
   def raw_query_get_select_all mcq_id
     ActiveRecord::Base.establish_connection(
             :adapter => "mysql2",

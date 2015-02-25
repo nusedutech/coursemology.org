@@ -280,7 +280,7 @@ Coursemology::Application.routes.draw do
         post 'get_concepts_list', :on => :collection
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
-        get 'master'
+        get 'master', :on => :collection
         post 'submit_answer', :on => :collection
         get 'ivleapi'       
     end

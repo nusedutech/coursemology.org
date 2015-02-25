@@ -9,7 +9,11 @@
 			<%= render  partial: "student_interface_titlebar" %>
 		</div>
 		<div class="task-content-container">
-			<%= render  partial: "topicconcept_for_guidance_map" %>
+      <% if current_page? :course_topicconcepts %>
+			  <%= render  partial: "topicconcept_for_guidance_map" %>
+      <% elsif current_page? :master_course_topicconcepts %>
+			  <%= render  partial: "master" %>
+      <% end %>
 		</div>
 	</div>
 <div>

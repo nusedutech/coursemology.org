@@ -2,9 +2,9 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :master]
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration]
 
-	before_filter :set_viewing_permissions, only:[:index, :master]
+	before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
   before_filter :load_general_topicconcept_data
 
@@ -20,7 +20,7 @@ class TopicconceptsController < ApplicationController
     
   end
   
-  def master
+  def diagnostic_exploration
     respond_to do |format|
       format.html {
         render "topicconcepts/index"

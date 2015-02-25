@@ -420,7 +420,7 @@
   function make_concept_tooltip_div_html (concept_data) {
 
     return "<p class='name'>"+concept_data.name+"</p>" +
-           make_concept_criteria_html (concept_data.action, concept_data.actionURL, concept_data.criteria) +
+           make_concept_criteria_html (concept_data.action, concept_data.actionURL, concept_data.actionURLItems, concept_data.criteria) +
            "<hr>" + 
            "<div>" + 
              "<p class='subtop'> Raw : " +
@@ -444,7 +444,7 @@
            "</div>";
   }
 
-  function make_concept_criteria_html (action, actionURL, criteria) {
+  function make_concept_criteria_html (action, actionURL, actionURLItems, criteria) {
     result = "";
 
     if (action != "none") {
@@ -481,7 +481,7 @@
     }
 
     if (action == "entry") {
-      result += '<a href="' + actionURL + '" class="btn btn-large btn-success" >Attempt</a>';
+      result += '<a href="#" onclick="guidance_quiz_post_with_concept_id(\'' + actionURL + '\',\'' + actionURLItems.concept_id + '\');" class="btn btn-large btn-success" >Attempt</a>';
     }
     else if (action == "resume") {
       result += '<a href="' + actionURL + '" class="btn btn-large" >Resume</a>';

@@ -39,7 +39,14 @@ class Assessment::Submission < ActiveRecord::Base
   has_many :gradings, class_name: Assessment::Grading, dependent: :destroy
   has_one :comment_topic, as: :topic
 
+  # Dependent destroy - result in frozen hash error as co-owned, by both submission and
+  # forward_policy_level - result when assessment is destroyed and all relations is deleted
+  # together
+  # Update might be required on MTI Gem
 	has_many :progression_groups, class_name: "Assessment::ProgressionGroup"
+
+  has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy  
+
 
   after_create :set_attempting
   after_save   :status_change_tasks, if: :status_changed?

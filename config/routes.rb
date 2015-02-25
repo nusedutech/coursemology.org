@@ -130,7 +130,7 @@ Coursemology::Application.routes.draw do
                 constraints: PolicyMissionConstraint.new do
         member do
           post 'edit' => 'policy_mission_submissions#edit'
-	  get 'export' => 'policy_mission_submissions#show_export_excel'
+	        get 'export' => 'policy_mission_submissions#show_export_excel'
           delete 'destroy' => 'policy_mission_submissions#destroy'
         end
         collection do
@@ -139,11 +139,14 @@ Coursemology::Application.routes.draw do
       end
 
       resources :assessment_submissions,
-                path:       :guidance_quiz_submissions,
-                controller: :quidance_quiz_submissions do
+                path:       :diagnostic_exploration,
+                as:         :guidance_quiz_submissions,
+                controller: :guidance_quiz_submissions do
         collection do
+          post :attempt, to: 'guidance_quiz_submissions#new'
         end
       end
+
     end
 
     resources :assessment_general_questions, path: :general_questions, controller: :general_questions , module: :assessment   
@@ -187,9 +190,9 @@ Coursemology::Application.routes.draw do
 
     resources :assessment_policy_missions, path: 'policy_missions', controller: :policy_missions, module: :assessment do
       collection do
-	get :index, to: 'assessments#index', type: 'policy_mission'
+	      get :index, to: 'assessments#index', type: 'policy_mission'
         get 'stats' => 'policy_missions#stats'
-	get 'submissions' => 'assessments#listall', type: 'policy_mission'
+	      get 'submissions' => 'assessments#listall', type: 'policy_mission'
       end
       member do
         put 'update_questions' => 'policy_missions#update_questions'
@@ -206,13 +209,13 @@ Coursemology::Application.routes.draw do
         post :set_concept_edge_relation, to: 'guidance_quizzes#set_concept_edge_relation'
         post :get_concept_edge_relation, to: 'guidance_quizzes#get_concept_edge_relation'
         
-        post 'get_concept_criteria', to: 'guidance_quizzes#get_concept_criteria'
-        post 'set_concept_criteria', to: 'guidance_quizzes#set_concept_criteria'
+        post :get_concept_criteria, to: 'guidance_quizzes#get_concept_criteria'
+        post :set_concept_criteria, to: 'guidance_quizzes#set_concept_criteria'
 
-        post 'get_guidance_concept_data', to: 'guidance_quizzes#get_guidance_concept_data'
-        post 'get_guidance_concept_edge_data', to: 'guidance_quizzes#get_guidance_concept_edge_data'
+        post :get_guidance_concept_data, to: 'guidance_quizzes#get_guidance_concept_data'
+        post :get_guidance_concept_edge_data, to: 'guidance_quizzes#get_guidance_concept_edge_data'
 
-        get 'get_topicconcept_data_with_criteria', to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
+        get :get_topicconcept_data_with_criteria, to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
       end
     end
 
@@ -280,7 +283,7 @@ Coursemology::Application.routes.draw do
         post 'get_concepts_list', :on => :collection
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
-        get 'master', :on => :collection
+        get 'diagnostic_exploration', :on => :member
         post 'submit_answer', :on => :collection
         get 'ivleapi'       
     end

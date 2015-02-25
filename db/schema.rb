@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150224033634) do
+ActiveRecord::Schema.define(:version => 20150225032607) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -281,6 +281,17 @@ ActiveRecord::Schema.define(:version => 20150224033634) do
     t.integer  "concept_edge_id"
   end
 
+  create_table "assessment_guidance_concept_edge_stage", :force => true do |t|
+    t.integer  "assessment_guidance_concept_stage_id"
+    t.integer  "concept_edge_id"
+    t.integer  "total_right",                          :default => 0
+    t.integer  "total_wrong",                          :default => 0
+    t.boolean  "passed",                               :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                                              :null => false
+    t.datetime "updated_at",                                              :null => false
+  end
+
   create_table "assessment_guidance_concept_options", :force => true do |t|
     t.integer  "topicconcept_id"
     t.boolean  "enabled",         :default => false
@@ -300,8 +311,9 @@ ActiveRecord::Schema.define(:version => 20150224033634) do
     t.integer  "disabled_topicconcept_id"
     t.datetime "disabled_at"
     t.datetime "deleted_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
+    t.boolean  "failed",                   :default => false
   end
 
   create_table "assessment_guidance_quiz_excluded_questions", :force => true do |t|

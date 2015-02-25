@@ -1,12 +1,14 @@
-class Assessment::PolicyMissionSubmissionsController < ApplicationController
+class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :assessment, through: :course, class: "Assessment"
   load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission"
 
-  before_filter :authorize, only: [:attempt, :edit]
+  before_filter :authorize, only: [:new, :edit]
 
-  def attempt
-    
+  def new
+    concept = @course.topicconcepts.concepts.where(id: params[:concept_id]).first
+
+    redirect_to diagnostic_exploration_course_topicconcept_path(@course, concept)
   end
 
   def edit

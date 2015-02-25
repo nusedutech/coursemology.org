@@ -1,4 +1,8 @@
 
+<% if flash[:alert] %>
+  <div class="alert alert-error topicconcepts-alert"><%= flash[:alert] %></div>
+<% end %>
+
 <div class="concept-tutorial">
 	<div id="tutorial-nav" class="tutorial-nav <%= hidden ? "post-animate-tutorial-nav" : "pre-animate-tutorial-nav" %> ">
 		<%= render  partial: "student_interface_progressbar" %>
@@ -11,7 +15,7 @@
 		<div class="task-content-container">
       <% if current_page? :course_topicconcepts %>
 			  <%= render  partial: "topicconcept_for_guidance_map" %>
-      <% elsif current_page? :master_course_topicconcepts %>
+      <% elsif current_page? :diagnostic_exploration_course_topicconcept %>
 			  <%= render  partial: "master" %>
       <% end %>
 		</div>

@@ -3,14 +3,13 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   load_and_authorize_resource :guidance_quiz, class: "Assessment::GuidanceQuiz", through: :course
   before_filter :load_general_course_data, only: [:access_denied]
 
-
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
   def set_enabled
     enabled = params[:data]
 
     if enabled == "true"
-		  Assessment::GuidanceQuiz.enable(@course)
+	  Assessment::GuidanceQuiz.enable(@course)
     else
       Assessment::GuidanceQuiz.disable(@course)
     end
@@ -155,7 +154,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       else
         result[:criteria] = []
       end
-      result = result.merge(get_guidance_concept_action_with concept_criteria)
+      result = result.merge(get_guidance_concept_action_with @concept, concept_criteria)
       result[:name] = @concept.name;
       result[:raw_right] = @concept.all_raw_correct_answer_attempts(curr_user_course.id).size
       result[:raw_total] = result[:raw_right] + @concept.all_raw_wrong_answer_attempts(curr_user_course.id).size
@@ -203,9 +202,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   private
 
   #Get the user action required with the current criteria
-  def get_guidance_concept_action_with criteria_hash
+  def get_guidance_concept_action_with concept, criteria_hash
     action = ""
     actionUrl = ""
+    actionUrlItems = ""
 
     if criteria_hash[:enabled] and Assessment::GuidanceQuiz.is_enabled? (@course)
       @guidance_quiz = @course.guidance_quizzes.first
@@ -215,7 +215,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       #Path to create new submission entered at current criteria
       if submission.nil? and criteria_hash[:is_entry]
         action = "entry"
-        actionUrl = ""
+        actionUrl = attempt_course_assessment_guidance_quiz_submissions_path(@course, @guidance_quiz.assessment)
+        actionUrlItems = { concept_id: concept.id }
       #Path to currently locked
       elsif submission.nil?
         action = "enabled"
@@ -230,7 +231,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       action = "none"
     end
 
-    return {action: action, actionURL: actionUrl}
+    return {action: action, actionURL: actionUrl, actionURLItems: actionUrlItems}
   end
 
   #Get failing criteria for a concept

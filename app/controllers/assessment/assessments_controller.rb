@@ -75,6 +75,10 @@ class Assessment::AssessmentsController < ApplicationController
         elsif ast.can_access_with_end_check? (curr_user_course)
         	action_map[ast.id][:action] = "Resume"
           action_map[ast.id][:url] = edit_course_assessment_submission_path(@course, ast, sub_map[ast.id])
+        elsif ast.submissions.submitted_format.where(std_course_id: curr_user_course.id).first
+          sub_map[ast.id] = ast.submissions.submitted_format.where(std_course_id: curr_user_course.id).first
+          action_map[ast.id][:action] = "Review"
+          action_map[ast.id][:url] = course_assessment_submission_path(@course, ast, sub_map[ast.id])
         end
 
         if ast.is_policy_mission? and !attempting and ast.specific.multipleAttempts? and ast.can_access_with_end_check? (curr_user_course)

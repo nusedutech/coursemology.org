@@ -322,9 +322,11 @@ input.btnmargined {
     margin: 2px;
 }
 
+.title-concept-name,
 .tipsy .name {
     font-size: 25px;
     font-weight: bold;
+    font-style: normal;
     color: #60B1FC;
     margin-top: 10px;
     margin-bottom: 20px;
@@ -548,11 +550,53 @@ g.node.enter.entry text {
 g.node.enter.entry:hover rect {
   fill: #77EE77; 
   stroke: #007000;
-  stroke-width: 3px;
+  stroke-width: 4px;
 }
 
 g.node.enter.entry:hover text {
-  fill: #007000;
+  fill: #008000;
+  font-weight: bold;
+}
+
+g.node.enter.entryin rect {
+  fill: #FFFFBB; 
+  stroke: #A0A000;
+}
+
+g.node.enter.entryin text {
+  fill: #A0A000;
+  font-weight: normal;
+}
+
+g.node.enter.entryin:hover rect {
+  fill: #EEEEAA; 
+  stroke: #808000;
+  stroke-width: 4px;
+}
+
+g.node.enter.entryin:hover text {
+  fill: #707000;
+  font-weight: bold;
+}
+
+g.node.enter.failed rect {
+  fill: #FFBBBB; 
+  stroke: #A00000;
+}
+
+g.node.enter.failed text {
+  fill: #A00000;
+  font-weight: normal;
+}
+
+g.node.enter.failed:hover rect {
+  fill: #EEAAAA; 
+  stroke: #800000;
+  stroke-width: 4px;
+}
+
+g.node.enter.failed:hover text {
+  fill: #700000;
   font-weight: bold;
 }
 
@@ -580,7 +624,7 @@ g.node.enter.enabled text {
 
 g.node.enter.enabled:hover rect {
   fill: #BBBBBB; 
-  stroke-width: 3px;
+  stroke-width: 4px;
 }
 
 g.node.enter.enabled:hover text {
@@ -591,7 +635,8 @@ g.edgeLabel.enter {
   cursor: pointer;
 }
 
-g.edgePath.enter.entrystart.entryend {
+g.edgePath.enter.entrystart.entryend,
+g.edgePath.enter.passed{
   stroke: #008000;
   stroke-width: 2;
 }
@@ -618,7 +663,6 @@ g.edgePath.enter.disabledstart.disabledend {
   stroke-width: 2;
 }
 
-
 g.edgeLabel.enter.entrystart.entryend text{
   fill: #008000;
 }
@@ -628,32 +672,43 @@ g.edgeLabel.enter.entrystart.entryend:hover text{
   font-weight: bold;
 }
 
-g.edgeLabel.enter.enabledstart.enabledend text{
+g.edgeLabel.enter.enabledstart.enabledend text,
+g.edgeLabel.enter.enabledstart.entryend text,
+g.edgeLabel.enter.enabledstart.disabledend text{
   fill: #000000;
 }
 
-g.edgeLabel.enter.enabledstart.enabledend:hover text{
+g.edgeLabel.enter.enabledstart.enabledend:hover text,
+g.edgeLabel.enter.enabledstart.entryend:hover text,
+g.edgeLabel.enter.enabledstart.disabledend:hover text{
   font-weight: bold;
 }
 
 g.edgeLabel.enter.entrystart.enabledend text,
-g.edgeLabel.enter.enabledstart.entryend text{
+g.edgeLabel.enter.entrystart.disabledend text{
   fill: #A0A000;
 }
 
 g.edgeLabel.enter.entrystart.enabledend:hover text,
-g.edgeLabel.enter.enabledstart.entryend:hover text{
+g.edgeLabel.enter.entrystart.disabledend:hover text{
   fill: #909000;
   font-weight:bold;
 }
 
-g.edgeLabel.enter.entrystart.disabledend text,
-g.edgeLabel.enter.enabledstart.disabledend text,
 g.edgeLabel.enter.disabledstart.entryend text,
 g.edgeLabel.enter.disabledstart.enabledend text,
 g.edgeLabel.enter.disabledstart.disabledend text {
   fill: #000000;
   opacity: 0.3
+}
+
+g.edgeLabel.enter.passed text{
+  fill: #008000;
+}
+
+g.edgeLabel.enter.passed:hover text{
+  fill: #007000;
+  font-weight:bold;
 }
 
 input[type = checkbox].normalized-topicconcept {
@@ -672,4 +727,8 @@ div.normalized-topicconcept{
   position: relative;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+a.link-type {
+  cursor: pointer;
 }

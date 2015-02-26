@@ -3,16 +3,64 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   load_and_authorize_resource :assessment, through: :course, class: "Assessment"
   load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission"
 
-  before_filter :authorize, only: [:new, :edit]
+  before_filter :authorize_and_load_guidance_quiz, only: [:attempt, :edit]
 
-  def new
+  #Create new guidance quiz entry
+  def attempt
     concept = @course.topicconcepts.concepts.where(id: params[:concept_id]).first
+
+    #Redirect when concept sent through POST is wrong, concept option doesn't exist
+    #or if entering through the concept is not allowed
+    if concept.nil? or concept.concept_option.nil? or !concept.concept_option.can_enter?
+      redirect_to course_topicconcepts_path(@course), alert: " Invalid Concept Path!"
+      return 
+    end
+
+    @submission = @assessment.submissions.where(std_course_id: curr_user_course).last
+    #Create only when a submission is not found or if the last submission is submitted
+    if @submission.nil? or @submission.submitted?
+      @submission = @assessment.submissions.new
+      @submission.std_course = curr_user_course
+      @submission.save
+
+      #Ensure guidance quiz setting - only one entry
+      if @guidance_quiz.neighbour_entry_lock
+        setup_concept_stages_from @submission, [concept] 
+      else
+        setup_concept_stages_from @submission, @course.topicconcepts.concepts
+      end
+    end
 
     redirect_to diagnostic_exploration_course_topicconcept_path(@course, concept)
   end
 
   def edit
 
+  end
+
+  private
+
+  #Setup the concept stage attempt in the submission
+  def setup_concept_stages_from submission, concepts
+    concepts.each do |concept|
+      if !concept.concept_option.nil? and concept.concept_option.can_enter?
+        concept_stage = submission.concept_stages.new
+        concept_stage.topicconcept_id = concept.id
+        concept_stage.save
+        setup_concept_edge_stage_from concept_stage, concept.concept_edge_dependent_concepts
+      end
+    end
+  end
+
+  #Setup the concept stage edges attempt from the concept stage
+  def setup_concept_edge_stage_from concept_stage, concept_edges
+    concept_edges.each do |concept_edge|
+      if !concept_edge.concept_edge_option.nil? and concept_edge.concept_edge_option.enabled
+        concept_edge_stage = concept_stage.concept_edge_stages.new
+        concept_edge_stage.concept_edge_id = concept_edge.id
+        concept_edge_stage.save
+      end
+    end
   end
 
   def submit_mcq(question)
@@ -70,14 +118,16 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     }
   end
 
-  def authorize
+  def authorize_and_load_guidance_quiz
     if curr_user_course.is_staff?
       return true
     end
  
+    @guidance_quiz = @assessment.specific
+
     #No start time for guidance quiz, only can start after published
-    unless @assessment.published
-      redirect_to access_denied_path, alert: " Not opened yet!"
+    unless @guidance_quiz.enabled
+      redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
     end
   end
 end

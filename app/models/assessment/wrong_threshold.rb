@@ -7,4 +7,8 @@ class Assessment::WrongThreshold < ActiveRecord::Base
   def is_type
     "wrong_threshold"
   end
+
+  def evaluate wrong_amt
+    self.threshold > wrong_amt
+  end
 end

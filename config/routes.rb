@@ -141,9 +141,10 @@ Coursemology::Application.routes.draw do
       resources :assessment_submissions,
                 path:       :diagnostic_exploration,
                 as:         :guidance_quiz_submissions,
-                controller: :guidance_quiz_submissions do
+                controller: :guidance_quiz_submissions,
+                constraints: GuidanceQuizConstraint.new do
         collection do
-          post :attempt, to: 'guidance_quiz_submissions#new'
+          post :attempt, to: 'guidance_quiz_submissions#attempt'
         end
       end
 

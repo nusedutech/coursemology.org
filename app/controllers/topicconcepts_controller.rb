@@ -6,7 +6,11 @@ class TopicconceptsController < ApplicationController
 
 	before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
-  before_filter :load_general_topicconcept_data
+  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
+
+  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
+
+  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration]
 
   def index   
     @topics_concepts_with_info = []
@@ -21,15 +25,14 @@ class TopicconceptsController < ApplicationController
   end
   
   def diagnostic_exploration
+
+    
+    @title_concept = @concept
     respond_to do |format|
       format.html {
         render "topicconcepts/index"
       }
     end
-  end
-  
-  def load_general_topicconcept_data
-    @user_course = curr_user_course
   end
 
   def raw_query_get_select_all mcq_id
@@ -361,5 +364,59 @@ class TopicconceptsController < ApplicationController
       set_student_layout
       set_hidden_sidebar_params
     end
+  end
+
+  def authorize_and_load_guidance_quiz_and_submission_and_concept
+    #No start time for guidance quiz, only can start after published
+    #This is for retrieving the latest concept attempted
+    if Assessment::GuidanceQuiz.is_enabled? @course
+      guidance_quiz = @course.guidance_quizzes.first
+      @submission = guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   status: "attempting").first
+      if @submission
+        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission
+        if @concept_stage
+          @latest_concept = @concept_stage.concept
+        end
+      end
+    end
+
+  end
+
+  def authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage
+    #No start time for guidance quiz, only can start after published
+    unless Assessment::GuidanceQuiz.is_enabled? @course
+      redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
+      return
+    end
+
+    @guidance_quiz = @course.guidance_quizzes.first
+    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   status: "attempting").first
+
+    #Submission not available, refer back to map
+    if @submission.nil? or !@submission.attempting?
+      redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
+      return
+    end
+
+    unless @topicconcept.is_concept?
+      redirect_to course_topicconcepts_path(@course), alert: " This is not a concept!"
+      return
+    end
+
+    @concept = @topicconcept
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept.id
+
+    unless @concept_stage
+      redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
+      return
+    end
+
+    @latest_concept = @concept
+  end
+
+  def load_general_topicconcept_data
+    @user_course = curr_user_course
   end
 end

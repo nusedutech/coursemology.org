@@ -5,6 +5,10 @@ class Assessment::GuidanceQuiz < ActiveRecord::Base
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
   attr_accessible :published, :passing_edge_lock, :neighbour_entry_lock
+ 
+  def enabled
+    self.published
+  end
 
   def self.is_enabled? (course)
     course && course.guidance_quizzes && course.guidance_quizzes.first && course.guidance_quizzes.first.published
@@ -57,5 +61,9 @@ class Assessment::GuidanceQuiz < ActiveRecord::Base
     end
 
     @guidance_quiz
+  end
+
+  def self.get_guidance_quiz (course)
+    course.guidance_quizzes.first
   end
 end

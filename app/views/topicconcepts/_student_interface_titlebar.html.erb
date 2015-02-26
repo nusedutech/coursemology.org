@@ -1,6 +1,9 @@
 <div class="cur-concept-title">
   <a class="btn btn-info btn-navbar collapsed stud-int-sidebar-collapse"><span class="icon-align-justify"></span></a>
     <div id="titlebar" class="cur-concept-title-slave">
+    	<% if @title_concept %>
+    		<h2>Currently Attempting: <attr title="Link to Google Search"><a class='btn btn-large topicconcept-google-search' data-google-search="<%= @title_concept.name %>" ><%= @title_concept.name %></a></attr></h2>
+    	<% end %>
     </div>			
 </div>
 

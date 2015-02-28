@@ -24,7 +24,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_passing_edge_lock
     enabled = params[:data]
-	Assessment::GuidanceQuiz.set_passing_edge_lock(@course, enabled == "true")
+	  Assessment::GuidanceQuiz.set_passing_edge_lock(@course, enabled == "true")
     
     respond_to do |format| 
       format.json { render json: { result: true}}
@@ -33,7 +33,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_neighbour_entry_lock
     enabled = params[:data]
-	Assessment::GuidanceQuiz.set_neighbour_entry_lock(@course, enabled == "true")
+	  Assessment::GuidanceQuiz.set_neighbour_entry_lock(@course, enabled == "true")
     
     respond_to do |format| 
       format.json { render json: { result: true}}

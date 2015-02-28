@@ -31,7 +31,7 @@ class Assessment::GuidanceQuizExcludedQuestion < ActiveRecord::Base
     if !exclusion_status.nil?
       result = exclusion_status.excluded
     else
-      result = true
+      result = false
     end
     result
   end

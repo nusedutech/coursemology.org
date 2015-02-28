@@ -12,33 +12,34 @@ class Assessment::ForwardPolicyLevel < ActiveRecord::Base
   #Get all questions linked to an assessment for a forward policy level
   #and permutate them
   def getAllQuestionsString(assessment)
-	result = ""
+	  result = ""
 
-	if assessment.is_a? Assessment
+	  if assessment.is_a? Assessment
       qaLinks = []
-      levelTaggableTags = self.forward_policy_theme.taggable_tags
+      levelTaggableTags = self.forward_policy_theme.taggable_tags.where(taggable_type: "Assessment::Question")
       levelTaggableTags.each do |singleTaggableTag|
         qaLinks = qaLinks + assessment.question_assessments.where("question_assessments.question_id = ? ", singleTaggableTag.taggable_id)
       end
 
-	  arr = []
-	  qaLinks.each do |question|
-	    arr.push(question.question_id)
+	    arr = []
+	    qaLinks.each do |question|
+	      arr.push(question.question_id)
+	    end
+
+	    #permutate questions
+	    arrNeo = arr.shuffle
+	    #CSV string save
+	    result = arrNeo.join(",")
 	  end
 
-	  #permutate questions
-	  arrNeo = arr.shuffle
-	  #CSV string save
-	  result = arrNeo.join(",")
-	end
-
-	return result
+	  return result
   end
 
   def getAllRelatedQuestions(assessment)
-	if assessment.is_a? Assessment
+	  if assessment.is_a? Assessment
       qaLinks = []
-      levelTaggableTags = self.forward_policy_theme.taggable_tags
+      levelTaggableTags = self.forward_policy_theme.taggable_tags.where(taggable_type: "Assessment::Question")
+  
       levelTaggableTags.each do |singleTaggableTag|
         qaLinks = qaLinks + assessment.question_assessments.where("question_assessments.question_id = ? ", singleTaggableTag.taggable_id)
       end
@@ -48,14 +49,14 @@ class Assessment::ForwardPolicyLevel < ActiveRecord::Base
         questions << qaLink.question
       end
 
-	else
-	  questions = []
-	end
+	  else
+	    questions = []
+	  end
 	
-	return questions
+	  return questions
   end
 
   def getTag
-	return self.forward_policy_theme
+	  return self.forward_policy_theme
   end
 end

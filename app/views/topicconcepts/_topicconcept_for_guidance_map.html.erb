@@ -58,6 +58,7 @@
   var EDGE_ENABLED_END_CLASS = "enabledend";
   var EDGE_DISABLED_END_CLASS = "disabledend";
   var EDGE_PASSED_CLASS = "passed";
+  var EDGE_DISABLED_CLASS = "disabled";
 
 
   function reset_edit_console(){
@@ -148,7 +149,7 @@
                                           failedNodes,
                                           openAtmEdges,
                                           failedEdges){
-    halt();
+
 
 		//Create graph
 	  gconcept = new dagreD3.Digraph();
@@ -181,11 +182,11 @@
       setup_passed_nodes_edges_color(openAtmNodes);
       setup_failed_nodes_edges_color(failedNodes);
       setup_passed_edges_color(openAtmEdges);
+      setup_disabled_edges_color(edgelist);
     }
     setup_edgepaths_arrow_heads()
     setup_tooltips();
 
-    resume();
 	}
 
   function setupNodes(graph, nodelist, lastAtmNode, openAtmNodes, failedNodes) {
@@ -194,12 +195,12 @@
     });
     if (openAtmNodes != null ) {
       $.each(openAtmNodes, function(){  
-        graph.addNode(this.concept_id, { label: this.concept_name });
+        graph.addNode(this.id, { label: this.name });
       });
     }
     if (failedNodes != null) {
       $.each(failedNodes, function(){  
-        graph.addNode(this.concept_id, { label: this.concept_name });
+        graph.addNode(this.id, { label: this.name });
       });
     }
     if (lastAtmNode != null) {
@@ -379,17 +380,17 @@
   function setup_passed_nodes_edges_color(openAtmNodes) {
     if (openAtmNodes != null) {
       $.each(openAtmNodes, function(){  
-        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENTRY_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+        $("#"+G_NODE_KEY+this.id).attr("class", NODE_ENTRY_CLASS);
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
           add_class(this, EDGE_ENTRY_START_CLASS);
         });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+        $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
           add_class(this, EDGE_ENTRY_END_CLASS);
         });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
           add_class(this, EDGE_ENTRY_START_CLASS);
         });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+        $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
           add_class(this, EDGE_ENTRY_END_CLASS);
         });
       }); 
@@ -424,21 +425,46 @@
   function setup_failed_nodes_edges_color(failedNodes) {
     if (failedNodes != null) {
       $.each(failedNodes, function(){  
-        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_FAILED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+        $("#"+G_NODE_KEY+this.id).attr("class", NODE_FAILED_CLASS);
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
           add_class(this, EDGE_ENABLED_START_CLASS);
         });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+        $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
           add_class(this, EDGE_ENABLED_END_CLASS);
         });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
           add_class(this, EDGE_ENABLED_START_CLASS);
         });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+        $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
           add_class(this, EDGE_ENABLED_END_CLASS);
         });
       }); 
     }
+  }
+
+  function setup_disabled_edges_color(edgelist) {
+    $.each(edgelist, function(){ 
+      if (!this.enabled) { 
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id).each(function(){
+          add_class(this, EDGE_DISABLED_CLASS);
+          remove_class(this, EDGE_ENABLED_START_CLASS);
+          remove_class(this, EDGE_ENABLED_END_CLASS);
+          remove_class(this, EDGE_ENTRY_START_CLASS);
+          remove_class(this, EDGE_ENTRY_END_CLASS);
+          remove_class(this, EDGE_DISABLED_START_CLASS);
+          remove_class(this, EDGE_DISABLED_END_CLASS);
+        });
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id).each(function(){
+          add_class(this, EDGE_DISABLED_CLASS);
+          remove_class(this, EDGE_ENABLED_START_CLASS);
+          remove_class(this, EDGE_ENABLED_END_CLASS);
+          remove_class(this, EDGE_ENTRY_START_CLASS);
+          remove_class(this, EDGE_ENTRY_END_CLASS);
+          remove_class(this, EDGE_DISABLED_START_CLASS);
+          remove_class(this, EDGE_DISABLED_END_CLASS);
+        });
+      }
+    });
   }
 
   function setup_edgepaths_arrow_heads() {
@@ -596,7 +622,7 @@
         }
 
         if (criteria[i].name == "wrong_threshold") {
-          statementP.innerHTML = ' More than <em class="tipsy-failWord">'+criteria[i].condition-1+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+          statementP.innerHTML = ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
         }
 
 

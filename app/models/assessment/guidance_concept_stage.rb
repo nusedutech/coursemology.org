@@ -1,4 +1,5 @@
 class Assessment::GuidanceConceptStage < ActiveRecord::Base
+  require 'csv'
   acts_as_paranoid
 
   attr_accessible :uncompleted_questions, :completed_answers, :disabled_topicconcept_id, :total_wrong, :total_right, :assessment_submission_id, :topicconcept_id, :failed
@@ -15,32 +16,40 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
   scope :failed, -> { where(failed: true) }
   scope :passed, -> { where(failed: false) }
   
-  def get_all_questions_string(guidance_quiz, course)
-    questions = self.concept.taggable_tags.collect(&:question)
+  def set_uncompleted_questions_string course
+    taggable_tags = self.concept.taggable_tags.question_type
     suitable_questions = []
-    questions.each do |question| 
-      if !(Assessment::GuidanceQuizExcludedQuestion.is_excluded?(question))
-        suitable_questions << question
+    taggable_tags.each do |tagtag|
+      #Only MCQ questions now
+      question = course.questions.mcq_question.find_by_id(tagtag.taggable_id)
+      if question and !(Assessment::GuidanceQuizExcludedQuestion.is_excluded?(question))
+        suitable_questions << question.id
       end
     end
 
+    suitable_questions
     if suitable_questions.count > 0
-      result = questions.shuffle.join(",")
+      result = suitable_questions.shuffle.join(",")
     else 
       result = nil
     end
-
-    result
+    
+    self.uncompleted_questions = result
+    self.save
   end
 
-  def allQuestions = CSV.parse_line(self.uncompleted_questions)
-    #We will only use line 0 so check line 0 only
-    if allQuestions == nil || allQuestions.nil?
-      policyLevel = self.getCorrespondingLevel
-      newQuestions = policyLevel.getAllQuestionsString assessment
-      self.uncompleted_questions = newQuestions
-      self.save
-      allQuestions = CSV.parse_line(newQuestions)
+  def get_top_question course
+    if self.uncompleted_questions.nil?
+      self.set_uncompleted_questions_string course
+    end
+    
+    #If still empty after refreshing
+    if self.uncompleted_questions.nil?
+      result = nil
+    else
+      all_questions = CSV.parse_line(self.uncompleted_questions)
+      question_id = all_questions.shift
+      todo_question = course.questions.find_by_id(question_id)
     end
   end
 

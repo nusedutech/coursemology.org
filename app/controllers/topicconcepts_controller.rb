@@ -25,8 +25,14 @@ class TopicconceptsController < ApplicationController
   end
   
   def diagnostic_exploration
-
-    
+    @concept_stage.updated_at = Time.now
+    @concept_stage.save
+    @question = @concept_stage.get_top_question @course
+    unless @question
+      redirect_to course_topicconcepts_path(@course), alert: " Current concept has run out of questions!"
+      return
+    end
+   
     @title_concept = @concept
     respond_to do |format|
       format.html {

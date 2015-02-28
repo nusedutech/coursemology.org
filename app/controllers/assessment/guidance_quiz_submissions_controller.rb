@@ -55,9 +55,14 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   #Setup the concept stage edges attempt from the concept stage
   def setup_concept_edge_stage_from concept_stage, concept_edges
     concept_edges.each do |concept_edge|
-      if !concept_edge.concept_edge_option.nil? and concept_edge.concept_edge_option.enabled
+      concept_edge_option = concept_edge.concept_edge_option
+      if !concept_edge_option.nil? and concept_edge_option.enabled
         concept_edge_stage = concept_stage.concept_edge_stages.new
         concept_edge_stage.concept_edge_id = concept_edge.id
+        #If no criteria found, pass the edge immediately
+        if concept_edge_option.concept_edge_criteria.count == 0
+          concept_edge_stage.passed = true
+        end
         concept_edge_stage.save
       end
     end
@@ -119,11 +124,10 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   end
 
   def authorize_and_load_guidance_quiz
+  	@guidance_quiz = @assessment.specific
     if curr_user_course.is_staff?
       return true
     end
- 
-    @guidance_quiz = @assessment.specific
 
     #No start time for guidance quiz, only can start after published
     unless @guidance_quiz.enabled

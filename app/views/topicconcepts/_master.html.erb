@@ -1,28 +1,48 @@
-<div class="topicconcept-spuuned">
-	<div class="topicconcept-spun-3 pull-right">
-		<div id="criteria_area_wrap">
-		  <div id="criteria_content" class="info-box">
-			  <span class="info-box-header">Criteria</span>
-				<div id="criteria-area" class="fancy-scrollbar criteria-area"></div>
-					<div class="criteria-buttons">
-						<div class="check-criteria-wrapper">
-					    <input id="check-criteria-button" class="btn btn-success" type="button" value="Refresh">
-		        	</div>
-				  </div>
-			  </div>
-		  </div>
+<div class="topicconcept-spunned">
+    <div class="topicconcept-spun-12">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box info-box-green">
+		  		<div>
+		  			No feedback.
+	  			</div>
+				<i id="correction-information-close" class="icon-remove icon-remove-button"></i>
+			</div>
 		</div>
 	</div>
-	<div class="topicconcept-spun-9 pull-right">
-		<% if @question.as_question.class == Assessment::McqQuestion %>
-		  <%= render  partial: "assessment/guidance_quiz_submissions/do_mcq", locals:{mcq: @question.specific}%>
-		<% end %>
+
+	<div class="topicconcept-spun-8">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+				<div class="inner-info-box-area">
+					<% if @question.as_question.class == Assessment::McqQuestion %>
+					  <%= render  partial: "assessment/guidance_quiz_submissions/do_mcq", locals:{mcq: @question.specific}%>
+					<% end %>
+				</div>
+				<div class="inner-info-box-footer pull-right">
+					<input id="submit-button" class="btn btn-info" type="button" value="Next">				
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="topicconcept-spun-4">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+			  	<span class="info-box-header">Failing Criteria</span>			  	
+			</div>
+		</div>
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+			  	<span class="info-box-header">Passing Criteria</span>
+			</div>
+		</div>
 	</div>
 </div>
 
 <script>
 	$(document).ready(function(){
-		
+		$('#correction-information-close').click(function(){
+			$(this).parent().parent().parent().css("display","none");
+		});
 	});
 	
 </script>

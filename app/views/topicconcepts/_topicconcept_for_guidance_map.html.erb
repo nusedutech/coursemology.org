@@ -473,7 +473,9 @@
       $(this).attr("marker-end", "url(#arrowGreen)");
     });
 
-    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
+    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
+      "g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
+      "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
       "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path").each(function(){
       $(this).attr("marker-end", "url(#arrowYellow)");
     });
@@ -482,9 +484,7 @@
       $(this).attr("marker-end", "url(#arrowBlack)");
     });
 
-    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
+    $("g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
       "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
       "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path").each(function(){
       $(this).attr("marker-end", "url(#arrowBlack)");

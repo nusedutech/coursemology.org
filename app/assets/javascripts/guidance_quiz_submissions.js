@@ -2,6 +2,7 @@ $(document).ready(function(){
     $(".topicconcept-google-search").click(function(){
         search_google_for(this.getAttribute("data-google-search"));
     });
+    $('.topicconcept-bar-tooltip').tooltip();
 });
 
 function guidance_quiz_post_with_concept_id( url, concept_id ) {

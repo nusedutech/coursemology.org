@@ -148,7 +148,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
 	      current = forwardGroup.getTopQuestion @assessment
       end
 
-      if !current.nil? && (params.has_key?(:qid) && params[:qid].to_i == current.id)
+      if !current.nil? && (params.has_key?(:qid) && params[:qid].to_i == current.id) && params.has_key?(:answer)
         question = @assessment.questions.find_by_id(params[:qid]).specific
         response = submit_mcq(question)
         forwardGroup.removeTopQuestion

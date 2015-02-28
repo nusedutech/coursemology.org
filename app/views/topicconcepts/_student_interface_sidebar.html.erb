@@ -12,7 +12,7 @@
 
 <div class="slimScrollDiv">
   <ul>
-    <li class="required-concept-node <%= menuItemSelected == 0 ? "selected" : "" %> <%= menuItemSelected > 0 ? "completed" : "" %>">
+    <li class="required-concept-node <%= menuItemSelected == 0 ? "selected" : "" %> completed">
   		<a href="<%= course_topicconcepts_path(@course) + appendedURL %>">
       	<div class="subway-icon">
           <div class="pipe"></div>							
@@ -21,7 +21,7 @@
       	<span class="progress-title">Select</span>
   		</a>
     </li>
-    <li class="required-concept-node <%= menuItemSelected == 1 ? "selected" : "" %> <%= menuItemSelected > 1 ? "completed" : "" %>">
+    <li class="required-concept-node <%= menuItemSelected == 1 ? "selected" : "" %> completed">
   		<a class="link-type" href="<%= !@latest_concept.nil? ? diagnostic_exploration_course_topicconcept_path(@course, @latest_concept) : "" %>"
         <% if @latest_concept.nil? %>
           onclick="alert('Please select a concept node to start at first.');"
@@ -34,7 +34,7 @@
       	<span class="progress-title">Solve</span>
   		</a>
     </li>
-    <li class="<%= @course.forums_enabled? ? "required-concept-node" : "main-concept" %> <%= menuItemSelected == 2 ? "selected" : "" %> <%= menuItemSelected > 2 ? "completed" : "" %>">
+    <li class="<%= @course.forums_enabled? ? "required-concept-node" : "main-concept" %> <%= menuItemSelected == 2 ? "selected" : "" %> completed">
   		<a class="link-type" href="" onclick="alert('Please select a concept node to start at first.');">
       	<div class="subway-icon">
           <div class="pipe"></div>							
@@ -45,7 +45,7 @@
     </li>
 
     <% if @course.forums_enabled? %>
-      <li class="main-concept <%= menuItemSelected == 3 ? "selected" : "" %> <%= menuItemSelected > 3 ? "completed" : "" %>">
+      <li class="main-concept <%= menuItemSelected == 3 ? "selected" : "" %> completed">
   		  <a class="link-type" href="<%= course_forums_path(@course) %>" target="_blank">
     		  <div class="subway-icon">
         	  <div class="pipe"></div>							

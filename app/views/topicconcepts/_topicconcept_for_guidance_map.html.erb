@@ -176,13 +176,16 @@
       updateTitleBar("<h2>Resume [<em class='title-concept-name'>" + lastAtmNode.name + "</em>] or select another concept</h2>");
     }
 
-    setup_node_edges_color(nodelist);
     if (submission != null) {
+      setup_node_edges_color_under_submission(nodelist);
       setup_current_node_edges_color(lastAtmNode);
       setup_passed_nodes_edges_color(openAtmNodes);
       setup_failed_nodes_edges_color(failedNodes);
       setup_passed_edges_color(openAtmEdges);
       setup_disabled_edges_color(edgelist);
+    }
+    else {
+      setup_node_edges_color(nodelist);
     }
     setup_edgepaths_arrow_heads()
     setup_tooltips();
@@ -357,6 +360,41 @@
         });
 	    }     
 	  });
+  }
+
+  function setup_node_edges_color_under_submission(nodelist) {
+    $.each(nodelist, function(){  
+      if (this.enabled) {
+        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENABLED_CLASS);
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_ENABLED_START_CLASS);
+        });
+        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_ENABLED_END_CLASS);
+        });
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_ENABLED_START_CLASS);
+        });
+        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_ENABLED_END_CLASS);
+        });
+      }
+      else {
+        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_DISABLED_CLASS);
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_DISABLED_START_CLASS);
+        });
+        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_DISABLED_END_CLASS);
+        });
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_DISABLED_START_CLASS);
+        });
+        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+          add_class(this, EDGE_DISABLED_END_CLASS);
+        });
+      }     
+    });
   }
 
   function setup_current_node_edges_color(lastAtmNode) {

@@ -146,6 +146,9 @@ Coursemology::Application.routes.draw do
         collection do
           post :attempt, to: 'guidance_quiz_submissions#attempt'
         end
+        member do
+          post :edit, to: 'guidance_quiz_submissions#edit'
+        end
       end
 
     end
@@ -285,6 +288,7 @@ Coursemology::Application.routes.draw do
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'diagnostic_exploration', :on => :member
+        get 'diagnostic_exploration_next_question', :on => :member
         post 'submit_answer', :on => :collection
         get 'ivleapi'       
     end

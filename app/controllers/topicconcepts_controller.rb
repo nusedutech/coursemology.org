@@ -1,4 +1,5 @@
 class TopicconceptsController < ApplicationController
+  include ERB::Util
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
@@ -10,7 +11,7 @@ class TopicconceptsController < ApplicationController
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
 
-  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration]
+  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
 
   def index   
     @topics_concepts_with_info = []
@@ -25,9 +26,13 @@ class TopicconceptsController < ApplicationController
   end
   
   def diagnostic_exploration
-    @concept_stage.updated_at = Time.now
-    @concept_stage.save
+    set_latest_concept_stage @concept_stage
     @question = @concept_stage.get_top_question @course
+
+    if @question.nil?
+      @question = @concept_stage.reset_and_get_top_question @course
+    end
+
     unless @question
       redirect_to course_topicconcepts_path(@course), alert: " Current concept has run out of questions!"
       return
@@ -39,6 +44,44 @@ class TopicconceptsController < ApplicationController
         render "topicconcepts/index"
       }
     end
+  end
+
+  def diagnostic_exploration_next_question
+    set_latest_concept_stage @concept_stage
+    question = @concept_stage.get_top_question @course
+
+    if question.nil?
+      question = @concept_stage.reset_and_get_top_question @course
+    end
+
+    unless question
+      access_denied " Current concept has run out of questions!", course_topicconcepts_path(@course)
+      return
+    end
+
+    if question.as_question.class == Assessment::McqQuestion
+      mcq_question = question.specific
+      options = mcq_question.options.map { |x| { id: x.id, text: style_format(html_escape(x.text)) } }
+      summary = {
+                  question_title: style_format(question.description),
+                  question_id: question.id,
+                  question_select_all: mcq_question.select_all,
+                  question_options: options
+                }
+    else
+      summary = {}
+    end
+
+    respond_to do |format|
+      format.json {
+        render json: summary
+      }
+    end
+  end
+
+  def set_latest_concept_stage concept_stage
+    concept_stage.updated_at = Time.now
+    concept_stage.save
   end
 
   def raw_query_get_select_all mcq_id
@@ -397,6 +440,7 @@ class TopicconceptsController < ApplicationController
     end
 
     @guidance_quiz = @course.guidance_quizzes.first
+    @assessment = @guidance_quiz.assessment
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
 
@@ -412,7 +456,7 @@ class TopicconceptsController < ApplicationController
     end
 
     @concept = @topicconcept
-    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept.id
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock
 
     unless @concept_stage
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
@@ -443,7 +487,7 @@ class TopicconceptsController < ApplicationController
                         disable_message: "Assessment not started yet"
                       }
     else
-      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission
+      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !guidance_quiz.neighbour_entry_lock
       passed_concepts = passed_concept_stages.collect(&:concept).uniq
       failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
       failed_concepts = failed_concept_stages.collect(&:concept).uniq
@@ -467,6 +511,19 @@ class TopicconceptsController < ApplicationController
                         enable_amt: enabled_concept_count,
                         disable_amt: disabled_concept_count,
                       }
+    end
+  end
+
+  def access_denied message, redirectURL
+    respond_to do |format|
+      format.json { 
+        render json: { 
+          access_denied: { 
+            message: message, 
+            redirectURL: redirectURL
+          } 
+        } 
+      }
     end
   end
 end

@@ -155,7 +155,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def get_guidance_quiz_submission_data submission
   	result = {}
-    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission
+    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !@guidance_quiz.neighbour_entry_lock
     failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
     result[:openAtmNodes] = passed_concept_stages.collect(&:concept).uniq
     result[:failedNodes] = failed_concept_stages.collect(&:concept).uniq 
@@ -261,7 +261,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         action = "enabled"
       #Path to resume submission at current criteria  
       else
-      	concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept.id
+        concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock
         if !concept_stage.nil?
           action = "resume"
           actionUrl = diagnostic_exploration_course_topicconcept_path(@course, @concept)
@@ -300,12 +300,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     #Get submission records if it exist
     if @submission
-      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, 
-                                                                 concept_option.topicconcept.id
-      #if concept_stage
-      #  current_wrong = concept_stage.total_wrong
-      #  current_right = concept_stage.total_right
-      #end
+      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept_option.topicconcept, !@guidance_quiz.neighbour_entry_lock 
+      if concept_stage
+        current_wrong = concept_stage.total_wrong
+        current_right = concept_stage.total_right
+      end
     end
     #Retrieve criteria info
     concept_option.concept_criteria.each do |criterion|

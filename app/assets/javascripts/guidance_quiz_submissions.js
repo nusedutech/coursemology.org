@@ -30,3 +30,28 @@ function search_google_for (text) {
         window.open("http://www.google.com/search?q="+queryText);
     }
 }
+
+function server_request(data, method, url){
+    var result = null;
+    $.ajax({
+        type: method,
+        dataType: "json",
+        data: data,
+        async: false,
+        url: url,
+        success: function(json) {           
+            if (json.access_denied){
+                access_denied_redirect(json.access_denied.message, 
+                                       json.access_denied.redirectURL);
+            }
+            else {
+                result = json; 
+            }
+
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            alert("Status: " + textStatus + " Error: " + errorThrown); 
+        }
+    });
+    return result;
+}

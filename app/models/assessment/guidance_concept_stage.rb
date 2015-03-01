@@ -38,19 +38,74 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     self.save
   end
 
-  def get_top_question course
+  #Accelerated function to get first id out
+  def get_top_question_id_fast
     if self.uncompleted_questions.nil?
-      self.set_uncompleted_questions_string course
+      result = nil
+    else
+      all_questions = CSV.parse_line(self.uncompleted_questions)
+      result = all_questions.shift
     end
     
-    #If still empty after refreshing
+    return result
+  end
+
+  def reset_and_get_top_question course
+    self.set_uncompleted_questions_string course
+
     if self.uncompleted_questions.nil?
       result = nil
     else
       all_questions = CSV.parse_line(self.uncompleted_questions)
       question_id = all_questions.shift
-      todo_question = course.questions.find_by_id(question_id)
+      result = course.questions.find_by_id(question_id)
     end
+    return result
+  end
+
+  def get_top_question course
+    if self.uncompleted_questions.nil? or self.uncompleted_questions == ""
+      self.set_uncompleted_questions_string course
+    end
+    
+    #If still empty after refreshing
+    if self.uncompleted_questions.nil? or self.uncompleted_questions == ""
+      result = nil
+    else
+      all_questions = CSV.parse_line(self.uncompleted_questions)
+      question_id = all_questions.shift
+      result = course.questions.find_by_id(question_id)
+    end
+    return result
+  end
+
+  def remove_top_question
+    all_questions = CSV.parse_line(self.uncompleted_questions)
+    all_questions.shift
+    self.uncompleted_questions = all_questions.join(",")
+    self.save
+  end
+
+  def record_answer(answer_id)
+    if self.completed_answers.present?
+      all_answers = CSV.parse_line(self.completed_answers)
+    else
+      all_answers = []
+    end
+    all_answers.concat([answer_id])
+
+    self.completed_answers = all_answers.join(",")
+    self.save
+  end
+
+  def add_one_right
+    self.total_right += 1
+    self.save
+  end
+
+  def add_one_wrong
+    self.total_wrong += 1
+    self.save
   end
 
   #Static methods declare here
@@ -70,16 +125,6 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
       end
     end
 
-    def get_passed_stages submission
-      clean_deleted_stages submission
-      submission.concept_stages.passed.order('updated_at DESC')
-    end
-
-    def get_failed_stages submission
-      clean_deleted_stages submission
-      submission.concept_stages.failed.order('updated_at DESC')
-    end
-
     def clean_deleted_stage concept_stage
       concept = concept_stage.concept
       #Update concepts which are deleted or disabled are removed at once
@@ -93,14 +138,56 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
       end
     end
 
-    def get_passed_stage submission, concept_id
-      concept_stage = submission.concept_stages.passed
-                                               .where(topicconcept_id: concept_id)
-                                               .first
-      if concept_stage.nil? or clean_deleted_stage concept_stage
-        return nil
-      else
+    def add_enabled_stages submission, create_new_option
+      concepts = submission.assessment.course.topicconcepts.concepts
+      #Update concepts which are enabled
+      if create_new_option
+        concepts.each do |concept|
+          concept_stage = submission.concept_stages.passed.where(topicconcept_id: concept.id).first
+          if concept_stage.nil? 
+            add_enabled_stage submission, concept
+          end
+        end
+      end
+    end
+
+    #Check if a concept is activated for doing
+    def add_enabled_stage submission, concept
+      if Assessment::GuidanceConceptOption.can_enter_with concept
+        concept_stage = submission.concept_stages.new
+        concept_stage.topicconcept_id = concept.id
+        concept_stage.save
+
+        #Rejuvenate edges related stages as well
+        add_concept_edge_stages_from concept_stage, concept.concept_edge_dependent_concepts
+
         return concept_stage
+      else
+        return nil
+      end
+    end
+
+    def get_passed_stages submission, create_new_option
+      clean_deleted_stages submission
+      add_enabled_stages submission, create_new_option
+      submission.concept_stages.passed.order('updated_at DESC')
+    end
+
+    def get_failed_stages submission
+      clean_deleted_stages submission
+      submission.concept_stages.failed.order('updated_at DESC')
+    end
+
+    def get_passed_stage submission, concept, create_new_option
+      concept_stage = submission.concept_stages.passed.where(topicconcept_id: concept.id).first
+      if !concept_stage.nil? and clean_deleted_stage concept_stage
+        return nil
+      elsif !concept_stage.nil?
+        return concept_stage
+      elsif create_new_option
+        return add_enabled_stage submission, concept
+      else create_new_option
+        return nil
       end
     end
 
@@ -113,13 +200,32 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
       end
     end
 
-    def get_stage submission, concept_id
-      concept_stage = submission.concept_stages.where(topicconcept_id: concept_id)
-                                               .first
-      if concept_stage.nil? or clean_deleted_stage concept_stage
+    def get_stage submission, concept, create_new_option
+      concept_stage = submission.concept_stages.where(topicconcept_id: concept.id).first
+      if !concept_stage.nil? and clean_deleted_stage concept_stage
         return nil
-      else
+      elsif !concept_stage.nil?
         return concept_stage
+      elsif create_new_option
+        return add_enabled_stage submission, concept
+      else create_new_option
+        return nil
+      end
+    end
+
+
+    def add_concept_edge_stages_from concept_stage, concept_edges
+      concept_edges.each do |concept_edge|
+        concept_edge_option = concept_edge.concept_edge_option
+        if !concept_edge_option.nil? and concept_edge_option.enabled
+          concept_edge_stage = concept_stage.concept_edge_stages.new
+          concept_edge_stage.concept_edge_id = concept_edge.id
+          #If no criteria found, pass the edge immediately
+          if concept_edge_option.concept_edge_criteria.count == 0
+            concept_edge_stage.passed = true
+          end
+          concept_edge_stage.save
+        end
       end
     end
   end

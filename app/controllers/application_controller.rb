@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-
+  require 'htmlentities'
   protect_from_forgery
   helper_method :sort_direction, :sort_column
   before_filter :init_gon
@@ -298,6 +298,22 @@ class ApplicationController < ActionController::Base
 
   def not_found
     raise ActionController::RoutingError.new('Not Found')
+  end
+
+  def style_format(str, html_safe = true, lang='python')
+    # TODO: Find a more consistent way for both back- and front-end to access styling without needing this.
+    if str.to_s.length > 0
+      unless html_safe
+        str = HTMLEntities.new.encode(str)
+      end
+      str = str.gsub(/\n/,"<br/>")
+      str = str.gsub(/\[b\](.*?)\[\/b\]/m,'<strong>\1</strong>')
+      str = str.gsub(/\[c\](.*?)\[\/c\]/m,'<div class="cos_code"><span class="jfdiCode cm-s-molokai ' << lang << 'Code">\1</span></div>')
+      str = str.gsub(/\[mc\](.*?)\[\/mc\]/m){'<div class="cos_code"><pre><div class="jfdiCode cm-s-molokai ' << lang << 'Code">'<< $1.gsub(/<br>/,'
+') <<'</div></pre></div>'}
+      return str.html_safe
+    end
+    ""
   end
 
   helper_method :masquerading?

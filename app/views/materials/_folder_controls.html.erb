@@ -64,7 +64,7 @@
   <div class="modal-header">
     <h3>Create Subfolder</h3>
   </div>
-  <%= render partial: "subfolder_form", locals: { modal: true, folder_to_change: MaterialFolder.new, subfolder_method: :post, parent: @folder } %>
+  <%= render partial: "subfolder_form", locals: { modal: true, folder_to_change: MaterialFolder.new(:open_at => @folder.open_at, :close_at => @folder.close_at), subfolder_method: :post, parent: @folder } %>
 </div>
 
 <div id="edit-subfolder-modal" class="modal hide fade">

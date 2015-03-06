@@ -5,13 +5,13 @@ class TopicconceptsController < ApplicationController
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration]
 
-	before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
+	#before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
-  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
+  #before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
 
-  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
+  #before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
 
-  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
+  #before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
 
   def index   
     @topics_concepts_with_info = []
@@ -26,62 +26,11 @@ class TopicconceptsController < ApplicationController
   end
   
   def diagnostic_exploration
-    set_latest_concept_stage @concept_stage
-    @question = @concept_stage.get_top_question @course
-
-    if @question.nil?
-      @question = @concept_stage.reset_and_get_top_question @course
-    end
-
-    unless @question
-      redirect_to course_topicconcepts_path(@course), alert: " Current concept has run out of questions!"
-      return
-    end
-   
-    @title_concept = @concept
-    respond_to do |format|
-      format.html {
-        render "topicconcepts/index"
-      }
-    end
+    
   end
 
   def diagnostic_exploration_next_question
-    set_latest_concept_stage @concept_stage
-    question = @concept_stage.get_top_question @course
-
-    if question.nil?
-      question = @concept_stage.reset_and_get_top_question @course
-    end
-
-    unless question
-      access_denied " Current concept has run out of questions!", course_topicconcepts_path(@course)
-      return
-    end
-
-    if question.as_question.class == Assessment::McqQuestion
-      mcq_question = question.specific
-      options = mcq_question.options.map { |x| { id: x.id, text: style_format(html_escape(x.text)) } }
-      summary = {
-                  question_title: style_format(question.description),
-                  question_id: question.id,
-                  question_select_all: mcq_question.select_all,
-                  question_options: options
-                }
-    else
-      summary = {}
-    end
-
-    respond_to do |format|
-      format.json {
-        render json: summary
-      }
-    end
-  end
-
-  def set_latest_concept_stage concept_stage
-    concept_stage.updated_at = Time.now
-    concept_stage.save
+    
   end
 
   def raw_query_get_select_all mcq_id
@@ -319,7 +268,7 @@ class TopicconceptsController < ApplicationController
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
-      if can? :manage, Topicconcept and !session[:topicconcept_student_view]
+      if can? :manage, Topicconcept
         user_ability = 'manage'
         format.json { render :json =>{:user_ability => user_ability, :topictrees => @topics_concepts_with_info}}
       else
@@ -388,131 +337,6 @@ class TopicconceptsController < ApplicationController
     end
   end
 
-	def set_student_layout
-		if cannot? :manage, Topicconcept or @student_view
-      self.class.layout "topicconcept_student_interface"
-    else
-      self.class.layout "application"
-    end
-  end
-
-  def set_student_view
-    session[:topicconcept_student_view] = !params[:student_view].nil? and params[:student_view] == "true"
-    @student_view = session[:topicconcept_student_view]
-  end
-
-  def set_hidden_sidebar_params
-    @hidden = !params[:hideSideBar].nil? and params[:hideSideBar] == "true"
-  end
-
-  #Set viewing permission and parameters of user
-  def set_viewing_permissions
-    @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
-    if @gqEnabled
-      set_student_view
-      set_student_layout
-      set_hidden_sidebar_params
-    end
-  end
-
-  def authorize_and_load_guidance_quiz_and_submission_and_concept
-    #No start time for guidance quiz, only can start after published
-    #This is for retrieving the latest concept attempted
-    if Assessment::GuidanceQuiz.is_enabled? @course
-      guidance_quiz = @course.guidance_quizzes.first
-      @submission = guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                   status: "attempting").first
-      if @submission
-        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission
-        if @concept_stage
-          @latest_concept = @concept_stage.concept
-        end
-      end
-    end
-
-  end
-
-  def authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage
-    #No start time for guidance quiz, only can start after published
-    unless Assessment::GuidanceQuiz.is_enabled? @course
-      redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
-      return
-    end
-
-    @guidance_quiz = @course.guidance_quizzes.first
-    @assessment = @guidance_quiz.assessment
-    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                   status: "attempting").first
-
-    #Submission not available, refer back to map
-    if @submission.nil? or !@submission.attempting?
-      redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
-      return
-    end
-
-    unless @topicconcept.is_concept?
-      redirect_to course_topicconcepts_path(@course), alert: " This is not a concept!"
-      return
-    end
-
-    @concept = @topicconcept
-    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock
-
-    unless @concept_stage
-      redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
-      return
-    end
-
-    @latest_concept = @concept
-  end
-
-  def load_general_topicconcept_data
-    @user_course = curr_user_course
-
-    guidance_quiz = @course.guidance_quizzes.first
-    submission = guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                 status: "attempting").first
-    
-    #Submission not available, indicate progress bar as such
-    if submission.nil? or !submission.attempting?
-      @progress_bar = {
-                        pass: 0,
-                        fail: 0,
-                        enable: 0,
-                        disable: 100,
-                        pass_amt: 0,
-                        fail_amt: 0,
-                        enable_amt: 0,
-                        disable_amt: 0,
-                        disable_message: "Assessment not started yet"
-                      }
-    else
-      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !guidance_quiz.neighbour_entry_lock
-      passed_concepts = passed_concept_stages.collect(&:concept).uniq
-      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
-      failed_concepts = failed_concept_stages.collect(&:concept).uniq
-      enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
-                                      .concepts
-                                      .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
-      all_concepts = @course.topicconcepts.concepts 
-
-      passed_concept_count = passed_concepts.count
-      failed_concept_count = failed_concepts.count
-      disabled_concept_count = all_concepts.count - enabled_concepts.count
-      enabled_concept_count = enabled_concepts.count - passed_concept_count - failed_concept_count 
-      total = passed_concept_count + failed_concept_count + disabled_concept_count + enabled_concept_count
-      @progress_bar = {
-                        pass: passed_concept_count * 100.0 / total,
-                        fail: failed_concept_count * 100.0 / total,
-                        enable: enabled_concept_count * 100.0 / total,
-                        disable: disabled_concept_count * 100.0 / total,
-                        pass_amt: passed_concept_count,
-                        fail_amt: failed_concept_count,
-                        enable_amt: enabled_concept_count,
-                        disable_amt: disabled_concept_count,
-                      }
-    end
-  end
 
   def access_denied message, redirectURL
     respond_to do |format|

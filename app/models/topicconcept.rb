@@ -24,7 +24,7 @@ class Topicconcept < ActiveRecord::Base
   has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy, class_name: "Assessment::ForwardPolicyLevel"
   has_many :questions, through: :taggable_tags, source: :taggable, source_type: "Assessment::Question"
 
-  has_one :concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy, foreign_key: "topicconcept_id"
+  #has_one :concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy, foreign_key: "topicconcept_id"
 
   def is_concept?
     self.typename == "concept"

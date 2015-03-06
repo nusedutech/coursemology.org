@@ -1,17 +1,1 @@
-<!--<link rel="stylesheet" href="dist/themes/default/style.min.css" /> -->
-
-<% if ((cannot? :manage, Topicconcept) or @student_view) and @gqEnabled %>
-  <% if !@user_course.is_student? %>
-    <a href="<%= course_topicconcepts_path(@course) %>" class="btn btn-info btn-topicconcept-toggle">Return to regular view</a>
-  <% end %>
-
-  <%= render  partial: "student_interface", locals:{hidden: @hidden} %>
-
-<% else %>
-
-  <% if (can? :manage, Topicconcept) and @gqEnabled %>
-    <a href="<%= course_topicconcepts_path(@course) %>?student_view=true" class="btn btn-info btn-topicconcept-toggle">Toggle student view</a>
-  <% end %>
-
-  <%= render  partial: "regular_interface" %>
-<% end %>
+<%= render  partial: "regular_interface" %>

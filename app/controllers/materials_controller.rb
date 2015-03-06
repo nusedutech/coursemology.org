@@ -175,7 +175,7 @@ class MaterialsController < ApplicationController
       @parent.attach_files(params[:files], params[:descriptions])
       notice = "The files were successfully uploaded."
     elsif params[:type] == "subfolder" && params[:material_folder][:name] then
-      @parent.new_subfolder(params[:material_folder][:name], params[:material_folder][:description])
+      @parent.new_subfolder(params[:material_folder][:name], params[:material_folder][:description], params[:material_folder][:can_student_upload], params[:material_folder][:open_at],params[:material_folder][:close_at])
       notice = "The subfolder #{params[:material_folder][:name]} was successfully created."
     end
 

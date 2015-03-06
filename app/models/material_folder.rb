@@ -142,8 +142,8 @@ class MaterialFolder < ActiveRecord::Base
     (close_at == nil || close_at >= DateTime.now)
   end
 
-  def new_subfolder(name, description = nil)
-    subfolder = MaterialFolder.create(:parent_folder => self, :course_id => course_id, :name => name, :description => description)
+  def new_subfolder(name, description = nil, can_student_upload = nil, open_at = nil, close_at = nil)
+    subfolder = MaterialFolder.create(:parent_folder => self, :course_id => course_id, :name => name, :description => description, :can_student_upload => can_student_upload, :open_at => open_at, :close_at => close_at)
     subfolder.save
   end
 

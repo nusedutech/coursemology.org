@@ -444,9 +444,9 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-    t.boolean  "test",       :default => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+    t.boolean  "test"
     t.integer  "duration"
   end
 

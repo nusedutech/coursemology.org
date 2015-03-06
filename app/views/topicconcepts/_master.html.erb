@@ -1,15 +1,166 @@
-<div id="criteria_area_wrap">
-  <div id="criteria_content" class="info-box">
-	  <span class="info-box-header">Criteria</span>
-		<div id="criteria-area" class="fancy-scrollbar criteria-area"></div>
-			<div class="criteria-buttons">
-				<div class="check-criteria-wrapper">
-			    <input id="check-criteria-button" class="btn btn-success" type="button" value="Refresh">
-        </div>
-		  </div>
-	  </div>
-  </div>
+<div class="topicconcept-spunned">
+    <div class="topicconcept-spun-12">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box info-box-green">
+		  		<div id="question-status">No feedback</div>
+	  			<div id="question-feedback"></div>
+				<i id="correction-information-close" class="icon-remove icon-remove-button"></i>
+			</div>
+		</div>
+	</div>
+
+	<div class="topicconcept-spun-8">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div id="question-area" class="info-box">
+		  		<input type="hidden" id="submission-url" value="<%= edit_course_assessment_guidance_quiz_submission_path(@course, @assessment, @submission) %>"/>
+		  		<input type="hidden" id="retrieve-question-url" value="<%= diagnostic_exploration_next_question_course_topicconcept_path(@course, @concept) %>"/>
+		  		<input type="hidden" id="concept-id" value="<%= @concept.id %>"/>
+		  		<div id="question-focus-area" class="inner-info-box-area">
+			  		<% if @question.as_question.class == Assessment::McqQuestion %>
+					  	<%= render  partial: "assessment/guidance_quiz_submissions/do_mcq", locals:{mcq: @question.specific}%>
+					<% end %>
+				</div>
+				<div class="inner-info-box-footer">
+				    <input id="mcq-submit-button" class="btn btn-info pull-right" type="button" value="Next" />        
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="topicconcept-spun-4">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+			  	<span class="info-box-header">Failing Criteria</span>			  	
+			</div>
+		</div>
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+			  	<span class="info-box-header">Passing Criteria</span>
+			</div>
+		</div>
+	</div>
 </div>
 
+<script>
+	$(document).ready(function(){
+		$('#correction-information-close').click(function(){
+			$(this).parent().parent().parent().css("display","none");
+		});
 
+		$('#mcq-submit-button').click(function(){
+			halt();
+			setTimeout(function(){
+				var checkedAmt = $("input[name='mcq-answers']:checked").length
+				if (checkedAmt < 1){
+					alert("None of the options were selected!");
+				}
+				else{
+					var response = submit_mcq();
+					if (response != null) {
+						halt("Getting next question...");
+						update_feedback(response.correct, response.explanation);
+						update_question(get_question());
+					}
+				}
+				resume();
+			}, 250);
 
+		});
+	});
+	
+
+	function submit_mcq(){
+		var result = null;
+		if ($("#mcq-qid").length == 1 && $("input[name='mcq-answers']").length >= 1) {
+			
+			var concept_id = $("#concept-id").prop("value");
+			var question_id = $("#mcq-qid").prop("value");
+			var url = $("#submission-url").prop("value");
+			var answers_id = [];
+			$("input[name='mcq-answers']:checked").each(function(){
+				answers_id.push($(this).prop("value"));
+			});
+			if (answers_id.length > 0) {
+				var data = { concept_id: concept_id, question_id: question_id, answers: answers_id };
+				var result = server_request(data, "POST", url);
+			}
+			
+		}
+		return result;
+	}
+
+	function get_question(){
+		var result = null;
+
+		var url = $("#retrieve-question-url").prop("value");
+		var result = server_request({}, "GET", url);
+
+		return result;
+	}
+
+	function update_feedback(status, explanation){
+		if (status) {
+			$("#question-status").html("Last question answered correctly!");
+			$("#question-status").parent().removeClass("info-box-red").addClass("info-box-green");
+		}
+		else {
+			$("#question-status").html("Almost got that correct!");
+			$("#question-status").parent().removeClass("info-box-green").addClass("info-box-red");
+		}
+
+		$("#question-feedback").html(explanation);
+	}
+
+	function update_question(question_details) {
+		$("#question-area").fadeOut(200, function(){
+			var questionParent = document.getElementById("question-focus-area");
+			questionParent.innerHTML = "";
+
+			var titleP = document.createElement("p");
+			titleP.innerHTML = question_details.question_title;
+			questionParent.appendChild(titleP);
+
+			var optionsUl = document.createElement("ul");
+
+			var questionResponseType = "radio";
+			if (question_details.question_select_all) {
+				var subtitleP = document.createElement("p");
+				subtitleP.innerHTML = "* Select all correct answers";
+				subtitleP.style.marginLeft = "15px";
+				questionParent.appendChild(subtitleP);
+				questionResponseType = "checkbox";
+			}
+			else {
+				questionResponseType = "radio";
+			}
+
+			for (var i = 0; i < question_details.question_options.length; i++) {
+				var optionLi = document.createElement("li");
+				optionLi.className = "checkbox-text";
+
+				var optionInput = document.createElement("input");
+				optionInput.type = questionResponseType;
+				optionInput.name = "mcq-answers";
+				optionInput.className = "choices";
+				optionInput.value = question_details.question_options[i].id;
+				optionInput.id = "value=" + question_details.question_options[i].id;
+
+				var optionLabel = document.createElement("label");
+				optionLabel.htmlFor = "value=" + question_details.question_options[i].id;
+				optionLabel.innerHTML = question_details.question_options[i].text;
+
+				optionLi.appendChild(optionInput);
+				optionLi.appendChild(optionLabel);
+				optionsUl.appendChild(optionLi);	
+			}
+			questionParent.appendChild(optionsUl);
+
+			var questionIdInput = document.createElement("input");
+			questionIdInput.type = "hidden";
+			questionIdInput.id = "mcq-qid";
+			questionIdInput.value = question_details.question_id;
+			questionParent.appendChild(questionIdInput);
+
+			$("#question-area").fadeIn(200);
+		});
+	}
+</script>

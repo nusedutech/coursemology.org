@@ -79,8 +79,8 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
             if forward_policy_level.getAllRelatedQuestions(@assessment).size  <= 0
               invalidPublish = true
             end
-	  end
-	  invalidSaves = false
+	        end
+	        invalidSaves = false
         end
         @policy_mission.create_local_file
       end
@@ -168,6 +168,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
   end
 	
 	def update_questions
+    @assessment = @policy_mission.assessment
     if !params[:assessment].nil?
       ques_list = params[:assessment][:question_assessments]
     else
@@ -194,7 +195,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
 
     respond_to do |format|      
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
-        invalidPublish = false  
+        invalidPublish = false 
         forward_policy_levels = @policy_mission.progression_policy.getForwardPolicy.forward_policy_levels
         forward_policy_levels.each do |single_level|
           #Cannot publish as long as one single level is missing a question to do
@@ -230,6 +231,8 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
   def answer_sheet
     if @policy_mission.revealAnswers? (curr_user_course)
       @pmAnswers = {}
+      @option_summary = get_option_count_hash_from @policy_mission.submissions.where(std_course_id: curr_user_course)
+
       if @policy_mission.progression_policy.isForwardPolicy?
         forwardPolicy = @policy_mission.progression_policy.getForwardPolicy
         forwardPolicyLevels = forwardPolicy.forward_policy_levels
@@ -253,5 +256,41 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
       end   
       return 
     end
+  end
+
+  def get_option_count_hash_from submissions
+    
+    attempted_answers = []
+    submissions.each do |submission|
+      attempted_answers = attempted_answers + submission.answers
+    end
+    
+    mcq_answers = []
+    attempted_answers.each do |attempt_answer|
+      if attempt_answer.as_answer_type == "Assessment::McqAnswer"
+        mcq_answers << attempt_answer.specific
+      end
+    end 
+
+    mcq_answer_options = []
+    mcq_answers.each do |mcq_answer|
+      mcq_answer_options = mcq_answer_options + mcq_answer.answer_options
+    end 
+    
+    options = []
+    mcq_answer_options.each do |mcq_answer_option|
+      options << mcq_answer_option.option
+    end 
+
+    option_hash = {}
+    options.each do |option|
+      if option_hash[option.id].nil?
+        option_hash[option.id] = 1
+      else
+        option_hash[option.id] += 1
+      end
+    end
+
+    option_hash
   end
 end

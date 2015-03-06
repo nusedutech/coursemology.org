@@ -141,9 +141,13 @@ Coursemology::Application.routes.draw do
       resources :assessment_submissions,
                 path:       :diagnostic_exploration,
                 as:         :guidance_quiz_submissions,
-                controller: :guidance_quiz_submissions do
+                controller: :guidance_quiz_submissions,
+                constraints: GuidanceQuizConstraint.new do
         collection do
-          post :attempt, to: 'guidance_quiz_submissions#new'
+          post :attempt, to: 'guidance_quiz_submissions#attempt'
+        end
+        member do
+          post :edit, to: 'guidance_quiz_submissions#edit'
         end
       end
 
@@ -284,6 +288,7 @@ Coursemology::Application.routes.draw do
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'diagnostic_exploration', :on => :member
+        get 'diagnostic_exploration_next_question', :on => :member
         post 'submit_answer', :on => :collection
         get 'ivleapi'       
     end

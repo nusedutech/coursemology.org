@@ -20,5 +20,30 @@ class Assessment::GuidanceConceptOption < ActiveRecord::Base
     concept_option
   end
 
-  
+  def self.can_enter_with concept
+    concept_option = concept.concept_option
+    if concept_option.nil?
+      return nil
+    else
+      return concept_option.can_enter?
+    end
+  end
+
+  def self.is_enabled_with concept
+    concept_option = concept.concept_option
+    if concept_option.nil?
+      return nil
+    else
+      return concept_option.is_enabled?
+    end
+  end
+
+  #Check if the related concept can be entered
+  def can_enter?
+    self.enabled and self.is_entry
+  end
+
+  def is_enabled?
+    self.enabled
+  end
 end

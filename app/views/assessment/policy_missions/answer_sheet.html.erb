@@ -18,21 +18,23 @@
             <strong><%= i + 1 %>. </strong>
             <%= style_format qn.description %>
           </div>
-	  <% if qn.specific.class == Assessment::McqQuestion %>
-	    <table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
-	      <colgroup>
+	        <% if qn.specific.class == Assessment::McqQuestion %>
+	          <table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
+	            <colgroup>
                 <col width="5%"/>
-	        <col width="35%"/>
-	      </colgroup>
-	      <% qn.options.each do |opt| %>
-                <tr>
+	              <col width="35%"/>
+                <col width="50%"/>
+	            </colgroup>
+	            <% qn.options.each do |opt| %>
+                <tr <%= "style=background-color:#AAEEAA;" if opt.correct %>>
                   <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
-	          <td><%= opt.text %></td>
+	                <td><%= opt.text %></td>
+                  <td style="color: <%= opt.correct ? "green" : "red" %>"><%= "You chose this option " + @option_summary[opt.id].to_s + " time(s)." if !@option_summary[opt.id].nil? %></td>
                 </tr>
               <% end %>
-	    </table>
-	  <% end %>
-	</section>
+	          </table>
+	        <% end %>
+	      </section>
       <% end %>
     </div>
   <% end %>

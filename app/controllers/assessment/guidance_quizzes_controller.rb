@@ -1,7 +1,10 @@
 class Assessment::GuidanceQuizzesController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :guidance_quiz, class: "Assessment::GuidanceQuiz", through: :course
+  
   before_filter :load_general_course_data, only: [:access_denied]
+
+  before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_edge_data]
 
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
@@ -21,7 +24,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_passing_edge_lock
     enabled = params[:data]
-		Assessment::GuidanceQuiz.set_passing_edge_lock(@course, enabled == "true")
+	  Assessment::GuidanceQuiz.set_passing_edge_lock(@course, enabled == "true")
     
     respond_to do |format| 
       format.json { render json: { result: true}}
@@ -30,7 +33,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_neighbour_entry_lock
     enabled = params[:data]
-		Assessment::GuidanceQuiz.set_neighbour_entry_lock(@course, enabled == "true")
+	  Assessment::GuidanceQuiz.set_neighbour_entry_lock(@course, enabled == "true")
     
     respond_to do |format| 
       format.json { render json: { result: true}}
@@ -124,22 +127,62 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
       
       @concepts = @course.topicconcepts.concepts
-      @concepts_with_criteria = @concepts.map { |c| (get_concept_criteria_with c).merge({ concept_name: c.name}) }
-
       @concept_edges = ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
-      @concept_edges_with_criteria = @concept_edges.map { |ce| (get_concept_edge_relation_with ce).merge({ dependent_id: ce.dependent_id, required_id: ce.required_id}) }
- 
-      format.json { render :json =>{:topictrees => @topics_concepts_with_info,
-                                    :nodelist => @concepts_with_criteria,
-                                    :edgelist => @concept_edges_with_criteria,
-                                    :lastAtmNode => nil,
-                                    :openAtmNodes => {},
-                                    :lastAtmEdges => {},
-                                    :openAtmEdges => {}
-                                   }
-                  }    
-   
+      
+
+      submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order('updated_at DESC').first
+      submission_valid = (!submission.nil? and submission.attempting?)
+      result =  { 
+      	          topictrees: @topics_concepts_with_info, 
+      	          submission: submission_valid
+      	        }
+
+      #Retrieve more information if has valid submission
+      if submission_valid 
+      	result.merge!(get_guidance_quiz_submission_data submission)
+      	afflictedNodes = result[:openAtmNodes] + result[:failedNodes] + [result[:lastAtmNode]]
+      	@concepts = @concepts - afflictedNodes
+      	afflictedEdges = result[:openAtmEdges] + result[:failedEdges]
+      	@concept_edges = @concept_edges - afflictedEdges 
+      end
+      
+      result[:nodelist] = @concepts.map { |c| (get_concept_criteria_with c).merge({ concept_name: c.name}) }
+      result[:edgelist] = @concept_edges.map { |ce| (get_concept_edge_relation_with ce).merge({ dependent_id: ce.dependent_id, required_id: ce.required_id}) }
+      
+      format.json { render json: result }    
     end    
+  end
+
+  def get_guidance_quiz_submission_data submission
+  	result = {}
+    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !@guidance_quiz.neighbour_entry_lock
+    failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
+    result[:openAtmNodes] = passed_concept_stages.collect(&:concept).uniq
+    result[:failedNodes] = failed_concept_stages.collect(&:concept).uniq 
+
+    latest_concept_stage = passed_concept_stages.first
+    if !latest_concept_stage.nil?
+      concept = latest_concept_stage.concept
+      result[:lastAtmNode] = concept
+      result[:openAtmNodes] = result[:openAtmNodes] - [concept]
+      result[:failedNodes] = result[:failedNodes] - [concept]
+    else
+      result[:lastAtmNode] = nil
+    end
+    
+    all_stages = passed_concept_stages + failed_concept_stages
+    all_atm_edges = []
+    all_stages.each do |stage|
+      all_atm_edges = all_atm_edges + (Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages stage)
+    end
+    failed_edges = []
+    all_stages.each do |stage|
+      failed_edges = failed_edges + (Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages stage)
+    end
+
+    result[:openAtmEdges] = all_atm_edges.collect(&:concept_edge).uniq
+    result[:failedEdges] = failed_edges.collect(&:concept_edge).uniq
+    result
   end
 
   #Action for student view on topicconcept map
@@ -207,25 +250,26 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     actionUrl = ""
     actionUrlItems = ""
 
-    if criteria_hash[:enabled] and Assessment::GuidanceQuiz.is_enabled? (@course)
-      @guidance_quiz = @course.guidance_quizzes.first
-      submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                    status: "submitted").first
-
+    if criteria_hash[:enabled]
       #Path to create new submission entered at current criteria
-      if submission.nil? and criteria_hash[:is_entry]
+      if @submission.nil? and criteria_hash[:is_entry]
         action = "entry"
         actionUrl = attempt_course_assessment_guidance_quiz_submissions_path(@course, @guidance_quiz.assessment)
         actionUrlItems = { concept_id: concept.id }
       #Path to currently locked
-      elsif submission.nil?
+      elsif @submission.nil?
         action = "enabled"
       #Path to resume submission at current criteria  
-      elsif false
-        action = "resume"
-        actionUrl = ""
       else
-        action = "none"
+        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock
+        if !concept_stage.nil? and !concept_stage.failed
+          action = "resume"
+          actionUrl = diagnostic_exploration_course_topicconcept_path(@course, @concept)
+        elsif !concept_stage.nil? and concept_stage.failed
+          action = "failed"
+        else
+          action = "none"
+        end
       end
     else
       action = "none"
@@ -253,15 +297,25 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def compress_concept_criteria_student_progress_from concept_option
     result = []
+    current_correct = 0
+    current_wrong = 0
 
+    #Get submission records if it exist
+    if @submission
+      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept_option.topicconcept, !@guidance_quiz.neighbour_entry_lock 
+      if concept_stage
+        current_wrong = concept_stage.total_wrong
+        current_right = concept_stage.total_right
+      end
+    end
     #Retrieve criteria info
     concept_option.concept_criteria.each do |criterion|
       singleSummary = {}
       case (criterion.specific.is_type)
         when "wrong_threshold"
           singleSummary[:name] = "wrong_threshold"
-          singleSummary[:pass] = true
-          singleSummary[:current] = "?" 
+          singleSummary[:pass] = criterion.specific.evaluate current_wrong
+          singleSummary[:current] = current_wrong.to_s 
           singleSummary[:condition] = criterion.specific.threshold
       end
 
@@ -288,15 +342,27 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   #Retrieve relation / passing criteria from a single edge based option for student progress
   def compress_concept_edge_criteria_student_progress_from concept_edge_option
     result = []
+    current_correct = 0
+    current_wrong = 0
 
+    #Get submission records if it exist
+    if @submission
+      concept_edge = concept_edge_option.concept_edge
+      concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept, !@guidance_quiz.neighbour_entry_lock 
+      if concept_stage
+        concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage concept_stage, concept_edge 
+        current_wrong = concept_edge_stage.total_wrong
+        current_correct = concept_edge_stage.total_right
+      end
+    end
     #Retrieve criteria info
     concept_edge_option.concept_edge_criteria.each do |criterion|
       singleSummary = {}
       case (criterion.specific.is_type)
         when "correct_threshold"
           singleSummary[:name] = "correct_threshold"
-          singleSummary[:pass] = false
-          singleSummary[:current] = "?" 
+          singleSummary[:pass] = criterion.specific.evaluate current_correct
+          singleSummary[:current] = current_correct 
           singleSummary[:condition] = criterion.specific.threshold
       end
       result << singleSummary
@@ -473,6 +539,21 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def integer_check unit
     unit =~ /^(-|\+)?(\d+)$/
+  end
+
+  def load_guidance_quiz_singleton
+    @guidance_quiz = Assessment::GuidanceQuiz.get_guidance_quiz (@course)
+
+    if @guidance_quiz.nil? or !@guidance_quiz.enabled
+      respond_to do |format|
+      	format.html { redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!" }
+      	format.json { render json: { access_denied: "Not opened yet!" } }
+      end
+      return
+    end 
+
+    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   status: "attempting").first
   end
 
   def access_denied

@@ -1,11 +1,11 @@
 <div class="nav-head-container">
 	<div class="nav-head-concept">
-    <h4>Progress</h4>
+    	<h4>Progress</h4>
 		<div class="progress">
-      <div class="bar bar-success" role="progressbar" style="width: 60%">
-      </div>
-      <div class="bar bar-warning" role="progressbar" style="width: 20%">
-      </div>
-    </div>		
+      		<div class="bar bar-success topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:pass] %>%" data-toggle="tooltip" title="<%= @progress_bar[:pass_amt] %> concept<%= "s" if @progress_bar[:pass_amt] > 1 %> unlocked"></div>
+      		<div class="bar bar-danger topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:fail] %>%" data-toggle="tooltip" title="<%= @progress_bar[:fail_amt] %> concept<%= "s" if @progress_bar[:fail_amt] > 1 %> failed / locked"></div>
+      		<div class="bar bar-success bar-enable topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:enable] %>%" data-toggle="tooltip" title="<%= @progress_bar[:enable_amt] %> concept<%= "s" if @progress_bar[:enable_amt] > 1 %> not achieved yet"></div>
+      		<div class="bar bar-success bar-disable topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:disable] %>%" data-toggle="tooltip" title="<%= @progress_bar[:disable_message] ? @progress_bar[:disable_message] : (@progress_bar[:disable_amt].to_s + (" concept" + (@progress_bar[:disable_amt] > 1 ? "s" : "") + " not enabled yet" ) ) %>"></div>
+    	</div>		
 	</div>
 </div>

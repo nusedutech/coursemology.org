@@ -96,7 +96,7 @@ g.node {
 }
 
 .slimScrollDiv li.selected .status{
-    background-position: 0 50px;  
+    background-position: 0 25px;  
 }
 
 .slimScrollDiv li.selected a{
@@ -246,7 +246,7 @@ g.node {
 .tutorial-content .task-content-container {
     min-height:230px;
     padding-left: 10px;
-    padding-right: 5px; 
+    padding-top: 10px; 
 
 }
 #problemarea {
@@ -265,38 +265,36 @@ g.node {
     margin-left: 50px;
 }
 
-#criteria_area_wrap {
-    float: right;
-    width: 30%;
-}
-
 .info-box-header {
     color: #777;
     display: block;
     font-size: 16px;
     font-weight: bold;
     line-height: 100%;
-    margin-bottom: 10px;
     text-shadow: 0 1px 0 #fff;
 }
 
 
-.criteria-area {
+.inner-info-box-area {
     border-bottom: 1px solid #c3c3c3;
     margin: 0 -10px;
     min-height: 35px;
-    overflow: visible;
+    overflow: auto;
     padding: 10px;
 }
 
-.criteria-buttons {
+.inner-info-box-footer {
     border-top: 1px solid #fff;
     margin: 0 -10px;
     padding: 10px 10px 0;
     position: relative;
 }
-.criteria-buttons input {
-  width: 100%;
+
+.info-box:after,
+.inner-info-box-footer:after {
+  content: "";
+  display: block;
+  clear: both;
 }
 
 .info-box {
@@ -311,20 +309,44 @@ g.node {
     border-width: 1px;
     box-shadow: 0 1px 2px #ccc;
     color: #333;
-    margin-bottom: 10px;
-    overflow-x: auto;
     padding: 10px;
     position: relative;
     z-index: 10;
+}
+
+.info-box .icon-remove-button {
+  position: absolute;
+  font-size: 18px;
+  cursor: pointer;
+  top: 10px;
+  right: 10px;
+}
+
+.info-box .icon-remove-button:hover {
+  color: #800;
+}
+
+.info-box.info-box-green{
+  background-color: #99ee99;
+  border-color: #7C7 #7C7 #5A5 #7C7;
+  min-height: 17px;
+}
+
+.info-box.info-box-red{
+  background-color: #ee9999;
+  border-color: #C77 #C77 #A55 #C77;
+  min-height: 17px;
 }
 
 input.btnmargined {
     margin: 2px;
 }
 
+.title-concept-name,
 .tipsy .name {
     font-size: 25px;
     font-weight: bold;
+    font-style: normal;
     color: #60B1FC;
     margin-top: 10px;
     margin-bottom: 20px;
@@ -548,11 +570,54 @@ g.node.enter.entry text {
 g.node.enter.entry:hover rect {
   fill: #77EE77; 
   stroke: #007000;
-  stroke-width: 3px;
+  stroke-width: 4px;
 }
 
 g.node.enter.entry:hover text {
-  fill: #007000;
+  fill: #008000;
+  font-weight: bold;
+}
+
+g.node.enter.entryin rect {
+  fill: #CCFF66; 
+  stroke: #647D32;
+  stroke-width: 4px;
+}
+
+g.node.enter.entryin text {
+  fill: #647D32;
+  font-weight: normal;
+}
+
+g.node.enter.entryin:hover rect {
+  fill: #BBEE55; 
+  stroke: #536E21;
+  stroke-width: 7px;
+}
+
+g.node.enter.entryin:hover text {
+  fill: #536E21;
+  font-weight: bold;
+}
+
+g.node.enter.failed rect {
+  fill: #FFBBBB; 
+  stroke: #A00000;
+}
+
+g.node.enter.failed text {
+  fill: #A00000;
+  font-weight: normal;
+}
+
+g.node.enter.failed:hover rect {
+  fill: #EEAAAA; 
+  stroke: #800000;
+  stroke-width: 4px;
+}
+
+g.node.enter.failed:hover text {
+  fill: #700000;
   font-weight: bold;
 }
 
@@ -580,7 +645,7 @@ g.node.enter.enabled text {
 
 g.node.enter.enabled:hover rect {
   fill: #BBBBBB; 
-  stroke-width: 3px;
+  stroke-width: 4px;
 }
 
 g.node.enter.enabled:hover text {
@@ -591,69 +656,84 @@ g.edgeLabel.enter {
   cursor: pointer;
 }
 
-g.edgePath.enter.entrystart.entryend {
+g.edgePath.enter.entrystart.entryend,
+g.edgePath.enter.passed{
   stroke: #008000;
   stroke-width: 2;
 }
 
-g.edgePath.enter.enabledstart.enabledend {
+g.edgePath.enter.enabledstart.enabledend,
+g.edgePath.enter.enabledstart.disabledend,
+g.edgePath.enter.enabledstart.entryend {
   stroke: #000000;
   stroke-width: 2;
 }
 
-g.edgePath.enter.entrystart.enabledend,
-g.edgePath.enter.enabledstart.entryend {
+g.edgePath.enter.entrystart.disabledend,
+g.edgePath.enter.entrystart.enabledend {
   stroke: #CCCC00;
   stroke-width: 2;
 }
 
-g.edgePath.enter.entrystart.disabledend,
-g.edgePath.enter.enabledstart.disabledend,
 g.edgePath.enter.disabledstart.entryend,
 g.edgePath.enter.disabledstart.enabledend,
-g.edgePath.enter.disabledstart.disabledend {
+g.edgePath.enter.disabledstart.disabledend,
+g.edgePath.enter.disabled {
   stroke: #000000;
   opacity: 0.3;
   stroke-dasharray: 5,5;
   stroke-width: 2;
 }
 
-
-g.edgeLabel.enter.entrystart.entryend text{
+g.edgeLabel.enter.entrystart.entryend text,
+g.edgePath.enter.passed text{
   fill: #008000;
 }
 
-g.edgeLabel.enter.entrystart.entryend:hover text{
+g.edgeLabel.enter.entrystart.entryend:hover text,
+g.edgePath.enter.passed text{
   fill: #007000;
   font-weight: bold;
 }
 
-g.edgeLabel.enter.enabledstart.enabledend text{
+g.edgeLabel.enter.enabledstart.enabledend text,
+g.edgeLabel.enter.enabledstart.entryend text,
+g.edgeLabel.enter.enabledstart.disabledend text{
   fill: #000000;
 }
 
-g.edgeLabel.enter.enabledstart.enabledend:hover text{
+g.edgeLabel.enter.enabledstart.enabledend:hover text,
+g.edgeLabel.enter.enabledstart.entryend:hover text,
+g.edgeLabel.enter.enabledstart.disabledend:hover text{
   font-weight: bold;
 }
 
 g.edgeLabel.enter.entrystart.enabledend text,
-g.edgeLabel.enter.enabledstart.entryend text{
+g.edgeLabel.enter.entrystart.disabledend text{
   fill: #A0A000;
 }
 
 g.edgeLabel.enter.entrystart.enabledend:hover text,
-g.edgeLabel.enter.enabledstart.entryend:hover text{
+g.edgeLabel.enter.entrystart.disabledend:hover text{
   fill: #909000;
   font-weight:bold;
 }
 
-g.edgeLabel.enter.entrystart.disabledend text,
-g.edgeLabel.enter.enabledstart.disabledend text,
 g.edgeLabel.enter.disabledstart.entryend text,
 g.edgeLabel.enter.disabledstart.enabledend text,
-g.edgeLabel.enter.disabledstart.disabledend text {
+g.edgeLabel.enter.disabledstart.disabledend text,
+g.edgeLabel.enter.disabled text, {
   fill: #000000;
   opacity: 0.3
+}
+
+g.edgeLabel.enter.passed text{
+  fill: #008000;
+}
+
+g.edgeLabel.enter.passed:hover text{
+  fill: #007000;
+  font-weight:bold;
 }
 
 input[type = checkbox].normalized-topicconcept {
@@ -672,4 +752,165 @@ div.normalized-topicconcept{
   position: relative;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+a.link-type {
+  cursor: pointer;
+}
+
+[class^="topicconcept-spun-"] {
+  vertical-align: top;
+}
+
+
+.topicconcept-spun-12,
+.topicconcept-spun-9,
+.topicconcept-spun-8,
+.topicconcept-spun-6,
+.topicconcept-spun-4,
+.topicconcept-spun-3{
+  display: inline-block;
+  font-size: 13px;
+}  
+
+.topicconcept-spunned {
+  font-size: 0px;
+}
+
+.topicconcept-spunned:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+@media (max-width: 767px){
+
+  .topicconcept-spun-12{
+    width: 100%;
+  }
+
+  .topicconcept-spun-9{
+    width: 100%;
+  }
+
+  .topicconcept-spun-8{
+    width: 100%;
+  }
+
+  .topicconcept-spun-6{
+    width: 100%;
+  }
+
+  .topicconcept-spun-4{
+    width: 100%;
+  }
+
+  .topicconcept-spun-3{
+    width: 100%;
+  }  
+}
+
+@media (min-width: 768px){
+  .topicconcept-spun-12{
+    width: 100%;
+  }
+
+  .topicconcept-spun-9{
+    width: 75%;
+  }
+
+  .topicconcept-spun-8{
+    width: 66.666%;
+  }
+
+  .topicconcept-spun-6{
+    width: 50%;
+  }
+
+  .topicconcept-spun-4{
+    width: 33.333%;
+  }
+
+  .topicconcept-spun-3{
+    width: 25%;
+  }  
+}
+
+@media (min-width: 980px){
+  .topicconcept-spun-12{
+    width: 100%;
+  }
+  
+  .topicconcept-spun-9{
+    width: 75%;
+  }
+
+  .topicconcept-spun-8{
+    width: 66.666%;
+  }
+
+  .topicconcept-spun-6{
+    width: 50%;
+  }
+
+  .topicconcept-spun-4{
+    width: 33.333%;
+  }
+
+  .topicconcept-spun-3{
+    width: 25%;
+  }   
+}
+
+@media (min-width: 1200px){
+  .topicconcept-spun-12{
+    width: 100%;
+  }
+  
+  .topicconcept-spun-9{
+    width: 75%;
+  }
+
+  .topicconcept-spun-8{
+    width: 66.666%;
+  }
+
+  .topicconcept-spun-6{
+    width: 50%;
+  }
+
+  .topicconcept-spun-4{
+    width: 33.333%;
+  }
+
+  .topicconcept-spun-3{
+    width: 25%;
+  }  
+}
+
+.topicconcept-spun-grid-normaliser {
+    width: auto;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+.progress .bar.bar-success.bar-enable {
+  background-color: #AAAAAA;
+  background-image: -moz-linear-gradient(top, #AAAAAA, #888888);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#AAAAAA), to(#888888));
+  background-image: -webkit-linear-gradient(top, #AAAAAA, #888888);
+  background-image: -o-linear-gradient(top, #AAAAAA, #888888);
+  background-image: linear-gradient(to bottom, #AAAAAA, #888888);
+}
+
+.progress .bar.bar-success.bar-disable {
+  background-color: rgba(0,0,0,0);
+  background-image: -moz-linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,0));
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(rgba(0,0,0,0)), to(rgba(0,0,0,0)));
+  background-image: -webkit-linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,0));
+  background-image: -o-linear-gradient(top, rgba(0,0,0,0), rgba(0,0,0,0));
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0));
+  -webkit-box-shadow: inset 0 0px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: inset 0 0px 0 rgba(0, 0, 0, 0.15); 
+  box-shadow: inset 0 0px 0 rgba(0, 0, 0, 0.15);
 }

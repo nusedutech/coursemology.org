@@ -1,12 +1,17 @@
 class TopicconceptsController < ApplicationController
+  include ERB::Util
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration]
 
-	before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
+	#before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
-  before_filter :load_general_topicconcept_data
+  #before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
+
+  #before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
+
+  #before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
 
   def index   
     @topics_concepts_with_info = []
@@ -21,15 +26,11 @@ class TopicconceptsController < ApplicationController
   end
   
   def diagnostic_exploration
-    respond_to do |format|
-      format.html {
-        render "topicconcepts/index"
-      }
-    end
+    
   end
-  
-  def load_general_topicconcept_data
-    @user_course = curr_user_course
+
+  def diagnostic_exploration_next_question
+    
   end
 
   def raw_query_get_select_all mcq_id
@@ -267,7 +268,7 @@ class TopicconceptsController < ApplicationController
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
-      if can? :manage, Topicconcept and !session[:topicconcept_student_view]
+      if can? :manage, Topicconcept
         user_ability = 'manage'
         format.json { render :json =>{:user_ability => user_ability, :topictrees => @topics_concepts_with_info}}
       else
@@ -336,30 +337,17 @@ class TopicconceptsController < ApplicationController
     end
   end
 
-	def set_student_layout
-		if cannot? :manage, Topicconcept or @student_view
-      self.class.layout "topicconcept_student_interface"
-    else
-      self.class.layout "application"
-    end
-  end
 
-  def set_student_view
-    session[:topicconcept_student_view] = !params[:student_view].nil? and params[:student_view] == "true"
-    @student_view = session[:topicconcept_student_view]
-  end
-
-  def set_hidden_sidebar_params
-    @hidden = !params[:hideSideBar].nil? and params[:hideSideBar] == "true"
-  end
-
-  #Set viewing permission and parameters of user
-  def set_viewing_permissions
-    @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
-    if @gqEnabled
-      set_student_view
-      set_student_layout
-      set_hidden_sidebar_params
+  def access_denied message, redirectURL
+    respond_to do |format|
+      format.json { 
+        render json: { 
+          access_denied: { 
+            message: message, 
+            redirectURL: redirectURL
+          } 
+        } 
+      }
     end
   end
 end

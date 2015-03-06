@@ -72,12 +72,16 @@
     	}
 
 		});
+
 	});
 	
+
   function halt(message) {
     var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
     $('#processing-halt-all-message').html(parsedMessage);
     $('#processing-halt-all').modal();
+
+
   }
 
   function resume() {

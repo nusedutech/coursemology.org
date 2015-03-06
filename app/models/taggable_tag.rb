@@ -7,4 +7,6 @@ class TaggableTag < ActiveRecord::Base
   #belongs_to  :taggable, polymorphic: true
   #belongs_to  :tag
   belongs_to  :question, class_name: "Assessment::Question"
+
+  scope :question_type, -> { where(taggable_type: "Assessment::Question") }
 end

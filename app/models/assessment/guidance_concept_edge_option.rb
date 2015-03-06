@@ -42,5 +42,4 @@ class Assessment::GuidanceConceptEdgeOption < ActiveRecord::Base
     result
   end
 
-  
 end

@@ -47,7 +47,7 @@ class Assessment::Submission < ActiveRecord::Base
   # Update might be required on MTI Gem
 	has_many :progression_groups, class_name: "Assessment::ProgressionGroup"
 
-  has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"  
+  #has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"  
 
 
   after_create :set_attempting

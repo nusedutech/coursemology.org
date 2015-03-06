@@ -165,6 +165,7 @@ class CourseAbility  < Ability
       can :get_topicconcept_rated_data, Topicconcept
       can :get_topicconcept_data, Topicconcept
       can :diagnostic_exploration, Topicconcept
+      can :diagnostic_exploration_next_question, Topicconcept
       can :submit_answer, Topicconcept
       
       can :get_topicconcept_data_with_criteria , Assessment::GuidanceQuiz

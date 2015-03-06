@@ -47,7 +47,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     end
 
     concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock 
-    if concept_stage.nil?
+    if concept_stage.nil? or concept_stage.check_to_lock
       access_denied "You do not have access to the current concept (Your lecturer might have disabled it)", course_topicconcepts_path(@course)
       return
     end
@@ -68,16 +68,22 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     response = submit_mcq(question)
     concept_stage.record_answer(response[:answer_id])
     if (response[:is_correct])
-      concept_stage.add_one_right
+      concept_stage.add_one_right @guidance_quiz.passing_edge_lock
     else
-      concept_stage.add_one_wrong
+      concept_stage.add_one_wrong @guidance_quiz.passing_edge_lock
+    end
+
+    #Launch second check to lock when evaluated fail status
+    if concept_stage.check_to_lock
+      access_denied "You have failed this concept. Try again from the easier concepts.", course_topicconcepts_path(@course)
+      return
     end
 
     respond_to do |format|
       format.json { 
         render json: { 
           correct: response[:is_correct], 
-          explanation: response[:explanation] 
+          explanation: response[:explanation]
         } 
       }
     end
@@ -104,11 +110,9 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       if !concept_edge_option.nil? and concept_edge_option.enabled
         concept_edge_stage = concept_stage.concept_edge_stages.new
         concept_edge_stage.concept_edge_id = concept_edge.id
-        #If no criteria found, pass the edge immediately
-        if concept_edge_option.concept_edge_criteria.count == 0
-          concept_edge_stage.passed = true
-        end
         concept_edge_stage.save
+
+        concept_edge_stage.check_to_unlock
       end
     end
   end

@@ -261,10 +261,12 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         action = "enabled"
       #Path to resume submission at current criteria  
       else
-        concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock
-        if !concept_stage.nil?
+        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock
+        if !concept_stage.nil? and !concept_stage.failed
           action = "resume"
           actionUrl = diagnostic_exploration_course_topicconcept_path(@course, @concept)
+        elsif !concept_stage.nil? and concept_stage.failed
+          action = "failed"
         else
           action = "none"
         end
@@ -312,7 +314,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       case (criterion.specific.is_type)
         when "wrong_threshold"
           singleSummary[:name] = "wrong_threshold"
-          singleSummary[:pass] = criterion.specific.evaluate 0
+          singleSummary[:pass] = criterion.specific.evaluate current_wrong
           singleSummary[:current] = current_wrong.to_s 
           singleSummary[:condition] = criterion.specific.threshold
       end
@@ -340,15 +342,27 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   #Retrieve relation / passing criteria from a single edge based option for student progress
   def compress_concept_edge_criteria_student_progress_from concept_edge_option
     result = []
+    current_correct = 0
+    current_wrong = 0
 
+    #Get submission records if it exist
+    if @submission
+      concept_edge = concept_edge_option.concept_edge
+      concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept, !@guidance_quiz.neighbour_entry_lock 
+      if concept_stage
+        concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage concept_stage, concept_edge 
+        current_wrong = concept_edge_stage.total_wrong
+        current_correct = concept_edge_stage.total_right
+      end
+    end
     #Retrieve criteria info
     concept_edge_option.concept_edge_criteria.each do |criterion|
       singleSummary = {}
       case (criterion.specific.is_type)
         when "correct_threshold"
           singleSummary[:name] = "correct_threshold"
-          singleSummary[:pass] = false
-          singleSummary[:current] = "?" 
+          singleSummary[:pass] = criterion.specific.evaluate current_correct
+          singleSummary[:current] = current_correct 
           singleSummary[:condition] = criterion.specific.threshold
       end
       result << singleSummary

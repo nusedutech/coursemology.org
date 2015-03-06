@@ -8,7 +8,8 @@ class Assessment::WrongThreshold < ActiveRecord::Base
     "wrong_threshold"
   end
 
+  #Return true if threshold not exceeded
   def evaluate wrong_amt
-    self.threshold > wrong_amt
+    self.threshold.to_i > wrong_amt.to_i
   end
 end

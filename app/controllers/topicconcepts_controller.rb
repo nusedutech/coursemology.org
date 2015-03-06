@@ -7,11 +7,11 @@ class TopicconceptsController < ApplicationController
 
 	before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
-  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
-
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
+
+  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
 
   def index   
     @topics_concepts_with_info = []

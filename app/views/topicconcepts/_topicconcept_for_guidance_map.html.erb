@@ -176,7 +176,7 @@
       updateTitleBar("<h2>Resume [<em class='title-concept-name'>" + lastAtmNode.name + "</em>] or select another concept</h2>");
     }
 
-    if (submission != null) {
+    if (submission) {
       setup_node_edges_color_under_submission(nodelist);
       setup_current_node_edges_color(lastAtmNode);
       setup_passed_nodes_edges_color(openAtmNodes);
@@ -608,7 +608,6 @@
   }
 
   function make_concept_tooltip_div_html (concept_data) {
-
     return "<p class='name'>"+concept_data.name+"</p>" +
            make_concept_criteria_html (concept_data.action, concept_data.actionURL, concept_data.actionURLItems, concept_data.criteria) +
            "<hr>" + 

@@ -46,8 +46,8 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       return
     end
 
-    concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock 
-    if concept_stage.nil? or concept_stage.check_to_lock
+    concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
+    if concept_stage.nil?
       access_denied "You do not have access to the current concept (Your lecturer might have disabled it)", course_topicconcepts_path(@course)
       return
     end
@@ -68,13 +68,13 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     response = submit_mcq(question)
     concept_stage.record_answer(response[:answer_id])
     if (response[:is_correct])
-      concept_stage.add_one_right @guidance_quiz.passing_edge_lock
+      concept_stage.add_one_right @submission, @guidance_quiz.passing_edge_lock
     else
-      concept_stage.add_one_wrong @guidance_quiz.passing_edge_lock
+      concept_stage.add_one_wrong @submission, @guidance_quiz.passing_edge_lock 
     end
 
     #Launch second check to lock when evaluated fail status
-    if concept_stage.check_to_lock
+    if concept_stage.check_to_lock @submission, @guidance_quiz.passing_edge_lock
       access_denied "You have failed this concept. Try again from the easier concepts.", course_topicconcepts_path(@course)
       return
     end
@@ -98,13 +98,13 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
         concept_stage = submission.concept_stages.new
         concept_stage.topicconcept_id = concept.id
         concept_stage.save
-        setup_concept_edge_stage_from concept_stage, concept.concept_edge_dependent_concepts
+        setup_concept_edge_stage_from submission, concept_stage, concept.concept_edge_dependent_concepts
       end
     end
   end
 
   #Setup the concept stage edges attempt from the concept stage
-  def setup_concept_edge_stage_from concept_stage, concept_edges
+  def setup_concept_edge_stage_from submission, concept_stage, concept_edges
     concept_edges.each do |concept_edge|
       concept_edge_option = concept_edge.concept_edge_option
       if !concept_edge_option.nil? and concept_edge_option.enabled
@@ -112,7 +112,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
         concept_edge_stage.concept_edge_id = concept_edge.id
         concept_edge_stage.save
 
-        concept_edge_stage.check_to_unlock
+        concept_edge_stage.check_to_unlock submission, @guidance_quiz.passing_edge_lock
       end
     end
   end

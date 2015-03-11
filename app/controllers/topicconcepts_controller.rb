@@ -5,7 +5,7 @@ class TopicconceptsController < ApplicationController
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration]
 
-	before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
+  before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
 
@@ -423,7 +423,7 @@ class TopicconceptsController < ApplicationController
       @submission = guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
       if @submission
-        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission
+        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission, guidance_quiz.passing_edge_lock
         if @concept_stage
           @latest_concept = @concept_stage.concept
         end
@@ -456,7 +456,7 @@ class TopicconceptsController < ApplicationController
     end
 
     @concept = @topicconcept
-    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
 
     unless @concept_stage
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
@@ -487,9 +487,9 @@ class TopicconceptsController < ApplicationController
                         disable_message: "Assessment not started yet"
                       }
     else
-      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !guidance_quiz.neighbour_entry_lock
+      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !guidance_quiz.neighbour_entry_lock, guidance_quiz.passing_edge_lock
       passed_concepts = passed_concept_stages.collect(&:concept).uniq
-      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
+      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission, guidance_quiz.passing_edge_lock
       failed_concepts = failed_concept_stages.collect(&:concept).uniq
       enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
                                       .concepts

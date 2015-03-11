@@ -155,8 +155,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def get_guidance_quiz_submission_data submission
   	result = {}
-    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !@guidance_quiz.neighbour_entry_lock
-    failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
+    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission, @guidance_quiz.passing_edge_lock
     result[:openAtmNodes] = passed_concept_stages.collect(&:concept).uniq
     result[:failedNodes] = failed_concept_stages.collect(&:concept).uniq 
 
@@ -173,11 +173,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     all_stages = passed_concept_stages + failed_concept_stages
     all_atm_edges = []
     all_stages.each do |stage|
-      all_atm_edges = all_atm_edges + (Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages stage)
+      all_atm_edges = all_atm_edges + (Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages submission, stage, @guidance_quiz.passing_edge_lock)
     end
     failed_edges = []
     all_stages.each do |stage|
-      failed_edges = failed_edges + (Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages stage)
+      failed_edges = failed_edges + (Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages submission, stage, @guidance_quiz.passing_edge_lock)
     end
 
     result[:openAtmEdges] = all_atm_edges.collect(&:concept_edge).uniq
@@ -261,7 +261,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         action = "enabled"
       #Path to resume submission at current criteria  
       else
-        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock
+        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
         if !concept_stage.nil? and !concept_stage.failed
           action = "resume"
           actionUrl = diagnostic_exploration_course_topicconcept_path(@course, @concept)
@@ -302,7 +302,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     #Get submission records if it exist
     if @submission
-      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept_option.topicconcept, !@guidance_quiz.neighbour_entry_lock 
+      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept_option.topicconcept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
       if concept_stage
         current_wrong = concept_stage.total_wrong
         current_right = concept_stage.total_right
@@ -348,9 +348,9 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     #Get submission records if it exist
     if @submission
       concept_edge = concept_edge_option.concept_edge
-      concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept, !@guidance_quiz.neighbour_entry_lock 
+      concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
       if concept_stage
-        concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage concept_stage, concept_edge 
+        concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage @submission, concept_stage, concept_edge, @guidance_quiz.passing_edge_lock 
         current_wrong = concept_edge_stage.total_wrong
         current_correct = concept_edge_stage.total_right
       end

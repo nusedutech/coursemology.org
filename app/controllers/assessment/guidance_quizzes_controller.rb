@@ -351,8 +351,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
       if concept_stage
         concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage @submission, concept_stage, concept_edge, @guidance_quiz.passing_edge_lock 
-        current_wrong = concept_edge_stage.total_wrong
-        current_correct = concept_edge_stage.total_right
+        if concept_edge_stage
+          current_wrong = concept_edge_stage.total_wrong
+          current_correct = concept_edge_stage.total_right
+        end
       end
     end
     #Retrieve criteria info

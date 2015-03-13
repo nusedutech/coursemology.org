@@ -19,6 +19,13 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     self.total_wrong += 1
     self.save
   end
+
+  def reset_statistics
+    self.total_right = 0
+    self.total_wrong = 0
+    self.passed = criteria_check
+    self.save
+  end
   
   def criteria_check
   	passing_criteria = self.concept_edge.concept_edge_option.concept_edge_criteria
@@ -41,19 +48,17 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
   end
 
   #Check for current progress on criteria and unlock if necessary
-  def check_to_unlock submission, passing_edge_lock
+  def check_to_unlock submission, passing_edge_lock, bypass_archive_check = false
     result = criteria_check
     
-    if result && !self.passed
+    if result && (!self.passed or bypass_archive_check)
       self.passed = true
       self.save
+      cascade_unlock_loop submission, self.concept_edge.dependent_concept
 
-      cascade_unlock_dependent_concept_stage submission, self.concept_edge.dependent_concept
-
-    elsif !result && self.passed
+    elsif !result && (self.passed or bypass_archive_check)
       self.passed = false
       self.save
-
       dependent_concept = self.concept_edge.dependent_concept
       dependent_concept_stage = Assessment::GuidanceConceptStage.get_stage_simplified submission, dependent_concept.id
       #Check for null and circular dependency (to prevent infinite recursion)
@@ -62,7 +67,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
 	    #Iteratively find the lower level concepts and delete the content
 	    while processing_concept_stages.size > 0 do
 	      current_concept_stage = processing_concept_stages.shift
-	      processing_concept_stages |= Assessment::GuidanceConceptStage.cascade_delete_failed_concept_stage current_concept_stage
+	      processing_concept_stages |= Assessment::GuidanceConceptStage.cascade_delete_failed_concept_stage submission, current_concept_stage
 	    end
       end
     end
@@ -107,7 +112,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
           passed_stage.save
 
           #Create attempting edge stages after stage is created
-          add_concept_edge_stages_from submission, passed_stage, dependent_concept.concept_edge_dependent_concepts
+          Assessment::GuidanceConceptEdgeStage.add_concept_edge_stages_from submission, passed_stage, dependent_concept.concept_edge_dependent_concepts
 
           #Get the next level of concepts to check for unlocking
           next_cascading_targets = dependent_concept.dependent_concepts
@@ -118,7 +123,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     next_cascading_targets
   end
 
-  def add_concept_edge_stages_from submission, concept_stage, concept_edges
+  def self.add_concept_edge_stages_from submission, concept_stage, concept_edges
     concept_edges.each do |concept_edge|
       concept_edge_option = concept_edge.concept_edge_option
       if !concept_edge_option.nil? and concept_edge_option.enabled
@@ -142,7 +147,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     result = true
     concept_edges.each do |concept_edge|
       #Only check for enabled edges when unlocking
-      if Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge
+      if (Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge) and (Assessment::GuidanceConceptOption.is_enabled_with concept_edge.required_concept)
       	concept_stage = Assessment::GuidanceConceptStage.get_passed_stage_simplified submission, concept_edge.required_concept.id
       	#Only check if the stage before this edge_stage is found and passed
       	if concept_stage.nil?
@@ -183,7 +188,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     end
 
     def add_enabled_edge_stages concept_stage
-      if !concept_stage.failed
+      if !concept_stage.failed and concept_stage.deleted_at.nil?
         concept_edges =  concept_stage.concept.concept_edge_dependent_concepts
         concept_edges.each do |concept_edge|
           concept_edge_stage = concept_stage.concept_edge_stages.where(concept_edge_id: concept_edge.id).first

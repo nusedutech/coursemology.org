@@ -66,7 +66,7 @@ class MaterialsController < ApplicationController
         render :json => build_subtree(@folder, true)
       }
       format.zip {
-        filename = build_zip @folder, :recursive => false, :include => params['include']
+        filename = build_zip @folder, :recursive => true, :include => params['include']
         send_file(filename, {
             :type => "application/zip, application/octet-stream",
             :disposition => "attachment",

@@ -172,6 +172,7 @@ class Assessment::QuestionsController < ApplicationController
     end
     
     #@question.max_grade = @assessment.is_mission? ? 10 : 2
+    @question.max_grade = (@question.is_a? Assessment::McqQuestion) ? 1 : 1
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @question }

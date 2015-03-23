@@ -1,5 +1,5 @@
 <%= render partial: "layouts/file_uploader_complicated",
-           locals: { owner: nil } %>
+           locals: { owner: @course } %>
 
 <%= form_for [@course, @folder], :html => { :class => 'form-horizontal', :id => 'submit_material_uploads' }, :method => :post do |f| %>
   <div id="uploaded_files_div"></div>

@@ -165,34 +165,66 @@ class TopicconceptsController < ApplicationController
   
   def topic_concept_data_move
     tc = Topicconcept.find params[:id]
-    if params[:old_parent]
+    if params[:old_parent] && params[:old_parent] != "#"
       old_edge = TopicEdge.find_by_parent_id_and_included_topic_concept_id(params[:old_parent],params[:id])
     end
-    if params[:parent]
+    if params[:parent] && params[:parent] != "#"
       new_edge = TopicEdge.new
       new_edge.parent_id = params[:parent]
       new_edge.included_topic_concept_id = params[:id]
       pc = Topicconcept.find(params[:parent])
       if pc.included_topicconcepts.count > 0 && params[:pos].to_i < pc.included_topicconcepts.count
         children_list = pc.included_topicconcepts.sort_by{|e| e.rank}
-        add_level = 0
-        children_list.each_with_index do |pitc, index|          
-          if params[:pos].to_i == index
+        pos_change = 0
+        children_list.each_with_index do |pitc, index|
+          if params[:pos].to_i == index && pos_change == 0
+            pos_change = 1
+            pitc.rank = pc.rank + '.' + (index + 1 + pos_change).to_s
+          elsif pitc.id == tc.id && pos_change != 0
+            tc.rank = pc.rank + '.' + (params[:pos].to_i + pos_change).to_s
+            pos_change = 0
+          elsif pitc.id == tc.id && pos_change == 0
+            pos_change = -1
             tc.rank = pc.rank + '.' + (params[:pos].to_i + 1).to_s
-            pitc.rank = pc.rank + '.' + (index + 2).to_s
-            pitc.save
-            add_level += 1
+          elsif params[:pos].to_i == index && pos_change != 0
+            pitc.rank = pc.rank + '.' + (index + 1 + pos_change).to_s
+            pos_change = 0
           else
-            pitc.rank = pc.rank + '.' + (index + add_level + 1).to_s
-            pitc.save
+            pitc.rank = pc.rank + '.' + (index + 1 + pos_change).to_s
           end
+          pitc.save
+
         end
       else
         tc.rank = pc.rank + '.' + (params[:pos].to_i + 1).to_s
       end
               
     else
-      tc.rank = (Topicconcept.where(:course_id => @course.id,:typename => 'topic').count + 1).to_s
+      topics = Topicconcept.where(:course_id => @course.id,:typename => 'topic')
+      if topics.count > 0 && params[:pos].to_i < topics.count
+        children_list = topics.sort_by{|e| e.rank}
+        pos_change = 0
+        children_list.each_with_index do |pitc, index|
+          if params[:pos].to_i == index && pos_change == 0
+            pos_change = 1
+            pitc.rank = (index + 1 + pos_change).to_s
+          elsif pitc.id == tc.id && pos_change != 0
+            tc.rank = (params[:pos].to_i + pos_change).to_s
+            pos_change = 0
+          elsif pitc.id == tc.id && pos_change == 0
+            pos_change = -1
+            tc.rank = (params[:pos].to_i + 1).to_s
+          elsif params[:pos].to_i == index && pos_change != 0
+            pitc.rank = (index + 1 + pos_change).to_s
+            pos_change = 0
+          else
+            pitc.rank = (index + 1 + pos_change).to_s
+          end
+          pitc.save
+        end
+      else
+        tc.rank = (params[:pos].to_i + 1).to_s
+      end
     end
     
     flag = true
@@ -202,7 +234,7 @@ class TopicconceptsController < ApplicationController
           flag = false           
         end
       end
-      if !new_edge.included_topic_concept_id.nil?
+      if !new_edge.nil? && !new_edge.included_topic_concept_id.nil?
         if !new_edge.save
           flag = false
         end

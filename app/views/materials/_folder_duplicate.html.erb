@@ -1,0 +1,33 @@
+<%= form_tag duplicate_structure_folder_course_material_folder_path(@course, folder_to_change), :method => subfolder_method, class: "folder-duplicate" do %>
+
+    <div class="<%= modal ? 'modal-body' : '' %>">
+    <div class="row-fluid control-group">
+      <label class="control-label" for="input-number-milestones">Open at </label>
+      <div class="controls">
+        <div class="datetimepicker input-append date">
+          <input type="text" class="text_field" id="open-at" name="open-at" value="<%= datetime_format(folder_to_change.open_at) %>">
+          <span class="add-on">
+          <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+        </span>
+        </div>
+      </div>
+    </div>
+    <div class="row-fluid control-group">
+      <label class="control-label" for="input-number-milestones">Close at </label>
+      <div class="controls">
+        <div class="datetimepicker input-append date">
+          <input type="text" class="text_field" id="close-at" name="close-at" value="<%= datetime_format(folder_to_change.close_at) %>">
+          <span class="add-on">
+          <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+        </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <input id="btn-dup-folder" class="btn btn-primary" type="submit" value="Done" />
+    <button data-dismiss="modal" class="btn">
+      Cancel
+    </button>
+  </div>
+<% end %>

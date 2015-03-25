@@ -284,6 +284,30 @@ class MaterialsController < ApplicationController
     end
   end
 
+  def duplicate_structure_folder
+    @folder = if params[:id] then
+                MaterialFolder.find_by_id(params[:id])
+              end
+    authorize! :edit, @folder
+
+    open_at = params["open-at"].empty? ? nil : params["open-at"].to_time
+    close_at = params["close-at"].empty? ? nil : params["close-at"].to_time
+    if @folder.parent_folder != nil then
+      @folder.class.amoeba do
+        include_field [:subfolders]
+        set :open_at => open_at
+        set :close_at => close_at
+      end
+      dup_folder = @folder.amoeba_dup
+      dup_folder.name = "Copy of " + dup_folder.name
+      respond_to do |format|
+        if dup_folder.save
+          format.html { redirect_to course_material_folder_path(@course, dup_folder), notice: "Duplicate folder successfully." }
+        end
+      end
+    end
+  end
+
 private
   # Builds a hash containing the given folder and all files in it, as a tree.
   def build_subtree(folder, include_files = true)

@@ -17,6 +17,7 @@ class TopicconceptsController < ApplicationController
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
     @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+    #@topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank.split('.')[e[:itc].rank.split('.').length-1].to_i}
 
     Rails.cache.clear
   end
@@ -174,7 +175,7 @@ class TopicconceptsController < ApplicationController
       new_edge.included_topic_concept_id = params[:id]
       pc = Topicconcept.find(params[:parent])
       if pc.included_topicconcepts.count > 0 && params[:pos].to_i < pc.included_topicconcepts.count
-        children_list = pc.included_topicconcepts.sort_by{|e| e.rank}
+        children_list = pc.included_topicconcepts.sort_by{|e| e.rank.split('.')[e.rank.split('.').length-1].to_i}
         pos_change = 0
         children_list.each_with_index do |pitc, index|
           if params[:pos].to_i == index && pos_change == 0
@@ -299,7 +300,7 @@ class TopicconceptsController < ApplicationController
     respond_to do |format|
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
-      @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+      @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank.split('.')[e[:itc].rank.split('.').length-1].to_i}
       if can? :manage, Topicconcept
         user_ability = 'manage'
         format.json { render :json =>{:user_ability => user_ability, :topictrees => @topics_concepts_with_info}}

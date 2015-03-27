@@ -290,7 +290,11 @@ Coursemology::Application.routes.draw do
         get 'diagnostic_exploration', :on => :member
         get 'diagnostic_exploration_next_question', :on => :member
         post 'submit_answer', :on => :collection
-        get 'ivleapi'       
+        get 'ivleapi'
+        
+        post 'get_topicconcept_data_noedit', :on => :collection
+        post 'get_topicconcept_overall_statistics', :on => :member
+        get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'       
     end
     
     resources :achievements

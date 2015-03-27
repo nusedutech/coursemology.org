@@ -3,7 +3,7 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration]
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration, :get_quiz_feedback]
 
   before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
 
@@ -25,6 +25,10 @@ class TopicconceptsController < ApplicationController
     
   end
   
+  def get_quiz_feedback
+
+  end
+
   def diagnostic_exploration
     set_latest_concept_stage @concept_stage
     @question = @concept_stage.get_top_question @course
@@ -334,19 +338,42 @@ class TopicconceptsController < ApplicationController
     end    
   end
   
+  def get_topicconcept_data_noedit
+    respond_to do |format|
+      @topics_concepts_with_info = []
+      get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
+      @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+
+      format.json { render :json =>{
+                                  :topictrees => @topics_concepts_with_info,
+                                  :nodelist => Topicconcept.where(:course_id => @course.id, :typename => 'concept'),
+                                  :edgelist => ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
+                                  }
+                }    
+
+    end 
+  end
+
   def get_topicconcept_rated_data
     result = {}
     result[:name] = @topicconcept.name;
     if @topicconcept.is_concept?
-      result[:raw_right] = @topicconcept.all_raw_correct_answer_attempts(curr_user_course.id).size
-      result[:raw_total] = result[:raw_right] + @topicconcept.all_raw_wrong_answer_attempts(curr_user_course.id).size
-      latest_answers = @topicconcept.all_latest_answer_attempts(curr_user_course.id)
+      user_course_id = nil
+      if can? :manage, Topicconcept
+        user_course_id = nil
+      else    
+        user_course_id = curr_user_course.id
+      end
+
+      result[:raw_right] = @topicconcept.all_raw_correct_answer_attempts(user_course_id).size
+      result[:raw_total] = result[:raw_right] + @topicconcept.all_raw_wrong_answer_attempts(user_course_id).size
+      latest_answers = @topicconcept.all_latest_answer_attempts(user_course_id)
       result[:latest_right] = latest_answers[:correct].size
       result[:latest_total] = latest_answers[:correct].size + latest_answers[:wrong].size
-      optimistic_answers = @topicconcept.all_optimistic_answer_attempts(curr_user_course.id)
+      optimistic_answers = @topicconcept.all_optimistic_answer_attempts(user_course_id)
       result[:optimistic_right] = optimistic_answers[:correct].size
       result[:optimistic_total] = optimistic_answers[:correct].size + optimistic_answers[:wrong].size
-      pessimistic_answers = @topicconcept.all_pessimistic_answer_attempts(curr_user_course.id)
+      pessimistic_answers = @topicconcept.all_pessimistic_answer_attempts(user_course_id)
       result[:pessimistic_right] = pessimistic_answers[:correct].size
       result[:pessimistic_total] = pessimistic_answers[:correct].size + pessimistic_answers[:wrong].size
     else
@@ -363,6 +390,10 @@ class TopicconceptsController < ApplicationController
     respond_to do |format|
       format.json { render json: result}
     end 
+  end
+
+  def get_topicconcept_overall_statistics
+
   end
 
   def get_all_concepts

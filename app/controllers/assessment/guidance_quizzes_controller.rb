@@ -4,7 +4,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   
   before_filter :load_general_course_data, only: [:access_denied]
 
-  before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_edge_data]
+  before_filter :load_guidance_quiz_singleton_with_submission, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_edge_data]
 
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
@@ -539,11 +539,15 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     result
   end
 
+  def get_quiz_feedback
+
+  end
+
   def integer_check unit
     unit =~ /^(-|\+)?(\d+)$/
   end
 
-  def load_guidance_quiz_singleton
+  def load_guidance_quiz_singleton_with_submission
     @guidance_quiz = Assessment::GuidanceQuiz.get_guidance_quiz (@course)
 
     if @guidance_quiz.nil? or !@guidance_quiz.enabled
@@ -556,6 +560,18 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
+  end
+
+  def load_guidance_quiz_singleton
+    @guidance_quiz = Assessment::GuidanceQuiz.get_guidance_quiz (@course)
+
+    if @guidance_quiz.nil? or !@guidance_quiz.enabled
+      respond_to do |format|
+        format.html { redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!" }
+        format.json { render json: { access_denied: "Not opened yet!" } }
+      end
+      return
+    end 
   end
 
   def access_denied

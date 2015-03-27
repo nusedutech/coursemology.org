@@ -209,9 +209,9 @@
 	function cancel_edit_required_concepts(){
 		is_editing_required_concepts = false;
 		$('#div_edit, #div_action').toggle();
-    $('#div_criteria_update').hide();
-    $('#div_criteria_update_next').hide();
-    $('#div_criteria_fail_update').hide();
+    	$('#div_criteria_update').hide();
+    	$('#div_criteria_update_next').hide();
+    	$('#div_criteria_fail_update').hide();
 		$('li.jstree-leaf a').css('border', '0px');
 		$('li.jstree-leaf a').css('background-color', '');
 	}
@@ -544,34 +544,34 @@
 	var layout = null;
 	function generate_entire_dependency_map(nodelist, edgelist){
 		//Create graph
-	  var gconcept = new dagreD3.Digraph();
-	  $.each(nodelist, function(){	  	
-	  	gconcept.addNode(this.id, { label: this.name});
-	  });
-	  $.each(edgelist, function(){
-	  	gconcept.addEdge(null, this.required_id, this.dependent_id, { label: "required by" });
-	  });
-	  var renderer = new dagreD3.Renderer();	  
-	  var layout_setting = dagreD3.layout();
-	  layout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-concept g"));
-	  
-	  var svg = d3.select("svg#svg-concept");
-	  var svgGroup = d3.select("svg#svg-concept g");
-	  zoom = d3.behavior.zoom().on("zoom", function redraw() {	  	
-	  	svgGroup.attr("transform","translate(" + (d3.event.translate[0]) + "," + (d3.event.translate[1]) + ")" + " scale(" + d3.event.scale + ")");		
-	  });
-	  svg.call(zoom);	  
+		var gconcept = new dagreD3.Digraph();
+		$.each(nodelist, function(){	  	
+		  	gconcept.addNode(this.id, { label: this.name});
+		});
+		$.each(edgelist, function(){
+		  	gconcept.addEdge(null, this.required_id, this.dependent_id, { label: "required by" });
+		});
+		var renderer = new dagreD3.Renderer();	  
+		var layout_setting = dagreD3.layout();
+		layout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-concept g"));
+		  
+		var svg = d3.select("svg#svg-concept");
+		var svgGroup = d3.select("svg#svg-concept g");
+		zoom = d3.behavior.zoom().on("zoom", function redraw() {	  	
+		  	svgGroup.attr("transform","translate(" + (d3.event.translate[0]) + "," + (d3.event.translate[1]) + ")" + " scale(" + d3.event.scale + ")");		
+		});
+		svg.call(zoom);	  
 
-    d3.selectAll("g.node").on('click', function(d, i){
-      $("#div_tree").jstree(true).deselect_node(selected_node, true);
-		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);
-	  })
-     
-    d3.selectAll("g.node")
-      .attr("title", get_topic_info)
-      .each(function(d, i){
-        $(this).tipsy({gravity: "w", opacity: 1.0, html: true, fade: true});
-    });
+	    d3.selectAll("g.node").on('click', function(d, i){
+	      $("#div_tree").jstree(true).deselect_node(selected_node, true);
+			  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);
+		});
+	     
+	    d3.selectAll("g.node")
+	      .attr("title", get_topic_info)
+	      .each(function(d, i){
+	        $(this).tipsy({gravity: "w", opacity: 1.0, html: true, fade: true});
+	    });
 	}
 	
 	function generate_dependency_map(node,json_required_data){
@@ -771,26 +771,26 @@
 		
 	function get_topic_info(concept_id){
 
-    var result;
+    	var result;
 		$.ajax({
-	    type: "POST",
-	    dataType: "json",
-	    async: false,
-	    url: "<%= course_path(@course)%>" + "/topicconcepts/"+concept_id+"/get_topicconcept_rated_data",
-	    success: function(json) {
-	    	result = json; 
-	    },
-	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        	alert("Status: " + textStatus + " Error: " + errorThrown); 
-    	}
-	  });
+		    type: "POST",
+		    dataType: "json",
+		    async: false,
+		    url: "<%= course_path(@course)%>" + "/topicconcepts/"+concept_id+"/get_topicconcept_rated_data",
+		    success: function(json) {
+		    	result = json;
+		    },
+		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	    	}
+		});
 
-	  return "<p class='name'>"+result.name+"</p>" + 
+	  	return "<p class='name'>"+result.name+"</p>" + 
            "<div><p class='subtop'> Raw : <em class='sub'>"+result.raw_right+" / "+result.raw_total+"</em></p></div>" + 
            "<div><p class='subtop'> Latest : <em class='sub'>"+result.latest_right+" / "+result.latest_total+"</em></p></div>" + 
            "<div><p class='subtop'> Optimistic : <em class='sub'>"+result.optimistic_right+" / "+result.optimistic_total+"</em></p></div>" + 
            "<div><p class='subtop'> Pessimistic : <em class='sub'>"+result.pessimistic_right+" / "+result.pessimistic_total+"</em></p></div>";
-  }
+    }
 
   function get_concept_edge_relation(data){
     var result;

@@ -23,6 +23,10 @@ class Assessment::Question < ActiveRecord::Base
   #TODO, dependent: :destroy here
   has_many  :question_assessments, dependent: :destroy
   has_many  :answers, class_name: Assessment::Answer, dependent: :destroy
+  has_many  :mcq_answers, class_name: "Assessment::McqAnswer",
+            through: :answers,
+            source: :as_answer, source_type: "Assessment::McqAnswer"
+
   has_many  :answer_gradings, class_name: Assessment::AnswerGrading, through: :answers
   has_one   :comment_topic, as: :topic
   

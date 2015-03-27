@@ -914,3 +914,27 @@ a.link-type {
   -moz-box-shadow: inset 0 0px 0 rgba(0, 0, 0, 0.15); 
   box-shadow: inset 0 0px 0 rgba(0, 0, 0, 0.15);
 }
+
+.accordion-right .accordion-minimise {
+  display: inline-block;
+}
+
+.accordion-heading .accordion-right {
+  right: 10px;
+  top: 10px;
+  position: absolute;
+}
+
+.accordion {
+  background-color: white;
+}
+
+.accordion-heading .accordion-wordheading{
+  position: relative;
+}
+
+.accordion-heading {
+  min-height: 36px;
+  position: relative;
+  padding: 10px;
+}

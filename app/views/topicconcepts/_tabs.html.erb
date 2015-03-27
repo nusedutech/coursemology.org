@@ -6,6 +6,9 @@
     <li class="<%= "active" if current_page? :exclude_questions_course_assessment_guidance_quiz_excluded_questions %>">
       <a href="<%= exclude_questions_course_assessment_guidance_quiz_excluded_questions_path(@course) %>" ><h4>Exclude questions</h4></a>
     </li>
+    <li class="<%= "active" if current_page? :feedback_course_topicconcepts %>">
+      <a href="<%= feedback_course_topicconcepts_path(@course) %>" ><h4>Overall Feedback</h4></a>
+    </li>
     <li class="<%= "active" if current_page? :course_preferences %>">
       <a href="<%= course_preferences_path(@course) %>?_tab=topicconcept" ><h4>Advanced Settings</h4></a>
     </li>

@@ -3,9 +3,13 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :diagnostic_exploration, :get_quiz_feedback]
+  layout "topicconcept_trend_popup", only: [:get_topicconcept_area]
+
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :get_topicconcept_overall_statistics, :diagnostic_exploration, :get_quiz_feedback, :get_topicconcept_weights]
 
   before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
+
+  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :get_topicconcept_weights, :get_topicconcept_area]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
 
@@ -26,7 +30,21 @@ class TopicconceptsController < ApplicationController
   end
   
   def get_quiz_feedback
+    @summary = {}
 
+    sbms = @guidance_quiz.submissions.where(std_course_id: @course.student_courses)
+    @summary[:attempting] = sbms.map { |sbm| sbm.std_course }
+    @summary[:attempting] = @summary[:attempting].uniq
+    @summary[:unsubmitted] = @course.student_courses - @summary[:attempting]
+
+    if params.has_key?("freq_wrong_count")
+      @freq_wrong_count = params["freq_wrong_count"].to_i
+    else
+      @freq_wrong_count = 5
+    end
+    @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers.select("assessment_answers.question_id as qid, COUNT(*) as count").where("assessment_answers.correct = '0'").group("qid").order("count DESC").limit(@freq_wrong_count)
+
+    @summary
   end
 
   def diagnostic_exploration
@@ -393,7 +411,160 @@ class TopicconceptsController < ApplicationController
   end
 
   def get_topicconcept_overall_statistics
+    result = {}
+    result[:name] = @topicconcept.name;
+    if @topicconcept.is_concept?
 
+      raw_right = @topicconcept.all_raw_correct_answer_attempts_from_guidance_quiz(@guidance_quiz).size
+      result[:raw_right] = raw_right
+      raw_total = result[:raw_right] + @topicconcept.all_raw_wrong_answer_attempts_from_guidance_quiz(@guidance_quiz).size
+      result[:raw_total] = raw_total
+      result[:raw_percent] = get_percentage_string raw_right, raw_total 
+
+      stroke_color = get_red_green_color raw_right, raw_total, 0, 140    
+      result[:stroke] = "rgb("+ stroke_color[:red] +", "+ stroke_color[:green] +", 0)"
+      fill_color = get_red_green_color raw_right, raw_total, 200, 55
+      result[:fill] = "rgb("+ fill_color[:red] +", "+ fill_color[:green] +", 200)"
+
+    else
+      result[:raw_right] = "nil"
+      result[:raw_total] = "nil"
+      result[:raw_percent] = "nil"
+      result[:stroke] = "rgb(51, 51, 51)"
+      result[:fill] = "rgb(255, 255, 255)"
+    end
+    
+    respond_to do |format|
+      format.json { render json: result}
+    end 
+  end
+
+  def get_topicconcept_weights
+    result = {}
+
+    enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
+                                   .concepts
+                                   .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+
+    if enabled_concepts.size > 0
+      result[:concepts] = []
+      enabled_concepts.each do |current_concept|
+        related_stages = Assessment::GuidanceConceptStage.where(topicconcept_id: current_concept.id)
+        curr_result = {
+                        title: current_concept.name,
+                        value: related_stages.count,
+                        students: related_stages.map { |rs| { name: rs.submission.std_course.name } }
+                      }
+
+        result[:concepts] << curr_result
+      end
+
+    else
+      result[:concepts] = [{title: "NONE", value: 1}]
+    end
+    
+    respond_to do |format|
+      format.json { render json: result}
+    end 
+  end
+
+  def get_topicconcept_area
+    enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
+                                   .concepts
+                                   .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+
+    if params.has_key?("accumulative")
+      accumulative = params[:accumulative].to_s == "true"
+    else
+      accumulative = false
+    end
+
+    if params.has_key?("correct")
+      get_correct = params[:correct].to_s == "true" ? 1 : 0
+    else
+      get_correct = 0
+    end
+
+    if params.has_key?("start_period")
+      start_date = Time.parse(params[:start_period])
+    else
+      start_date = Time.now - 1.months
+    end
+
+    if params.has_key?("end_period")
+      end_date = Time.parse(params[:end_period])
+    else
+      end_date = Time.now
+    end
+
+    if params.has_key?("time_step")
+      case params[:time_step]
+      when "day"
+        time_step = 1.day
+        time_key = "day"
+      when "month"
+        time_step = 1.month
+        time_key = "month"
+      when "year"
+        time_step = 1.year
+        time_key = "year"
+      else
+        time_step = 1.day
+        time_key = "day"
+      end
+    else
+      time_step = 1.day
+      time_key = "day"
+    end
+
+    query_string = "assessment_answers.updated_at <= ? and assessment_answers.updated_at >= ? "
+    query_start_date_string = "1000-01-01"
+    area_data = []
+    (start_date.to_i .. end_date.to_i).step(time_step) do |date_int|
+      date = Time.at(date_int)
+      offset_date = date + 1.day
+      query_end_date_string = offset_date.strftime("%Y-%m-%d")
+      solo_data = {}
+      if !accumulative
+        query_start_date_string = date.strftime("%Y-%m-%d")
+      end
+      enabled_concepts.each do |concept|
+        solo_data[concept.id.to_s] = concept.mcq_answers
+                                            .where("assessment_answers.correct = '?' AND assessment_answers.submission_id IN (?) AND " + query_string , 
+                                                   get_correct,
+                                                   @guidance_quiz.submissions,
+                                                   query_end_date_string,
+                                                   query_start_date_string).count
+        solo_data[time_key] = query_end_date_string
+
+      end
+      area_data << solo_data
+    end
+
+    respond_to do |format|
+      format.json { 
+        render json: {
+          data: area_data,
+          x: time_key,
+          y: enabled_concepts.map { |ec| ec.id.to_s },
+          concepts: enabled_concepts.map { |ec| ec.name }
+        }
+      }
+      format.html {
+        render locals: {
+          data: area_data,
+          x: time_key,
+          y: enabled_concepts.map { |ec| ec.id.to_s },
+          concepts: enabled_concepts.map { |ec| ec.name },
+
+          accumulative: accumulative,
+          correct: get_correct == 1,
+          start_period: params[:start_period],
+          end_period: params[:end_period],
+          time_step: params[:time_step]
+        }
+      } 
+    end
   end
 
   def get_all_concepts
@@ -445,6 +616,50 @@ class TopicconceptsController < ApplicationController
       set_hidden_sidebar_params
     end
   end
+
+  #Get red green color representations based on input parameter percentages
+  def get_red_green_color current = 0, total = 0, offset = 0, size = 0
+    red = 0
+    green = 0
+
+    if total <= 0
+      red = offset
+      green = offset
+    else
+      itmd = current * 1.0 / total
+      green = itmd * size + offset
+      red = (1 - itmd) * size + offset
+    end
+
+    {
+      red: red.ceil.to_s,
+      green: green.ceil.to_s
+    }
+  end
+
+  #Return the true percentage string representation of the input parameters
+  def get_percentage_string current = 0, total = 0
+    result = "0"
+    if total <= 0
+      result = "NaN"
+    else
+      itmd = current * 100 / total
+      result = itmd.to_s + "%"
+    end
+
+
+    result
+  end
+
+  def authorize_and_load_guidance_quiz
+    #No start time for guidance quiz, only can start after published
+    unless Assessment::GuidanceQuiz.is_enabled? @course
+      redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
+      return
+    end
+
+    @guidance_quiz = @course.guidance_quizzes.first
+  end 
 
   def authorize_and_load_guidance_quiz_and_submission_and_concept
     #No start time for guidance quiz, only can start after published

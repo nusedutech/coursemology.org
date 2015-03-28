@@ -23,6 +23,11 @@ class Topicconcept < ActiveRecord::Base
   has_many :taggable_tags, as: :tag, dependent: :destroy
   has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy, class_name: "Assessment::ForwardPolicyLevel"
   has_many :questions, through: :taggable_tags, source: :taggable, source_type: "Assessment::Question"
+  has_many :answers, through: :questions, source: :answers, class_name: Assessment::Answer
+  has_many :mcq_answers, class_name: "Assessment::McqAnswer",
+           through: :answers,
+           source: :as_answer, source_type: "Assessment::McqAnswer"
+
 
   has_one :concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy, foreign_key: "topicconcept_id"
 
@@ -63,21 +68,21 @@ class Topicconcept < ActiveRecord::Base
     answers = []
 
     if submission.nil?
-      answers = self.questions.mcq_answers.where("assessment_answers.correct = '1' AND assessment_answers.submission_id IN (?)", guidance_quiz.submissions)
+      answers = self.mcq_answers.where("assessment_answers.correct = '1' AND assessment_answers.submission_id IN (?)", guidance_quiz.submissions)
     else
-      answers = submission.mcq_answers.where(submission_id: submission, correct: 1)
+      answers = self.mcq_answers.where(submission_id: submission, correct: 1)
     end
     
     answers
   end
 
-  def all_raw_wrong_answer_attempts_from_guidance_quiz guidance_quiz
+  def all_raw_wrong_answer_attempts_from_guidance_quiz guidance_quiz, submission = nil
     answers = []
     
     if submission.nil?
-      answers = self.questions.mcq_answers.where("assessment_answers.correct = '0' AND assessment_answers.submission_id IN (?)", guidance_quiz.submissions)
+      answers = self.mcq_answers.where("assessment_answers.correct = '0' AND assessment_answers.submission_id IN (?)", guidance_quiz.submissions)
     else
-      answers = submission.mcq_answers.where(submission_id: submission, correct: 0)
+      answers = self.mcq_answers.where(submission_id: submission, correct: 0)
     end
 
     answers

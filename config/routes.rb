@@ -294,6 +294,8 @@ Coursemology::Application.routes.draw do
         
         post 'get_topicconcept_data_noedit', :on => :collection
         post 'get_topicconcept_overall_statistics', :on => :member
+        post 'get_topicconcept_weights', :on => :collection
+        post 'get_topicconcept_area', :on => :collection
         get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'       
     end
     

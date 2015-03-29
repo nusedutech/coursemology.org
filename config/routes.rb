@@ -148,6 +148,7 @@ Coursemology::Application.routes.draw do
         end
         member do
           post :edit, to: 'guidance_quiz_submissions#edit'
+          get  :submit, to: 'guidance_quiz_submissions#submit'
         end
       end
 
@@ -220,6 +221,8 @@ Coursemology::Application.routes.draw do
         post :get_guidance_concept_edge_data, to: 'guidance_quizzes#get_guidance_concept_edge_data'
 
         get :get_topicconcept_data_with_criteria, to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
+
+        post :get_topicconcept_data_history, to: 'guidance_quizzes#get_topicconcept_data_history'
       end
     end
 
@@ -289,11 +292,18 @@ Coursemology::Application.routes.draw do
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'diagnostic_exploration', :on => :member
         get 'diagnostic_exploration_next_question', :on => :member
+        get 'review_diagnostic_exploration', :on => :collection
+        post 'review_diagnostic_exploration_on_stage', :on => :collection
+
         post 'submit_answer', :on => :collection
         get 'ivleapi'
         
         post 'get_topicconcept_data_noedit', :on => :collection
         post 'get_topicconcept_overall_statistics', :on => :member
+        post 'get_topicconcept_single_statistics', :on => :member
+        post 'get_topicconcept_single_current_statistics', :on => :member
+        post 'get_topicconcept_best_concepts', :on => :collection
+        post 'get_topicconcept_notbest_concepts', :on => :collection
         post 'get_topicconcept_weights', :on => :collection
         post 'get_topicconcept_area', :on => :collection
         get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'       

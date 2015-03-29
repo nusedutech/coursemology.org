@@ -3,19 +3,21 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  layout "topicconcept_trend_popup", only: [:get_topicconcept_area]
+  before_filter :set_popup_layout, only: [:get_topicconcept_area, :review_diagnostic_exploration_on_stage]
 
-  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :get_topicconcept_overall_statistics, :diagnostic_exploration, :get_quiz_feedback, :get_topicconcept_weights]
+  before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :get_topicconcept_overall_statistics, :diagnostic_exploration, :get_quiz_feedback, :get_topicconcept_weights, :review_diagnostic_exploration]
 
-  before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration]
+  before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration, :review_diagnostic_exploration, :get_quiz_feedback]
 
-  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :get_topicconcept_weights, :get_topicconcept_area]
+  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :get_topicconcept_weights, :get_topicconcept_area, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
+
+  before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_for_review, only: [:review_diagnostic_exploration]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept, only: [:index]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
 
-  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration]
+  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration, :review_diagnostic_exploration]
 
   def index   
     @topics_concepts_with_info = []
@@ -59,7 +61,7 @@ class TopicconceptsController < ApplicationController
       redirect_to course_topicconcepts_path(@course), alert: " Current concept has run out of questions!"
       return
     end
-   
+
     @title_concept = @concept
     respond_to do |format|
       format.html {
@@ -98,6 +100,81 @@ class TopicconceptsController < ApplicationController
       format.json {
         render json: summary
       }
+    end
+  end
+
+  def review_diagnostic_exploration
+    @submissions = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order("updated_at DESC")
+
+    if params.has_key?(:submission_id)
+      @chosen_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id, id: params[:submission_id]).first
+    end
+
+    if @chosen_submission.nil?
+      @chosen_submission = @latest_submission
+    end
+
+    @concept_stages = Assessment::GuidanceConceptStage.get_stages @chosen_submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
+                                   .concepts
+                                   .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+    @achieve_percentage = @concept_stages.size * 100 / enabled_concepts.size; 
+    @achieve_correct_amount = @chosen_submission.mcq_answers.where(assessment_answers: {correct: true}).size
+    @achieve_wrong_amount = @chosen_submission.mcq_answers.where(assessment_answers: {correct: false}).size 
+
+    respond_to do |format|
+      format.html {
+        render "topicconcepts/index"
+      }
+    end
+  end
+
+  def review_diagnostic_exploration_on_stage
+
+    unless params.has_key?(:submission_id) and params.has_key?(:concept_id)
+      redirect_to course_topicconcepts_path(@course), alert: " Insufficent units provided!"
+      return
+    end
+
+    @submission = @guidance_quiz.submissions.where(id: params[:submission_id]).first
+    if @submission.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Submission not found!"
+      return
+    end
+
+    @concept = @course.topicconcepts.concepts.where(id: params[:concept_id]).first
+    if @concept.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Concept not found!"
+      return
+    end
+    @concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+
+    @questions = []
+    @question_total = 0;
+    @question_right = 0;
+    mcq_answers = @concept.mcq_answers.where(assessment_answers: {submission_id: @submission}).order("assessment_answers.updated_at DESC")
+    mcq_answers.each do |single_answer|
+      mcq_question = single_answer.question.specific
+      question_summary = {}
+      question_summary[:correct] = single_answer.correct
+      question_summary[:description] = mcq_question.description
+      question_summary[:right_option] = mcq_question.getCorrectOptions 
+
+      #For incorrectly answered questions only
+      if !single_answer.correct
+        question_summary[:chosen_option] = []            
+        single_answer.answer_options.each do |answer_option|
+          question_summary[:chosen_option] << answer_option.option
+        end
+      else
+        @question_right = @question_right + 1
+      end
+      @question_total = @question_total + 1
+      @questions << question_summary
+    end
+
+    respond_to do |format|
+      format.html
     end
   end
 
@@ -430,13 +507,124 @@ class TopicconceptsController < ApplicationController
       result[:raw_right] = "nil"
       result[:raw_total] = "nil"
       result[:raw_percent] = "nil"
-      result[:stroke] = "rgb(51, 51, 51)"
-      result[:fill] = "rgb(255, 255, 255)"
+      result[:stroke] = "rgb(70, 70, 0)"
+      result[:fill] = "rgb(227, 227, 200)"
     end
     
     respond_to do |format|
       format.json { render json: result}
     end 
+  end
+
+  def get_topicconcept_single_statistics
+    result = {}
+    result[:name] = @topicconcept.name;
+
+    unless params.has_key?(:submission_id)
+      redirect_to course_topicconcepts_path(@course), alert: " Submission parameters not found!"
+      return
+    end
+    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   id: params[:submission_id]).first
+    #Submission not available, refer back to map
+    if @submission.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Submission not found!"
+      return
+    end
+
+    if @topicconcept.is_concept?
+
+      raw_right = @topicconcept.all_raw_correct_answer_attempts_from_guidance_quiz(@guidance_quiz, @submission).size
+      result[:raw_right] = raw_right
+      raw_total = result[:raw_right] + @topicconcept.all_raw_wrong_answer_attempts_from_guidance_quiz(@guidance_quiz, @submission).size
+      result[:raw_total] = raw_total
+      result[:raw_percent] = get_percentage_string raw_right, raw_total 
+
+      stroke_color = get_red_green_color raw_right, raw_total, 0, 140    
+      result[:stroke] = "rgb("+ stroke_color[:red] +", "+ stroke_color[:green] +", 0)"
+      fill_color = get_red_green_color raw_right, raw_total, 200, 55
+      result[:fill] = "rgb("+ fill_color[:red] +", "+ fill_color[:green] +", 200)"
+
+    else
+      result[:raw_right] = "nil"
+      result[:raw_total] = "nil"
+      result[:raw_percent] = "nil"
+      result[:stroke] = "rgb(70, 70, 0)"
+      result[:fill] = "rgb(227, 227, 200)"
+    end
+    
+    respond_to do |format|
+      format.json { render json: result}
+    end 
+  end
+
+  def get_topicconcept_single_current_statistics
+    result = {}
+    result[:name] = @topicconcept.name;
+
+    unless params.has_key?(:submission_id)
+      redirect_to course_topicconcepts_path(@course), alert: " Submission parameters not found!"
+      return
+    end
+    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   id: params[:submission_id]).first
+    #Submission not available, refer back to map
+    if @submission.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Submission not found!"
+      return
+    end
+
+    if @topicconcept.is_concept?
+      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, @topicconcept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    end
+
+    if concept_stage
+      raw_right = concept_stage.total_right
+      result[:raw_right] = concept_stage.total_right
+      raw_total = concept_stage.total_right + concept_stage.total_wrong
+      result[:raw_total] = raw_total
+      result[:raw_percent] = get_percentage_string raw_right, raw_total 
+    else
+      result[:raw_right] = "nil"
+      result[:raw_total] = "nil"
+      result[:raw_percent] = "nil"
+    end
+    
+    respond_to do |format|
+      format.json { render json: result}
+    end 
+  end
+
+  def get_topicconcept_best_concepts
+    @submission = @guidance_quiz.submissions.where(id: params[:submission_id]).first
+    if @submission.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Submission not found!"
+      return
+    end
+
+    concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * -100 / (cs.total_right + cs.total_wrong) }
+
+
+    respond_to do |format|
+      format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * 100 / (cs.total_right + cs.total_wrong) }}}
+    end
+  end
+
+  def get_topicconcept_notbest_concepts
+    @submission = @guidance_quiz.submissions.where(id: params[:submission_id]).first
+    if @submission.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Submission not found!"
+      return
+    end
+
+    concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
+
+
+    respond_to do |format|
+      format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * 100 / (cs.total_right + cs.total_wrong) }}}
+    end
   end
 
   def get_topicconcept_weights
@@ -449,7 +637,8 @@ class TopicconceptsController < ApplicationController
     if enabled_concepts.size > 0
       result[:concepts] = []
       enabled_concepts.each do |current_concept|
-        related_stages = Assessment::GuidanceConceptStage.where(topicconcept_id: current_concept.id)
+        related_stages = Assessment::GuidanceConceptStage.joins("INNER JOIN assessment_submissions ON assessment_submissions.id = assessment_guidance_concept_stages.assessment_submission_id")
+                                                         .where(assessment_guidance_concept_stages: {topicconcept_id: current_concept.id, failed: false}, assessment_submissions: {status: "attempting"})
         curr_result = {
                         title: current_concept.name,
                         value: related_stages.count,
@@ -623,8 +812,8 @@ class TopicconceptsController < ApplicationController
     green = 0
 
     if total <= 0
-      red = offset
-      green = offset
+      red = offset + size / 2
+      green = offset + size / 2
     else
       itmd = current * 1.0 / total
       green = itmd * size + offset
@@ -661,21 +850,47 @@ class TopicconceptsController < ApplicationController
     @guidance_quiz = @course.guidance_quizzes.first
   end 
 
+  def authorize_and_load_guidance_quiz_and_submission_and_concept_for_review
+    #No start time for guidance quiz, only can start after published
+    unless Assessment::GuidanceQuiz.is_enabled? @course
+      redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
+      return
+    end
+
+    @guidance_quiz = @course.guidance_quizzes.first
+    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   status: "attempting").first
+    if @submission
+      @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission, @guidance_quiz.passing_edge_lock
+      if @concept_stage
+        @latest_concept = @concept_stage.concept
+      end
+    end
+
+    @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order("updated_at DESC").first
+
+    if @latest_submission.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
+      return
+    end
+  end
+
   def authorize_and_load_guidance_quiz_and_submission_and_concept
     #No start time for guidance quiz, only can start after published
     #This is for retrieving the latest concept attempted
     if Assessment::GuidanceQuiz.is_enabled? @course
-      guidance_quiz = @course.guidance_quizzes.first
-      @submission = guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+      @guidance_quiz = @course.guidance_quizzes.first
+      @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
       if @submission
-        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission, guidance_quiz.passing_edge_lock
+        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission, @guidance_quiz.passing_edge_lock
         if @concept_stage
           @latest_concept = @concept_stage.concept
         end
       end
-    end
 
+      @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).first
+    end
   end
 
   def authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage
@@ -695,6 +910,7 @@ class TopicconceptsController < ApplicationController
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
       return
     end
+    @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).first
 
     unless @topicconcept.is_concept?
       redirect_to course_topicconcepts_path(@course), alert: " This is not a concept!"
@@ -715,12 +931,12 @@ class TopicconceptsController < ApplicationController
   def load_general_topicconcept_data
     @user_course = curr_user_course
 
-    guidance_quiz = @course.guidance_quizzes.first
-    submission = guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+    @guidance_quiz = @course.guidance_quizzes.first
+    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                  status: "attempting").first
     
     #Submission not available, indicate progress bar as such
-    if submission.nil? or !submission.attempting?
+    if @submission.nil? or !@submission.attempting?
       @progress_bar = {
                         pass: 0,
                         fail: 0,
@@ -733,9 +949,9 @@ class TopicconceptsController < ApplicationController
                         disable_message: "Assessment not started yet"
                       }
     else
-      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !guidance_quiz.neighbour_entry_lock, guidance_quiz.passing_edge_lock
+      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
       passed_concepts = passed_concept_stages.collect(&:concept).uniq
-      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission, guidance_quiz.passing_edge_lock
+      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages @submission, @guidance_quiz.passing_edge_lock
       failed_concepts = failed_concept_stages.collect(&:concept).uniq
       enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
                                       .concepts
@@ -758,6 +974,10 @@ class TopicconceptsController < ApplicationController
                         disable_amt: disabled_concept_count,
                       }
     end
+  end
+
+  def set_popup_layout
+    self.class.layout "topicconcept_trend_popup"
   end
 
   def access_denied message, redirectURL

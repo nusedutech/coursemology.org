@@ -15,6 +15,8 @@
 		<div class="task-content-container">
       <% if current_page? :course_topicconcepts %>
 			  <%= render  partial: "topicconcept_for_guidance_map" %>
+      <% elsif current_page? :review_diagnostic_exploration_course_topicconcepts %>
+        <%= render  partial: "review_diagnostic_exploration" %>
       <% elsif current_page? :diagnostic_exploration_course_topicconcept %>
 			  <%= render  partial: "master" %>
       <% end %>

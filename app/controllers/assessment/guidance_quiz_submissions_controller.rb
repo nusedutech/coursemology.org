@@ -1,9 +1,10 @@
 class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :assessment, through: :course, class: "Assessment"
-  load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission", id_param: :id, only: [:edit]
+  load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission", id_param: :id, only: [:edit, :submit]
 
-  before_filter :authorize_and_load_guidance_quiz, only: [:attempt, :edit]
+  before_filter :authorize_and_load_guidance_quiz, only: [:attempt, :edit, :submit]
+  before_filter :no_update_after_submission, only: [:edit, :submit]
 
   #Create new guidance quiz entry
   def attempt
@@ -16,7 +17,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       return 
     end
 
-    @submission = @assessment.submissions.where(std_course_id: curr_user_course).last
+    @submission = @assessment.submissions.submitted_format.where(std_course_id: curr_user_course).last
     #Create only when a submission is not found or if the last submission is submitted
     if @submission.nil? or @submission.submitted?
       @submission = @assessment.submissions.new
@@ -87,6 +88,12 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
         } 
       }
     end
+  end
+
+  def submit
+    @submission.set_submitted
+
+    redirect_to course_topicconcepts_path(@course)
   end
 
   private
@@ -182,6 +189,12 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     #No start time for guidance quiz, only can start after published
     unless @guidance_quiz.enabled
       redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
+    end
+  end
+
+  def no_update_after_submission
+    unless @submission.attempting?
+      access_denied "Submission is already submitted.", course_topicconcepts_path(@course)
     end
   end
 

@@ -70,7 +70,7 @@ class Topicconcept < ActiveRecord::Base
     if submission.nil?
       answers = self.mcq_answers.where("assessment_answers.correct = '1' AND assessment_answers.submission_id IN (?)", guidance_quiz.submissions)
     else
-      answers = self.mcq_answers.where(submission_id: submission, correct: 1)
+      answers = self.mcq_answers.where(assessment_answers: {submission_id: submission, correct: 1})
     end
     
     answers
@@ -82,7 +82,7 @@ class Topicconcept < ActiveRecord::Base
     if submission.nil?
       answers = self.mcq_answers.where("assessment_answers.correct = '0' AND assessment_answers.submission_id IN (?)", guidance_quiz.submissions)
     else
-      answers = self.mcq_answers.where(submission_id: submission, correct: 0)
+      answers = self.mcq_answers.where(assessment_answers: {submission_id: submission, correct: 0})
     end
 
     answers

@@ -1,8 +1,10 @@
 <% menuItemSelected = 0 %>
 <% if current_page? :course_topicconcepts %>
-   <% menuItemSelected = 0; %>
+  <% menuItemSelected = 0; %>
+<% elsif current_page? :review_diagnostic_exploration_course_topicconcepts %>
+  <% menuItemSelected = 2; %>
 <% elsif current_page? :diagnostic_exploration_course_topicconcept %>
-   <% menuItemSelected = 1; %>
+  <% menuItemSelected = 1; %>
 <% end %>
 
 <% appendedURL = "" %>
@@ -35,7 +37,11 @@
   		</a>
     </li>
     <li class="<%= @course.forums_enabled? ? "required-concept-node" : "main-concept" %> <%= menuItemSelected == 2 ? "selected" : "" %> completed">
-  		<a class="link-type" href="" onclick="alert('Please select a concept node to start at first.');">
+  		<a class="link-type" href="<%= review_diagnostic_exploration_course_topicconcepts_path(@course) if !@latest_submission.nil? %>" 
+        <% if @latest_submission.nil? %>
+          onclick="alert('Please select a concept node to start at first.');"
+        <% end %>
+      >
       	<div class="subway-icon">
           <div class="pipe"></div>							
           <div class="status exercise-node"></div>						

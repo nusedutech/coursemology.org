@@ -84,6 +84,25 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     self.save
   end
 
+  def get_all_answers
+    all_answers = []
+    if !self.completed_answers.nil?
+      all_answer_ids = CSV.parse_line(self.completed_answers)
+      answer = nil
+      all_answer_ids.each do |answer_id|
+        answer = Assessment::Answer.where(as_answer_id: answer_id, as_answer_type: "Assessment::McqAnswer").first
+        #Check in case questions are deleted
+        if !answer.nil? and !answer.specific.question.nil?
+          all_answers << answer
+        else
+          next
+        end
+      end
+    end
+
+    all_answers
+  end
+
   def record_answer(answer_id)
     if self.completed_answers.present?
       all_answers = CSV.parse_line(self.completed_answers)
@@ -343,6 +362,13 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
 
     def verify_failed_stage submission, concept_stage, passing_edge_lock
       concept_stage.check_to_lock submission, passing_edge_lock
+    end
+
+    def get_stages submission, create_new_option, passing_edge_lock
+      clean_deleted_stages submission
+      add_enabled_stages submission, create_new_option, passing_edge_lock
+      verify_failed_stages submission, passing_edge_lock
+      submission.concept_stages.order('updated_at DESC')
     end
 
     def get_passed_stages submission, create_new_option, passing_edge_lock

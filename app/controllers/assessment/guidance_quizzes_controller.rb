@@ -6,6 +6,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   before_filter :load_guidance_quiz_singleton_with_submission, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_edge_data]
 
+  before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_history]
+
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
   def set_enabled
@@ -151,6 +153,39 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       
       format.json { render json: result }    
     end    
+  end
+
+  def get_topicconcept_data_history
+    respond_to do |format|
+      @topics_concepts_with_info = []
+      get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
+      @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
+      
+      @concepts = @course.topicconcepts.concepts
+      @concept_edges = ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
+      
+      submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                    id: params[:submission_id]).order('updated_at DESC').first
+      submission_valid = !submission.nil?
+      result =  { 
+                  topictrees: @topics_concepts_with_info, 
+                  submission: submission_valid
+                }
+
+      #Retrieve more information if has valid submission
+      if submission_valid 
+        result.merge!(get_guidance_quiz_submission_data submission)
+        afflictedNodes = result[:openAtmNodes] + result[:failedNodes] + [result[:lastAtmNode]]
+        @concepts = @concepts - afflictedNodes
+        afflictedEdges = result[:openAtmEdges] + result[:failedEdges]
+        @concept_edges = @concept_edges - afflictedEdges 
+      end
+      
+      result[:nodelist] = @concepts.map { |c| (get_concept_criteria_with c).merge({ concept_name: c.name}) }
+      result[:edgelist] = @concept_edges.map { |ce| (get_concept_edge_relation_with ce).merge({ dependent_id: ce.dependent_id, required_id: ce.required_id}) }
+      
+      format.json { render json: result }    
+    end
   end
 
   def get_guidance_quiz_submission_data submission

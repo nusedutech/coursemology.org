@@ -17,7 +17,7 @@ class TopicconceptsController < ApplicationController
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_and_conceptstage, only: [:diagnostic_exploration, :diagnostic_exploration_next_question]
 
-  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration, :review_diagnostic_exploration]
+  before_filter :load_general_topicconcept_data, only: [:index, :diagnostic_exploration, :review_diagnostic_exploration, :get_progress_bar_info]
 
   def index   
     @topics_concepts_with_info = []
@@ -753,6 +753,14 @@ class TopicconceptsController < ApplicationController
           time_step: params[:time_step]
         }
       } 
+    end
+  end
+
+  def get_progress_bar_info
+    respond_to do |format|
+      format.json { 
+        render json: @progress_bar
+      }
     end
   end
 

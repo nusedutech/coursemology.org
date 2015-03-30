@@ -75,16 +75,20 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     end
 
     #Launch second check to lock when evaluated fail status
-    if concept_stage.check_to_lock @submission, @guidance_quiz.passing_edge_lock
+    if concept_stage.check_to_lock_procedure @submission, @guidance_quiz.passing_edge_lock
       access_denied "You have failed this concept. Try again from the easier concepts.", course_topicconcepts_path(@course)
       return
     end
+
+    unlocked_concepts = concept_stage.check_to_unlock_procedure @submission, @guidance_quiz.passing_edge_lock
+    concept_names = unlocked_concepts.map {|c| c.name}
 
     respond_to do |format|
       format.json { 
         render json: { 
           correct: response[:is_correct], 
-          explanation: response[:explanation]
+          explanation: response[:explanation],
+          unlocked_concepts: concept_names
         } 
       }
     end

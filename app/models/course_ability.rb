@@ -174,11 +174,14 @@ class CourseAbility  < Ability
       can :get_topicconcept_single_current_statistics, Topicconcept
       can :get_topicconcept_best_concepts, Topicconcept
       can :get_topicconcept_notbest_concepts, Topicconcept
+      can :get_progress_bar_info, Topicconcept
 
       can :get_topicconcept_data_with_criteria , Assessment::GuidanceQuiz
       can :get_topicconcept_data_history , Assessment::GuidanceQuiz
-      can :get_guidance_concept_data, Assessment::GuidanceQuiz   
+      can :get_guidance_concept_data, Assessment::GuidanceQuiz  
+      can :get_guidance_concept_data_no_stats, Assessment::GuidanceQuiz  
       can :get_guidance_concept_edge_data, Assessment::GuidanceQuiz
+      can :get_guidance_concept_edges_data, Assessment::GuidanceQuiz
 
       can :students, Course
 

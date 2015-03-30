@@ -343,6 +343,11 @@ input.btnmargined {
     margin: 2px;
 }
 
+.act-tipsy {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .title-concept-name,
 .tipsy .name {
     font-size: 25px;
@@ -355,12 +360,23 @@ input.btnmargined {
     margin-right: 10px;
 }
 
+.act-tipsy .name{
+  font-size: 15px;
+  font-weight: bold;
+  font-style: normal;
+  color: #4091DC;
+  text-decoration: underline;
+  text-align: center;
+}
+
+.act-tipsy .subtop,
 .tipsy .subtop {
     font-size: 15px;
     color: #AAF;
     text-align: right;
 }
 
+.act-tipsy .sub,
 .tipsy .sub {
     font-weight: normal;
     font-style: normal;
@@ -369,21 +385,27 @@ input.btnmargined {
     text-align: right;
 }
 
+.act-tipsy .tipsy-passWhen,
 .tipsy .tipsy-passWhen{
     margin-top: 10px;
     color: #0F0;
 }
 
+.act-tipsy .tipsy-failWhen,
 .tipsy .tipsy-failWhen{
     color: #F00;
 }
 
+.act-tipsy .tipsy-passWhen,
+.act-tipsy .tipsy-failWhen,
 .tipsy .tipsy-passWhen,
 .tipsy .tipsy-failWhen{
     text-align: left;
     font-size: 18px;
 }
 
+.act-tipsy .tipsy-pass-statement,
+.act-tipsy .tipsy-fail-statement,
 .tipsy .tipsy-pass-statement,
 .tipsy .tipsy-fail-statement{
     font-size: 16px;
@@ -391,14 +413,18 @@ input.btnmargined {
     display: inline-block;
 }
 
+.act-tipsy .tipsy-passstrikeout,
 .tipsy .tipsy-passstrikeout{
     text-decoration: line-through;
 }
 
+.act-tipsy .tipsy-failstrikeout,
 .tipsy .tipsy-failstrikeout{
     text-decoration: line-through;
 }
 
+.act-tipsy .tipsy-passIcon,
+.act-tipsy .tipsy-failIcon,
 .tipsy .tipsy-passIcon,
 .tipsy .tipsy-failIcon{
     font-size: 16px;
@@ -406,14 +432,18 @@ input.btnmargined {
     margin-right: 5px;
 }
 
+.act-tipsy .tipsy-passIcon,
 .tipsy .tipsy-passIcon{
     color: #0A0;
 }
 
+.act-tipsy .tipsy-failIcon,
 .tipsy .tipsy-failIcon{
     color: #A00;
 }
 
+.act-tipsy .tipsy-passWord,
+.act-tipsy .tipsy-failWord,
 .tipsy .tipsy-passWord,
 .tipsy .tipsy-failWord{
     font-weight: normal;
@@ -422,34 +452,41 @@ input.btnmargined {
     text-align: left;
 }
 
+.act-tipsy .tipsy-fail-statement,
 .tipsy .tipsy-fail-statement{
     color: #080;
 }
 
+.act-tipsy .tipsy-passWord,
 .tipsy .tipsy-passWord{
     color: #0F0;
 }
 
+.act-tipsy .tipsy-pass-statement,
 .tipsy .tipsy-pass-statement{
     color: #800;
 }
 
+.act-tipsy .tipsy-failWord,
 .tipsy .tipsy-failWord{
     color: #F00;
 }
 
+.act-tipsy .tipsy-failstrikeout,
 .tipsy .tipsy-failstrikeout,
 .tipsy-failstrikeout .tipsy-passWord,
 .tipsy-failstrikeout .tipsy-failWord{
     color: #A00;
 }
 
+.act-tipsy .tipsy-passstrikeout,
 .tipsy .tipsy-passstrikeout,
 .tipsy-passstrikeout .tipsy-passWord,
 .tipsy-passstrikeout .tipsy-failWord{
     color: #0A0;
 }
 
+.act-tipsy .tipsy-condition-margin,
 .tipsy .tipsy-condition-margin{
     margin-bottom: 8px;
 }

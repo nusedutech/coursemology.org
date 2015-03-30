@@ -138,13 +138,13 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
 
     concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages submission, self, pass_edge_lock
     concept_edge_stages.each do |concept_edge_stage|
-      concept_edge_stage.add_one_right
+      concept_edge_stage.add_one_wrong
     end
 
     if !pass_edge_lock
       pass_concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages submission, self, pass_edge_lock
       pass_concept_edge_stages.each do |concept_edge_stage|
-        concept_edge_stage.add_one_right
+        concept_edge_stage.add_one_wrong
       end
     end
   end
@@ -163,6 +163,16 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
   #Check for current progress only criteria and lock if necessary
   #If no lock necessary, we check to unlock concept edge stages
   def check_to_lock submission, passing_edge_lock
+    result = check_to_lock_procedure submission, passing_edge_lock
+
+    if !result
+      check_to_unlock_procedure submission, passing_edge_lock
+    end
+
+    result
+  end
+
+  def check_to_lock_procedure submission, passing_edge_lock
     failing_criteria = self.concept.concept_option.concept_criteria
 
     if failing_criteria.count > 0
@@ -185,12 +195,12 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
 
     if result && !self.failed
       #Only set to fail and lock if there is children to unlock
-      if unlock_required_children
+      if unlock_required_children submission, passing_edge_lock
         self.failed = true
         self.disabled_topicconcept_id = self.concept.id
         self.save
       else
-        reset_statistics
+        reset_statistics submission, passing_edge_lock
       end
       #Once found failed stage, delete all descendants/dependent entries
       cascade_delete_failed_content submission, passing_edge_lock
@@ -200,11 +210,16 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
       self.save
     end
 
-    if !result
-      concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_edge_stages submission, self, passing_edge_lock
-      concept_edge_stages.each do |concept_edge_stage|
-        concept_edge_stage.check_to_unlock submission, passing_edge_lock
-      end
+    result
+  end
+
+  #Check to unlock concept edge stages connected to current concept stage
+  def check_to_unlock_procedure submission, passing_edge_lock
+    result = []
+
+    concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_edge_stages submission, self, passing_edge_lock
+    concept_edge_stages.each do |concept_edge_stage|
+      result = concept_edge_stage.check_to_unlock submission, passing_edge_lock
     end
 
     result
@@ -212,12 +227,12 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
 
   #Unlock required concept stages nodes when dependant concept fail
   #Return true if at least one node is unlocked
-  def unlock_required_children submission
+  def unlock_required_children submission, passing_edge_lock
     result = false
 
     required_edges = self.concept.concept_edge_required_concepts
-    required_edges.each do |edge|
-      if Assessment::GuidanceConceptEdgeOption.is_enabled? edge
+    required_edges.each do |required_edge|
+      if Assessment::GuidanceConceptEdgeOption.is_enabled? required_edge
         required_concept = required_edge.required_concept
         #At least one concept enabled set result to true 
         if Assessment::GuidanceConceptOption.is_enabled_with required_concept
@@ -240,10 +255,14 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
 
             #Create attempting edge stages after stage is created
             Assessment::GuidanceConceptEdgeStage.add_concept_edge_stages_from submission, passed_stage, concept.concept_edge_dependent_concepts
+          else
+            concept_stage.reset_statistics submission, passing_edge_lock
           end
         end
       end
     end
+
+    result
   end
 
   def cascade_delete_failed_content submission, passing_edge_lock
@@ -435,7 +454,7 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
           concept_edge_stage.save
       
           #In case no criteria, we check to unlock edge pass status
-          #Add bypass status to allow cascading to always allow
+          #Add bypass status to allow cascading to always follow
           concept_edge_stage.check_to_unlock submission, passing_edge_lock, true
         end
       end

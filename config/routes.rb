@@ -218,8 +218,10 @@ Coursemology::Application.routes.draw do
         post :set_concept_criteria, to: 'guidance_quizzes#set_concept_criteria'
 
         post :get_guidance_concept_data, to: 'guidance_quizzes#get_guidance_concept_data'
+        post :get_guidance_concept_data_no_stats, to: 'guidance_quizzes#get_guidance_concept_data_no_stats'
         post :get_guidance_concept_edge_data, to: 'guidance_quizzes#get_guidance_concept_edge_data'
-
+        post :get_guidance_concept_edges_data, to: 'guidance_quizzes#get_guidance_concept_edges_data'
+        
         get :get_topicconcept_data_with_criteria, to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
 
         post :get_topicconcept_data_history, to: 'guidance_quizzes#get_topicconcept_data_history'
@@ -306,6 +308,7 @@ Coursemology::Application.routes.draw do
         post 'get_topicconcept_notbest_concepts', :on => :collection
         post 'get_topicconcept_weights', :on => :collection
         post 'get_topicconcept_area', :on => :collection
+        get :get_progress_bar_info, :on => :collection
         get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'       
     end
     

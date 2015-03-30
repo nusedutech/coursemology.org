@@ -4,7 +4,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   
   before_filter :load_general_course_data, only: [:access_denied]
 
-  before_filter :load_guidance_quiz_singleton_with_submission, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_edge_data]
+  before_filter :load_guidance_quiz_singleton_with_submission, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_data_no_stats, :get_guidance_concept_edge_data, :get_guidance_concept_edges_data]
 
   before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_history]
 
@@ -118,7 +118,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         format.json { render json: result}
       end
     else
-      raise "Concept id is invalid"
+      access_denied "Concept id is invalid!", course_topicconcepts_path(@course)
     end
   end
 
@@ -254,6 +254,27 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end 
   end
 
+  #Action for student view on showing criteria
+  def get_guidance_concept_data_no_stats
+    @concept = @course.topicconcepts.concepts.where(id: params[:concept_id]).first
+    result = {}
+
+    if !@concept.nil?
+      concept_criteria = get_concept_criteria_student_progress_with @concept
+      if concept_criteria[:enabled]
+        result[:criteria] = concept_criteria[:criteria]
+      else
+        result[:criteria] = []
+      end
+
+      respond_to do |format|
+        format.json { render json: result}
+      end 
+    else
+      access_denied "Concept id is invalid!", course_topicconcepts_path(@course)
+    end
+  end
+
   #Action for student view on topicconcept map
   def get_guidance_concept_edge_data
     @concept_edge = @course.concept_edges.where(required_id: params[:required_concept_id],
@@ -274,6 +295,24 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     respond_to do |format|
       format.json { render json: result}
     end 
+  end
+
+  #Action for student view on showing edges criteria from one concept
+  def get_guidance_concept_edges_data
+    concept_edges = @course.concept_edges.where(required_id: params[:concept_id] )
+
+      result = []
+
+    concept_edges.each do |concept_edge|
+      concept_edge_criteria = get_concept_edge_relation_student_progress_with concept_edge
+      if concept_edge_criteria[:enabled]
+        result << { name: concept_edge.dependent_concept.name, criteria: concept_edge_criteria[:criteria]}
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: result}
+    end
   end
 
   #Everything beyond here are shortcut methods to make people's lives easier
@@ -399,7 +438,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         when "correct_threshold"
           singleSummary[:name] = "correct_threshold"
           singleSummary[:pass] = criterion.specific.evaluate current_correct
-          singleSummary[:current] = current_correct 
+          singleSummary[:current] = current_correct
           singleSummary[:condition] = criterion.specific.threshold
       end
       result << singleSummary
@@ -452,25 +491,6 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       result[:criteria] = default_concept_edge_criteria_values
     end
    
-    result
-  end
-
-  #Get failing criteria for a concept
-  def get_concept_criteria_with concept
-    result = {
-               concept_id: concept.id
-             }
-    concept_option = concept.concept_option
-    if !concept_option.nil?
-      result[:enabled] = concept_option.enabled
-      result[:is_entry] = concept_option.is_entry
-      result[:criteria] = compress_concept_criteria_from concept_option
-    #Default Values for display purposes
-    else
-      result[:enabled] = false
-      result[:is_entry] = false
-      result[:criteria] = default_concept_criteria_values
-    end
     result
   end
 
@@ -574,10 +594,6 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     result
   end
 
-  def get_quiz_feedback
-
-  end
-
   def integer_check unit
     unit =~ /^(-|\+)?(\d+)$/
   end
@@ -609,7 +625,16 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end 
   end
 
-  def access_denied
-
+  def access_denied message, redirectURL
+    respond_to do |format|
+      format.json { 
+        render json: { 
+          access_denied: { 
+            message: message, 
+            redirectURL: redirectURL
+          } 
+        } 
+      }
+    end
   end
 end

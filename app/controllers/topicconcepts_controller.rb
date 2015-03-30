@@ -53,6 +53,15 @@ class TopicconceptsController < ApplicationController
     set_latest_concept_stage @concept_stage
     @question = @concept_stage.get_top_question @course
 
+    @tags = @course.tags
+    if !@concept_stage.tag_id.nil?
+      #After tag is deleted, but stage is not updated,
+      #we need to reassign questions again
+      if @concept_stage.tag.nil?
+        @concept_stage.set_uncompleted_questions_string @course
+      end
+    end
+
     if @question.nil?
       @question = @concept_stage.reset_and_get_top_question @course
     end
@@ -61,6 +70,8 @@ class TopicconceptsController < ApplicationController
       redirect_to course_topicconcepts_path(@course), alert: " Current concept has run out of questions!"
       return
     end
+
+    @current_tag =  @concept_stage.tag
 
     @title_concept = @concept
     respond_to do |format|

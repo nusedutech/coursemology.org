@@ -1,10 +1,12 @@
 class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :assessment, through: :course, class: "Assessment"
-  load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission", id_param: :id, only: [:edit, :submit]
+  load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission", id_param: :id, only: [:edit, :submit, :set_tag_to_stage]
 
   before_filter :authorize_and_load_guidance_quiz, only: [:attempt, :edit, :submit]
   before_filter :no_update_after_submission, only: [:edit, :submit]
+  before_filter :authorize_and_load_guidance_quiz_and_concept_and_conceptstage, only: [:set_tag_to_stage]
+
 
   #Create new guidance quiz entry
   def attempt
@@ -98,6 +100,19 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     @submission.set_submitted
 
     redirect_to course_topicconcepts_path(@course)
+  end
+
+  def set_tag_to_stage
+    if params.has_key?(:tag_id) and params[:tag_id] != @concept_stage.tag_id
+      if params[:tag_id] == "nil"
+        @concept_stage.set_tag nil, @course
+      else
+        param_tag = @course.tags.find_by_id(params[:tag_id])
+        @concept_stage.set_tag param_tag, @course
+      end
+    end
+
+    redirect_to diagnostic_exploration_course_topicconcept_path(@course, @concept)
   end
 
   private
@@ -199,6 +214,32 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   def no_update_after_submission
     unless @submission.attempting?
       access_denied "Submission is already submitted.", course_topicconcepts_path(@course)
+    end
+  end
+
+  def authorize_and_load_guidance_quiz_and_concept_and_conceptstage
+    #No start time for guidance quiz, only can start after published
+    unless Assessment::GuidanceQuiz.is_enabled? @course
+      redirect_to course_topicconcepts_path(@course), alert: " Not opened yet!"
+      return
+    end
+
+    @guidance_quiz = @course.guidance_quizzes.first
+    unless params.has_key?(:concept_id)
+      redirect_to course_topicconcepts_path(@course), alert: " Concept parameter not found!"
+      return
+    end
+
+    @concept = @course.topicconcepts.concepts.where(id: params[:concept_id]).first
+    if @concept.nil?
+      redirect_to course_topicconcepts_path(@course), alert: " Concept not found!"
+      return
+    end
+
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    unless @concept_stage
+      redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
+      return
     end
   end
 

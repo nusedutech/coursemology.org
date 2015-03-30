@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150225134415) do
+ActiveRecord::Schema.define(:version => 20150330163809) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -314,6 +314,7 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.datetime "created_at",                                  :null => false
     t.datetime "updated_at",                                  :null => false
     t.boolean  "failed",                   :default => false
+    t.integer  "tag_id"
   end
 
   create_table "assessment_guidance_quiz_excluded_questions", :force => true do |t|
@@ -1277,6 +1278,7 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.datetime "deleted_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "rating",         :default => 1
   end
 
   add_index "tags", ["name"], :name => "index_tags_on_name"

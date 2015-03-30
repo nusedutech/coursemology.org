@@ -1,6 +1,8 @@
 <input type="hidden" id="concept-id-val" value="<%= @concept.id %>"/>
 <input type="hidden" id="progress-bar-url" value="<%= get_progress_bar_info_course_topicconcepts_path(@course) %>"/>
 
+<%= debug @concept_stage %>
+
 <div class="topicconcept-spunned">
     <div class="topicconcept-spun-12">
 		<div class="topicconcept-spun-grid-normaliser">
@@ -31,6 +33,25 @@
 		</div>
 	</div>
 	<div class="topicconcept-spun-4">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+		  		<div id="question-focus-area" class="inner-info-box-area">
+			  		<span class="info-box-header">Question Type</span>
+			  	</div>
+			  	<div class="inner-info-box-footer">
+		  			<form action="<%= set_tag_to_stage_course_assessment_guidance_quiz_submission_path(@course, @guidance_quiz.assessment, @submission) %>" method="POST" >
+		  				<input type="hidden" name="concept_id" value="<%= @concept.id %>"/>
+				      	<select name="tag_id" onchange="this.form.submit();">
+				      		<option value="nil" <%= "selected" if @current_tag.nil? %>> All</option>
+				        	<%= @tags.each do |tag| %>
+				            	<option value="<%= tag.id %>" <%= "selected" if @current_tag == tag %>><%= tag.name %></option>
+				        	<% end %>
+				      	</select>
+			      	</form>
+		  		</div>			  	
+			</div>
+		</div>
+
 		<div class="topicconcept-spun-grid-normaliser">
 		  	<div class="info-box">
 			  	<span class="info-box-header">Failing Criteria</span>

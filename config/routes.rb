@@ -149,6 +149,7 @@ Coursemology::Application.routes.draw do
         member do
           post :edit, to: 'guidance_quiz_submissions#edit'
           get  :submit, to: 'guidance_quiz_submissions#submit'
+          post :set_tag_to_stage, to: 'guidance_quiz_submissions#set_tag_to_stage'
         end
       end
 

@@ -10,22 +10,34 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
   belongs_to :submission, class_name: Assessment::Submission, foreign_key: "assessment_submission_id"
   
   has_many :concept_edge_stages, class_name: Assessment::GuidanceConceptEdgeStage, dependent: :destroy, foreign_key: "assessment_guidance_concept_stage_id" 
+  belongs_to :tag, class_name: Tag, foreign_key: "tag_id"
  
   scope :failed, -> { where(failed: true) }
   scope :passed, -> { where(failed: false) }
-  
+
+  def set_tag tag, course
+    self.tag = tag
+    self.save
+
+    set_uncompleted_questions_string course
+  end
+
   def set_uncompleted_questions_string course
     taggable_tags = self.concept.taggable_tags.question_type
     suitable_questions = []
     taggable_tags.each do |tagtag|
       #Only MCQ questions now
-      question = course.questions.mcq_question.find_by_id(tagtag.taggable_id)
+      if self.tag.nil?
+        self.tag_id = nil
+        question = course.questions.mcq_question.find_by_id(tagtag.taggable_id)
+      else
+        question = self.tag.mcq_questions.find_by_id(tagtag.taggable_id)
+      end
       if question and !(Assessment::GuidanceQuizExcludedQuestion.is_excluded?(question))
         suitable_questions << question.id
       end
     end
 
-    suitable_questions
     if suitable_questions.count > 0
       result = suitable_questions.shuffle.join(",")
     else 
@@ -49,6 +61,7 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
   end
 
   def reset_and_get_top_question course
+    self.tag_id = nil
     self.set_uncompleted_questions_string course
 
     if self.uncompleted_questions.nil?

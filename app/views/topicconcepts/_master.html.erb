@@ -1,8 +1,6 @@
 <input type="hidden" id="concept-id-val" value="<%= @concept.id %>"/>
 <input type="hidden" id="progress-bar-url" value="<%= get_progress_bar_info_course_topicconcepts_path(@course) %>"/>
 
-<%= debug @concept_stage %>
-
 <div class="topicconcept-spunned">
     <div class="topicconcept-spun-12">
 		<div class="topicconcept-spun-grid-normaliser">
@@ -44,7 +42,7 @@
 				      	<select name="tag_id" onchange="this.form.submit();">
 				      		<option value="nil" <%= "selected" if @current_tag.nil? %>> All</option>
 				        	<%= @tags.each do |tag| %>
-				            	<option value="<%= tag.id %>" <%= "selected" if @current_tag == tag %>><%= tag.name %></option>
+				            	<option value="<%= tag.id %>" <%= "selected" if @current_tag == tag %>><%= tag.name %> ( Rating: <%= tag.rating %> )</option>
 				        	<% end %>
 				      	</select>
 			      	</form>
@@ -52,6 +50,15 @@
 			</div>
 		</div>
 
+		
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+			  	<span class="info-box-header">Passing Criteria</span>
+			  	<input type="hidden" id="retrieve-passing-criteria-url" value="<%= get_guidance_concept_edges_data_course_assessment_guidance_quizzes_path(@course) %>"/>
+		  		<div id="passing-criteria-focus-area" class="act-tipsy">
+		  		</div>
+			</div>
+		</div>
 		<div class="topicconcept-spun-grid-normaliser">
 		  	<div class="info-box">
 			  	<span class="info-box-header">Failing Criteria</span>
@@ -59,13 +66,6 @@
 		  		<div id="failing-criteria-focus-area" class="act-tipsy">
 
 		  		</div>			  	
-			</div>
-		</div>
-		<div class="topicconcept-spun-grid-normaliser">
-		  	<div class="info-box">
-			  	<span class="info-box-header">Passing Criteria</span>
-			  	<input type="hidden" id="retrieve-passing-criteria-url" value="<%= get_guidance_concept_edges_data_course_assessment_guidance_quizzes_path(@course) %>"/>
-		  		<div id="passing-criteria-focus-area" class="act-tipsy">
 			</div>
 		</div>
 	</div>
@@ -196,6 +196,17 @@
 	        if (criteria[i].name == "wrong_threshold") {
 	          	statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
 	        }
+	        else if (criteria[i].name == "wrong_rating_threshold"){
+          		var innerText = "";
+          		if (criteria[i].condition2) {
+            		var innerText = "right and ";
+          		}
+
+          		statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">negative '+criteria[i].condition+'</em> rating from '+ innerText +'wrong answers (<em class="tipsy-passWord"> '+(criteria[i].current * -1)+' current </em>)';
+        	}
+        	else if (criteria[i].name == "wrong_percent_threshold"){
+          		statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em>% '+'wrong answers (<em class="tipsy-passWord"> '+criteria[i].current+'% current </em>)';
+        	}
 
 	        conditionDiv.appendChild(statementP);
 	        result += conditionDiv.outerHTML;
@@ -229,7 +240,18 @@
 
 	      	if (criteria[i].name == "correct_threshold") {
 	        	statementP.innerHTML += ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em> correct ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
-	      	}
+	      	}   	
+      		else if (criteria[i].name == "correct_rating_threshold"){
+        		var innerText = "";
+        		if (criteria[i].condition2) {
+          			var innerText = "and wrong ";
+        		}
+
+        		statementP.innerHTML += ' Getting  <em class="tipsy-failWord">'+criteria[i].condition+'</em> rating from right '+ innerText +'answers (<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+      		}
+      		else if (criteria[i].name == "correct_percent_threshold"){
+        		statementP.innerHTML += ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em>% '+'right answers (<em class="tipsy-passWord"> '+criteria[i].current+'% current </em>)';
+      		}
 
 	      	conditionDiv.appendChild(statementP);
 	      	result += conditionDiv.outerHTML;

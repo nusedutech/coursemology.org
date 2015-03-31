@@ -128,36 +128,38 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     self.save
   end
 
-  def add_one_right submission, pass_edge_lock
+  def add_one_right submission, pass_edge_lock, rating
     self.total_right += 1
+    self.rating_right += rating
     self.save
 
     concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages submission, self, pass_edge_lock
     concept_edge_stages.each do |concept_edge_stage|
-      concept_edge_stage.add_one_right
+      concept_edge_stage.add_one_right rating
     end
 
     if !pass_edge_lock
       pass_concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages submission, self, pass_edge_lock
       pass_concept_edge_stages.each do |concept_edge_stage|
-        concept_edge_stage.add_one_right
+        concept_edge_stage.add_one_right rating
       end
     end
   end
 
-  def add_one_wrong submission, pass_edge_lock
+  def add_one_wrong submission, pass_edge_lock, rating
     self.total_wrong += 1
+    self.rating_wrong += rating
     self.save
 
     concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages submission, self, pass_edge_lock
     concept_edge_stages.each do |concept_edge_stage|
-      concept_edge_stage.add_one_wrong
+      concept_edge_stage.add_one_wrong rating
     end
 
     if !pass_edge_lock
       pass_concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages submission, self, pass_edge_lock
       pass_concept_edge_stages.each do |concept_edge_stage|
-        concept_edge_stage.add_one_wrong
+        concept_edge_stage.add_one_wrong rating
       end
     end
   end
@@ -195,6 +197,10 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
         case (criterion.specific.is_type)
           when "wrong_threshold"
             pass_intermediate = criterion.specific.evaluate self.total_wrong
+          when "wrong_rating_threshold"
+            pass_intermediate = criterion.specific.evaluate self.rating_right, self.rating_wrong
+          when "wrong_percentage_threshold"
+            pass_intermediate = criterion.specific.evaluate self.total_right, self.total_wrong
         end
 
         if pass_intermediate
@@ -232,7 +238,7 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
 
     concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_edge_stages submission, self, passing_edge_lock
     concept_edge_stages.each do |concept_edge_stage|
-      result = concept_edge_stage.check_to_unlock submission, passing_edge_lock
+      result |= concept_edge_stage.check_to_unlock submission, passing_edge_lock
     end
 
     result

@@ -59,7 +59,7 @@
 	      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-map" href="#collapse-map"><i class="icon-minus"></i></a>
         		</div>
       		</div>
-      		<div id="collapse-map" class="accordion-body collapse in">
+      		<div id="collapse-map" class="accordion-body collapse">
         		<div class="accordion-inner">
           			<table style="width: 99%">
 						<thead>
@@ -88,24 +88,48 @@
    		<div class="accordion-group">
       		<div class="accordion-heading">
         		<div class="accordion-wordheading">
-          			<h4>Most frequently wrong questions</h4>
+          			<h4>Most frequently wrong/correct questions</h4>
         		</div>
         		<div class="accordion-right">
 	      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-wrong-questions" href="#collapse-wrong-questions"><i class="icon-minus"></i></a>
         		</div>
       		</div>
-      		<div id="collapse-wrong-questions" class="accordion-body collapse in">
+      		<div id="collapse-wrong-questions" class="accordion-body collapse">
         		<div class="accordion-inner">
         			<form action="<%= request.original_url %>" method="GET">
-	        			<table class="table-basic">
-					      	<tr>
-						        <td>Top Results: </td>
-						        <td>
-						          	<input name="freq_wrong_count" type="number" value="<%= @freq_wrong_count %>" min="0"/>
-						        </td>
-					        	<td><input class="btn" type="submit" value="Go" /></td>
-					      	</tr>
-					    </table>
+	        			<div class="feedback-form-div">
+        					Top Results: <input name="freq_wrong_count" type="number" value="<%= @freq_wrong_count %>" min="0"/>
+        					&nbsp;&nbsp;&nbsp; 
+        				</div>
+        				<div class="feedback-form-div">
+        					Tag: 
+        					<select class="input-medium" name="tag_id">
+	        					<option name="tag_id" value="nil" <%= "selected" if @tag.nil? %> >All</option>
+	        					<% @tags.each do |tag| %>
+	        						<option value="<%= tag.id %>" <%= "selected" if @tag == tag %>><%= tag.name %></option>
+	        					<% end %>
+	        				</select>
+        					&nbsp;&nbsp;&nbsp; 
+        				</div>
+        				<div class="feedback-form-div">
+        					Concept:
+        					<select class="input-medium" name="freq_concept_id">
+	        					<option name="chosen_concept_id" value="nil" <%= "selected" if @chosen_concept.nil? %> >All</option>
+	        					<% @concepts.each do |concept| %>
+	        						<option value="<%= concept.id %>" <%= "selected" if @chosen_concept == concept %>><%= concept.name %></option>
+	        					<% end %>
+	        				</select>
+        					&nbsp;&nbsp;&nbsp; 
+        				</div>
+        				<div class="feedback-form-div">
+        					Correct?:
+        					<input type="checkbox" name="correct" value="true" <%= "checked" if @choose_correct %>/>
+        					&nbsp;&nbsp;&nbsp; 
+        				</div>
+        				<div class="feedback-form-div">
+        					<input class="btn" type="submit" value="Go" />
+        					&nbsp;&nbsp;&nbsp; 
+        				</div>
 					</form>
 
           			<% @summary[:freq_wrong_questions].each_with_index do |q, i| %>
@@ -115,7 +139,15 @@
 				            	<strong><%= i + 1 %>. </strong>
 				            	<%= style_format qn.description %>
 				            	
-				            	- Answered wrongly <strong style="color: #FF0000;"><%= q.count %></strong> times
+				            	- Answered <%= @choose_correct ? "correctly" : "wrongly" %> <strong style="color: #FF0000;"><%= q.count %></strong> times
+				          	</div>
+				          	<div style="margin: 10px;">
+				            	<% qn.topicconcepts.concepts.each do |concept| %>
+				                    <span class="label label-success"><%= concept.name %></span>
+				                <% end %>
+				                <% qn.tags.each do |tag| %>
+				                    <span class="label label-info"><%= tag.name %></span>
+				                <% end %>
 				          	</div>
 					        <% if qn.specific.class == Assessment::McqQuestion %>
 					          	<table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
@@ -151,7 +183,7 @@
 	      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-student-attempted" href="#collapse-student-attempted"><i class="icon-minus"></i></a>
         		</div>
       		</div>
-      		<div id="collapse-student-attempted" class="accordion-body collapse in">
+      		<div id="collapse-student-attempted" class="accordion-body collapse">
         		<div class="accordion-inner">
         			<div id="student-attempted-pie" style="text-align: center;"></div>
         		</div>
@@ -169,18 +201,18 @@
 	      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-overall-trend" href="#collapse-overall-trend"><i class="icon-minus"></i></a>
         		</div>
       		</div>
-      		<div id="collapse-overall-trend" class="accordion-body collapse in">
+      		<div id="collapse-overall-trend" class="accordion-body collapse">
         		<div class="accordion-inner">
         			<div>
         				<h4>Accumulative</h4>
         				<form class="form-inline" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
-	        				<div style="display:inline-block;">
+	        				<div class="feedback-form-div">
 	        					From: <input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/>&nbsp;&nbsp;&nbsp; 
 	        				</div>
-	        				<div style="display:inline-block;">
+	        				<div class="feedback-form-div">
 	        					To: <input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
 	        				</div>
-	        				<div style="display:inline-block;">
+	        				<div class="feedback-form-div">
 	        					Step:
 		        				<select class="input-small" name="time_step">
 		        					<option value="day">Day</option>
@@ -189,11 +221,29 @@
 		        				</select>
 	        				</div>
         					&nbsp;&nbsp;&nbsp;
-	        				<div style="display:inline-block;">
-	        					Correct?:
-	        					<input type="checkbox" name="correct" value="true" checked/>
+        					<div class="feedback-form-div">
+	        					Tag type:
+		        				<select class="input-small" name="tag_id">
+		        					<option name="tag_id" value="nil" selected>All</option>
+		        					<% @tags.each do |tag| %>
+		        						<option value="<%= tag.id %>"><%= tag.name %></option>
+		        					<% end %>
+		        				</select>
 	        				</div>
-        					&nbsp;&nbsp;&nbsp;<input class="btn" type="submit" value="Submit" />
+        					&nbsp;&nbsp;&nbsp;
+	        				<div class="feedback-form-div">
+	        					Answer Type:
+	        					<select class="input-small" name="correct">
+		        					<option value="correct" selected>Correct</option>
+		        					<option value="wrong">Wrong</option>
+		        					<option value="both">Both</option>
+		        					<option value="absolute">Absolute</option>
+		        				</select>
+	        				</div>
+        					&nbsp;&nbsp;&nbsp;
+        					<div class="feedback-form-div">
+        						<input class="btn" type="submit" value="Submit" />
+        					</div>
         					<input type="hidden" name="accumulative" value="true" />
 	        			</form>
         				<div id="overall-trend-acc" style="height: 400px; margin-top: 10px; margin-bottom: 10px;"></div>
@@ -202,13 +252,13 @@
         			<div>
         				<h4>Non-accumulative</h4>
         				<form class="form-inline" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
-	        				<div style="display:inline-block;">
+	        				<div class="feedback-form-div">
 	        					From: <input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/>&nbsp;&nbsp;&nbsp; 
 	        				</div>
-	        				<div style="display:inline-block;">
+	        				<div class="feedback-form-div">
 	        					To: <input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
 	        				</div>
-	        				<div style="display:inline-block;">
+	        				<div class="feedback-form-div">
 	        					Step:
 		        				<select class="input-small" name="time_step">
 		        					<option value="day">Day</option>
@@ -217,15 +267,36 @@
 		        				</select>
 	        				</div>
         					&nbsp;&nbsp;&nbsp;
-	        				<div style="display:inline-block;">
-	        					Correct?:
-	        					<input type="checkbox" name="correct" value="true" checked/>
+        					<div class="feedback-form-div">
+	        					Tag type:
+		        				<select class="input-small" name="tag_id">
+		        					<option name="tag_id" value="nil" selected>All</option>
+		        					<% @tags.each do |tag| %>
+		        						<option value="<%= tag.id %>"><%= tag.name %></option>
+		        					<% end %>
+		        				</select>
 	        				</div>
-        					&nbsp;&nbsp;&nbsp;<input class="btn" type="submit" value="Submit" />
+        					&nbsp;&nbsp;&nbsp;
+	        				<div class="feedback-form-div">
+	        					Answer Type:
+	        					<select class="input-small" name="correct">
+		        					<option value="correct" selected>Correct</option>
+		        					<option value="wrong">Wrong</option>
+		        					<option value="both">Both</option>
+		        					<option value="absolute">Absolute</option>
+		        				</select>
+	        				</div>
+        					&nbsp;&nbsp;&nbsp;
+	        				<div class="feedback-form-div">
+	        					<input class="btn" type="submit" value="Submit" />
+	        				</div>
         					<input type="hidden" name="accumulative" value="false" />
 	        			</form>
         				<div id="overall-trend-nonacc" style="height: 400px; margin-top: 10px; margin-bottom: 10px;"></div>
         			</div>
+
+
+
         		</div>
       		</div>
     	</div>

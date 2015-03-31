@@ -71,9 +71,9 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     response = submit_mcq(question)
     concept_stage.record_answer(response[:answer_id])
     if (response[:is_correct])
-      concept_stage.add_one_right @submission, @guidance_quiz.passing_edge_lock
+      concept_stage.add_one_right @submission, @guidance_quiz.passing_edge_lock, question.totalRating
     else
-      concept_stage.add_one_wrong @submission, @guidance_quiz.passing_edge_lock 
+      concept_stage.add_one_wrong @submission, @guidance_quiz.passing_edge_lock, question.totalRating 
     end
 
     #Launch second check to lock when evaluated fail status

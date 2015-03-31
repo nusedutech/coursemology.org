@@ -1,35 +1,53 @@
 <h3>Enable Guidance Quiz (Training):</h3>
-<p>Only enable if you want the students to access the training. The excluded questions can be set <a href="<%= exclude_questions_course_assessment_guidance_quiz_excluded_questions_path(@course) %>">here</a>.</p>
+<p>Only enable if you want the students to access the training. The excluded questions can be set 
+    <a href="<%= exclude_questions_course_assessment_guidance_quiz_excluded_questions_path(@course) %>">here</a>.
+</p>
 <div class="info-block checkbox-text">
-  <div class="normalized-topicconcept">
-    <input type="checkbox"
+    <div class="normalized-topicconcept">
+        <input type="checkbox"
            class="normalized-topicconcept"
            name="guidance_quiz_setting_enable"
            <%= "checked" if @enable %>> Enabled?
-    <input type="hidden"
+        <input type="hidden"
            value="<%= set_enabled_course_assessment_guidance_quizzes_path(@course) %>">
-  </div class="normalized-topicconcept">
+    </div class="normalized-topicconcept">
 </div>
 
 <h3>Guidance Quiz (Training) Settings:</h3>
 <p>For various settings to customise your student's exploration process.</p>
 <div class="info-block checkbox-text">
-  <div class="normalized-topicconcept">
-    <input type="checkbox"
+    <div class="normalized-topicconcept">
+        <input type="checkbox"
            class="normalized-topicconcept"
            name="guidance_quiz_setting_pal"
            <%= "checked" if @passing_edge_lock %>> Enable locking on passed edges criteria <em>(students may not have their edge status changed to fail once they have passed it)</em>
-    <input type="hidden"
+        <input type="hidden"
            value="<%= set_passing_edge_lock_course_assessment_guidance_quizzes_path(@course) %>">
-  </div>
-  <div class="normalized-topicconcept">
-    <input type="checkbox"
+    </div>
+    <div class="normalized-topicconcept">
+        <input type="checkbox"
            class="normalized-topicconcept"
            name="guidance_quiz_setting_nel"
            <%= "checked" if @neighbour_entry_lock %>> Enable locking on all entry criterias once one criteria is chosen <em>(to enforce linear progression)</em>
-    <input type="hidden"
+        <input type="hidden"
            value="<%= set_neighbour_entry_lock_course_assessment_guidance_quizzes_path(@course) %>">
-  </div>
+    </div>
 </div>
 
+<h3>Concept Settings:</h3>
+<p>Settings for concept in bulk.</p>
+<div>
+    <textarea id="textarea" style="padding-bottom:11px;" rows="1"></textarea>
+</div>
 
+<script>
+
+    $(document).ready(function(){
+        $('#textarea').textext(
+        {
+            plugins : 'tags prompt focus autocomplete ajax arrow',
+            tagsItems : [ 'Basic', 'JavaScript', 'PHP', 'Scala', 'JavaScript', 'PHP', 'Scala', 'JavaScript', 'PHP', 'Scala', 'JavaScript', 'PHP', 'Scala', 'JavaScript', 'PHP', 'Scala', 'JavaScript', 'PHP', 'Scala', 'JavaScript', 'PHP', 'Scala' ],
+            prompt : 'Add one...'
+        });
+    });
+</script>

@@ -19,6 +19,13 @@ class Tag < ActiveRecord::Base
            through: :questions,
            source: :as_question, source_type: "Assessment::McqQuestion"
  
+  has_many :answers, class_name: "Assessment::Answer",
+           through: :questions
+
+  has_many  :mcq_answers, class_name: "Assessment::McqAnswer",
+            through: :answers,
+            source: :as_answer, source_type: "Assessment::McqAnswer"
+
   has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy, class_name: "Assessment::ForwardPolicyLevel"
   
 	has_many :taggings, dependent: :destroy, class_name: 'TaggableTag'

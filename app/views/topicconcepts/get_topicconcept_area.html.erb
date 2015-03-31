@@ -1,12 +1,12 @@
 <div style="margin-left: 20px;">
 	<form class="form-inline" action="<%= request.original_url %>" method="POST">
-		<div style="display:inline-block;">
+		<div class="feedback-form-div">
 			From: <input type="date" name="start_period" class="" value="<%= start_period %>"/>&nbsp;&nbsp;&nbsp; 
 		</div>
-		<div style="display:inline-block;">
+		<div class="feedback-form-div">
 			To: <input type="date" name="end_period" value="<%= end_period %>"/>&nbsp;&nbsp;&nbsp;
 		</div>
-		<div style="display:inline-block;">
+		<div class="feedback-form-div">
 			Step:
 			<select class="input-small" name="time_step">
 				<option value="day" <%= "selected" if time_step == "day" %> >Day</option>
@@ -15,15 +15,33 @@
 			</select>
 		</div>
 		&nbsp;&nbsp;&nbsp;
-		<div style="display:inline-block;">
-			Correct?:
-			<input type="checkbox" name="correct" value="true" <%= "checked" if correct %> />
+		<div class="feedback-form-div">	
+			Answer Type:
+			<select class="input-small" name="correct">
+				<option value="correct" <%= "selected" if correct=="correct" %>>Correct</option>
+				<option value="wrong" <%= "selected" if correct=="wrong" %>>Wrong</option>
+				<option value="both" <%= "selected" if correct=="both" %>>Both</option>
+				<option value="absolute" <%= "selected" if correct=="absolute" %>>Absolute</option>
+			</select>
 		</div>
-		<div style="display:inline-block;">
+		<div class="feedback-form-div">
 			Accumulative?:
 			<input type="checkbox" name="accumulative" value="true" <%= "checked" if accumulative %> />
 		</div>
-		&nbsp;&nbsp;&nbsp;<input class="btn" type="submit" value="Submit" />
+		&nbsp;&nbsp;&nbsp;
+		<div class="feedback-form-div">
+			Tag type:
+			<select class="input-small" name="tag_id">
+				<option name="tag_id" value="nil" <%= "selected" if current_tag.nil? %>>All</option>
+				<% tags.each do |tag| %>
+					<option value="<%= tag.id %>" <%= "selected" if current_tag == tag %>><%= tag.name %></option>
+				<% end %>
+			</select>
+		</div>
+		&nbsp;&nbsp;&nbsp;
+		<div class="feedback-form-div">
+			<input class="btn" type="submit" value="Submit" />
+		</div>
 	</form>	
 </div>
 

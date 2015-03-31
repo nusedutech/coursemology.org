@@ -30,7 +30,7 @@ class TopicconceptsController < ApplicationController
   def ivleapi   
     
   end
-  
+
   def get_quiz_feedback
     @summary = {}
 
@@ -44,9 +44,71 @@ class TopicconceptsController < ApplicationController
     else
       @freq_wrong_count = 5
     end
-    @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers.select("assessment_answers.question_id as qid, COUNT(*) as count").where("assessment_answers.correct = '0'").group("qid").order("count DESC").limit(@freq_wrong_count)
 
-    @summary
+    if params.has_key?("correct") and params[:correct] == "true"
+      @choose_correct = true
+    else
+      @choose_correct = false
+    end
+
+    if params.has_key?("tag_id") and params[:tag_id] != "nil"
+      @tag = @course.tags.where(id: params[:tag_id]).first
+    else
+      @tag = nil
+    end
+    if params.has_key?("freq_concept_id") and params[:freq_concept_id] != "nil"
+      @chosen_concept = @course.topicconcepts
+                               .concepts
+                               .where(id: params[:freq_concept_id])
+                               .first
+    else
+      @chosen_concept = nil
+    end
+
+    @concepts = @course.topicconcepts.concepts
+    if @chosen_concept and @tag
+      tag_mcq_answers = @tag.mcq_answers
+      combined_mcq_answers = @chosen_concept.mcq_answers
+                                            .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
+                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                                             @choose_correct,
+                                                             combined_mcq_answers)
+                                                      .group("qid")
+                                                      .order("count DESC")
+                                                      .limit(@freq_wrong_count)
+    elsif @chosen_concept
+      concept_mcq_answers = @chosen_concept.mcq_answers
+      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
+                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                                             @choose_correct,
+                                                             concept_mcq_answers)
+                                                      .group("qid")
+                                                      .order("count DESC")
+                                                      .limit(@freq_wrong_count)
+    elsif @tag
+      tag_mcq_answers = @tag.mcq_answers
+      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
+                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                                             @choose_correct,
+                                                             tag_mcq_answers)
+                                                      .group("qid")
+                                                      .order("count DESC")
+                                                      .limit(@freq_wrong_count)
+    else
+      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
+                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .where("assessment_answers.correct = ?",@choose_correct)
+                                                      .group("qid")
+                                                      .order("count DESC")
+                                                      .limit(@freq_wrong_count)
+    end
+
+    @tags = @course.tags
+    @concepts = @course.topicconcepts.concepts
   end
 
   def diagnostic_exploration
@@ -132,6 +194,10 @@ class TopicconceptsController < ApplicationController
     @achieve_percentage = @concept_stages.size * 100 / enabled_concepts.size; 
     @achieve_correct_amount = @chosen_submission.mcq_answers.where(assessment_answers: {correct: true}).size
     @achieve_wrong_amount = @chosen_submission.mcq_answers.where(assessment_answers: {correct: false}).size 
+    @achieve_rating = 0
+    @concept_stages.each do |stage|
+      @achieve_rating += stage.rating_right
+    end
 
     respond_to do |format|
       format.html {
@@ -630,12 +696,17 @@ class TopicconceptsController < ApplicationController
     end
 
     concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
-    concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
-
+    #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
+    rehashed_stages = concept_stages.map{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
+    #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
+    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, wrong: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_wrong, total: (cs.total_right + cs.total_wrong) == 0 ? 2 : (cs.total_right + cs.total_wrong)} }
 
     respond_to do |format|
-      format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * 100 / (cs.total_right + cs.total_wrong) }}}
+      format.json { render json: rehashed_stages.map{|cs| {label: cs[:concept].name, value: cs[:wrong] * 100 / cs[:total] }}}
     end
+    #respond_to do |format|
+    #  format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * 100 / (cs.total_right + cs.total_wrong) }}}
+    #end
   end
 
   def get_topicconcept_weights
@@ -672,31 +743,42 @@ class TopicconceptsController < ApplicationController
     enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
                                    .concepts
                                    .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
-
+    #Get accumulative boolean parameter
     if params.has_key?("accumulative")
       accumulative = params[:accumulative].to_s == "true"
     else
       accumulative = false
     end
 
+    #Get correct/wrong boolean parameter
     if params.has_key?("correct")
-      get_correct = params[:correct].to_s == "true" ? 1 : 0
+      correct_type = AREA_GRAPH_CORRECT_TYPE[params[:correct]]
     else
-      get_correct = 0
+      correct_type = "nil"
     end
 
+    #Get start period date parameter
     if params.has_key?("start_period")
       start_date = Time.parse(params[:start_period])
     else
       start_date = Time.now - 1.months
     end
 
+    #Get end period date parameter
     if params.has_key?("end_period")
       end_date = Time.parse(params[:end_period])
     else
       end_date = Time.now
     end
 
+    #Get tag type
+    if params.has_key?("tag_id") and params[:"tag_id"] != "nil"
+      tag = @course.tags.where(id: params[:"tag_id"]).first
+    else
+      tag = nil
+    end
+
+    #Get time step type
     if params.has_key?("time_step")
       case params[:time_step]
       when "day"
@@ -728,15 +810,23 @@ class TopicconceptsController < ApplicationController
       if !accumulative
         query_start_date_string = date.strftime("%Y-%m-%d")
       end
-      enabled_concepts.each do |concept|
-        solo_data[concept.id.to_s] = concept.mcq_answers
-                                            .where("assessment_answers.correct = '?' AND assessment_answers.submission_id IN (?) AND " + query_string , 
-                                                   get_correct,
-                                                   @guidance_quiz.submissions,
-                                                   query_end_date_string,
-                                                   query_start_date_string).count
-        solo_data[time_key] = query_end_date_string
 
+      if tag 
+        tag_questions = tag.questions
+        enabled_concepts.each do |concept|
+          questions = concept.questions.where("assessment_questions.id in (?)", tag_questions)
+          answer_count = 0
+          questions.each do |question|
+            answer_count += get_answer_count_mcq_answers_with_mcqunit question, query_string, correct_type, @guidance_quiz.submissions, query_start_date_string, query_end_date_string
+          end
+          solo_data[concept.id.to_s] = answer_count
+          solo_data[time_key] = query_end_date_string
+        end
+      else
+        enabled_concepts.each do |concept|
+          solo_data[concept.id.to_s] = get_answer_count_mcq_answers_with_mcqunit concept, query_string, correct_type, @guidance_quiz.submissions, query_start_date_string, query_end_date_string
+          solo_data[time_key] = query_end_date_string
+        end
       end
       area_data << solo_data
     end
@@ -758,10 +848,12 @@ class TopicconceptsController < ApplicationController
           concepts: enabled_concepts.map { |ec| ec.name },
 
           accumulative: accumulative,
-          correct: get_correct == 1,
+          correct: params[:correct],
           start_period: params[:start_period],
           end_period: params[:end_period],
-          time_step: params[:time_step]
+          time_step: params[:time_step],
+          current_tag: tag,
+          tags: @course.tags
         }
       } 
     end
@@ -855,6 +947,51 @@ class TopicconceptsController < ApplicationController
       result = itmd.to_s + "%"
     end
 
+
+    result
+  end
+
+private
+  AREA_GRAPH_CORRECT_TYPE = {
+                              "wrong" => 0,
+                              "correct" => 1,
+                              "absolute" => 2,
+                              "both" => 3
+                            }
+
+  def get_answer_count_mcq_answers_with_mcqunit mcqunit, additional_query_string, correct_type, submissions, start_date, end_date
+    result = 0
+    case correct_type
+    when AREA_GRAPH_CORRECT_TYPE["wrong"]
+      result = mcqunit.mcq_answers
+                      .where("assessment_answers.correct = '0' AND assessment_answers.submission_id IN (?) AND " + additional_query_string , 
+                              submissions,
+                              end_date,
+                              start_date).count
+    when AREA_GRAPH_CORRECT_TYPE["absolute"]
+      result = mcqunit.mcq_answers
+                      .where("assessment_answers.correct = '1' AND assessment_answers.submission_id IN (?) AND " + additional_query_string , 
+                              submissions,
+                              end_date,
+                              start_date).count
+      result -= mcqunit.mcq_answers
+                      .where("assessment_answers.correct = '0' AND assessment_answers.submission_id IN (?) AND " + additional_query_string , 
+                              submissions,
+                              end_date,
+                              start_date).count
+    when AREA_GRAPH_CORRECT_TYPE["both"]
+      result = mcqunit.mcq_answers
+                      .where("assessment_answers.submission_id IN (?) AND " + additional_query_string , 
+                              submissions,
+                              end_date,
+                              start_date).count
+    else
+      result = mcqunit.mcq_answers
+                      .where("assessment_answers.correct = '1' AND assessment_answers.submission_id IN (?) AND " + additional_query_string , 
+                              submissions,
+                              end_date,
+                              start_date).count
+    end
 
     result
   end

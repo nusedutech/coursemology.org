@@ -58,7 +58,17 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       concept_edge = @course.concept_edges.where(id: params["concept_edge_id"]).first
       concept_edge_option = concept_edge.concept_edge_option
       if params.has_key?(:correct_threshold)
-        result += "\n" + set_concept_edge_correct_threshold(concept_edge_option, params[:correct_threshold])
+        result += "\n" + set_concept_edge_correct_threshold(concept_edge_option, 
+                                                            params[:correct_threshold])
+      end
+      if params.has_key?(:correct_rating_threshold) and params.has_key?(:correct_rating_choice)
+        result += "\n" + set_concept_edge_correct_rating_threshold(concept_edge_option, 
+                                                            params[:correct_rating_threshold], 
+                                                            params[:correct_rating_choice]=="true")
+      end
+      if params.has_key?(:correct_percent_threshold)
+        result += "\n" + set_concept_edge_correct_percent_threshold(concept_edge_option, 
+                                                            params[:correct_percent_threshold])
       end
 
       respond_to do |format| 
@@ -99,12 +109,20 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         result += "\n" + set_concept_wrong_threshold(concept_option, params[:wrong_threshold])
       end
 
+      if params.has_key?(:wrong_rating_threshold) and params.has_key?(:wrong_rating_absolute)
+        result += "\n" + set_concept_wrong_rating_threshold(concept_option, params[:wrong_rating_threshold], params[:wrong_rating_absolute]=="true")
+      end
+
+      if params.has_key?(:wrong_percent_threshold)
+        result += "\n" + set_concept_wrong_percent_threshold(concept_option, params[:wrong_percent_threshold])
+      end
+
       respond_to do |format| 
         format.json { render json: { result: result}}
       end
     else
       respond_to do |format| 
-        format.json { render json: { result: "Concept-edge was not found"}}
+        format.json { render json: { result: "Concept was not found"}}
       end
     end
   end
@@ -373,6 +391,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     result = []
     current_correct = 0
     current_wrong = 0
+    rating_right = 0
+    rating_wrong = 0
 
     #Get submission records if it exist
     if @submission
@@ -380,6 +400,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       if concept_stage
         current_wrong = concept_stage.total_wrong
         current_right = concept_stage.total_right
+        rating_right = concept_stage.rating_right
+        rating_wrong = concept_stage.rating_wrong
       end
     end
     #Retrieve criteria info
@@ -390,6 +412,17 @@ class Assessment::GuidanceQuizzesController < ApplicationController
           singleSummary[:name] = "wrong_threshold"
           singleSummary[:pass] = criterion.specific.evaluate current_wrong
           singleSummary[:current] = current_wrong.to_s 
+          singleSummary[:condition] = criterion.specific.threshold
+        when "wrong_rating_threshold"
+          singleSummary[:name] = "wrong_rating_threshold"
+          singleSummary[:pass] = criterion.specific.evaluate rating_right, rating_wrong
+          singleSummary[:current] = criterion.specific.get_current rating_right, rating_wrong
+          singleSummary[:condition] = criterion.specific.threshold
+          singleSummary[:condition2] = criterion.specific.absolute
+        when "wrong_percent_threshold"  
+          singleSummary[:name] = "wrong_percent_threshold"
+          singleSummary[:pass] = criterion.specific.evaluate current_right, current_wrong
+          singleSummary[:current] = "%.1f" % (criterion.specific.get_current current_right, current_wrong)
           singleSummary[:condition] = criterion.specific.threshold
       end
 
@@ -418,6 +451,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     result = []
     current_correct = 0
     current_wrong = 0
+    rating_right = 0
+    rating_wrong = 0
 
     #Get submission records if it exist
     if @submission
@@ -428,6 +463,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         if concept_edge_stage
           current_wrong = concept_edge_stage.total_wrong
           current_correct = concept_edge_stage.total_right
+          rating_right = concept_edge_stage.rating_right
+          rating_wrong = concept_edge_stage.rating_wrong
         end
       end
     end
@@ -439,6 +476,17 @@ class Assessment::GuidanceQuizzesController < ApplicationController
           singleSummary[:name] = "correct_threshold"
           singleSummary[:pass] = criterion.specific.evaluate current_correct
           singleSummary[:current] = current_correct
+          singleSummary[:condition] = criterion.specific.threshold
+        when "correct_rating_threshold"
+          singleSummary[:name] = "correct_rating_threshold"
+          singleSummary[:pass] = criterion.specific.evaluate rating_right, rating_wrong
+          singleSummary[:current] = criterion.specific.get_current rating_right, rating_wrong
+          singleSummary[:condition] = criterion.specific.threshold
+          singleSummary[:condition2] = criterion.specific.absolute
+        when "correct_percent_threshold"  
+          singleSummary[:name] = "correct_percent_threshold"
+          singleSummary[:pass] = criterion.specific.evaluate current_correct, current_wrong
+          singleSummary[:current] = "%.1f" % (criterion.specific.get_current current_correct, current_wrong)
           singleSummary[:condition] = criterion.specific.threshold
       end
       result << singleSummary
@@ -503,6 +551,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       case (criterion.specific.is_type)
         when "correct_threshold"
           result[:correct_threshold] = criterion.specific.threshold
+        when "correct_rating_threshold"
+          result[:correct_rating_threshold] = criterion.specific.threshold
+          result[:correct_rating_absolute] = criterion.specific.absolute
+        when "correct_percent_threshold"
+          result[:correct_percent_threshold] = criterion.specific.threshold
       end
     end
     result
@@ -511,7 +564,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   #Initial Default values - future pref values can be set here
   def default_concept_edge_criteria_values
     {
-      correct_threshold: 0
+      correct_threshold: 0,
+      correct_rating_threshold: 0,
+      correct_rating_absolute: false,
+      correct_percent_threshold: 0,
     }
   end
 
@@ -524,6 +580,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       case (criterion.specific.is_type)
         when "wrong_threshold"
           result[:wrong_threshold] = criterion.specific.threshold
+        when "wrong_rating_threshold"
+          result[:wrong_rating_threshold] = criterion.specific.threshold
+          result[:wrong_rating_absolute] = criterion.specific.absolute
+        when "wrong_percent_threshold"
+          result[:wrong_percent_threshold] = criterion.specific.threshold
       end
     end
     result
@@ -532,7 +593,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   #Initial Default values - future pref values can be set here
   def default_concept_criteria_values
     {
-      wrong_threshold: 0
+      wrong_threshold: 0,
+      wrong_rating_threshold: 0,
+      wrong_rating_absolute: false,
+      wrong_percent_threshold: 0
     }
   end
 
@@ -565,6 +629,65 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     result
   end
 
+  def set_concept_edge_correct_rating_threshold(concept_edge_option, correct_rating_threshold_amt, correct_rating_choice)
+
+    result = "\n[ Correct Rating Threshold ]"
+    correct_rating_threshold_single = concept_edge_option.concept_edge_criteria.correct_rating_threshold_subcriteria.first
+
+    if !correct_rating_threshold_single.nil?
+      correct_rating_threshold_criterion = correct_rating_threshold_single.specific
+    else
+      correct_rating_threshold_criterion = Assessment::CorrectRatingThreshold.new
+      correct_rating_threshold_criterion.guidance_concept_edge_option = concept_edge_option
+    end
+
+    #Match integers only
+    if integer_check correct_rating_threshold_amt
+      amt = correct_rating_threshold_amt.to_i
+      if amt > 0
+        correct_rating_threshold_criterion.threshold = amt
+        correct_rating_threshold_criterion.absolute = correct_rating_choice
+        correct_rating_threshold_criterion.save
+        result += "\n - " + "Positive integer entered. Criteria updated."
+      else
+        correct_rating_threshold_criterion.destroy
+        result += "\n - " + "0 / Negative integer entered. Criteria deleted."
+      end
+    else
+      result += "\n - " + "Non-integer entered. No changes made."
+    end
+    result
+  end
+
+  def set_concept_edge_correct_percent_threshold(concept_edge_option, correct_percent_threshold_amt)
+
+    result = "\n[ Correct Percent Threshold ]"
+    correct_percent_threshold_single = concept_edge_option.concept_edge_criteria.correct_percent_threshold_subcriteria.first
+
+    if !correct_percent_threshold_single.nil?
+      correct_percent_threshold_criterion = correct_percent_threshold_single.specific
+    else
+      correct_percent_threshold_criterion = Assessment::CorrectPercentThreshold.new
+      correct_percent_threshold_criterion.guidance_concept_edge_option = concept_edge_option
+    end
+
+    #Match integers only
+    if integer_check correct_percent_threshold_amt
+      amt = correct_percent_threshold_amt.to_i
+      if amt > 0
+        correct_percent_threshold_criterion.threshold = amt
+        correct_percent_threshold_criterion.save
+        result += "\n - " + "Positive integer entered. Criteria updated."
+      else
+        correct_percent_threshold_criterion.destroy
+        result += "\n - " + "0 / Negative integer entered. Criteria deleted."
+      end
+    else
+      result += "\n - " + "Non-integer entered. No changes made."
+    end
+    result
+  end
+
   def set_concept_wrong_threshold(concept_option, wrong_threshold_amt)
 
     result = "\n[ Wrong Threshold ]"
@@ -587,6 +710,65 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       else
         wrong_threshold_criterion.destroy
         result += "\n - " + "0 / Negative integer entered. Criteria deleted."
+      end
+    else
+      result += "\n - " + "Non-integer entered. No changes made."
+    end
+    result
+  end
+
+  def set_concept_wrong_rating_threshold(concept_option, wrong_rating_threshold_amt, absolute_choice)
+
+    result = "\n[ Wrong Rating Threshold ]"
+    wrong_rating_threshold_single = concept_option.concept_criteria.wrong_rating_threshold_subcriteria.first
+
+    if !wrong_rating_threshold_single.nil?
+      wrong_rating_threshold_criterion = wrong_rating_threshold_single.specific
+    else
+      wrong_rating_threshold_criterion = Assessment::WrongRatingThreshold.new
+      wrong_rating_threshold_criterion.guidance_concept_option = concept_option
+    end
+
+    #Match integers only
+    if integer_check wrong_rating_threshold_amt
+      amt = wrong_rating_threshold_amt.to_i
+      if amt > 0
+        wrong_rating_threshold_criterion.threshold = amt
+        wrong_rating_threshold_criterion.absolute = absolute_choice
+        wrong_rating_threshold_criterion.save
+        result += "\n - " + "Positive integer entered. Criteria updated."
+      else
+        wrong_rating_threshold_criterion.destroy
+        result += "\n - " + "0 / Negative integer entered. Criteria deleted."
+      end
+    else
+      result += "\n - " + "Non-integer entered. No changes made."
+    end
+    result
+  end
+
+  def set_concept_wrong_percent_threshold(concept_option, wrong_percent_threshold_amt)
+
+    result = "\n[ Wrong Percent Threshold ]"
+    wrong_percent_threshold_single = concept_option.concept_criteria.wrong_percent_threshold_subcriteria.first
+
+    if !wrong_percent_threshold_single.nil?
+      wrong_percent_threshold_criterion = wrong_percent_threshold_single.specific
+    else
+      wrong_percent_threshold_criterion = Assessment::WrongPercentThreshold.new
+      wrong_percent_threshold_criterion.guidance_concept_option = concept_option
+    end
+
+    #Match integers only
+    if integer_check wrong_percent_threshold_amt
+      amt = wrong_percent_threshold_amt.to_i
+      if amt > 0 and amt <= 100
+        wrong_percent_threshold_criterion.threshold = amt
+        wrong_percent_threshold_criterion.save
+        result += "\n - " + "Positive integer entered. Criteria updated."
+      else
+        wrong_percent_threshold_criterion.destroy
+        result += "\n - " + "0 / Negative integer or > 100% entered. Criteria deleted."
       end
     else
       result += "\n - " + "Non-integer entered. No changes made."

@@ -10,13 +10,15 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
   scope :failed, -> { where(passed: false) }
   scope :passed, -> { where(passed: true) }
 
-  def add_one_right
+  def add_one_right rating
     self.total_right += 1
+    self.rating_right += rating
     self.save
   end
 
-  def add_one_wrong
+  def add_one_wrong rating
     self.total_wrong += 1
+    self.rating_wrong += rating
     self.save
   end
 
@@ -36,6 +38,10 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
         case (criterion.specific.is_type)
           when "correct_threshold"
             pass_intermediate = criterion.specific.evaluate self.total_right
+          when "correct_rating_threshold"
+            pass_intermediate = criterion.specific.evaluate self.rating_right, self.rating_wrong
+          when "correct_percent_threshold"
+            pass_intermediate = criterion.specific.evaluate self.total_right, self.total_wrong
         end
 
         if !pass_intermediate
@@ -223,9 +229,6 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
         concept_edge_stage = concept_stage.concept_edge_stages.new
         concept_edge_stage.concept_edge_id = concept_edge.id
         concept_edge_option = concept_edge.concept_edge_option
-        if concept_edge_option.concept_edge_criteria.count == 0
-          concept_edge_stage.passed = true
-        end
         concept_edge_stage.save
 
         return concept_edge_stage

@@ -9,6 +9,6 @@ class CreateAssessmentWrongThresholds < ActiveRecord::Migration
   end
 
   def down
-		drop_table  :assessment_wrong_thresholds
+	drop_table  :assessment_wrong_thresholds
   end
 end

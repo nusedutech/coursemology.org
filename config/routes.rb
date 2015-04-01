@@ -226,7 +226,8 @@ Coursemology::Application.routes.draw do
         post :get_guidance_concept_edges_data, to: 'guidance_quizzes#get_guidance_concept_edges_data'
         
         get :get_topicconcept_data_with_criteria, to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
-
+        post :get_scoreboard_data, to: 'guidance_quizzes#get_scoreboard_data'
+        
         post :get_topicconcept_data_history, to: 'guidance_quizzes#get_topicconcept_data_history'
       end
     end

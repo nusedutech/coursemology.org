@@ -6,7 +6,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   before_filter :load_guidance_quiz_singleton_with_submission, only: [:get_topicconcept_data_with_criteria, :get_guidance_concept_data, :get_guidance_concept_data_no_stats, :get_guidance_concept_edge_data, :get_guidance_concept_edges_data]
 
-  before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_history]
+  before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_history, :get_scoreboard_data]
 
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
@@ -419,6 +419,26 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     respond_to do |format|
       format.json { render json: result}
+    end
+  end
+
+  #Get scoreboard data across students attempting submissions
+  def get_scoreboard_data
+    score_data = @guidance_quiz.submissions
+                               .attempting_format
+                               .joins(:std_course)
+                               .where("assessment_submissions.std_course_id = user_courses.id")
+                               .joins("INNER JOIN users ON users.id = user_courses.user_id")
+                               .joins(:concept_stages)
+                               .select("users.profile_photo_url as img, user_courses.name, SUM(assessment_guidance_concept_stages.rating_right) as rating")
+                               .where("assessment_submissions.id = assessment_guidance_concept_stages.assessment_submission_id and assessment_guidance_concept_stages.failed = 0")
+                               .group("assessment_guidance_concept_stages.assessment_submission_id")
+                               .order("rating DESC")
+                               .limit(10)
+
+
+    respond_to do |format|
+      format.json { render json: score_data}
     end
   end
 

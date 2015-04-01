@@ -182,6 +182,7 @@ class CourseAbility  < Ability
       can :get_guidance_concept_data_no_stats, Assessment::GuidanceQuiz  
       can :get_guidance_concept_edge_data, Assessment::GuidanceQuiz
       can :get_guidance_concept_edges_data, Assessment::GuidanceQuiz
+      can :get_scoreboard_data, Assessment::GuidanceQuiz
 
       can :students, Course
 

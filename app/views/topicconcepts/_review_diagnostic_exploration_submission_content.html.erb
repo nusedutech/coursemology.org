@@ -105,6 +105,39 @@
 		</div>
 	</div>
 
+	<div class="topicconcept-spun-12">
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="accordion accordion-student-transcript-panel" id="accordion-scoreboard">
+				<div class="accordion-group student-transcript-panel">
+			  		<div class="accordion-heading">
+			    		<div class="accordion-wordheading">
+			      			<h4>Scoreboard
+			      				<a href="#" class="tooltip-units" data-placement="right" data-toggle="tooltip" data-original-title="Rating scoreboard across students">
+			      					<i class="icon-info-sign icon-hover-effect"></i>
+			      				</a>
+			      			</h4>
+			    		</div>
+			    		<div class="accordion-right">
+			      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-scoreboard" href="#collapse-scoreboard"><i class="icon-minus"></i></a>
+			    		</div>
+			  		</div>
+			  		<div id="collapse-scoreboard" class="accordion-body collapse">
+			    		<div class="accordion-inner paddingless">
+			    			<table id="scoreboard_table" class="table table-striped">
+			    				<tr>
+			    					<th style="width:15px;">SN.</th>
+			    					<th style="width: 20px; max-width:55px;"></th>
+			    					<th></th>
+			    					<th style="width:50px;">Rating</th>
+			    				</tr>
+			    			</table>
+			    		</div>
+			  		</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
     <div class="topicconcept-spun-6">
 		<div class="topicconcept-spun-grid-normaliser">
 		  	<div class="accordion accordion-student-transcript-panel" id="accordion-student-transcript-panel-best">
@@ -237,7 +270,7 @@
                                     tcdata2.failedEdges);
 
     	$('.tooltip-units').tooltip();
-
+    	generate_scoreboard_data(get_scoreboard_data());
     	var best= get_topicconcept_best_concepts();
     	Morris.Donut({
   			element: 'student-transcript-panel-best',
@@ -405,6 +438,34 @@
     	}
   	}
 
+  	function generate_scoreboard_data(profile_scores){
+  		var table = document.getElementById("scoreboard_table").childNodes[1];
+  		for (var i = 0; i < profile_scores.length; i++) {
+  			var row = document.createElement("tr");
+
+  			var sncol = document.createElement("td");
+  			sncol.innerHTML = i+1;
+  			row.appendChild(sncol);
+
+  			var imgcol = document.createElement("td");
+  			var profileimg = document.createElement("img");
+  			profileimg.setAttribute("src", profile_scores[i].img);
+  			profileimg.setAttribute("class", "user-profile-pic");
+  			imgcol.appendChild(profileimg);
+  			row.appendChild(imgcol);
+
+  			var profilecol = document.createElement("td");
+  			profilecol.innerHTML = profile_scores[i].name;
+  			row.appendChild(profilecol);
+
+  			var ratingcol = document.createElement("td");
+  			ratingcol.innerHTML = profile_scores[i].rating;
+  			row.appendChild(ratingcol);
+
+  			table.appendChild(row);
+  		}
+  	}
+
 	function get_topicconcept_data(){
 		var result;
 		$.ajax({
@@ -512,6 +573,41 @@
 		    data: {submission_id: <%= @chosen_submission.id %>},
 		    async: false,
 		    url: "<%= get_topicconcept_notbest_concepts_course_topicconcepts_path(@course)%>",
+		    success: function(json) {	    	
+		    	result = json;
+		    },
+		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	    	}
+	  	});
+	  	return result;
+	}
+
+	function get_topicconcept_notbest_concepts(){
+		var result;
+		$.ajax({
+		    type: "POST",
+		    dataType: "json",
+		    data: {submission_id: <%= @chosen_submission.id %>},
+		    async: false,
+		    url: "<%= get_topicconcept_notbest_concepts_course_topicconcepts_path(@course)%>",
+		    success: function(json) {	    	
+		    	result = json;
+		    },
+		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	    	}
+	  	});
+	  	return result;
+	}
+
+	function get_scoreboard_data(){
+		var result;
+		$.ajax({
+		    type: "POST",
+		    dataType: "json",
+		    async: false,
+		    url: "<%= get_scoreboard_data_course_assessment_guidance_quizzes_path(@course)%>",
 		    success: function(json) {	    	
 		    	result = json;
 		    },

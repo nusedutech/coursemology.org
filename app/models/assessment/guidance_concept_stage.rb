@@ -167,6 +167,8 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
   def reset_statistics submission, pass_edge_lock
     self.total_wrong = 0
     self.total_right = 0
+    self.rating_right = 0
+    self.rating_wrong = 0
     self.save
 
     concept_edge_stages = Assessment::GuidanceConceptEdgeStage.get_edge_stages submission, self, pass_edge_lock
@@ -252,6 +254,11 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     required_edges = self.concept.concept_edge_required_concepts
     required_edges.each do |required_edge|
       if Assessment::GuidanceConceptEdgeOption.is_enabled? required_edge
+        #If no criteria on edge, don't lock child concept stage
+        unless Assessment::GuidanceConceptEdgeOption.has_criteria? required_edge
+          next
+        end
+
         required_concept = required_edge.required_concept
         #At least one concept enabled set result to true 
         if Assessment::GuidanceConceptOption.is_enabled_with required_concept

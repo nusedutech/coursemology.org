@@ -180,24 +180,24 @@
 	var required_concepts = [];
 	var concepts_list = [];
 
-  //Constants
+  	//Constants
 	var DATA_HOVER_KEY = "data-hover-status";
 	var DATA_HIDE_STATUS = "hide";
 	var DATA_SHOW_STATUS = "show";
 
-  function reset_edit_console(){
-    $('#div_edit').hide();
-    $('#div_criteria_update').hide();
-    $('#div_criteria_update_next').hide();
-    $('#div_action').hide();
-    $('#div_criteria_fail_update').hide();
-    $('#div_criteria_fail_update_next').hide();
-  }
+  	function reset_edit_console(){
+    	$('#div_edit').hide();
+    	$('#div_criteria_update').hide();
+    	$('#div_criteria_update_next').hide();
+    	$('#div_action').hide();
+    	$('#div_criteria_fail_update').hide();
+    	$('#div_criteria_fail_update_next').hide();
+  	}
 
-  function default_edit_console(){
-    reset_edit_console();
-    $('#div_action').show();
-  }
+  	function default_edit_console(){
+    	reset_edit_console();
+    	$('#div_action').show();
+  	}
 
 	function finish_edit_required_concepts(){
 		is_editing_required_concepts = false;
@@ -310,7 +310,7 @@
       	if (result.dependencies.length != 0) {
         	$('#criteria_relation_select').find('option').remove();
        		$.each(result.dependencies, function(i, dependency) {
-          		$('#criteria_relation_select').append('<option value="'+dependency.concept_edge_id+'">'+dependency.required_concept_name+' DEPENDENT ON '+result.current_concept.name+"</option>");
+          		$('#criteria_relation_select').append('<option value="'+dependency.concept_edge_id+'">'+dependency.required_concept_name+' REQUIRED BY '+result.current_concept.name+"</option>");
         		}); 
         
         		reset_edit_console();

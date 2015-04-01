@@ -24,7 +24,9 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
 
   def reset_statistics
     self.total_right = 0
-    self.total_wrong = 0
+    self.total_wrong = 0   
+    self.rating_right = 0
+    self.rating_wrong = 0
     self.passed = criteria_check
     self.save
   end

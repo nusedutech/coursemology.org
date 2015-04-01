@@ -19,6 +19,7 @@ class Assessment::Submission < ActiveRecord::Base
   scope :graded, -> { where(status: 'graded') }
 
   scope :submitted_format, -> { where(status: 'submitted') }
+  scope :attempting_format, -> { where(status: 'attempting') }
 
   belongs_to :assessment
   belongs_to :std_course, class_name: "UserCourse"

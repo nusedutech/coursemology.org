@@ -42,4 +42,17 @@ class Assessment::GuidanceConceptEdgeOption < ActiveRecord::Base
     result
   end
 
+  def self.has_criteria?(concept_edge)
+    enable_status = concept_edge.concept_edge_option
+    result = false
+
+    if !enable_status.nil?
+      result = enable_status.concept_edge_criteria.size > 0
+    else
+      result = false
+    end
+
+    result
+  end
+
 end

@@ -81,6 +81,54 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end
   end
 
+  def set_concept_edges_relation
+    concept_edge_ids = JSON.parse(params[:tags]).map { |tag| tag["id"] }
+    concept_edges = @course.concept_edges.where(id: concept_edge_ids)
+
+    enabled = params.has_key?(:enabled)
+    if params.has_key?(:correct_threshold)
+      correct_threshold = params[:correct_threshold]
+    else
+      correct_threshold = 0
+    end
+
+    if params.has_key?(:correct_rating_threshold)
+      correct_rating_threshold = params[:correct_rating_threshold]
+      correct_rating_absolute = params.has_key?(:correct_rating_absolute)
+    else
+      correct_rating_threshold = 0
+      correct_rating_absolute = false
+    end
+
+    if params.has_key?(:correct_percent_threshold)
+      correct_percent_threshold = params[:correct_percent_threshold]
+    else
+      correct_percent_threshold = 0
+    end
+
+    concept_edges.each do |concept_edge|
+      #Initialise / create concept option (if not created before)
+      if enabled
+        Assessment::GuidanceConceptEdgeOption.enable(concept_edge)
+      else
+        Assessment::GuidanceConceptEdgeOption.disable(concept_edge)
+      end
+
+      #Reload Concept Edge to get the child relation
+      concept_edge = @course.concept_edges.where(id: concept_edge.id).first
+      concept_edge_option = concept_edge.concept_edge_option
+      set_concept_edge_correct_threshold(concept_edge_option,
+                                         correct_threshold)
+      set_concept_edge_correct_rating_threshold(concept_edge_option, 
+                                                correct_rating_threshold, 
+                                                correct_rating_absolute)
+      set_concept_edge_correct_percent_threshold(concept_edge_option, 
+                                                 correct_percent_threshold)
+    end
+
+    redirect_to course_preferences_path(@course)+"?_tab=topicconcept"
+  end
+
   def get_concept_edge_relation
     concept_edge = @course.concept_edges.where(id: params["concept_edge_id"]).first
     if !concept_edge.nil?
@@ -125,6 +173,48 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         format.json { render json: { result: "Concept was not found"}}
       end
     end
+  end
+
+  def set_concepts_criteria
+    concept_ids = JSON.parse(params[:tags]).map { |tag| tag["id"] }
+    concepts = @course.topicconcepts.concepts.where(id: concept_ids)
+
+    enabled = params.has_key?(:fail_enabled)
+    is_entry = params.has_key?(:fail_is_entry)
+    if params.has_key?(:fail_wrong_threshold)
+      wrong_threshold = params[:fail_wrong_threshold]
+    else
+      wrong_threshold = 0
+    end
+
+    if params.has_key?(:fail_wrong_rating_threshold)
+      wrong_rating_threshold = params[:fail_wrong_rating_threshold]
+      wrong_rating_absolute = params.has_key?(:fail_wrong_rating_absolute)
+    else
+      wrong_rating_threshold = 0
+      wrong_rating_absolute = false
+    end
+
+    if params.has_key?(:fail_wrong_percent_threshold)
+      wrong_percent_threshold = params[:fail_wrong_percent_threshold]
+    else
+      wrong_percent_threshold = 0
+    end
+
+    concepts.each do |concept|
+      attributes = { 
+        enabled: enabled,
+        is_entry: is_entry
+      }
+      #Initialise / create concept option (if not created before)
+      concept_option = Assessment::GuidanceConceptOption.update_attributes_with_new concept, attributes
+      set_concept_wrong_threshold(concept_option, wrong_threshold)
+      set_concept_wrong_rating_threshold(concept_option, wrong_rating_threshold, wrong_rating_absolute)
+      set_concept_wrong_percent_threshold(concept_option, wrong_percent_threshold)
+
+    end
+
+    redirect_to course_preferences_path(@course)+"?_tab=topicconcept"
   end
 
   def get_concept_criteria
@@ -182,8 +272,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       @concepts = @course.topicconcepts.concepts
       @concept_edges = ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
       
-      submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                    id: params[:submission_id]).order('updated_at DESC').first
+      submission = load_and_authorize_submission_with_id params[:submission_id]
       submission_valid = !submission.nil?
       result =  { 
                   topictrees: @topics_concepts_with_info, 
@@ -793,6 +882,15 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
+  end
+
+  def load_and_authorize_submission_with_id submission_id
+    if curr_user_course.is_staff?
+      submission = @guidance_quiz.submissions.where(id: submission_id).first
+    else
+      submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id, id: submission_id).first
+    end
+    submission
   end
 
   def load_guidance_quiz_singleton

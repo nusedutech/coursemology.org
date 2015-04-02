@@ -119,6 +119,11 @@ class Assessment::Submission < ActiveRecord::Base
     self.status == 'graded'
   end
 
+  def set_updated_timing
+    self.updated_at = Time.now
+    self.save
+  end
+
   def get_path
     course_assessment_submission_path(std_course.course, assessment, self)
   end

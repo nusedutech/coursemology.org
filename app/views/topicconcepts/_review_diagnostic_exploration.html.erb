@@ -6,7 +6,7 @@
 		    	<td>
 			      	<select name="submission_id" onchange="this.form.submit();">
 			        	<%= @submissions.each do |sbm| %>
-			            	<option value="<%= sbm.id %>" <%= @chosen_submission == sbm ? "selected" : "" %>><%= sbm.updated_at.to_formatted_s(:long) %></option>
+			            	<option value="<%= sbm.id %>" <%= @chosen_submission == sbm ? "selected" : "" %>><%= sbm.created_at.to_formatted_s(:long) %></option>
 			        	<% end %>
 			      	</select>
 		    	</td>

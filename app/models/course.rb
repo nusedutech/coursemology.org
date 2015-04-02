@@ -56,7 +56,7 @@ class Course < ActiveRecord::Base
   has_many   :guidance_quizzes, class_name: "Assessment::GuidanceQuiz", through: :assessments,
             source: :as_assessment, source_type: "Assessment::GuidanceQuiz"
 
-  has_one   :topicconcepts_updated_timing, class_name: "TopicconceptsUpdatedTiming"
+  has_one   :topicconcepts_updated_timing, class_name: "TopicconceptsUpdatedTiming", dependent: :destroy
 
   amoeba do
     include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences,

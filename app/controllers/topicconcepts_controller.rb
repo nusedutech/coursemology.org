@@ -22,6 +22,7 @@ class TopicconceptsController < ApplicationController
   before_filter :set_topicconcept_updated_timing, only: [:topic_concept_data_create, :topic_concept_data_delete, :topic_concept_data_move, :topic_concept_data_save_dependency]
 
   def index   
+
     @topics_concepts_with_info = []
     get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
     @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
@@ -188,7 +189,7 @@ class TopicconceptsController < ApplicationController
  		if @student
  			@submissions = @guidance_quiz.submissions
  																	 .where(std_course_id: @student.id)
- 																	 .order("updated_at DESC")
+ 																	 .order("created_at DESC")
  		else
  			@submissions = []
  		end
@@ -198,10 +199,11 @@ class TopicconceptsController < ApplicationController
  																				 .where(std_course_id: @student.id,
  																				 				id: params[:select_submission])
  																				 .first
+      data_synchronise_submission @chosen_submission
  		end
 
  		if @chosen_submission
- 			@concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @chosen_submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+ 			@concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @chosen_submission
 	    enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
 	                                   .concepts
 	                                   .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
@@ -216,7 +218,7 @@ class TopicconceptsController < ApplicationController
   end
 
   def review_diagnostic_exploration
-    @submissions = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order("updated_at DESC")
+    @submissions = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order("created_at DESC")
 
     if params.has_key?(:submission_id)
       @chosen_submission = load_and_authorize_submission_with_id params[:submission_id]
@@ -226,7 +228,7 @@ class TopicconceptsController < ApplicationController
       @chosen_submission = @latest_submission
     end
 
-    @concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @chosen_submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    @concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @chosen_submission
     enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
                                    .concepts
                                    .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
@@ -263,7 +265,7 @@ class TopicconceptsController < ApplicationController
       redirect_to course_topicconcepts_path(@course), alert: " Concept not found!"
       return
     end
-    @concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    @concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
 
     @questions = []
     @question_total = 0;
@@ -747,7 +749,7 @@ class TopicconceptsController < ApplicationController
     end
 
     if @topicconcept.is_concept?
-      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, @topicconcept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, @topicconcept
     end
 
     if concept_stage
@@ -774,7 +776,7 @@ class TopicconceptsController < ApplicationController
       return
     end
 
-    concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
     #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * -100 / (cs.total_right + cs.total_wrong) }
     rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, right: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_right, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
 
@@ -793,7 +795,7 @@ class TopicconceptsController < ApplicationController
       return
     end
 
-    concept_stages = Assessment::GuidanceConceptStage.get_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
     #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
     rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, wrong: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_wrong, total: (cs.total_right + cs.total_wrong) == 0 ? 2 : (cs.total_right + cs.total_wrong)} }
 
@@ -907,20 +909,21 @@ class TopicconceptsController < ApplicationController
         query_start_date_string = date.strftime("%Y-%m-%d")
       end
 
+      sbms = @guidance_quiz.submissions
       if tag 
         tag_questions = tag.questions
         enabled_concepts.each do |concept|
           questions = concept.questions.where("assessment_questions.id in (?)", tag_questions)
           answer_count = 0
           questions.each do |question|
-            answer_count += get_answer_count_mcq_answers_with_mcqunit question, query_string, correct_type, @guidance_quiz.submissions, query_start_date_string, query_end_date_string
+            answer_count += get_answer_count_mcq_answers_with_mcqunit question, query_string, correct_type, sbms, query_start_date_string, query_end_date_string
           end
           solo_data[concept.id.to_s] = answer_count
           solo_data[time_key] = query_end_date_string
         end
       else
         enabled_concepts.each do |concept|
-          solo_data[concept.id.to_s] = get_answer_count_mcq_answers_with_mcqunit concept, query_string, correct_type, @guidance_quiz.submissions, query_start_date_string, query_end_date_string
+          solo_data[concept.id.to_s] = get_answer_count_mcq_answers_with_mcqunit concept, query_string, correct_type, sbms, query_start_date_string, query_end_date_string
           solo_data[time_key] = query_end_date_string
         end
       end
@@ -1112,18 +1115,21 @@ private
     @guidance_quiz = @course.guidance_quizzes.first
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
+    data_synchronise_submission @submission
+
     if @submission
-      @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission, @guidance_quiz.passing_edge_lock
+      @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission
       if @concept_stage
         @latest_concept = @concept_stage.concept
       end
     end
 
-    @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order("updated_at DESC").first
-
+    @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order("created_at DESC").first
     if @latest_submission.nil?
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
       return
+    else
+      data_synchronise_submission @latest_submission
     end
   end
 
@@ -1135,13 +1141,15 @@ private
       @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
       if @submission
-        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission, @guidance_quiz.passing_edge_lock
+        data_synchronise_submission @submission
+        @concept_stage = Assessment::GuidanceConceptStage.get_latest_passed_stage @submission
         if @concept_stage
           @latest_concept = @concept_stage.concept
         end
       end
 
       @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).first
+      data_synchronise_submission @latest_submission
     end
   end
 
@@ -1156,6 +1164,7 @@ private
     @assessment = @guidance_quiz.assessment
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
+    data_synchronise_submission @submission
 
     #Submission not available, refer back to map
     if @submission.nil? or !@submission.attempting?
@@ -1163,6 +1172,7 @@ private
       return
     end
     @latest_submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).first
+    data_synchronise_submission @latest_submission
 
     unless @topicconcept.is_concept?
       redirect_to course_topicconcepts_path(@course), alert: " This is not a concept!"
@@ -1170,7 +1180,7 @@ private
     end
 
     @concept = @topicconcept
-    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept
 
     unless @concept_stage
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
@@ -1186,7 +1196,8 @@ private
     @guidance_quiz = @course.guidance_quizzes.first
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                  status: "attempting").first
-    
+    data_synchronise_submission @submission
+
     #Submission not available, indicate progress bar as such
     if @submission.nil? or !@submission.attempting?
       @progress_bar = {
@@ -1201,9 +1212,9 @@ private
                         disable_message: "Assessment not started yet"
                       }
     else
-      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @submission
       passed_concepts = passed_concept_stages.collect(&:concept).uniq
-      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages @submission, @guidance_quiz.passing_edge_lock
+      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages @submission
       failed_concepts = failed_concept_stages.collect(&:concept).uniq
       enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
                                       .concepts
@@ -1234,7 +1245,23 @@ private
     else
       submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id, id: submission_id).first
     end
+    data_synchronise_submission submission
     submission
+  end
+
+  #Check for synchronisation requirements
+  def data_synchronise_submission submission
+    if submission and (@course.topicconcepts_updated_timing_singleton.update_required submission.updated_at)
+      Assessment::GuidanceConceptStage.data_synchronisation submission, !@guidance_quiz.neighbour_entry_lock
+      submission.set_updated_timing
+    end
+  end
+
+  #Check for synchronisation requirements
+  def data_synchronise_submissions submissions
+    submissions.each do |submission|
+      data_synchronise_submission submission
+    end
   end
 
   def set_topicconcept_updated_timing

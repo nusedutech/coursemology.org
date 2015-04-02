@@ -241,9 +241,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       @concepts = @course.topicconcepts.concepts
       @concept_edges = ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
       
-
-      submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id).order('updated_at DESC').first
-      submission_valid = (!submission.nil? and submission.attempting?)
+      submission_valid = (!@submission.nil? and @submission.attempting?)
       result =  { 
       	          topictrees: @topics_concepts_with_info, 
       	          submission: submission_valid
@@ -251,7 +249,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
       #Retrieve more information if has valid submission
       if submission_valid 
-      	result.merge!(get_guidance_quiz_submission_data submission)
+      	result.merge!(get_guidance_quiz_submission_data @submission)
       	afflictedNodes = result[:openAtmNodes] + result[:failedNodes] + [result[:lastAtmNode]]
       	@concepts = @concepts - afflictedNodes
       	afflictedEdges = result[:openAtmEdges] + result[:failedEdges]
@@ -299,8 +297,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def get_guidance_quiz_submission_data submission
   	result = {}
-    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
-    failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission, @guidance_quiz.passing_edge_lock
+    passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages submission
+    failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages submission
     result[:openAtmNodes] = passed_concept_stages.collect(&:concept).uniq
     result[:failedNodes] = failed_concept_stages.collect(&:concept).uniq 
 
@@ -317,11 +315,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     all_stages = passed_concept_stages + failed_concept_stages
     all_atm_edges = []
     all_stages.each do |stage|
-      all_atm_edges = all_atm_edges + (Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages submission, stage, @guidance_quiz.passing_edge_lock)
+      all_atm_edges = all_atm_edges + (Assessment::GuidanceConceptEdgeStage.get_passed_edge_stages stage)
     end
     failed_edges = []
     all_stages.each do |stage|
-      failed_edges = failed_edges + (Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages submission, stage, @guidance_quiz.passing_edge_lock)
+      failed_edges = failed_edges + (Assessment::GuidanceConceptEdgeStage.get_failed_edge_stages stage)
     end
 
     result[:openAtmEdges] = all_atm_edges.collect(&:concept_edge).uniq
@@ -426,6 +424,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   #Get scoreboard data across students attempting submissions
   def get_scoreboard_data
+
     score_data = @guidance_quiz.submissions
                                .attempting_format
                                .joins(:std_course)
@@ -464,7 +463,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
         action = "enabled"
       #Path to resume submission at current criteria  
       else
-        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept
         if !concept_stage.nil? and !concept_stage.failed
           action = "resume"
           actionUrl = diagnostic_exploration_course_topicconcept_path(@course, @concept)
@@ -507,7 +506,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     #Get submission records if it exist
     if @submission
-      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept_option.topicconcept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
+      concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, concept_option.topicconcept
       if concept_stage
         current_wrong = concept_stage.total_wrong
         current_right = concept_stage.total_right
@@ -568,9 +567,9 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     #Get submission records if it exist
     if @submission
       concept_edge = concept_edge_option.concept_edge
-      concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
+      concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept_edge.required_concept
       if concept_stage
-        concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage @submission, concept_stage, concept_edge, @guidance_quiz.passing_edge_lock 
+        concept_edge_stage = Assessment::GuidanceConceptEdgeStage.get_stage concept_stage, concept_edge
         if concept_edge_stage
           current_wrong = concept_edge_stage.total_wrong
           current_correct = concept_edge_stage.total_right
@@ -904,6 +903,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
                                                    status: "attempting").first
+    data_synchronise_submission @submission
   end
 
   def load_and_authorize_submission_with_id submission_id
@@ -912,6 +912,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     else
       submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id, id: submission_id).first
     end
+    data_synchronise_submission submission
     submission
   end
 
@@ -929,6 +930,21 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_topicconcept_updated_timing
     @course.topicconcepts_updated_timing_singleton.set_updated_timing
+  end
+
+  #Check for synchronisation requirements
+  def data_synchronise_submission submission
+    if submission and (@course.topicconcepts_updated_timing_singleton.update_required submission.updated_at)
+      Assessment::GuidanceConceptStage.data_synchronisation submission, !@guidance_quiz.neighbour_entry_lock
+      submission.set_updated_timing
+    end
+  end
+
+  #Check for synchronisation requirements
+  def data_synchronise_submissions submissions
+    submissions.each do |submission|
+      data_synchronise_submission submission
+    end
   end
 
   def access_denied message, redirectURL

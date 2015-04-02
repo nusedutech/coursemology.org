@@ -49,7 +49,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       return
     end
 
-    concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock 
+    concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, concept
     if concept_stage.nil?
       access_denied "You do not have access to the current concept (Your lecturer might have disabled it)", course_topicconcepts_path(@course)
       return
@@ -77,12 +77,12 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     end
 
     #Launch second check to lock when evaluated fail status
-    if concept_stage.check_to_lock_procedure @submission, @guidance_quiz.passing_edge_lock
+    if concept_stage.check_to_lock_procedure @submission
       access_denied "You have failed this concept. Try again from the easier concepts.", course_topicconcepts_path(@course)
       return
     end
 
-    unlocked_concepts = concept_stage.check_to_unlock_procedure @submission, @guidance_quiz.passing_edge_lock
+    unlocked_concepts = concept_stage.check_to_unlock_procedure @submission
     concept_names = unlocked_concepts.map {|c| c.name}
 
     respond_to do |format|
@@ -138,7 +138,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
         concept_edge_stage.concept_edge_id = concept_edge.id
         concept_edge_stage.save
 
-        concept_edge_stage.check_to_unlock submission, @guidance_quiz.passing_edge_lock
+        concept_edge_stage.check_to_unlock submission
       end
     end
   end
@@ -201,6 +201,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
 
   def authorize_and_load_guidance_quiz
   	@guidance_quiz = @assessment.specific
+    data_synchronise_submission @submission
     if curr_user_course.is_staff?
       return true
     end
@@ -225,6 +226,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     end
 
     @guidance_quiz = @course.guidance_quizzes.first
+    data_synchronise_submission @submission
     unless params.has_key?(:concept_id)
       redirect_to course_topicconcepts_path(@course), alert: " Concept parameter not found!"
       return
@@ -236,10 +238,18 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       return
     end
 
-    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock, @guidance_quiz.passing_edge_lock
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock
     unless @concept_stage
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
       return
+    end
+  end
+
+  #Check for synchronisation requirements
+  def data_synchronise_submission submission
+    if submission and (@course.topicconcepts_updated_timing_singleton.update_required submission.updated_at)
+      Assessment::GuidanceConceptStage.data_synchronisation submission, !@guidance_quiz.neighbour_entry_lock
+      submission.set_updated_timing
     end
   end
 

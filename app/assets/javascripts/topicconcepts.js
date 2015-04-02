@@ -256,8 +256,9 @@ function setup_node_edges_color(nodelist) {
 
   function setup_passed_edges_color(openAtmEdges) {
     if (openAtmEdges != null) {
-      $.each(openAtmEdges, function(){  
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id).each(function(){
+      $.each(openAtmEdges, function(){
+        var dependent_id = this.dependent_id; 
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id+"."+G_EDGEPATH_DEPENDENT_KEY+dependent_id).each(function(){
           add_class(this, EDGE_PASSED_CLASS);
           remove_class(this, EDGE_ENABLED_START_CLASS);
           remove_class(this, EDGE_ENABLED_END_CLASS);
@@ -265,8 +266,9 @@ function setup_node_edges_color(nodelist) {
           remove_class(this, EDGE_ENTRY_END_CLASS);
           remove_class(this, EDGE_DISABLED_START_CLASS);
           remove_class(this, EDGE_DISABLED_END_CLASS);
+          remove_class(this, EDGE_DISABLED_CLASS);
         });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id).each(function(){
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id+"."+G_EDGELABEL_DEPENDENT_KEY+dependent_id).each(function(){
           add_class(this, EDGE_PASSED_CLASS);
           remove_class(this, EDGE_ENABLED_START_CLASS);
           remove_class(this, EDGE_ENABLED_END_CLASS);
@@ -274,6 +276,7 @@ function setup_node_edges_color(nodelist) {
           remove_class(this, EDGE_ENTRY_END_CLASS);
           remove_class(this, EDGE_DISABLED_START_CLASS);
           remove_class(this, EDGE_DISABLED_END_CLASS);
+          remove_class(this, EDGE_DISABLED_CLASS);
         });
       }); 
     }
@@ -301,9 +304,11 @@ function setup_node_edges_color(nodelist) {
 
   function setup_disabled_edges_color(edgelist) {
     $.each(edgelist, function(){ 
-      if (!this.enabled) { 
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id).each(function(){
+      if (!this.enabled) {
+        var dependent_id = this.dependent_id;
+        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id+"."+G_EDGEPATH_DEPENDENT_KEY+dependent_id).each(function(){
           add_class(this, EDGE_DISABLED_CLASS);
+          remove_class(this, EDGE_PASSED_CLASS);
           remove_class(this, EDGE_ENABLED_START_CLASS);
           remove_class(this, EDGE_ENABLED_END_CLASS);
           remove_class(this, EDGE_ENTRY_START_CLASS);
@@ -311,8 +316,9 @@ function setup_node_edges_color(nodelist) {
           remove_class(this, EDGE_DISABLED_START_CLASS);
           remove_class(this, EDGE_DISABLED_END_CLASS);
         });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id).each(function(){
+        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id+"."+G_EDGELABEL_DEPENDENT_KEY+dependent_id).each(function(){
           add_class(this, EDGE_DISABLED_CLASS);
+          remove_class(this, EDGE_PASSED_CLASS);
           remove_class(this, EDGE_ENABLED_START_CLASS);
           remove_class(this, EDGE_ENABLED_END_CLASS);
           remove_class(this, EDGE_ENTRY_START_CLASS);

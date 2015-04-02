@@ -57,7 +57,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
 
   #Check for current progress on criteria and unlock if necessary
   #Return the concepts unlocked
-  def check_to_unlock submission, passing_edge_lock, bypass_archive_check = true
+  def check_to_unlock submission, bypass_archive_check = false
     result = []
     criteria_result = criteria_check
 
@@ -192,12 +192,6 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     end
   end
 
-  #For static method use to see if the data-synchronisation checks are required
-  #Not required if updated timing is larger than the data's timing
-  def skip_checks timing
-     timing < self.updated_at
-  end
-
   #Static methods declare here
   #For retrieving collection or member units
   #Remember to clean deleted entries first
@@ -205,16 +199,16 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     def clean_deleted_edge_stages concept_stage
       concept_edge_stages = concept_stage.concept_edge_stages
       concept_edge_stages.each do |concept_edge_stage|
-        unlocking_edge_stages |= clean_deleted_edge_stage concept_edge_stage
+        clean_deleted_edge_stage concept_edge_stage
       end
     end
 
     def clean_deleted_edge_stage concept_edge_stage
       concept_edge = concept_edge_stage.concept_edge
-      if concept_edge.nil? or 
-         !Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge
-        concept_edge_stage.destroy
 
+      if concept_edge.nil? or 
+         (Assessment::GuidanceConceptEdgeOption.is_not_enabled? concept_edge)
+        concept_edge_stage.destroy
 
         return true
       else
@@ -227,7 +221,8 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
         concept_edges =  concept_stage.concept.concept_edge_dependent_concepts
         concept_edges.each do |concept_edge|
           concept_edge_stage = concept_stage.concept_edge_stages.where(concept_edge_id: concept_edge.id).first
-          if concept_edge_stage.nil?
+          if concept_edge_stage.nil? and
+             Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge
             add_enabled_edge_stage concept_stage, concept_edge
           end
         end
@@ -247,42 +242,47 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
       end
     end
 
-    def verify_passed_edge_stages submission, concept_stage, passing_edge_lock
+    def verify_passed_edge_stages submission, concept_stage
       concept_stage.concept_edge_stages.each do |concept_edge_stage|
-        verify_passed_edge_stage submission, concept_edge_stage, passing_edge_lock
+        verify_passed_edge_stage submission, concept_edge_stage
       end
     end
 
-    def verify_passed_edge_stage submission, concept_edge_stage, passing_edge_lock
-      concept_edge_stage.check_to_unlock submission, passing_edge_lock
+    def verify_passed_edge_stage submission, concept_edge_stage
+      concept_edge_stage.check_to_unlock submission, true
     end
 
-    def get_passed_edge_stages submission, concept_stage, passing_edge_lock
-      clean_deleted_edge_stages concept_stage
-      add_enabled_edge_stages concept_stage
-      verify_passed_edge_stages submission, concept_stage, passing_edge_lock
+    def data_synchronisation_clean submission, concept_stages
+      concept_stages.each do |concept_stage|
+        clean_deleted_edge_stages concept_stage
+      end
+    end
+
+    def data_synchronisation_add submission, concept_stages
+      concept_stages.each do |concept_stage|
+        add_enabled_edge_stages concept_stage
+      end
+    end
+
+    def data_synchronisation_verify submission, concept_stages
+      concept_stages.each do |concept_stage|
+        verify_passed_edge_stages submission, concept_stage
+      end
+    end
+
+    def get_passed_edge_stages concept_stage
       concept_stage.concept_edge_stages.passed.order('updated_at DESC')
     end
 
-    def get_failed_edge_stages submission, concept_stage, passing_edge_lock
-      clean_deleted_edge_stages concept_stage
-      add_enabled_edge_stages concept_stage
-      verify_passed_edge_stages submission, concept_stage, passing_edge_lock
+    def get_failed_edge_stages concept_stage
       concept_stage.concept_edge_stages.failed.order('updated_at DESC')
     end
 
-    def get_edge_stages submission, concept_stage, passing_edge_lock
-      clean_deleted_edge_stages concept_stage
-      add_enabled_edge_stages concept_stage
-      verify_passed_edge_stages submission, concept_stage, passing_edge_lock
+    def get_edge_stages concept_stage
       concept_stage.concept_edge_stages.order('updated_at DESC')
     end
 
-    def get_stage submission, concept_stage, concept_edge, passing_edge_lock
-      clean_deleted_edge_stages concept_stage
-      add_enabled_edge_stages concept_stage
-      verify_passed_edge_stages submission, concept_stage, passing_edge_lock
-
+    def get_stage concept_stage, concept_edge
       concept_edge_stage = concept_stage.concept_edge_stages.where(concept_edge_id: concept_edge.id).first
     end
 

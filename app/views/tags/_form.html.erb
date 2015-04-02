@@ -2,6 +2,7 @@
                     :html => { :class => 'form-horizontal' },
                     defaults: { input_html: { class: 'span7' } } do |f| %>
     <%= f.input :name %>
+    <%= f.input :rating, as: :integer, input_html: {class: "input-medium", min: "1"}  %>
     <%= f.input :description, as: :text, input_html:{class: "span7 text-area", rows:10}  %>
     <%= f.association :tag_group, collection: @tag_groups, input_html: {class: "input-medium"}, include_blank: false%>
 

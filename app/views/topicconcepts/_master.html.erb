@@ -1,9 +1,13 @@
+<input type="hidden" id="concept-id-val" value="<%= @concept.id %>"/>
+<input type="hidden" id="progress-bar-url" value="<%= get_progress_bar_info_course_topicconcepts_path(@course) %>"/>
+
 <div class="topicconcept-spunned">
     <div class="topicconcept-spun-12">
 		<div class="topicconcept-spun-grid-normaliser">
 		  	<div class="info-box info-box-green">
 		  		<div id="question-status">No feedback</div>
 	  			<div id="question-feedback"></div>
+	  			<div id="unlocked-concepts"></div>
 				<i id="correction-information-close" class="icon-remove icon-remove-button"></i>
 			</div>
 		</div>
@@ -29,12 +33,39 @@
 	<div class="topicconcept-spun-4">
 		<div class="topicconcept-spun-grid-normaliser">
 		  	<div class="info-box">
-			  	<span class="info-box-header">Failing Criteria</span>			  	
+		  		<div id="question-focus-area" class="inner-info-box-area">
+			  		<span class="info-box-header">Question Type</span>
+			  	</div>
+			  	<div class="inner-info-box-footer">
+		  			<form action="<%= set_tag_to_stage_course_assessment_guidance_quiz_submission_path(@course, @guidance_quiz.assessment, @submission) %>" method="POST" >
+		  				<input type="hidden" name="concept_id" value="<%= @concept.id %>"/>
+				      	<select name="tag_id" onchange="this.form.submit();">
+				      		<option value="nil" <%= "selected" if @current_tag.nil? %>> All</option>
+				        	<%= @tags.each do |tag| %>
+				            	<option value="<%= tag.id %>" <%= "selected" if @current_tag == tag %>><%= tag.name %> ( Rating: <%= tag.rating %> )</option>
+				        	<% end %>
+				      	</select>
+			      	</form>
+		  		</div>			  	
+			</div>
+		</div>
+
+		
+		<div class="topicconcept-spun-grid-normaliser">
+		  	<div class="info-box">
+			  	<span class="info-box-header">Passing Criteria</span>
+			  	<input type="hidden" id="retrieve-passing-criteria-url" value="<%= get_guidance_concept_edges_data_course_assessment_guidance_quizzes_path(@course) %>"/>
+		  		<div id="passing-criteria-focus-area" class="act-tipsy">
+		  		</div>
 			</div>
 		</div>
 		<div class="topicconcept-spun-grid-normaliser">
 		  	<div class="info-box">
-			  	<span class="info-box-header">Passing Criteria</span>
+			  	<span class="info-box-header">Failing Criteria</span>
+			  	<input type="hidden" id="retrieve-failing-criteria-url" value="<%= get_guidance_concept_data_no_stats_course_assessment_guidance_quizzes_path(@course) %>"/>
+		  		<div id="failing-criteria-focus-area" class="act-tipsy">
+
+		  		</div>			  	
 			</div>
 		</div>
 	</div>
@@ -57,14 +88,27 @@
 					var response = submit_mcq();
 					if (response != null) {
 						halt("Getting next question...");
-						update_feedback(response.correct, response.explanation);
+						update_feedback(response.correct, response.explanation, response.unlocked_concepts);
+						update_failing_criteria(get_failing_criteria());
+						update_passing_criteria(get_passing_criteria());
 						update_question(get_question());
+						progress_bar = get_progress_bar_info();
+						updateSideBar(progress_bar.pass,
+									  progress_bar.pass_amt,
+									  progress_bar.fail,
+									  progress_bar.fail_amt,
+									  progress_bar.enable,
+									  progress_bar.enable_amt,
+									  progress_bar.disable,
+									  progress_bar.disable_amt);
 					}
 				}
 				resume();
 			}, 250);
-
 		});
+
+		update_failing_criteria(get_failing_criteria());
+		update_passing_criteria(get_passing_criteria());
 	});
 	
 
@@ -97,7 +141,139 @@
 		return result;
 	}
 
-	function update_feedback(status, explanation){
+	function get_failing_criteria(){
+		var result = null;
+
+		var url = $("#retrieve-failing-criteria-url").prop("value");
+		var concept_id = $("#concept-id-val").prop("value");
+		var result = server_request({concept_id: concept_id}, "POST", url);
+
+		return result;
+	}
+
+	function get_passing_criteria(){
+		var result = null;
+
+		var url = $("#retrieve-passing-criteria-url").prop("value");
+		var concept_id = $("#concept-id-val").prop("value");
+		var result = server_request({concept_id: concept_id}, "POST", url);
+
+		return result;
+	}
+
+	function get_progress_bar_info(){
+		var result = null;
+
+		var url = $("#progress-bar-url").prop("value");
+		var result = server_request({}, "GET", url);
+
+		return result;
+	}
+
+	function make_concept_criteria_html (criteria) {
+	    result = "";
+
+      	if (criteria.length <= 0) {
+        	result += '<p class="tipsy-passWhen" style="text-align:center;">No criteria found</p>';
+      	}
+      	for ( var i = 0; i < criteria.length; i++) {
+	        var conditionDiv = document.createElement('div');
+	        conditionDiv.className = "tipsy-condition-margin"
+	        var iconSpan = document.createElement('span');
+	        var statementP = document.createElement('p');
+	        statementP.className = "tipsy-fail-statement"
+
+	        if (criteria[i].pass) {
+	          	iconSpan.className = "icon-ok-sign tipsy-passIcon";
+	        }
+	        else {
+	          	iconSpan.className = "icon-remove-sign tipsy-failIcon";
+	          	statementP.className += " tipsy-failstrikeout";
+	        }
+
+	        statementP.appendChild(iconSpan);
+
+	        if (criteria[i].name == "wrong_threshold") {
+	          	statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+	        }
+	        else if (criteria[i].name == "wrong_rating_threshold"){
+          		var innerText = "";
+          		if (criteria[i].condition2) {
+            		var innerText = "right and ";
+          		}
+
+          		statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">negative '+criteria[i].condition+'</em> rating from '+ innerText +'wrong answers (<em class="tipsy-passWord"> '+(criteria[i].current * -1)+' current </em>)';
+        	}
+        	else if (criteria[i].name == "wrong_percent_threshold"){
+          		statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em>% '+'wrong answers (<em class="tipsy-passWord"> '+criteria[i].current+'% current </em>)';
+        	}
+
+	        conditionDiv.appendChild(statementP);
+	        result += conditionDiv.outerHTML;
+      	}
+
+    	return result;
+  	}
+
+  	function make_concept_edge_criteria_html (criteria_details) {
+    	var result = "<hr/><p class='name'>"+criteria_details.name+"</p>";
+    	var criteria = criteria_details.criteria
+	    if (criteria.length <= 0) {
+	      	result += '<p class="tipsy-passWhen" style="text-align:center;">No criteria found</p>';
+	    }
+    	for ( var i = 0; i < criteria.length; i++) {
+	      	var conditionDiv = document.createElement('div');
+	      	conditionDiv.className = "tipsy-condition-margin"
+	      	var iconSpan = document.createElement('span');
+	      	var statementP = document.createElement('p');
+	      	statementP.className = "tipsy-pass-statement"
+
+	      	if (criteria[i].pass) {
+	        	iconSpan.className = "icon-ok-sign tipsy-passIcon";
+	        	statementP.className += " tipsy-passstrikeout";
+	      	}
+	      	else {
+	        	iconSpan.className = "icon-remove-sign tipsy-failIcon";
+	      	}
+
+	      	statementP.appendChild(iconSpan);
+
+	      	if (criteria[i].name == "correct_threshold") {
+	        	statementP.innerHTML += ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em> correct ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+	      	}   	
+      		else if (criteria[i].name == "correct_rating_threshold"){
+        		var innerText = "";
+        		if (criteria[i].condition2) {
+          			var innerText = "and wrong ";
+        		}
+
+        		statementP.innerHTML += ' Getting  <em class="tipsy-failWord">'+criteria[i].condition+'</em> rating from right '+ innerText +'answers (<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+      		}
+      		else if (criteria[i].name == "correct_percent_threshold"){
+        		statementP.innerHTML += ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em>% '+'right answers (<em class="tipsy-passWord"> '+criteria[i].current+'% current </em>)';
+      		}
+
+	      	conditionDiv.appendChild(statementP);
+	      	result += conditionDiv.outerHTML;
+    	}
+
+    	return result;
+  	}
+
+  	function update_failing_criteria(criteria_details){
+  		$("#failing-criteria-focus-area").html(make_concept_criteria_html (criteria_details.criteria));
+	}
+
+	function update_passing_criteria(criteria_details){
+		var result = "";
+		for (var i = 0; i < criteria_details.length; i++) {
+			result += make_concept_edge_criteria_html(criteria_details[i]);
+		}
+
+  		$("#passing-criteria-focus-area").html(result);
+	}
+
+	function update_feedback(status, explanation, concepts){
 		if (status) {
 			$("#question-status").html("Last question answered correctly!");
 			$("#question-status").parent().removeClass("info-box-red").addClass("info-box-green");
@@ -108,6 +284,23 @@
 		}
 
 		$("#question-feedback").html(explanation);
+
+		if (concepts.length > 0) {
+			var conceptsUL = document.createElement('ul');
+			conceptsUL.setAttribute("style","list-style:initial");
+			for (var i = 0; i < concepts.length; i++) {
+				var conceptLI = document.createElement('li');
+				conceptLI.innerHTML = concepts[i];
+				conceptsUL.appendChild(conceptLI);
+			}
+
+			var statementP = document.createElement('p');
+			statementP.innerHTML = "Concepts Unlocked:";
+			$("#unlocked-concepts").html("<hr>"+statementP.outerHTML + conceptsUL.outerHTML);
+		}
+		else{
+			$("#unlocked-concepts").html("");
+		}
 	}
 
 	function update_question(question_details) {

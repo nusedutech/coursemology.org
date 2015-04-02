@@ -1,35 +1,241 @@
 <h3>Enable Guidance Quiz (Training):</h3>
-<p>Only enable if you want the students to access the training. The excluded questions can be set <a href="<%= exclude_questions_course_assessment_guidance_quiz_excluded_questions_path(@course) %>">here</a>.</p>
+<p>Only enable if you want the students to access the training. The excluded questions can be set 
+    <a href="<%= exclude_questions_course_assessment_guidance_quiz_excluded_questions_path(@course) %>">here</a>.
+</p>
 <div class="info-block checkbox-text">
-  <div class="normalized-topicconcept">
-    <input type="checkbox"
+    <div class="normalized-topicconcept">
+        <input type="checkbox"
            class="normalized-topicconcept"
            name="guidance_quiz_setting_enable"
            <%= "checked" if @enable %>> Enabled?
-    <input type="hidden"
+        <input type="hidden"
            value="<%= set_enabled_course_assessment_guidance_quizzes_path(@course) %>">
-  </div class="normalized-topicconcept">
+    </div class="normalized-topicconcept">
 </div>
 
 <h3>Guidance Quiz (Training) Settings:</h3>
 <p>For various settings to customise your student's exploration process.</p>
 <div class="info-block checkbox-text">
-  <div class="normalized-topicconcept">
-    <input type="checkbox"
+    <div class="normalized-topicconcept">
+        <input type="checkbox"
            class="normalized-topicconcept"
            name="guidance_quiz_setting_pal"
            <%= "checked" if @passing_edge_lock %>> Enable locking on passed edges criteria <em>(students may not have their edge status changed to fail once they have passed it)</em>
-    <input type="hidden"
+        <input type="hidden"
            value="<%= set_passing_edge_lock_course_assessment_guidance_quizzes_path(@course) %>">
-  </div>
-  <div class="normalized-topicconcept">
-    <input type="checkbox"
+    </div>
+    <div class="normalized-topicconcept">
+        <input type="checkbox"
            class="normalized-topicconcept"
            name="guidance_quiz_setting_nel"
            <%= "checked" if @neighbour_entry_lock %>> Enable locking on all entry criterias once one criteria is chosen <em>(to enforce linear progression)</em>
-    <input type="hidden"
+        <input type="hidden"
            value="<%= set_neighbour_entry_lock_course_assessment_guidance_quizzes_path(@course) %>">
-  </div>
+    </div>
 </div>
 
+<hr>
+<h3>Concept Settings:</h3>
+<p>Settings for concept in bulk.</p>
+<%= form_tag set_concepts_criteria_course_assessment_guidance_quizzes_path(@course), class: 'form-horizontal', method: 'POST' do %>
+    <div class="control-group">
+        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+        <div class="controls">
+            <textarea id="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'fail_enabled', 'Enabled? :', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'fail_enabled', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'fail_is_entry', 'Is Entry Concept? :', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'fail_is_entry', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'fail_wrong_threshold', 'Failing threshold:', class: 'control-label' %>
+        <div class='controls'>
+            <%= number_field_tag 'fail_wrong_threshold', '0', class: 'input-medium' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'fail_wrong_rating_threshold', 'Rating threshold:', class: 'control-label' %>
+        <div class='controls'>
+            <%= number_field_tag 'fail_wrong_rating_threshold', '0', class: 'input-medium' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'fail_wrong_rating_absolute', 'Absolute Rating:', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'fail_wrong_rating_absolute', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'fail_wrong_percent_threshold', 'Failing Percent threshold (%):', class: 'control-label' %>
+        <div class='controls'>
+            <%= number_field_tag 'fail_wrong_percent_threshold', '0', class: 'input-medium' %>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <input type="submit" class="btn" value="Update"/>
+        </div>
+    </div>
+<% end %>
 
+<hr>
+<h3>Concept Edge Settings:</h3>
+<p>Settings for concept edges in bulk.</p>
+<%= form_tag set_concept_edges_relation_course_assessment_guidance_quizzes_path(@course), class: 'form-horizontal', method: 'POST' do %>
+    <div class="control-group">
+        <%= label_tag 'concept-edges-textext', 'Choose Concepts Edges: ', class: 'control-label' %>
+        <div class="controls">
+            <textarea id="concept-edges-textext" style="padding-bottom:11px;" rows="1"></textarea>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'enabled', 'Enabled? :', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'enabled', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'correct_threshold', 'Correct threshold:', class: 'control-label' %>
+        <div class='controls'>
+            <%= number_field_tag 'correct_threshold', '0', class: 'input-medium' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'correct_rating_threshold', 'Rating threshold:', class: 'control-label' %>
+        <div class='controls'>
+            <%= number_field_tag 'correct_rating_threshold', '0', class: 'input-medium' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'correct_rating_absolute', 'Absolute Rating:', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'correct_rating_absolute', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <%= label_tag 'correct_percent_threshold', 'Correct Percent threshold (%):', class: 'control-label' %>
+        <div class='controls'>
+            <%= number_field_tag 'correct_percent_threshold', '0', class: 'input-medium' %>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <input type="submit" class="btn" value="Update"/>
+        </div>
+    </div>
+<% end %>
+
+<script>
+    var onlySelectionItemManager = {
+            compareItems: function(item1, item2)
+            {
+                return item1.name === item2.name;
+            },
+            filter: function(list, query)
+            {
+                var result = [];
+                $.each(list, function(){
+                    if (this.name.toString().toLowerCase().indexOf(query.toLowerCase()) == 0){
+                        result.push(this);
+                    }
+                });
+                //console.log(result);
+                return result;
+            },
+            itemContains: function(item, needle)
+            {
+                return item.name.indexOf(needle) == 0;
+            },
+            itemToString: function(item)
+            {
+                return item.name;
+            },
+            stringToItem: function(string)
+            {
+                return {id: "nil", name: string}
+            }
+        };
+
+    function onSelectionTagFilter(e, data){
+        var enteredItems = $.parseJSON($(this).textext()[0].hiddenInput().val());
+        var enteredValues = extractOneParameterListFromJsonArray(enteredItems, "name");
+        //If value found in current list of tags, don't add it
+        if(enteredValues.indexOf(data.tag.name) >= 0) {
+            data.result = false;
+            return;
+        }
+
+        var suggestedItems = $(this).textext()[0].ajax()._suggestions;
+        var suggestedValues = extractOneParameterListFromJsonArray(suggestedItems, "name");
+        //Only allow values found in suggestions
+        var index = suggestedValues.indexOf(data.tag.name)
+        if (index == -1){
+            data.result = false;
+            return;
+        }
+        //Passed tags are assigned the ids found in suggestions
+        else {
+            data.tag.id = suggestedItems[index].id;
+        }
+
+    }
+
+    $(document).ready(function(){
+        $('#concepts-textext').textext(
+        {
+            plugins : 'prompt focus arrow autocomplete tags ajax filter',
+            ajax : {
+                url : '<%= get_concepts_list_with_id_course_topicconcepts_path(@course)%>',
+                type: "POST",
+                async: false,
+                dataType : 'json',
+                cacheResults : true,
+            },
+            html : {
+                hidden: ('<input type="hidden" name="tags" />')
+            },
+            ext : {
+                itemManager : onlySelectionItemManager
+            }
+        })
+        .bind('isTagAllowed', onSelectionTagFilter)
+
+        $('#concept-edges-textext').textext(
+        {
+            plugins : 'prompt focus arrow autocomplete tags ajax filter',
+            ajax : {
+                url : '<%= get_concept_edges_list_with_id_course_topicconcepts_path(@course)%>',
+                type: "POST",
+                async: false,
+                dataType : 'json',
+                cacheResults : true,
+            },
+            html : {
+                hidden: ('<input type="hidden" name="tags" />')
+            },
+            ext : {
+                itemManager : onlySelectionItemManager
+            }
+        })
+        .bind('isTagAllowed', onSelectionTagFilter);
+    });
+
+    function extractOneParameterListFromJsonArray(arr, key)
+    {
+        var result = [];
+        for (var i = 0; i < arr.length; i++) {
+            result.push(arr[i][key]);
+        }
+
+        return result;
+    }
+</script>

@@ -94,6 +94,21 @@ class Assessment < ActiveRecord::Base
   has_many  :queued_jobs, as: :owner, class_name: "QueuedJob", dependent: :destroy
   has_many  :pending_actions, as: :item, dependent: :destroy
   has_many  :submissions, class_name: "Assessment::Submission",dependent: :destroy, foreign_key: "assessment_id"
+  has_many  :answers, class_name: "Assessment::Answer",
+            through: :submissions
+  
+  has_many  :general_answers, class_name: "Assessment::GeneralAnswer",
+            through: :answers,
+            source: :as_answer, source_type: "Assessment::GeneralAnswer"
+
+  has_many  :coding_answers, class_name: "Assessment::CodingAnswer",
+            through: :answers,
+            source: :as_answer, source_type: "Assessment::CodingAnswer"
+
+  has_many  :mcq_answers, class_name: "Assessment::McqAnswer",
+            through: :answers,
+            source: :as_answer, source_type: "Assessment::McqAnswer"
+
 
   amoeba do
     clone [:questions]

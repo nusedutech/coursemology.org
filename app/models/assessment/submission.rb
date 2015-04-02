@@ -19,6 +19,7 @@ class Assessment::Submission < ActiveRecord::Base
   scope :graded, -> { where(status: 'graded') }
 
   scope :submitted_format, -> { where(status: 'submitted') }
+  scope :attempting_format, -> { where(status: 'attempting') }
 
   belongs_to :assessment
   belongs_to :std_course, class_name: "UserCourse"
@@ -47,7 +48,7 @@ class Assessment::Submission < ActiveRecord::Base
   # Update might be required on MTI Gem
 	has_many :progression_groups, class_name: "Assessment::ProgressionGroup"
 
-  #has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"  
+  has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"  
 
 
   after_create :set_attempting
@@ -116,6 +117,11 @@ class Assessment::Submission < ActiveRecord::Base
 
   def graded?
     self.status == 'graded'
+  end
+
+  def set_updated_timing
+    self.updated_at = Time.now
+    self.save
   end
 
   def get_path

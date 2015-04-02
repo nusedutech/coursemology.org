@@ -1,0 +1,26 @@
+<div style="margin-right: 10px;">
+	<form action="<%= request.original_url %>" method="GET" >
+		<table class="table-basic">
+		  	<tr>
+		    	<td>Attempted date: </td>
+		    	<td>
+			      	<select name="submission_id" onchange="this.form.submit();">
+			        	<%= @submissions.each do |sbm| %>
+			            	<option value="<%= sbm.id %>" <%= @chosen_submission == sbm ? "selected" : "" %>><%= sbm.created_at.to_formatted_s(:long) %></option>
+			        	<% end %>
+			      	</select>
+		    	</td>
+		  	</tr>
+		</table>
+	</form>
+	<hr/>
+</div>
+
+<%= render  partial: "review_diagnostic_exploration_submission_content" %>
+
+<script>
+	$(document).ready(function(){
+	    updateTitleBar("<h2>Review Progress</h2>");
+
+	});
+</script>

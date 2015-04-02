@@ -7,7 +7,6 @@ class Assessment::GuidanceConceptOption < ActiveRecord::Base
   belongs_to :topicconcept, class_name: Topicconcept, foreign_key: "topicconcept_id"
   has_many :concept_criteria, class_name: Assessment::GuidanceConceptCriterion, dependent: :destroy
 
-
   def self.update_attributes_with_new (topicconcept, attributes)
     concept_option = topicconcept.concept_option
     if concept_option.nil?

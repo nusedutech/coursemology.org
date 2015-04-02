@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150225134415) do
+ActiveRecord::Schema.define(:version => 20150402072703) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -178,6 +178,21 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.datetime "updated_at",   :null => false
   end
 
+  create_table "assessment_correct_percent_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "assessment_correct_rating_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.boolean  "absolute",   :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+  end
+
   create_table "assessment_correct_thresholds", :force => true do |t|
     t.integer  "threshold"
     t.datetime "deleted_at"
@@ -290,6 +305,8 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.datetime "deleted_at"
     t.datetime "created_at",                                              :null => false
     t.datetime "updated_at",                                              :null => false
+    t.integer  "rating_right",                         :default => 0
+    t.integer  "rating_wrong",                         :default => 0
   end
 
   create_table "assessment_guidance_concept_options", :force => true do |t|
@@ -314,6 +331,9 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.datetime "created_at",                                  :null => false
     t.datetime "updated_at",                                  :null => false
     t.boolean  "failed",                   :default => false
+    t.integer  "tag_id"
+    t.integer  "rating_right",             :default => 0
+    t.integer  "rating_wrong",             :default => 0
   end
 
   create_table "assessment_guidance_quiz_excluded_questions", :force => true do |t|
@@ -444,10 +464,25 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+    t.boolean  "test",       :default => false
+    t.integer  "duration"
+  end
+
+  create_table "assessment_wrong_percent_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.datetime "deleted_at"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
-    t.boolean  "test"
-    t.integer  "duration"
+  end
+
+  create_table "assessment_wrong_rating_thresholds", :force => true do |t|
+    t.integer  "threshold"
+    t.boolean  "absolute",   :default => false
+    t.datetime "deleted_at"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
   end
 
   create_table "assessment_wrong_thresholds", :force => true do |t|
@@ -1277,6 +1312,7 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.datetime "deleted_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "rating",         :default => 1
   end
 
   add_index "tags", ["name"], :name => "index_tags_on_name"
@@ -1306,6 +1342,12 @@ ActiveRecord::Schema.define(:version => 20150225134415) do
     t.time     "deleted_at"
     t.datetime "created_at",                 :null => false
     t.datetime "updated_at",                 :null => false
+  end
+
+  create_table "topicconcepts_updated_timings", :force => true do |t|
+    t.integer  "course_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "tutorial_groups", :force => true do |t|

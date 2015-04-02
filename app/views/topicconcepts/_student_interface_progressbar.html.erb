@@ -2,10 +2,54 @@
 	<div class="nav-head-concept">
     	<h4>Progress</h4>
 		<div class="progress">
-      		<div class="bar bar-success topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:pass] %>%" data-toggle="tooltip" title="<%= @progress_bar[:pass_amt] %> concept<%= "s" if @progress_bar[:pass_amt] > 1 %> unlocked"></div>
-      		<div class="bar bar-danger topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:fail] %>%" data-toggle="tooltip" title="<%= @progress_bar[:fail_amt] %> concept<%= "s" if @progress_bar[:fail_amt] > 1 %> failed / locked"></div>
-      		<div class="bar bar-success bar-enable topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:enable] %>%" data-toggle="tooltip" title="<%= @progress_bar[:enable_amt] %> concept<%= "s" if @progress_bar[:enable_amt] > 1 %> not achieved yet"></div>
-      		<div class="bar bar-success bar-disable topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:disable] %>%" data-toggle="tooltip" title="<%= @progress_bar[:disable_message] ? @progress_bar[:disable_message] : (@progress_bar[:disable_amt].to_s + (" concept" + (@progress_bar[:disable_amt] > 1 ? "s" : "") + " not enabled yet" ) ) %>"></div>
+      		<div id="guidance-sidebar-pass" class="bar bar-success topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:pass] %>%" data-toggle="tooltip" title="<%= @progress_bar[:pass_amt] %> concept<%= "s" if @progress_bar[:pass_amt] > 1 %> unlocked"></div>
+      		<div id="guidance-sidebar-fail" class="bar bar-danger topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:fail] %>%" data-toggle="tooltip" title="<%= @progress_bar[:fail_amt] %> concept<%= "s" if @progress_bar[:fail_amt] > 1 %> failed"></div>
+      		<div id="guidance-sidebar-enabled" class="bar bar-success bar-enable topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:enable] %>%" data-toggle="tooltip" title="<%= @progress_bar[:enable_amt] %> concept<%= "s" if @progress_bar[:enable_amt] > 1 %> not achieved yet"></div>
+      		<div id="guidance-sidebar-disabled" class="bar bar-success bar-disable topicconcept-bar-tooltip" role="progressbar" style="width: <%= @progress_bar[:disable] %>%" data-toggle="tooltip" title="<%= @progress_bar[:disable_message] ? @progress_bar[:disable_message] : (@progress_bar[:disable_amt].to_s + (" concept" + (@progress_bar[:disable_amt] > 1 ? "s" : "") + " not enabled yet" ) ) %>"></div>
     	</div>		
 	</div>
 </div>
+
+<script>
+	function updateSideBar(passPercentage,
+						   passAmount,
+						   failPercentage,
+						   failAmount,
+						   enabledPercentage,
+						   enabledAmount,
+						   disabledPercentage,
+						   disabledAmount) {
+
+		$("#guidance-sidebar-pass").css("width", passPercentage+"%");
+		if (passAmount > 1) {
+			$("#guidance-sidebar-pass").attr("data-original-title", passAmount+" concept unlocked");
+		}
+		else {
+			$("#guidance-sidebar-pass").attr("data-original-title", passAmount+" concepts unlocked");
+		}
+
+		$("#guidance-sidebar-fail").css("width", failPercentage+"%");
+		if (failAmount > 1) {
+			$("#guidance-sidebar-fail").attr("data-original-title", failAmount+" concept failed");
+		}
+		else {
+			$("#guidance-sidebar-fail").attr("data-original-title", failAmount+" concepts failed");
+		}
+
+		$("#guidance-sidebar-enabled").css("width", enabledPercentage+"%");
+		if (enabledAmount > 1) {
+			$("#guidance-sidebar-enabled").attr("data-original-title", enabledAmount+" concept not achieved yet");
+		}
+		else {
+			$("#guidance-sidebar-enabled").attr("data-original-title", enabledAmount+" concepts not achieved yet");
+		}
+
+		$("#guidance-sidebar-disabled").css("width", disabledPercentage+"%");
+		if (disabledAmount > 1) {
+			$("#guidance-sidebar-disabled").attr("data-original-title", disabledAmount+" concept not enabled yet");
+		}
+		else {
+			$("#guidance-sidebar-disabled").attr("data-original-title", disabledAmount+" concepts not enabled yet");
+		}
+	}
+</script>

@@ -1,0 +1,47 @@
+<%= render  partial: "tabs" %>
+
+<div class="page-header">
+    <h1>Individual Submissions</h1>
+</div>
+
+<%= form_for '/', html: { class: 'form-horizontal' }, method:"GET" do %>
+	<div class="control-group">
+        <%= label_tag 'select_student', 'Choose Student: ', class: 'control-label' %>
+        <div class="controls">
+            <select name="select_student" onchange="this.form.submit();"> 
+            	<% if @student.nil? %>
+            		<option value="" selected></option>
+            	<% end %>
+            	<% @course.user_courses.each do |student| %>
+            		<option value="<%= student.id %>" <%= "selected" if @student == student %> ><%= student.name %></option>
+            	<% end %>
+            </select>
+        </div>
+    </div>
+<% end %>
+
+<% if @student %> 
+	<%= form_for '/', html: { class: 'form-horizontal' }, method:"GET" do %>
+		<input type="hidden" name="select_student" value="<%= @student.id %>"/>
+		<div class="control-group">
+	        <%= label_tag 'select_submission', 'Choose Submission: ', class: 'control-label' %>
+	        <div class="controls">
+	            <select name="select_submission" onchange="this.form.submit();">
+	            	<% if @chosen_submission.nil? %>
+	            		<option value="" selected></option>
+	            	<% end %>
+		        	<%= @submissions.each do |sbm| %>
+		            	<option value="<%= sbm.id %>" <%= @chosen_submission == sbm ? "selected" : "" %>><%= sbm.updated_at.to_formatted_s(:long) %></option>
+		        	<% end %>
+		      	</select>
+	        </div>
+	    </div>
+	<% end %>
+<% end %>
+
+<% if @chosen_submission %>
+	<hr/>
+	<div class="well">
+		<%= render  partial: "review_diagnostic_exploration_submission_content" %>
+	</div>
+<% end %>

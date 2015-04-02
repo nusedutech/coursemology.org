@@ -30,6 +30,8 @@
 				<div id="div_edit_dpd" style="display: none;">
 					<div id="div_action">
 						<input style="float: right" type="button" id="btn_show_edit_required_concepts" class="btn btn-success btnmargined" value="Edit Required Concepts" onclick="show_edit_required_concepts()"/>
+            			<input style="float: right" type="button" id="btn_show_edit_concept_criterias" class="btn btnmargined" value="Edit Progress Criteria" onclick="show_edit_concept_criterias();"/>
+            			<input style="float: right" type="button" id="btn_show_edit_concept_fail_criterias" class="btn btn-info btnmargined" value="Edit Failing Criteria" onclick="show_edit_concept_fail_criteria();"/>
 					</div>
 					<div id="div_edit" style="display: none">
 						<div>
@@ -40,7 +42,128 @@
 							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_edit_required_concepts" class="btn" value="Cancel" onclick="cancel_edit_required_concepts()"/>
 						</div>
 					</div>
-          
+          			<div id="div_criteria_update" style="display: none">
+            			<hr>
+            			<select id="criteria_relation_select" class="full-width">
+            			</select>
+           				<hr>
+						<div style="margin-top: 2px;">
+							<input style="float: right" type="button" id="btn_next_concept_criterias" class="btn btn-success" value="Next" onclick="edit_concept_criterias();"/>
+							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
+						</div>
+					</div>
+          			<div id="div_criteria_update_next" style="display: none">
+            			<hr>
+            			<div>
+              				<%= form_tag '/', class: 'form-horizontal' do %>
+	                			<input type="hidden" id="concept_edge_id" name="concept_edge_id" value=""/>
+	               				<div class='control-group'>
+								    <%= label_tag 'enabled', 'Enabled? :', class: 'control-label' %>
+	                  				<div class='controls'>
+								      	<%= check_box_tag 'enabled', 'yes' %>
+	                 				</div>
+	                			</div>
+	                			<div class='control-group'>
+								    <%= label_tag 'correct_threshold', 'Correct threshold:', class: 'control-label' %>
+	                  				<div class='controls'>
+								      	<%= number_field_tag 'correct_threshold', '0', class: 'input-medium' %>
+	                  				</div>
+	                			</div>
+	                			<div class='control-group'>
+							    	<%= label_tag 'correct_rating_threshold', 'Rating threshold:', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= number_field_tag 'correct_rating_threshold', '0', class: 'input-medium' %>
+                  					</div>
+                				</div>
+            					<div class='control-group'>
+							    	<%= label_tag 'correct_rating_choice_threshold', 'Absolute Rating:', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= check_box_tag 'correct_rating_choice_threshold', 'no' %>
+                  					</div>
+                				</div>
+            					<div class='control-group'>
+							    	<%= label_tag 'correct_percent_threshold', 'Correct Percent threshold (%):', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= number_field_tag 'correct_percent_threshold', '0', class: 'input-medium' %>
+                  					</div>
+                				</div>
+              				<% end %>
+              				<div class="pseudo-pull-right-child">
+                				<input type="button" class="btn" value="Finish" onclick="finish_edit_concept_criterias()"/>
+              				</div>
+						</div>
+            			<hr>
+						<div style="margin-top: 2px;">
+							<input style="float: right" type="button" id="btn_back_concept_criterias" class="btn btn-warning" value="Back" onclick="show_edit_concept_criterias();"/>
+							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
+						</div>
+					</div>
+
+          			<div id="div_criteria_fail_update" style="display: none">
+            			<hr>
+            			<select id="fail_concept_select" class="full-width">
+            			</select>
+            			<hr>
+						<div style="margin-top: 2px;">
+							<input style="float: right" type="button" id="btn_next_concept_fail_criterias" class="btn btn-success" value="Next" onclick="edit_concept_fail_criteria();"/>
+							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
+						</div>
+					</div>
+
+          			<div id="div_criteria_fail_update_next" style="display: none">
+            			<hr>
+            			<div>
+              				<%= form_tag '/', class: 'form-horizontal' do %>
+                				<input type="hidden" id="fail_concept_id" name="fail_concept_id" value=""/>
+                				<div class='control-group'>
+								    <%= label_tag 'fail_enabled', 'Enabled? :', class: 'control-label' %>
+	                 				<div class='controls'>
+										<%= check_box_tag 'fail_enabled', 'yes' %>
+	                  				</div>
+	                			</div>
+                				<div class='control-group'>
+							    	<%= label_tag 'fail_is_entry', 'Is Entry Concept? :', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= check_box_tag 'fail_is_entry', 'yes' %>
+                  					</div>
+                				</div>
+            					<div class='control-group'>
+							    	<%= label_tag 'fail_wrong_threshold', 'Failing threshold:', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= number_field_tag 'fail_wrong_threshold', '0', class: 'input-medium' %>
+                  					</div>
+                				</div>
+            					<div class='control-group'>
+							    	<%= label_tag 'fail_wrong_rating_threshold', 'Rating threshold:', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= number_field_tag 'fail_wrong_rating_threshold', '0', class: 'input-medium' %>
+                  					</div>
+                				</div>
+            					<div class='control-group'>
+							    	<%= label_tag 'fail_wrong_rating_choice_threshold', 'Absolute Rating:', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= check_box_tag 'fail_wrong_rating_choice_threshold', 'no' %>
+                  					</div>
+                				</div>
+            					<div class='control-group'>
+							    	<%= label_tag 'fail_wrong_percent_threshold', 'Failing Percent threshold (%):', class: 'control-label' %>
+                  					<div class='controls'>
+							      		<%= number_field_tag 'fail_wrong_percent_threshold', '0', class: 'input-medium' %>
+                  					</div>
+                				</div>
+
+              				<% end %>
+	              			<div class="pseudo-pull-right-child">
+	                			<input type="button" class="btn" value="Finish" onclick="finish_edit_concept_fail_criteria()"/>
+	              			</div>
+						</div>
+            			<hr>
+						<div style="margin-top: 2px;">
+							<input style="float: right" type="button" id="btn_back_concept_fail_criterias" class="btn btn-warning" value="Back" onclick="show_edit_concept_fail_criteria();"/>
+							<input style="float: right; margin-right: 5px;" type="button" id="btn_cancel_concept_criterias" class="btn" value="Cancel" onclick="cancel_concept_criterias();"/>
+						</div>
+					</div>
+
 				</div>
 				<% end %>
 			</td>
@@ -57,23 +180,31 @@
 	var required_concepts = [];
 	var concepts_list = [];
 
-  //Constants
+  	//Constants
 	var DATA_HOVER_KEY = "data-hover-status";
 	var DATA_HIDE_STATUS = "hide";
 	var DATA_SHOW_STATUS = "show";
 
-  function reset_edit_console(){
-    $('#div_edit').hide();
-    $('#div_action').hide();  }
+  	function reset_edit_console(){
+    	$('#div_edit').hide();
+    	$('#div_criteria_update').hide();
+    	$('#div_criteria_update_next').hide();
+    	$('#div_action').hide();
+    	$('#div_criteria_fail_update').hide();
+    	$('#div_criteria_fail_update_next').hide();
+  	}
 
-  function default_edit_console(){
-    reset_edit_console();
-    $('#div_action').show();
-  }
+  	function default_edit_console(){
+    	reset_edit_console();
+    	$('#div_action').show();
+  	}
 
 	function finish_edit_required_concepts(){
 		is_editing_required_concepts = false;
 		$('#div_edit, #div_action').toggle();
+	    $('#div_criteria_update').hide();
+	    $('#div_criteria_update_next').hide();
+	    $('#div_criteria_fail_update').hide();
 		agoras = $('#txtar_required_concepts').textext()[0].hiddenInput().val();
 		if(selected_node != null){
 			var result = topic_concept_data_save_dependency(selected_node.id, JSON.stringify(required_concepts), JSON.stringify(JSON.parse(agoras)));
@@ -88,6 +219,9 @@
 	function show_edit_required_concepts(){
 		is_editing_required_concepts = true;
 		$('#div_edit, #div_action').toggle();
+	    $('#div_criteria_update').hide();
+	    $('#div_criteria_update_next').hide();
+	    $('#div_criteria_fail_update').hide();
 		var tree = $("#div_tree").jstree(true);
 		tree.open_all();
 		$('li.jstree-leaf a').css('border', '1px solid white');
@@ -112,11 +246,150 @@
 	function cancel_edit_required_concepts(){
 		is_editing_required_concepts = false;
 		$('#div_edit, #div_action').toggle();
+    	$('#div_criteria_update').hide();
+    	$('#div_criteria_update_next').hide();
+    	$('#div_criteria_fail_update').hide();
 		$('li.jstree-leaf a').css('border', '0px');
 		$('li.jstree-leaf a').css('background-color', '');
 	}
 	
-  
+  	function cancel_concept_criterias(){
+    	reset_edit_console();
+    	$('#div_action').show();
+  	}
+
+  	function finish_edit_concept_criterias(){
+	    reset_edit_console();
+
+	    var enabled = $("#enabled").prop("checked");
+	    var correct_threshold = $("#correct_threshold").prop("value");
+	    var concept_edge_id = $("#concept_edge_id").prop("value");
+        var correct_rating_threshold = $("#correct_rating_threshold").prop("value");
+        var correct_rating_choice = $("#correct_rating_choice_threshold").prop("checked");
+        var correct_percent_threshold = $("#correct_percent_threshold").prop("value");
+
+	    set_concept_edge_relation({concept_edge_id   		 : concept_edge_id,
+	                          	   correct_threshold 		 : correct_threshold,
+	                          	   enabled           		 : enabled,
+	                          	   correct_rating_threshold  : correct_rating_threshold,
+	                          	   correct_rating_choice 	 : correct_rating_choice,
+	                          	   correct_percent_threshold : correct_percent_threshold});
+	    show_edit_concept_criterias();
+  	}
+
+  	function edit_concept_criterias(){
+    	var value = $('#criteria_relation_select').prop('value');
+    	if (value != null){
+      		var result = get_concept_edge_relation({concept_edge_id : value});
+      		if (result != null){
+        		$("#concept_edge_id").prop("value", result.concept_edge_id);
+        		$("#enabled").prop("checked", result.enabled);
+        		$("#correct_threshold").prop("value", result.criteria.correct_threshold);
+        		$("#correct_rating_threshold").prop("value", result.criteria.correct_rating_threshold);
+        		$("#correct_rating_choice_threshold").prop("checked", result.criteria.correct_rating_absolute);
+        		$("#correct_percent_threshold").prop("value", result.criteria.correct_percent_threshold);
+
+		    	reset_edit_console();
+		    	$('#div_criteria_update_next').show();
+			}
+      		else{
+        		alert('Criterias cannot be retrieved');
+        		cancel_concept_criterias();
+      		}
+    	}
+    	else {
+      		alert('No dependency selected');
+      		cancel_concept_criterias();
+    	}
+  	}
+
+  	function show_edit_concept_criterias(){
+    	if(selected_node != null){
+      	var result = get_concept_required_edges(selected_node.id);       
+
+      	if (result.dependencies.length != 0) {
+        	$('#criteria_relation_select').find('option').remove();
+       		$.each(result.dependencies, function(i, dependency) {
+          		$('#criteria_relation_select').append('<option value="'+dependency.concept_edge_id+'">'+dependency.required_concept_name+' REQUIRED BY '+result.current_concept.name+"</option>");
+        		}); 
+        
+        		reset_edit_console();
+        		$('#div_criteria_update').show();
+      		}
+      		else {
+        		alert('No dependency found for concept');
+        		cancel_concept_criterias();
+      		}
+    	}
+  	}
+
+  	function show_edit_concept_fail_criteria(){
+    	if(selected_node != null){
+      		var result = get_all_concepts();
+      		if (result.concepts.length != 0) {
+        		$('#fail_concept_select').find('option').remove();
+        		$.each(result.concepts, function(i, concept) {
+          			$('#fail_concept_select').append('<option value="'+concept.id+'">'+concept.name+'</option>');
+        		});
+
+        		reset_edit_console();
+        		$('#div_criteria_fail_update').show();
+      		}
+      		else {
+        		alert('No concepts found');
+        		cancel_concept_criterias();
+      		}
+    	}
+  	}
+
+  	function edit_concept_fail_criteria(){
+    	var value = $('#fail_concept_select').prop('value');
+    	if (value != null){
+      		var result = get_concept_criteria({concept_id : value});
+      		if (result != null){
+        		$("#fail_enabled").prop("checked", result.enabled);
+        		$("#fail_is_entry").prop("checked", result.is_entry);
+        		$("#fail_wrong_threshold").prop("value", result.criteria.wrong_threshold);
+        		$("#fail_wrong_rating_threshold").prop("value", result.criteria.wrong_rating_threshold);
+        		$("#fail_wrong_rating_choice_threshold").prop("checked", result.criteria.wrong_rating_absolute);
+        		$("#fail_wrong_percent_threshold").prop("value", result.criteria.wrong_percent_threshold);
+        		$("#fail_concept_id").prop("value", result.concept_id);
+
+		    	reset_edit_console();
+		    	$('#div_criteria_fail_update_next').show();
+			}
+      		else{
+        		alert('Criterias cannot be retrieved');
+        		cancel_concept_criterias();
+      		}
+		}
+    	else {
+      		alert('No dependency selected');
+      		cancel_concept_criterias();
+    	}
+  	}
+
+  	function finish_edit_concept_fail_criteria(){
+    	reset_edit_console();
+
+	    var enabled = $("#fail_enabled").prop("checked");
+	    var is_entry = $("#fail_is_entry").prop("checked");
+	    var wrong_threshold = $("#fail_wrong_threshold").prop("value");
+	    var wrong_rating_threshold = $("#fail_wrong_rating_threshold").prop("value");
+        var wrong_rating_absolute = $("#fail_wrong_rating_choice_threshold").prop("checked");
+        var wrong_percent_threshold = $("#fail_wrong_percent_threshold").prop("value");
+	    var concept_id = $("#fail_concept_id").prop("value");
+
+    	set_concept_criteria({concept_id      		  : concept_id,
+                          	  wrong_threshold 		  : wrong_threshold,
+                          	  enabled         		  : enabled,
+                          	  wrong_rating_threshold  : wrong_rating_threshold,
+                          	  wrong_rating_absolute   : wrong_rating_absolute,
+                          	  wrong_percent_threshold : wrong_percent_threshold,
+                          	  is_entry        		  : is_entry });
+    	show_edit_concept_fail_criteria();
+  	}
+
 	$(document).ready(function(){
 		//set up add button
 		$('input.btn_add_topic_tree').click(function() {
@@ -320,34 +593,34 @@
 	var layout = null;
 	function generate_entire_dependency_map(nodelist, edgelist){
 		//Create graph
-	  var gconcept = new dagreD3.Digraph();
-	  $.each(nodelist, function(){	  	
-	  	gconcept.addNode(this.id, { label: this.name});
-	  });
-	  $.each(edgelist, function(){
-	  	gconcept.addEdge(null, this.required_id, this.dependent_id, { label: "required by" });
-	  });
-	  var renderer = new dagreD3.Renderer();	  
-	  var layout_setting = dagreD3.layout();
-	  layout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-concept g"));
-	  
-	  var svg = d3.select("svg#svg-concept");
-	  var svgGroup = d3.select("svg#svg-concept g");
-	  zoom = d3.behavior.zoom().on("zoom", function redraw() {	  	
-	  	svgGroup.attr("transform","translate(" + (d3.event.translate[0]) + "," + (d3.event.translate[1]) + ")" + " scale(" + d3.event.scale + ")");		
-	  });
-	  svg.call(zoom);	  
+		var gconcept = new dagreD3.Digraph();
+		$.each(nodelist, function(){	  	
+		  	gconcept.addNode(this.id, { label: this.name});
+		});
+		$.each(edgelist, function(){
+		  	gconcept.addEdge(null, this.required_id, this.dependent_id, { label: "required by" });
+		});
+		var renderer = new dagreD3.Renderer();	  
+		var layout_setting = dagreD3.layout();
+		layout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-concept g"));
+		  
+		var svg = d3.select("svg#svg-concept");
+		var svgGroup = d3.select("svg#svg-concept g");
+		zoom = d3.behavior.zoom().on("zoom", function redraw() {	  	
+		  	svgGroup.attr("transform","translate(" + (d3.event.translate[0]) + "," + (d3.event.translate[1]) + ")" + " scale(" + d3.event.scale + ")");		
+		});
+		svg.call(zoom);	  
 
-    d3.selectAll("g.node").on('click', function(d, i){
-      $("#div_tree").jstree(true).deselect_node(selected_node, true);
-		  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);
-	  })
-     
-    d3.selectAll("g.node")
-      .attr("title", get_topic_info)
-      .each(function(d, i){
-        $(this).tipsy({gravity: "w", opacity: 1.0, html: true, fade: true});
-    });
+	    d3.selectAll("g.node").on('click', function(d, i){
+	      $("#div_tree").jstree(true).deselect_node(selected_node, true);
+			  $("#div_tree").jstree(true).select_node($("#div_tree").jstree(true).get_node(d),false,false);
+		});
+	     
+	    d3.selectAll("g.node")
+	      .attr("title", get_topic_info)
+	      .each(function(d, i){
+	        $(this).tipsy({gravity: "w", opacity: 1.0, html: true, fade: true});
+	    });
 	}
 	
 	function generate_dependency_map(node,json_required_data){
@@ -547,26 +820,26 @@
 		
 	function get_topic_info(concept_id){
 
-    var result;
+    	var result;
 		$.ajax({
-	    type: "POST",
-	    dataType: "json",
-	    async: false,
-	    url: "<%= course_path(@course)%>" + "/topicconcepts/"+concept_id+"/get_topicconcept_rated_data",
-	    success: function(json) {
-	    	result = json; 
-	    },
-	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        	alert("Status: " + textStatus + " Error: " + errorThrown); 
-    	}
-	  });
+		    type: "POST",
+		    dataType: "json",
+		    async: false,
+		    url: "<%= course_path(@course)%>" + "/topicconcepts/"+concept_id+"/get_topicconcept_rated_data",
+		    success: function(json) {
+		    	result = json;
+		    },
+		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	    	}
+		});
 
-	  return "<p class='name'>"+result.name+"</p>" + 
+	  	return "<p class='name'>"+result.name+"</p>" + 
            "<div><p class='subtop'> Raw : <em class='sub'>"+result.raw_right+" / "+result.raw_total+"</em></p></div>" + 
            "<div><p class='subtop'> Latest : <em class='sub'>"+result.latest_right+" / "+result.latest_total+"</em></p></div>" + 
            "<div><p class='subtop'> Optimistic : <em class='sub'>"+result.optimistic_right+" / "+result.optimistic_total+"</em></p></div>" + 
            "<div><p class='subtop'> Pessimistic : <em class='sub'>"+result.pessimistic_right+" / "+result.pessimistic_total+"</em></p></div>";
-  }
+    }
 
   function get_concept_edge_relation(data){
     var result;

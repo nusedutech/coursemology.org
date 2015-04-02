@@ -8,6 +8,8 @@ class Assessment::GuidanceConceptEdgeCriterion < ActiveRecord::Base
   belongs_to :guidance_concept_edge_option, class_name: Assessment::GuidanceConceptEdgeOption, foreign_key: "guidance_concept_edge_option_id"
 
   scope :correct_threshold_subcriteria, -> { where(guidance_concept_edge_criterion_type: "Assessment::CorrectThreshold") }
+  scope :correct_rating_threshold_subcriteria, -> { where(guidance_concept_edge_criterion_type: "Assessment::CorrectRatingThreshold") }
+  scope :correct_percent_threshold_subcriteria, -> { where(guidance_concept_edge_criterion_type: "Assessment::CorrectPercentThreshold") }
 
   def self.delete_with_new(criterion)
     if criterion.id.nil?

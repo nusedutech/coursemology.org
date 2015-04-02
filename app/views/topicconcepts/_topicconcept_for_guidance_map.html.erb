@@ -1,3 +1,9 @@
+<% if @submission and @submission.attempting? %>
+  <div style="text-align: right; margin:10px;">
+    <a href="<%= submit_course_assessment_guidance_quiz_submission_path(@course, @guidance_quiz.assessment, @submission) %>" class="btn btn-large btn-success" >Restart</a>
+  </div>
+<% end %>
+
 <table style="width: 99%">
 	<thead>
 		<tr>
@@ -36,30 +42,6 @@
 	var required_concepts = [];
 	var concepts_list = [];
 
-  //Constants
-	var DATA_HOVER_KEY = "data-hover-status";
-	var DATA_HIDE_STATUS = "hide";
-	var DATA_SHOW_STATUS = "show";
-  var G_NODE_KEY = "g-node-key-"
-  var G_EDGELABEL_REQUIRED_KEY = "g-edgelabel-required-key-";
-  var G_EDGELABEL_DEPENDENT_KEY = "g-edgelabel-dependent-key-";
-  var G_EDGEPATH_REQUIRED_KEY = "g-edgepath-required-key-";
-  var G_EDGEPATH_DEPENDENT_KEY = "g-edgepath-dependent-key-";
-
-  var NODE_ENTRY_CLASS = "node enter entry";
-  var NODE_FAILED_CLASS = "node enter failed";
-  var NODE_ENTRY_CURRENT_CLASS = "node enter entryin";
-  var NODE_ENABLED_CLASS = "node enter enabled";
-  var NODE_DISABLED_CLASS = "node enter disabled";
-  var EDGE_ENTRY_START_CLASS = "entrystart";
-  var EDGE_ENABLED_START_CLASS = "enabledstart";
-  var EDGE_DISABLED_START_CLASS = "disabledstart";
-  var EDGE_ENTRY_END_CLASS = "entryend";
-  var EDGE_ENABLED_END_CLASS = "enabledend";
-  var EDGE_DISABLED_END_CLASS = "disabledend";
-  var EDGE_PASSED_CLASS = "passed";
-  var EDGE_DISABLED_CLASS = "disabled";
-
 
   function reset_edit_console(){
     $('#div_edit').hide();
@@ -74,7 +56,7 @@
 				
 	  //Create topic trees
 	  var tcdata = get_topicconcept_data_with_criteria();
-    console.log(tcdata);
+    //console.log(tcdata);
     generate_entire_dependency_map(tcdata.nodelist, 
                                    tcdata.edgelist,
                                    tcdata.submission,
@@ -227,54 +209,6 @@
     }
   }
 
-  function get_length(obj) {
-    var count = 0;
-    for (something in obj) {
-      ++count;
-    }
-    return count;
-  }
-
-  //Only for use on svg related elements
-  function remove_class (obj, name) {
-    var classesStr = $(obj).attr("class");
-    var classes = classesStr.split(" ");
-    for (var i = 0; i < classes.length ; i++ ) {
-      if (classes[i] == name) {
-        classes.splice(i,1);
-        $(obj).attr("class", classes.join(" "));
-        return true;
-      }
-    }
-    return false;
-  }
-
-  //Only for use on svg related elements
-  function add_class (obj, name) {
-    var classesStr = $(obj).attr("class");
-    var classes = classesStr.split(" ");
-    for (var i = 0; i < classes.length ; i++ ) {
-      if (classes[i] == name) {
-        return false;
-      }
-    }
-    classes.push(name);
-    $(obj).attr("class", classes.join(" "));
-    return true;
-  }
-
-  //Only for use on svg related elements
-  function has_class (obj, name) {
-    var classesStr = $(obj).attr("class");
-    var classes = classesStr.split(" ");
-    for (var i = 0; i < classes.length ; i++ ) {
-      if (classes[i] == name) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   function setup_graph_identification(renderer) {
     var oldDrawNodes = renderer.drawNodes();
     renderer.drawNodes(function(graph, svg) {
@@ -310,223 +244,6 @@
       return svgPaths;
     });
 
-  }
-
-  function setup_node_edges_color(nodelist) {
-    $.each(nodelist, function(){	
-	    if (this.enabled && this.is_entry) { 
-			  $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENTRY_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENTRY_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENTRY_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENTRY_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENTRY_END_CLASS);
-        });
-	    }
-	    else if (this.enabled) {
-	      $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENABLED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-	    }
-	    else {
-	      $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_DISABLED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_END_CLASS);
-        });
-	    }     
-	  });
-  }
-
-  function setup_node_edges_color_under_submission(nodelist) {
-    $.each(nodelist, function(){  
-      if (this.enabled) {
-        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENABLED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-      }
-      else {
-        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_DISABLED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_END_CLASS);
-        });
-      }     
-    });
-  }
-
-  function setup_current_node_edges_color(lastAtmNode) {
-    if (lastAtmNode != null) {
-      $("#"+G_NODE_KEY+lastAtmNode.id).attr("class", NODE_ENTRY_CURRENT_CLASS);
-      $("."+G_EDGEPATH_REQUIRED_KEY+lastAtmNode.id).each(function(){
-        add_class(this, EDGE_ENTRY_START_CLASS);
-      });
-      $("."+G_EDGEPATH_DEPENDENT_KEY+lastAtmNode.id).each(function(){
-        add_class(this, EDGE_ENTRY_END_CLASS);
-      });
-      $("."+G_EDGELABEL_REQUIRED_KEY+lastAtmNode.id).each(function(){
-        add_class(this, EDGE_ENTRY_START_CLASS);
-      });
-      $("."+G_EDGELABEL_DEPENDENT_KEY+lastAtmNode.id).each(function(){
-        add_class(this, EDGE_ENTRY_END_CLASS);
-      });
-    }
-  }
-
-  function setup_passed_nodes_edges_color(openAtmNodes) {
-    if (openAtmNodes != null) {
-      $.each(openAtmNodes, function(){  
-        $("#"+G_NODE_KEY+this.id).attr("class", NODE_ENTRY_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_END_CLASS);
-        });
-      }); 
-    }
-  }
-
-  function setup_passed_edges_color(openAtmEdges) {
-    if (openAtmEdges != null) {
-      $.each(openAtmEdges, function(){  
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id).each(function(){
-          add_class(this, EDGE_PASSED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id).each(function(){
-          add_class(this, EDGE_PASSED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-        });
-      }); 
-    }
-  }
-
-  function setup_failed_nodes_edges_color(failedNodes) {
-    if (failedNodes != null) {
-      $.each(failedNodes, function(){  
-        $("#"+G_NODE_KEY+this.id).attr("class", NODE_FAILED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-      }); 
-    }
-  }
-
-  function setup_disabled_edges_color(edgelist) {
-    $.each(edgelist, function(){ 
-      if (!this.enabled) { 
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id).each(function(){
-          add_class(this, EDGE_DISABLED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id).each(function(){
-          add_class(this, EDGE_DISABLED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-        });
-      }
-    });
-  }
-
-  function setup_edgepaths_arrow_heads() {
-    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_PASSED_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowGreen)");
-    });
-
-    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowYellow)");
-    });
-
-    $("g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowBlack)");
-    });
-
-    $("g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowBlack)");
-    });
   }
 
   function setup_tooltips() {
@@ -635,7 +352,6 @@
 
   function make_concept_criteria_html (action, actionURL, actionURLItems, criteria) {
     result = "";
-
     if (action != "none") {
       if (criteria.length > 0) {
         result += '<p class="tipsy-failWhen">Fail when:</p>';
@@ -658,12 +374,22 @@
           statementP.className += " tipsy-failstrikeout";
         }
 
+        statementP.appendChild(iconSpan);
         if (criteria[i].name == "wrong_threshold") {
-          statementP.innerHTML = ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+          statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em> wrong ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+        }
+        else if (criteria[i].name == "wrong_rating_threshold"){
+          var innerText = "";
+          if (criteria[i].condition2) {
+            var innerText = "right and ";
+          }
+
+          statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">negative '+criteria[i].condition+'</em> rating from '+ innerText +'wrong answers (<em class="tipsy-passWord"> '+(criteria[i].current * -1)+' current </em>)';
+        }
+        else if (criteria[i].name == "wrong_percent_threshold"){
+          statementP.innerHTML += ' Exceeding <em class="tipsy-failWord">'+criteria[i].condition+'</em>% '+'wrong answers (<em class="tipsy-passWord"> '+criteria[i].current+'% current </em>)';
         }
 
-
-        conditionDiv.appendChild(iconSpan);
         conditionDiv.appendChild(statementP);
         result += conditionDiv.outerHTML;
       }
@@ -703,12 +429,23 @@
         iconSpan.className = "icon-remove-sign tipsy-failIcon";
       }
 
+
+      statementP.appendChild(iconSpan);
       if (criteria[i].name == "correct_threshold") {
-        statementP.innerHTML = ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em> correct ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+        statementP.innerHTML += ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em> correct ' +'(<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+      }
+      else if (criteria[i].name == "correct_rating_threshold"){
+        var innerText = "";
+        if (criteria[i].condition2) {
+          var innerText = "and wrong ";
+        }
+
+        statementP.innerHTML += ' Getting  <em class="tipsy-failWord">'+criteria[i].condition+'</em> rating from right '+ innerText +'answers (<em class="tipsy-passWord"> '+criteria[i].current+' current </em>)';
+      }
+      else if (criteria[i].name == "correct_percent_threshold"){
+        statementP.innerHTML += ' At least <em class="tipsy-failWord">'+criteria[i].condition+'</em>% '+'right answers (<em class="tipsy-passWord"> '+criteria[i].current+'% current </em>)';
       }
 
-
-      conditionDiv.appendChild(iconSpan);
       conditionDiv.appendChild(statementP);
       result += conditionDiv.outerHTML;
     }

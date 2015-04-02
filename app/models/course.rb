@@ -56,6 +56,8 @@ class Course < ActiveRecord::Base
   has_many   :guidance_quizzes, class_name: "Assessment::GuidanceQuiz", through: :assessments,
             source: :as_assessment, source_type: "Assessment::GuidanceQuiz"
 
+  has_one   :topicconcepts_updated_timing, class_name: "TopicconceptsUpdatedTiming"
+
   amoeba do
     include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences,
                    :assessments, :achievements, :lesson_plan_milestones,
@@ -433,6 +435,15 @@ class Course < ActiveRecord::Base
     url
   end
 
+  def topicconcepts_updated_timing_singleton
+    if self.topicconcepts_updated_timing.nil?
+      result = TopicconceptsUpdatedTiming.create(course_id: self.id)
+    else
+      result = self.topicconcepts_updated_timing
+    end
+
+    result
+  end
 
   def forums_enabled?
     result = false

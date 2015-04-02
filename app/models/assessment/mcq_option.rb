@@ -22,7 +22,7 @@ class Assessment::McqOption < ActiveRecord::Base
         joins("INNER JOIN assessment_answer_options aao ON aao.answer_id = ama.id").
 				joins("INNER JOIN assessment_submissions asub ON asub.id = aa.submission_id").
         where("aao.option_id = ?", self.id).
-				where("asub.assessment_id = ?", assessment.id)
+				where("asub.assessment_id = ? and asub.deleted_at is NULL", assessment.id)
   end
 
 

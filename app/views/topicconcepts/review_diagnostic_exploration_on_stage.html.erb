@@ -1,0 +1,59 @@
+<form action="<%= request.original_url %>" method="POST">
+	<table class="table-basic">
+	  	<tr>
+	  		<td>
+		    	<input type="hidden" name="submission_id" value="<%= @submission.id %>" />
+		      	<select name="concept_id"  onchange="this.form.submit();">
+		        	<%= @concept_stages.each do |cs| %>
+		            	<option value="<%= cs.concept.id %>" <%= cs.concept.id == @concept.id ? "selected" : "" %>><%= cs.concept.name %></option>
+		        	<% end %>
+		      	</select>
+		    </td>
+		</tr>
+	</table>
+</form>
+
+<div class="well" style="position: relative;">
+	<div>
+		<h3><%= @concept.name %></h3>
+		<div class="score-box-well">
+			<div class="score-box-well-left">
+				<label style="font-size: 24px;">
+					<%= @question_right %>
+				</label> 
+			</div>
+			<div class="score-box-well-right">
+				<label style="font-size: 24px;">
+					<%= @question_total %>
+				</label>
+			</div> 
+		</div>
+	</div>
+	<hr/>
+	<div>
+		<% @questions.each do |question| %>
+		    <div>
+		      	<h4><%= style_format(question[:description]) %></h4>
+		      	<div>
+			        <% if question[:correct] %>
+			            <label>Correctly chosen option : </label>
+			            <% question[:right_option].each do |option| %>
+			                <p style="color:green; margin-left: 10px;"><%= style_format option.text %></p>
+			            <% end %>
+
+			        <% else %>
+			            <label>Incorrectly chosen option : </label>
+			            <% question[:chosen_option].each do |option| %>
+			                <p style="color:red; margin-left: 10px;"><%= style_format option.text %></p>
+			            <% end %>
+			            <label>Correct option : </label>
+			            <% question[:right_option].each do |option| %>
+			                <p style="margin-left: 10px;"><%= style_format option.text %></p>
+			            <% end %>
+			        <% end %>
+		      	</div>
+		    </div>
+		    <hr/>
+		<% end %>
+	</div>
+</div>

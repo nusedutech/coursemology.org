@@ -57,7 +57,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
 
   #Check for current progress on criteria and unlock if necessary
   #Return the concepts unlocked
-  def check_to_unlock submission, passing_edge_lock, bypass_archive_check = false
+  def check_to_unlock submission, passing_edge_lock, bypass_archive_check = true
     result = []
     criteria_result = criteria_check
 
@@ -72,7 +72,8 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
       dependent_concept = self.concept_edge.dependent_concept
       dependent_concept_stage = Assessment::GuidanceConceptStage.get_stage_simplified submission, dependent_concept.id
       #Check for null and circular dependency (to prevent infinite recursion)
-      if !dependent_concept_stage.nil?
+      #Only delete if concept is not a entry type concept
+      if !dependent_concept_stage.nil? and dependent_concept.concept_option.can_enter?
         processing_concept_stages = [dependent_concept_stage]
 	      #Iteratively find the lower level concepts and delete the content
 	      while processing_concept_stages.size > 0 do
@@ -191,6 +192,12 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     end
   end
 
+  #For static method use to see if the data-synchronisation checks are required
+  #Not required if updated timing is larger than the data's timing
+  def skip_checks timing
+     timing < self.updated_at
+  end
+
   #Static methods declare here
   #For retrieving collection or member units
   #Remember to clean deleted entries first
@@ -198,16 +205,17 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     def clean_deleted_edge_stages concept_stage
       concept_edge_stages = concept_stage.concept_edge_stages
       concept_edge_stages.each do |concept_edge_stage|
-        clean_deleted_edge_stage concept_edge_stage
+        unlocking_edge_stages |= clean_deleted_edge_stage concept_edge_stage
       end
     end
 
     def clean_deleted_edge_stage concept_edge_stage
       concept_edge = concept_edge_stage.concept_edge
       if concept_edge.nil? or 
-         concept_edge.concept_edge_option.nil? or 
-         !concept_edge.concept_edge_option.enabled
+         !Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge
         concept_edge_stage.destroy
+
+
         return true
       else
         return false

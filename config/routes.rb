@@ -270,6 +270,7 @@ Coursemology::Application.routes.draw do
         post "create", to: "materials#create"
         put "update", to: "materials#update_folder"
         delete "", to: "materials#destroy_folder"
+        post "duplicate_structure_folder",to: "materials#duplicate_structure_folder"
       end
 
       get "mark_read", to: "materials#mark_folder_read"

@@ -66,7 +66,7 @@ class MaterialsController < ApplicationController
         render :json => build_subtree(@folder, true)
       }
       format.zip {
-        filename = build_zip @folder, :recursive => false, :include => params['include']
+        filename = build_zip @folder, :recursive => true, :include => params['include']
         send_file(filename, {
             :type => "application/zip, application/octet-stream",
             :disposition => "attachment",
@@ -175,7 +175,7 @@ class MaterialsController < ApplicationController
       @parent.attach_files(params[:files], params[:descriptions])
       notice = "The files were successfully uploaded."
     elsif params[:type] == "subfolder" && params[:material_folder][:name] then
-      @parent.new_subfolder(params[:material_folder][:name], params[:material_folder][:description])
+      @parent.new_subfolder(params[:material_folder][:name], params[:material_folder][:description], params[:material_folder][:can_student_upload], params[:material_folder][:open_at],params[:material_folder][:close_at])
       notice = "The subfolder #{params[:material_folder][:name]} was successfully created."
     end
 
@@ -281,6 +281,30 @@ class MaterialsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to course_material_folder_path(@course, parent),
                                 notice: "The folder #{foldername} was successfully deleted." }
+    end
+  end
+
+  def duplicate_structure_folder
+    @folder = if params[:id] then
+                MaterialFolder.find_by_id(params[:id])
+              end
+    authorize! :edit, @folder
+
+    open_at = params["open-at"].empty? ? nil : params["open-at"].to_time
+    close_at = params["close-at"].empty? ? nil : params["close-at"].to_time
+    if @folder.parent_folder != nil then
+      @folder.class.amoeba do
+        include_field [:subfolders]
+        set :open_at => open_at
+        set :close_at => close_at
+      end
+      dup_folder = @folder.amoeba_dup
+      dup_folder.name = "Copy of " + dup_folder.name
+      respond_to do |format|
+        if dup_folder.save
+          format.html { redirect_to course_material_folder_path(@course, dup_folder), notice: "Duplicate folder successfully." }
+        end
+      end
     end
   end
 

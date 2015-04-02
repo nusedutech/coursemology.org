@@ -29,13 +29,13 @@ module AutoGrader
         if answer.nil? || !answer.correct
           ag.grade = 0
         else
-          ag.grade = mcq.max_grade
+          ag.grade = mcq.max_grade.nil? ? 0 : mcq.max_grade
         end
       else
         if pref_grader != 'two-one-zero' || std_answers.count == 0
-          ag.grade = mcq.max_grade
+          ag.grade = mcq.max_grade.nil? ? 0 : mcq.max_grade
         elsif mcq.specific.select_all?
-          ag.grade = mcq.max_grade / 2.0
+          ag.grade = (mcq.max_grade.nil? ? 0 : mcq.max_grade) / 2.0
         else
           num_wrong_choices = mcq.options.find_all_by_correct(false).count
           uniq_wrong_attempts = std_answers.unique_attempts(false).count

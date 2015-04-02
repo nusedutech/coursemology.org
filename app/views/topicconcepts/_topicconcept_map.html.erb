@@ -559,7 +559,7 @@
 	  if(tcdata.user_ability === 'manage'){
 		  //rename event handler
 		  $('#div_tree').on('rename_node.jstree', function (e, data) {
-		  	if(data.text != data.old){
+		  	if(data.text != ""){
 			  	var result = topic_concept_data_rename(data.node.id, data.text);
 			  	if(isNaN(result)){
 			  		alert("rename fails");

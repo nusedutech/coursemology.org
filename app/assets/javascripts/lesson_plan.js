@@ -13,6 +13,7 @@ $(document).ready(function() {
     }
 
     this.$modal = $('<div class="modal hide fade" />');
+    this.pickers[0].selectedMaterials = new Object();
     this.pickers[0].pick(this.$modal[0]);
     this.$modal.modal();
   }

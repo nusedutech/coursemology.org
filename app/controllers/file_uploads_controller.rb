@@ -46,6 +46,11 @@ class FileUploadsController < ApplicationController
       if check_file
         file.original_filename = File.basename(file.original_filename, '.*') + "_" + Time.now.strftime("%d%m%Y%H%M%S") + File.extname(file.original_filename)
       end
+    else #temporary fix for upload the same files in Material
+      check_file = FileUpload.where(:original_name => file.original_filename, :owner_type => Material.name).first
+      if check_file
+        file.original_filename = File.basename(file.original_filename, '.*') + "_" + Time.now.strftime("%d%m%Y%H%M%S") + File.extname(file.original_filename)
+      end
     end
     file_upload = FileUpload.create({
                                         creator: current_user,

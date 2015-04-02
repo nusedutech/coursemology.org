@@ -8,6 +8,8 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   before_filter :load_guidance_quiz_singleton, only: [:get_topicconcept_data_history, :get_scoreboard_data]
 
+  before_filter :set_topicconcept_updated_timing, only: [:set_concept_edge_relation, :set_concept_edges_relation, :set_concept_criteria, :set_concepts_criteria]
+
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
   def set_enabled
@@ -923,6 +925,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       end
       return
     end 
+  end
+
+  def set_topicconcept_updated_timing
+    @course.topicconcepts_updated_timing_singleton.set_updated_timing
   end
 
   def access_denied message, redirectURL

@@ -1,6 +1,8 @@
 Coursemology::Application.routes.draw do
 
 
+  mount Ckeditor::Engine => '/ckeditor'
+
   authenticated :user do
     root :to => "home#index"
   end

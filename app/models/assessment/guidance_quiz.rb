@@ -5,7 +5,7 @@ class Assessment::GuidanceQuiz < ActiveRecord::Base
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
   attr_accessible :published, :passing_edge_lock, :neighbour_entry_lock
- 
+
   def enabled
     self.published
   end

@@ -7,19 +7,19 @@ class Assessment::ProgressionGroup < ActiveRecord::Base
 	belongs_to :submission, class_name: "Assessment::Submission"
 
 	def isForwardGroup?
-		self.as_progression_group_type == "Assessment::ForwardGroup"
+	  self.as_progression_group_type == "Assessment::ForwardGroup"
 	end
 
 	def getForwardGroup
-		return Assessment::ForwardGroup.find(self.as_progression_group_id)		
+	  return Assessment::ForwardGroup.find(self.as_progression_group_id)		
 	end
 
 	#Method to obtain tag name from related classes directly
 	def getTagName
-		forwardGroup = self.getForwardGroup
-		forwardPolicyLevel = forwardGroup.getCorrespondingLevel
-		tag = forwardPolicyLevel.getTag
+	  forwardGroup = self.getForwardGroup
+	  forwardPolicyLevel = forwardGroup.getCorrespondingLevel
+	  tag = forwardPolicyLevel.getTag
 
-		tag.name
+	  tag.name
 	end
 end

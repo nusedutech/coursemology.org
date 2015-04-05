@@ -150,6 +150,8 @@ Coursemology::Application.routes.draw do
         end
         member do
           post :edit, to: 'guidance_quiz_submissions#edit'
+          get  :submit, to: 'guidance_quiz_submissions#submit'
+          post :set_tag_to_stage, to: 'guidance_quiz_submissions#set_tag_to_stage'
         end
       end
 
@@ -213,15 +215,22 @@ Coursemology::Application.routes.draw do
         post :set_neighbour_entry_lock, to: 'guidance_quizzes#set_neighbour_entry_lock'
 
         post :set_concept_edge_relation, to: 'guidance_quizzes#set_concept_edge_relation'
+        post :set_concept_edges_relation, to: 'guidance_quizzes#set_concept_edges_relation'
         post :get_concept_edge_relation, to: 'guidance_quizzes#get_concept_edge_relation'
         
         post :get_concept_criteria, to: 'guidance_quizzes#get_concept_criteria'
         post :set_concept_criteria, to: 'guidance_quizzes#set_concept_criteria'
+        post :set_concepts_criteria, to: 'guidance_quizzes#set_concepts_criteria'
 
         post :get_guidance_concept_data, to: 'guidance_quizzes#get_guidance_concept_data'
+        post :get_guidance_concept_data_no_stats, to: 'guidance_quizzes#get_guidance_concept_data_no_stats'
         post :get_guidance_concept_edge_data, to: 'guidance_quizzes#get_guidance_concept_edge_data'
-
+        post :get_guidance_concept_edges_data, to: 'guidance_quizzes#get_guidance_concept_edges_data'
+        
         get :get_topicconcept_data_with_criteria, to: 'guidance_quizzes#get_topicconcept_data_with_criteria'
+        post :get_scoreboard_data, to: 'guidance_quizzes#get_scoreboard_data'
+        
+        post :get_topicconcept_data_history, to: 'guidance_quizzes#get_topicconcept_data_history'
       end
     end
 
@@ -288,12 +297,29 @@ Coursemology::Application.routes.draw do
         post 'topic_concept_data_move', :on => :collection
         post 'topic_concept_data_dependency', :on => :collection
         post 'get_concepts_list', :on => :collection
+        post 'get_concepts_list_with_id', :on => :collection
+        post 'get_concept_edges_list_with_id', on: :collection
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
         get 'diagnostic_exploration', :on => :member
         get 'diagnostic_exploration_next_question', :on => :member
+        get 'review_diagnostic_exploration', :on => :collection
+        post 'review_diagnostic_exploration_on_stage', :on => :collection
+        get 'individual_submissions', :on => :collection
+        get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'
+
         post 'submit_answer', :on => :collection
-        get 'ivleapi'       
+        get 'ivleapi'
+        
+        post 'get_topicconcept_data_noedit', :on => :collection
+        post 'get_topicconcept_overall_statistics', :on => :member
+        post 'get_topicconcept_single_statistics', :on => :member
+        post 'get_topicconcept_single_current_statistics', :on => :member
+        post 'get_topicconcept_best_concepts', :on => :collection
+        post 'get_topicconcept_notbest_concepts', :on => :collection
+        post 'get_topicconcept_weights', :on => :collection
+        post 'get_topicconcept_area', :on => :collection
+        get :get_progress_bar_info, :on => :collection       
     end
     
     resources :achievements

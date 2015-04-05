@@ -2,7 +2,7 @@ class Tag < ActiveRecord::Base
   acts_as_paranoid
   acts_as_duplicable
 
-  attr_accessible :name, :description, :icon_url, :tag_group_id, :course_id
+  attr_accessible :name, :description, :icon_url, :tag_group_id, :course_id, :rating
   #TODO, validates_uniqueness_of doesn't work when create new questions
   # validates_uniqueness_of :name, scope: [:course_id]
 
@@ -12,7 +12,20 @@ class Tag < ActiveRecord::Base
   belongs_to :tag_group
   
   has_many :taggable_tags, as: :tag, dependent: :destroy
+  has_many :questions, class_name: "Assessment::Question",
+           through: :taggable_tags
+
+  has_many :mcq_questions, class_name: "Assessment::McqQuestion",
+           through: :questions,
+           source: :as_question, source_type: "Assessment::McqQuestion"
  
+  has_many :answers, class_name: "Assessment::Answer",
+           through: :questions
+
+  has_many  :mcq_answers, class_name: "Assessment::McqAnswer",
+            through: :answers,
+            source: :as_answer, source_type: "Assessment::McqAnswer"
+
   has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy, class_name: "Assessment::ForwardPolicyLevel"
   
 	has_many :taggings, dependent: :destroy, class_name: 'TaggableTag'

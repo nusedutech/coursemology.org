@@ -21,6 +21,7 @@
   <th>Tag Group</th>
   <th>Tag</th>
   <th width="40%">Description</th>
+  <th>Rating</th>
   <th width="10%">Action</th>
   </thead>
 
@@ -32,6 +33,7 @@
         </td>
         <td></td>
         <td><%= tag_group.description %></td>
+        <td></td>
         <td>
           <% if can? :manage, tag_group %>
               <%= link_to edit_course_tag_group_path(@course, tag_group), class: 'btn' do %>
@@ -57,6 +59,7 @@
               <% end %>
             </td>
             <td><%= tag.description %></td>
+            <td><%= tag.rating %></td>
             <td>
               <% if can?(:manage, tag) %>
                   <%= link_to edit_course_tag_path(@course, tag), class: 'btn' do %>
@@ -79,6 +82,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
     </tr>
     <% @concept_tags.each do |concept| %>
       <tr>
@@ -89,6 +93,7 @@
             </a> 
         </td>
         <td><%= concept.description %></td>
+        <td></td>
         <td>
         	  
         </td>
@@ -97,6 +102,7 @@
     
     <tr class="well">
       <td><strong>Difficulty</strong></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -111,6 +117,7 @@
 	            </a> 
 	        </td>
 	        <td><%= tag.description %></td>
+          <td></td>
 	        <td>
 	        	  
 	        </td>

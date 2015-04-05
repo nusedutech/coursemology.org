@@ -12,6 +12,9 @@
   <li class="<%= "active" if @tab == "TrainingPreference" %>">
     <a href="<%= course_preferences_path(@course) %>?_tab=training">Training</a>
   </li>
+  <li class="<%= "active" if @tab == "TopicconceptPreference" %>">
+    <a href="<%= course_preferences_path(@course) %>?_tab=topicconcept">Topic - Concept</a>
+  </li>
   <li class="<%= "active" if @tab == "McqPreference" %>">
     <a href="<%= course_preferences_path(@course) %>?_tab=mcq">MCQ</a>
   </li>
@@ -38,6 +41,8 @@
     <%= render partial: "misc" %>
 <% elsif @tab == 'Sidebar' %>
     <%= render partial: "navbar_form" %>
+<% elsif @tab == "TopicconceptPreference" %>
+    <%= render partial: "topicconcept_form" %>
 <% else %>
     <%=render partial: "form" %>
 <% end %>

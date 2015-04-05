@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150331131926) do
+ActiveRecord::Schema.define(:version => 20150402072703) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -464,9 +464,8 @@ ActiveRecord::Schema.define(:version => 20150331131926) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-    t.boolean  "test",       :default => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
     t.integer  "duration"
   end
 

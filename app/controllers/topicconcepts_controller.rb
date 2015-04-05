@@ -1195,7 +1195,7 @@ private
 
     @guidance_quiz = @course.guidance_quizzes.first
     @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                 status: "attempting").first
+                                                 status: "attempting").first if !@guidance_quiz.nil?
     data_synchronise_submission @submission
 
     #Submission not available, indicate progress bar as such

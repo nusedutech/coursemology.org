@@ -466,6 +466,7 @@ ActiveRecord::Schema.define(:version => 20150402072703) do
     t.datetime "deleted_at"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+    t.boolean  "test"
     t.integer  "duration"
   end
 

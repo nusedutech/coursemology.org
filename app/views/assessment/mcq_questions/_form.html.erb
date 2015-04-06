@@ -5,8 +5,8 @@
     <% if !@parent_mpq_question.nil? %>
         <input type="hidden" name="parent_mpq_question" value="<%= @parent_mpq_question.id %>" />
     <% end %>
-    <%#= f.input :description, :as => :ckeditor, :input_html => { :ckeditor => {:toolbar => 'mini'} } %>
-    <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
+    <%= f.input :description, :as => :ckeditor, :input_html => { :ckeditor => {:toolbar => 'mini'} } %>
+    <%#= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
     <%= f.input :max_grade, as: :integer, input_html: {class: "number_field input-mini"} %>
     <%#= f.input :tags, as: :tag, url: course_tags_path, input_html: {class: "span7"}  %>
 

@@ -583,24 +583,6 @@
 	  	return result;
 	}
 
-	function get_topicconcept_notbest_concepts(){
-		var result;
-		$.ajax({
-		    type: "POST",
-		    dataType: "json",
-		    data: {submission_id: <%= @chosen_submission.id %>},
-		    async: false,
-		    url: "<%= get_topicconcept_notbest_concepts_course_topicconcepts_path(@course)%>",
-		    success: function(json) {	    	
-		    	result = json;
-		    },
-		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
-	    	}
-	  	});
-	  	return result;
-	}
-
 	function get_scoreboard_data(){
 		var result;
 		$.ajax({

@@ -534,8 +534,13 @@ class TopicconceptsController < ApplicationController
 
   def get_concepts_list_with_id
     concepts = Topicconcept.where(course_id: @course.id, typename: "concept").select([:name, :id])
+
+    #Additional "All" parameter added
+    concepts_parsed = concepts.map { |c| { id: c.id, name: c.name}}
+    concepts_parsed << {id: "nil", name: "All"}
+
     respond_to do |format|
-      format.json { render json: concepts }      
+      format.json { render json: concepts_parsed }      
     end
   end
 
@@ -554,7 +559,7 @@ class TopicconceptsController < ApplicationController
     	end
     end
     respond_to do |format|
-      format.json { render json: concept_edges }      
+      format.json { render json: concept_edges + [{id: "nil", name: "All"}] }      
     end
   end
   
@@ -990,7 +995,8 @@ class TopicconceptsController < ApplicationController
   end
 
 	def set_student_layout
-		if cannot? :manage, Topicconcept or @student_view
+		if Assessment::GuidanceQuiz.is_enabled? (@course) and
+       (cannot? :manage, Topicconcept or @student_view)
       self.class.layout "topicconcept_student_interface"
     else
       self.class.layout "application"
@@ -1009,9 +1015,9 @@ class TopicconceptsController < ApplicationController
   #Set viewing permission and parameters of user
   def set_viewing_permissions
     @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
+    set_student_layout
     if @gqEnabled
       set_student_view
-      set_student_layout
       set_hidden_sidebar_params
     end
   end

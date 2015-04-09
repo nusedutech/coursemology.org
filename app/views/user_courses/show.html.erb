@@ -54,92 +54,99 @@
 <% end %>
 
 <% if @user_course.is_student? && @course.tags.count > 0 %>
-    <h3>Raw Topic Mastery</h3>
-    <br/>
-    <table class="table span6 table-hover">
-      <colgroup>
-        <col width="30%">
-        <col width="50%">
-      </colgroup>
-      <% @tag_groups.each do |tg| %>
-          <% next if tg.tags.length <= 0 %>
+    <div style="display:table;">
+      <h3>Raw Topic Mastery</h3>
+      <br/>
+      <table class="table span6 table-hover">
+        <colgroup>
+          <col width="30%">
+          <col width="50%">
+        </colgroup>
+        <% @tag_groups.each do |tg| %>
+            <% next if tg.tags.length <= 0 %>
+            <tr class="well">
+              <td colspan="5"><strong><%= tg.name %></strong></td>
+            </tr>
+            <%= render partial:"tag_single_row_raw", locals: {tags: tg.tags} %>
+        <% end %>
+        <% if @concepts.size > 0 %>
           <tr class="well">
-            <td colspan="5"><strong><%= tg.name %></strong></td>
+              <td colspan="5"><strong>Concepts</strong></td>
           </tr>
-          <%= render partial:"tag_single_row_raw", locals: {tags: tg.tags} %>
-      <% end %>
-      <% if @concepts.size > 0 %>
-        <tr class="well">
-            <td colspan="5"><strong>Concepts</strong></td>
-        </tr>
-        <%= render partial:"tag_single_row_raw", locals: {tags: @concepts} %>
-      <% end %>
-    </table>
+          <%= render partial:"tag_single_row_raw", locals: {tags: @concepts} %>
+        <% end %>
+      </table>
+    </div>
 
-
-   <h3>Latest Topic Mastery</h3>
-    <br/>
-    <table class="table span6 table-hover">
-      <colgroup>
-        <col width="30%">
-        <col width="50%">
-      </colgroup>
-      <% @tag_groups.each do |tg| %>
-          <% next if tg.tags.length <= 0 %>
+    <div style="display:table;">
+      <h3>Latest Topic Mastery</h3>
+      <br/>
+      <table class="table span6 table-hover">
+        <colgroup>
+          <col width="30%">
+          <col width="50%">
+        </colgroup>
+        <% @tag_groups.each do |tg| %>
+            <% next if tg.tags.length <= 0 %>
+            <tr class="well">
+              <td colspan="5"><strong><%= tg.name %></strong></td>
+            </tr>
+            <%= render partial:"tag_single_row_latest", locals: {tags: tg.tags} %>
+        <% end %>
+        <% if @concepts.size > 0 %>
           <tr class="well">
-            <td colspan="5"><strong><%= tg.name %></strong></td>
+              <td colspan="5"><strong>Concepts</strong></td>
           </tr>
-          <%= render partial:"tag_single_row_latest", locals: {tags: tg.tags} %>
-      <% end %>
-      <% if @concepts.size > 0 %>
-        <tr class="well">
-            <td colspan="5"><strong>Concepts</strong></td>
-        </tr>
-        <%= render partial:"tag_single_row_latest", locals: {tags: @concepts} %>
-      <% end %>
-    </table>
+          <%= render partial:"tag_single_row_latest", locals: {tags: @concepts} %>
+        <% end %>
+      </table>
+    </div>
 
-    <h3>Optimistic Topic Mastery</h3>
-    <br/>
-    <table class="table span6 table-hover">
-      <colgroup>
-        <col width="30%">
-        <col width="50%">
-      </colgroup>
-      <% @tag_groups.each do |tg| %>
-          <% next if tg.tags.length <= 0 %>
+    <div style="display:table;">
+      <h3>Optimistic Topic Mastery</h3>
+      <br/>
+      <table class="table span6 table-hover">
+        <colgroup>
+          <col width="30%">
+          <col width="50%">
+        </colgroup>
+        <% @tag_groups.each do |tg| %>
+            <% next if tg.tags.length <= 0 %>
+            <tr class="well">
+              <td colspan="5"><strong><%= tg.name %></strong></td>
+            </tr>
+            <%= render partial:"tag_single_row_optimistic", locals: {tags: tg.tags} %>
+        <% end %>
+        <% if @concepts.size > 0 %>
           <tr class="well">
-            <td colspan="5"><strong><%= tg.name %></strong></td>
+              <td colspan="5"><strong>Concepts</strong></td>
           </tr>
-          <%= render partial:"tag_single_row_optimistic", locals: {tags: tg.tags} %>
-      <% end %>
-      <% if @concepts.size > 0 %>
-        <tr class="well">
-            <td colspan="5"><strong>Concepts</strong></td>
-        </tr>
-        <%= render partial:"tag_single_row_optimistic", locals: {tags: @concepts} %>
-      <% end %>
-    </table>
+          <%= render partial:"tag_single_row_optimistic", locals: {tags: @concepts} %>
+        <% end %>
+      </table>
+    </div>
 
-    <h3>Pessimistic Topic Mastery</h3>
-    <br/>
-    <table class="table span6 table-hover">
-      <colgroup>
-        <col width="30%">
-        <col width="50%">
-      </colgroup>
-      <% @tag_groups.each do |tg| %>
-          <% next if tg.tags.length <= 0 %>
+    <div style="display:table;">
+      <h3>Pessimistic Topic Mastery</h3>
+      <br/>
+      <table class="table span6 table-hover">
+        <colgroup>
+          <col width="30%">
+          <col width="50%">
+        </colgroup>
+        <% @tag_groups.each do |tg| %>
+            <% next if tg.tags.length <= 0 %>
+            <tr class="well">
+              <td colspan="5"><strong><%= tg.name %></strong></td>
+            </tr>
+            <%= render partial:"tag_single_row_pessimistic", locals: {tags: tg.tags} %>
+        <% end %>
+        <% if @concepts.size > 0 %>
           <tr class="well">
-            <td colspan="5"><strong><%= tg.name %></strong></td>
+              <td colspan="5"><strong>Concepts</strong></td>
           </tr>
-          <%= render partial:"tag_single_row_pessimistic", locals: {tags: tg.tags} %>
-      <% end %>
-      <% if @concepts.size > 0 %>
-        <tr class="well">
-            <td colspan="5"><strong>Concepts</strong></td>
-        </tr>
-        <%= render partial:"tag_single_row_pessimistic", locals: {tags: @concepts} %>
-      <% end %>
-    </table>
+          <%= render partial:"tag_single_row_pessimistic", locals: {tags: @concepts} %>
+        <% end %>
+      </table>
+    </div>
 <% end %>

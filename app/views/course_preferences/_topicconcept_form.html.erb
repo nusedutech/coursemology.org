@@ -45,6 +45,12 @@
         </div>
     </div>
     <div class='control-group'>
+        <%= label_tag 'exclude_concepts_textext', 'Exclude "Choose Concepts"? :', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'exclude_concepts_textext', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
         <%= label_tag 'fail_enabled', 'Enabled? :', class: 'control-label' %>
         <div class='controls'>
             <%= check_box_tag 'fail_enabled', 'no' %>
@@ -98,6 +104,12 @@
         </div>
     </div>
     <div class='control-group'>
+        <%= label_tag 'exclude_concept_edges_textext', 'Exclude "Choose Concept Edges"? :', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'exclude_concept_edges_textext', 'no' %>
+        </div>
+    </div>
+    <div class='control-group'>
         <%= label_tag 'enabled', 'Enabled? :', class: 'control-label' %>
         <div class='controls'>
             <%= check_box_tag 'enabled', 'no' %>
@@ -148,7 +160,6 @@
                         result.push(this);
                     }
                 });
-                //console.log(result);
                 return result;
             },
             itemContains: function(item, needle)
@@ -166,15 +177,27 @@
         };
 
     function onSelectionTagFilter(e, data){
-        var enteredItems = $.parseJSON($(this).textext()[0].hiddenInput().val());
+        var textextItem = $(this).textext()[0];
+        var tags = textextItem.tags();
+
+        var enteredItems = $.parseJSON(textextItem.hiddenInput().val());
         var enteredValues = extractOneParameterListFromJsonArray(enteredItems, "name");
         //If value found in current list of tags, don't add it
-        if(enteredValues.indexOf(data.tag.name) >= 0) {
+        //If all tag already entered, don't add new tags
+        if(enteredValues.indexOf(data.tag.name) >= 0 || 
+            enteredValues.indexOf("All") >= 0) {
             data.result = false;
             return;
         }
 
-        var suggestedItems = $(this).textext()[0].ajax()._suggestions;
+        //If all tag entered, remove all other tags
+        if (data.tag.name === "All"){
+            for (var i = 0; i < enteredItems.length; i++) {
+                tags.removeTag(enteredItems[i]);
+            } 
+        }
+
+        var suggestedItems = textextItem.ajax()._suggestions;
         var suggestedValues = extractOneParameterListFromJsonArray(suggestedItems, "name");
         //Only allow values found in suggestions
         var index = suggestedValues.indexOf(data.tag.name)

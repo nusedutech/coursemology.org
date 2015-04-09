@@ -69,11 +69,11 @@ class Assessment::AssessmentsController < ApplicationController
         attempting = sub_map[ast.id].attempting?
         action_map[ast.id] = {}
         if !attempting
-					action_map[ast.id][:action] = "Review"
-					action_map[ast.id][:url] = course_assessment_submission_path(@course, ast, sub_map[ast.id])
+		  action_map[ast.id][:action] = "Review"
+		  action_map[ast.id][:url] = course_assessment_submission_path(@course, ast, sub_map[ast.id])
         #Ensure controls are not revealed when assessment has ended
         elsif ast.can_access_with_end_check? (curr_user_course)
-        	action_map[ast.id][:action] = "Resume"
+          action_map[ast.id][:action] = "Resume"
           action_map[ast.id][:url] = edit_course_assessment_submission_path(@course, ast, sub_map[ast.id])
         elsif ast.submissions.submitted_format.where(std_course_id: curr_user_course.id).first
           sub_map[ast.id] = ast.submissions.submitted_format.where(std_course_id: curr_user_course.id).first
@@ -97,8 +97,8 @@ class Assessment::AssessmentsController < ApplicationController
           (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or
           can?(:manage, ast)) and ast.can_access_with_end_check? (curr_user_course)
 
-        action_map[ast.id] = {action: "Attempt",
-                              url: new_course_assessment_submission_path(@course, ast)}
+          action_map[ast.id] = {action: "Attempt",
+                                url: new_course_assessment_submission_path(@course, ast)}
 
         if ast.is_policy_mission?
           @listed_tags[ast.id] = nil

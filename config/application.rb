@@ -20,6 +20,7 @@ module Coursemology
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
     config.autoload_paths +=  Dir["#{config.root}/app/models/**/","#{config.root}/lib/**/"]
+    #config.autoload_paths += %W(#{config.root}/app/models/ckeditor)
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -62,6 +63,7 @@ module Coursemology
     # Enable the asset pipeline
     config.assets.enabled = true
     config.assets.initialize_on_precompile = false
+    config.assets.precompile += %w( ckeditor/* )
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'

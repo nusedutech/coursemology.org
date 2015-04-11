@@ -995,7 +995,7 @@ class TopicconceptsController < ApplicationController
   end
 
 	def set_student_layout
-		if Assessment::GuidanceQuiz.is_enabled? (@course) and
+	  if Assessment::GuidanceQuiz.is_enabled? (@course) and
        (cannot? :manage, Topicconcept or @student_view)
       self.class.layout "topicconcept_student_interface"
     else

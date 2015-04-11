@@ -94,7 +94,7 @@ gem "nokogiri"
 gem "newrelic_rpm"
 gem "omniauth-ivle"
 gem "omniauth-openid"
-
+gem "ckeditor"
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 

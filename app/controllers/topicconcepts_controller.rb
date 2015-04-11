@@ -782,15 +782,12 @@ class TopicconceptsController < ApplicationController
     end
 
     concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
-    #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * -100 / (cs.total_right + cs.total_wrong) }
-    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, right: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_right, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
+    unattempted_weight = @guidance_quiz.feedback_best_unattempted_weight
+    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, right: (cs.total_right + cs.total_wrong) == 0 ? unattempted_weight : cs.total_right, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
 
     respond_to do |format|
       format.json { render json: rehashed_stages.map{|cs| {label: cs[:concept].name, value: cs[:right] * 100 / cs[:total] }}}
     end
-    #respond_to do |format|
-    #  format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * 100 / (cs.total_right + cs.total_wrong) }}}
-    #end
   end
 
   def get_topicconcept_notbest_concepts
@@ -801,15 +798,12 @@ class TopicconceptsController < ApplicationController
     end
 
     concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
-    #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
-    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, wrong: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_wrong, total: (cs.total_right + cs.total_wrong) == 0 ? 2 : (cs.total_right + cs.total_wrong)} }
+    unattempted_weight = @guidance_quiz.feedback_notbest_unattempted_weight
+    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, wrong: (cs.total_right + cs.total_wrong) == 0 ? unattempted_weight : cs.total_wrong, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
 
     respond_to do |format|
       format.json { render json: rehashed_stages.map{|cs| {label: cs[:concept].name, value: cs[:wrong] * 100 / cs[:total] }}}
     end
-    #respond_to do |format|
-    #  format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * 100 / (cs.total_right + cs.total_wrong) }}}
-    #end
   end
 
   def get_topicconcept_weights

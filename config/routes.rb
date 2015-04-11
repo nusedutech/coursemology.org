@@ -211,6 +211,7 @@ Coursemology::Application.routes.draw do
     resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
       collection do
         post :set_enabled, to: 'guidance_quizzes#set_enabled'
+        post :set_feedback_data, to: 'guidance_quizzes#set_feedback_data'
         post :set_passing_edge_lock, to: 'guidance_quizzes#set_passing_edge_lock'
         post :set_neighbour_entry_lock, to: 'guidance_quizzes#set_neighbour_entry_lock'
 

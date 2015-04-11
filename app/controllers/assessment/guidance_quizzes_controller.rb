@@ -26,6 +26,25 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     end
   end
 
+  def set_feedback_data
+    if params.has_key?("best_unattempted_weight") and
+       params.has_key?("notbest_unattempted_weight") and
+       integer_check params["best_unattempted_weight"] and
+       integer_check params["notbest_unattempted_weight"] and
+       params["best_unattempted_weight"].to_i >= 0 and
+       params["best_unattempted_weight"].to_i <= 100 and
+       params["notbest_unattempted_weight"].to_i >= 0 and
+       params["notbest_unattempted_weight"].to_i <= 100
+
+      Assessment::GuidanceQuiz.set_feedback_controls @course,
+                                                     params.has_key?("show_scoreboard"),
+                                                     params["best_unattempted_weight"].to_i,
+                                                     params["notbest_unattempted_weight"].to_i
+    end
+
+    redirect_to course_preferences_path(@course)+"?_tab=topicconcept"
+  end
+
   def set_passing_edge_lock
     enabled = params[:data]
 	  Assessment::GuidanceQuiz.set_passing_edge_lock(@course, enabled == "true")
@@ -455,6 +474,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   #Get scoreboard data across students attempting submissions
   def get_scoreboard_data
+    unless @guidance_quiz.feedback_show_scoreboard
+      respond_to do |format|
+        format.json { render json: { access_denied: "Scoreboard not enabled!" } }
+      end
+    end
 
     score_data = @guidance_quiz.submissions
                                .attempting_format

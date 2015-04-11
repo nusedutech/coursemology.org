@@ -35,6 +35,43 @@
 </div>
 
 <hr>
+
+<h3>Guidance Quiz (Feedback) Settings:</h3>
+<p>Feedback Settings for individual student submissions.</p>
+<%= form_tag set_feedback_data_course_assessment_guidance_quizzes_path(@course), class: 'form-horizontal', method: 'POST' do %>
+    <div class='control-group'>
+        <%= label_tag 'show_scoreboard', 'Show Scoreboard? :', class: 'control-label' %>
+        <div class='controls'>
+            <%= check_box_tag 'show_scoreboard', 'yes', @show_scoreboard %>
+        </div>
+    </div>
+    <div class='control-group'>
+        <label class="control-label" for="best_unattempted_weight">Uattempted Concepts Weight (Best)
+            <a href="#" class="tooltip-units" data-placement="right" data-toggle="tooltip" data-original-title="Unlocked topics are sorted at percentage of correct over total in a submission. Set a default percentage value for topics with no question attempt.">
+                <i class="icon-info-sign icon-hover-effect"></i>
+            </a>:
+        </label>
+        <div class='controls'>
+            <%= number_field_tag 'best_unattempted_weight', @best_unattempted_weight, in: 0...100, class: 'input-medium' %>
+        </div>
+    </div>
+    <div class='control-group'>        
+        <label class="control-label" for="notbest_unattempted_weight">Uattempted Concepts Weight (Worst)
+            <a href="#" class="tooltip-units" data-placement="right" data-toggle="tooltip" data-original-title="Unlocked topics are sorted at percentage of wrong over total in a submission. Set a default percentage value for topics with no question attempt.">    <i class="icon-info-sign icon-hover-effect"></i>
+            </a>:
+        </label>
+        <div class='controls'>
+            <%= number_field_tag 'notbest_unattempted_weight', @notbest_unattempted_weight, in: 0...100, class: 'input-medium' %>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <input type="submit" class="btn" value="Update"/>
+        </div>
+    </div>
+<% end %>
+<hr>
+
 <h3>Concept Settings:</h3>
 <p>Settings for concept in bulk.</p>
 <%= form_tag set_concepts_criteria_course_assessment_guidance_quizzes_path(@course), class: 'form-horizontal', method: 'POST' do %>
@@ -213,6 +250,7 @@
     }
 
     $(document).ready(function(){
+        $('.tooltip-units').tooltip();
         $('#concepts-textext').textext(
         {
             plugins : 'prompt focus arrow autocomplete tags ajax filter',

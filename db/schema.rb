@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150402072703) do
+ActiveRecord::Schema.define(:version => 20150411104609) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -334,6 +334,9 @@ ActiveRecord::Schema.define(:version => 20150402072703) do
     t.integer  "tag_id"
     t.integer  "rating_right",             :default => 0
     t.integer  "rating_wrong",             :default => 0
+    t.integer  "current_page_left_count",  :default => 0
+    t.integer  "total_page_left_count",    :default => 0
+    t.datetime "question_generate_at"
   end
 
   create_table "assessment_guidance_quiz_excluded_questions", :force => true do |t|
@@ -346,10 +349,13 @@ ActiveRecord::Schema.define(:version => 20150402072703) do
 
   create_table "assessment_guidance_quizzes", :force => true do |t|
     t.datetime "deleted_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.boolean  "passing_edge_lock",    :default => false
-    t.boolean  "neighbour_entry_lock", :default => false
+    t.datetime "created_at",                                             :null => false
+    t.datetime "updated_at",                                             :null => false
+    t.boolean  "passing_edge_lock",                   :default => false
+    t.boolean  "neighbour_entry_lock",                :default => false
+    t.boolean  "feedback_show_scoreboard",            :default => true
+    t.integer  "feedback_best_unattempted_weight",    :default => 1
+    t.integer  "feedback_notbest_unattempted_weight", :default => 1
   end
 
   create_table "assessment_mcq_answers", :force => true do |t|
@@ -464,9 +470,9 @@ ActiveRecord::Schema.define(:version => 20150402072703) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-    t.boolean  "test"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+    t.boolean  "test",       :default => false
     t.integer  "duration"
   end
 

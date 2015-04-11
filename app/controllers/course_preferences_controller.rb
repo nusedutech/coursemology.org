@@ -44,6 +44,16 @@ class CoursePreferencesController < ApplicationController
       when 'topicconcept'
         @tab = 'TopicconceptPreference'
         @enable = Assessment::GuidanceQuiz.is_enabled?(@course)
+        if @enable
+          guidance_quiz = @course.guidance_quizzes.first
+          @show_scoreboard = guidance_quiz.feedback_show_scoreboard
+          @best_unattempted_weight = guidance_quiz.feedback_best_unattempted_weight
+          @notbest_unattempted_weight = guidance_quiz.feedback_notbest_unattempted_weight
+        else
+          @show_scoreboard = true
+          @best_unattempted_weight = 0
+          @notbest_unattempted_weight = 0
+        end
         @passing_edge_lock = Assessment::GuidanceQuiz.is_passing_edge_lock?(@course)
         @neighbour_entry_lock = Assessment::GuidanceQuiz.is_neighbour_entry_lock?(@course)
       else

@@ -34,6 +34,17 @@ class Assessment::GuidanceQuiz < ActiveRecord::Base
     @guidance_quiz.save
   end
 
+  def self.set_feedback_controls (course,
+                                  show_scoreboard,
+                                  best_unattempted_weight,
+                                  notbest_unattempted_weight)
+    self.create_if_new (course)
+    @guidance_quiz.feedback_show_scoreboard = show_scoreboard
+    @guidance_quiz.feedback_best_unattempted_weight = best_unattempted_weight
+    @guidance_quiz.feedback_notbest_unattempted_weight = notbest_unattempted_weight
+    @guidance_quiz.save
+  end
+
   def self.set_passing_edge_lock (course, bool_value)
     self.create_if_new (course)
     @guidance_quiz.passing_edge_lock = bool_value

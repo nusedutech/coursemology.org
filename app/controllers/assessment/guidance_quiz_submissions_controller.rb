@@ -89,7 +89,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       format.json { 
         render json: { 
           correct: response[:is_correct], 
-          explanation: response[:explanation],
+          explanation: style_format(response[:explanation]),
           unlocked_concepts: concept_names
         } 
       }

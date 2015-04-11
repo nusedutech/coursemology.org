@@ -362,7 +362,7 @@
 	function generate_overall_trend_data(){
 
 		var accumulative = get_topicconcept_accumulative();
-		Morris.Area({
+		Morris.Line({
 		    element: 'overall-trend-acc',
             gridEnabled: true,
 		    data: accumulative.data,
@@ -375,7 +375,7 @@
 		});
 
 		var nonaccumulative = get_topicconcept_nonaccumulative();
-		Morris.Area({
+		Morris.Line({
 		    element: 'overall-trend-nonacc',
             gridEnabled: true,
 		    data: nonaccumulative.data,

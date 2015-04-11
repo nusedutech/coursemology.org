@@ -85,7 +85,22 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_concept_edges_relation
     concept_edge_ids = JSON.parse(params[:tags]).map { |tag| tag["id"] }
-    concept_edges = @course.concept_edges.where(id: concept_edge_ids)
+    get_all_concept_edges = false
+    concept_edge_ids.each do |concept_edge_id|
+      if concept_edge_id == "nil"
+        get_all_concept_edges = true
+        break
+      end
+    end
+    if get_all_concept_edges
+      concept_edges = @course.concept_edges
+    else
+      concept_edges = @course.concept_edges.where(id: concept_edge_ids)
+    end
+
+    if params.has_key?(:exclude_concept_edges_textext)
+      concept_edges = @course.concept_edges - concept_edges
+    end
 
     enabled = params.has_key?(:enabled)
     if params.has_key?(:correct_threshold)
@@ -179,7 +194,23 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def set_concepts_criteria
     concept_ids = JSON.parse(params[:tags]).map { |tag| tag["id"] }
-    concepts = @course.topicconcepts.concepts.where(id: concept_ids)
+    get_all_concepts = false
+    concept_ids.each do |concept_id|
+      if concept_id == "nil"
+        get_all_concepts = true
+        break
+      end
+    end
+
+    if get_all_concepts
+      concepts = @course.topicconcepts.concepts
+    else
+      concepts = @course.topicconcepts.concepts.where(id: concept_ids)
+    end
+
+    if params.has_key?(:exclude_concepts_textext)
+      concepts = @course.topicconcepts.concepts - concepts
+    end
 
     enabled = params.has_key?(:fail_enabled)
     is_entry = params.has_key?(:fail_is_entry)

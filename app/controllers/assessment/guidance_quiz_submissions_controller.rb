@@ -238,7 +238,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       return
     end
 
-    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept, !@guidance_quiz.neighbour_entry_lock
+    @concept_stage = Assessment::GuidanceConceptStage.get_passed_stage @submission, @concept
     unless @concept_stage
       redirect_to course_topicconcepts_path(@course), alert: " Choose concept first!"
       return

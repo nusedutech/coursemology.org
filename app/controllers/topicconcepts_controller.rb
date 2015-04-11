@@ -534,8 +534,13 @@ class TopicconceptsController < ApplicationController
 
   def get_concepts_list_with_id
     concepts = Topicconcept.where(course_id: @course.id, typename: "concept").select([:name, :id])
+
+    #Additional "All" parameter added
+    concepts_parsed = concepts.map { |c| { id: c.id, name: c.name}}
+    concepts_parsed << {id: "nil", name: "All"}
+
     respond_to do |format|
-      format.json { render json: concepts }      
+      format.json { render json: concepts_parsed }      
     end
   end
 
@@ -554,7 +559,7 @@ class TopicconceptsController < ApplicationController
     	end
     end
     respond_to do |format|
-      format.json { render json: concept_edges }      
+      format.json { render json: concept_edges + [{id: "nil", name: "All"}] }      
     end
   end
   
@@ -990,7 +995,8 @@ class TopicconceptsController < ApplicationController
   end
 
 	def set_student_layout
-		if cannot? :manage, Topicconcept or @student_view
+	  if Assessment::GuidanceQuiz.is_enabled? (@course) and
+       (cannot? :manage, Topicconcept or @student_view)
       self.class.layout "topicconcept_student_interface"
     else
       self.class.layout "application"
@@ -1009,9 +1015,9 @@ class TopicconceptsController < ApplicationController
   #Set viewing permission and parameters of user
   def set_viewing_permissions
     @gqEnabled = Assessment::GuidanceQuiz.is_enabled? (@course)
+    set_student_layout
     if @gqEnabled
       set_student_view
-      set_student_layout
       set_hidden_sidebar_params
     end
   end
@@ -1194,48 +1200,51 @@ private
     @user_course = curr_user_course
 
     @guidance_quiz = @course.guidance_quizzes.first
-    @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
-                                                 status: "attempting").first if !@guidance_quiz.nil?
-    data_synchronise_submission @submission
 
-    #Submission not available, indicate progress bar as such
-    if @submission.nil? or !@submission.attempting?
-      @progress_bar = {
-                        pass: 0,
-                        fail: 0,
-                        enable: 0,
-                        disable: 100,
-                        pass_amt: 0,
-                        fail_amt: 0,
-                        enable_amt: 0,
-                        disable_amt: 0,
-                        disable_message: "Assessment not started yet"
-                      }
-    else
-      passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @submission
-      passed_concepts = passed_concept_stages.collect(&:concept).uniq
-      failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages @submission
-      failed_concepts = failed_concept_stages.collect(&:concept).uniq
-      enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
-                                      .concepts
-                                      .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
-      all_concepts = @course.topicconcepts.concepts 
+    if !@guidance_quiz.nil?
+      @submission = @guidance_quiz.submissions.where(std_course_id: curr_user_course.id,
+                                                   status: "attempting").first
+      data_synchronise_submission @submission
 
-      passed_concept_count = passed_concepts.count
-      failed_concept_count = failed_concepts.count
-      disabled_concept_count = all_concepts.count - enabled_concepts.count
-      enabled_concept_count = enabled_concepts.count - passed_concept_count - failed_concept_count 
-      total = passed_concept_count + failed_concept_count + disabled_concept_count + enabled_concept_count
-      @progress_bar = {
-                        pass: passed_concept_count * 100.0 / total,
-                        fail: failed_concept_count * 100.0 / total,
-                        enable: enabled_concept_count * 100.0 / total,
-                        disable: disabled_concept_count * 100.0 / total,
-                        pass_amt: passed_concept_count,
-                        fail_amt: failed_concept_count,
-                        enable_amt: enabled_concept_count,
-                        disable_amt: disabled_concept_count,
-                      }
+      #Submission not available, indicate progress bar as such
+      if @submission.nil? or !@submission.attempting?
+        @progress_bar = {
+                          pass: 0,
+                          fail: 0,
+                          enable: 0,
+                          disable: 100,
+                          pass_amt: 0,
+                          fail_amt: 0,
+                          enable_amt: 0,
+                          disable_amt: 0,
+                          disable_message: "Assessment not started yet"
+                        }
+      else
+        passed_concept_stages = Assessment::GuidanceConceptStage.get_passed_stages @submission
+        passed_concepts = passed_concept_stages.collect(&:concept).uniq
+        failed_concept_stages = Assessment::GuidanceConceptStage.get_failed_stages @submission
+        failed_concepts = failed_concept_stages.collect(&:concept).uniq
+        enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
+                                        .concepts
+                                        .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+        all_concepts = @course.topicconcepts.concepts 
+
+        passed_concept_count = passed_concepts.count
+        failed_concept_count = failed_concepts.count
+        disabled_concept_count = all_concepts.count - enabled_concepts.count
+        enabled_concept_count = enabled_concepts.count - passed_concept_count - failed_concept_count 
+        total = passed_concept_count + failed_concept_count + disabled_concept_count + enabled_concept_count
+        @progress_bar = {
+                          pass: passed_concept_count * 100.0 / total,
+                          fail: failed_concept_count * 100.0 / total,
+                          enable: enabled_concept_count * 100.0 / total,
+                          disable: disabled_concept_count * 100.0 / total,
+                          pass_amt: passed_concept_count,
+                          fail_amt: failed_concept_count,
+                          enable_amt: enabled_concept_count,
+                          disable_amt: disabled_concept_count,
+                        }
+      end
     end
   end
 

@@ -81,7 +81,7 @@ CKEDITOR.editorConfig = function (config) {
         { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] }
     ];
     config.toolbar_mini = [
-        ["Bold",  "Italic",  "Underline",  "Strike",  "-",'Styles', 'Format', 'Font', 'FontSize',  "-", 'TextColor', 'BGColor',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar', "EqnEditor"],
+        ["Bold",  "Italic",  "Underline",  "Strike", "-", 'TextColor', 'BGColor',  "-",'NumberedList', 'BulletedList', 'Font', 'FontSize','Table',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar', "EqnEditor","-",'Source'],
     ];
 
 }

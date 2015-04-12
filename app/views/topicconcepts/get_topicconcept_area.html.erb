@@ -1,5 +1,5 @@
 <div style="margin-left: 20px;">
-	<form class="form-inline" action="<%= request.original_url %>" method="POST">
+	<form class="form-inline" action="<%= request.original_url %>" method="POST" onsubmit="halt();">
 		<div class="feedback-form-div">
 			From: <input type="date" name="start_period" class="" value="<%= start_period %>"/>&nbsp;&nbsp;&nbsp; 
 		</div>

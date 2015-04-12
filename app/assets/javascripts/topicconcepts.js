@@ -401,3 +401,17 @@ function setup_node_edges_color(nodelist) {
     }
     return false;
   }
+
+  function halt(message, argFunc) {
+    var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
+    $('#processing-halt-all-message').html(parsedMessage);
+    $('#processing-halt-all').modal();
+
+    if (typeof argFunc !== "undefined") {
+      setTimeout(argFunc, 250);
+    }
+  }
+
+  function resume() {
+    $('#processing-halt-all').modal('hide');
+  }

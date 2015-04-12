@@ -5,6 +5,7 @@ class Topicconcept < ActiveRecord::Base
   include Rails.application.routes.url_helpers
   
   scope :concepts, -> { where(:typename => "concept") }
+  scope :topics, -> { where(:typename => "topic") }
   
   belongs_to :course  
   #belongs_to :creator, class_name: "User"
@@ -30,6 +31,8 @@ class Topicconcept < ActiveRecord::Base
 
 
   has_one :concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy, foreign_key: "topicconcept_id"
+  has_many :concept_stages, class_name: Assessment::GuidanceConceptStage, foreign_key: "topicconcept_id"
+
 
   def is_concept?
     self.typename == "concept"

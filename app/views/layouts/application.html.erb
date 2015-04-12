@@ -78,6 +78,11 @@
       <%= yield %>
     </div>
 <% end %>
+<div class="topicconcept-loading-modal hide fade" id="processing-halt-all" data-backdrop="static" data-keyboard="true">
+    <h1 id="processing-halt-all-message">Processing.... Please wait</h1>
+    <div class="processing-ball"></div>
+    <div class="inner-processing-ball"></div>
+</div>
 <%= render "layouts/footer" %>
 <%= debug(params) if Rails.env.development? %>
 </body>

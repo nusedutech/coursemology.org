@@ -96,7 +96,7 @@
       		</div>
       		<div id="collapse-wrong-questions" class="accordion-body collapse">
         		<div class="accordion-inner">
-        			<form action="<%= request.original_url %>" method="GET">
+        			<form action="<%= get_freq_answers_feedback_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
 	        			<div class="feedback-form-div">
         					Top Results: <input name="freq_wrong_count" type="number" value="<%= @freq_wrong_count %>" min="0"/>
         					&nbsp;&nbsp;&nbsp; 
@@ -132,42 +132,7 @@
         				</div>
 					</form>
 
-          			<% @summary[:freq_wrong_questions].each_with_index do |q, i| %>
-          				<% qn = @course.questions.find_by_id(q.qid) %>
-				        <section id="question_<%= i + 1%>" style="margin-bottom: 20px;">
-				          	<div class="grey_background" style="margin: 10px;">
-				            	<strong><%= i + 1 %>. </strong>
-				            	<%= style_format qn.description %>
-				            	
-				            	- Answered <%= @choose_correct ? "correctly" : "wrongly" %> <strong style="color: #FF0000;"><%= q.count %></strong> times
-				          	</div>
-				          	<div style="margin: 10px;">
-				            	<% qn.topicconcepts.concepts.each do |concept| %>
-				                    <span class="label label-success"><%= concept.name %></span>
-				                <% end %>
-				                <% qn.tags.each do |tag| %>
-				                    <span class="label label-info"><%= tag.name %></span>
-				                <% end %>
-				          	</div>
-					        <% if qn.specific.class == Assessment::McqQuestion %>
-					          	<table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
-						            <colgroup>
-					                	<col width="5%"/>
-						              	<col width="35%"/>
-						              	<col width="50%"/>
-						            </colgroup>
-						            <% qn.options.each do |opt| %>
-				            			<% nonuniq_stds = opt.assemt_std(@course, @guidance_quiz.assessment) %>
-							            <tr>
-								            <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
-								            <td><%= opt.text %></td>
-								            <td><%= nonuniq_stds.size %></td>
-							            </tr>
-				        			<% end %>
-					          	</table>
-					        <% end %>
-				      	</section>
-				    <% end %>
+          			<%= render  partial: "get_freq_answers_feedback_table" %>
         		</div>
       		</div>
     	</div>
@@ -312,7 +277,6 @@
 				
 	  	//Create topic trees
 	  	var tcdata = get_topicconcept_data();
-    	console.log(tcdata);
     	generate_entire_dependency_map(tcdata.nodelist, 
                                    tcdata.edgelist);
 
@@ -438,7 +402,9 @@
 		});
 
 		return "<p class='name'>"+result.name+"</p>" + 
-	           "<div><p class='subtop'> Statistics : <em class='sub'>"+result.raw_right+" / "+result.raw_total+" (" + result.raw_percent + ") "+"</em></p></div>";
+	           "<div><p class='subtop'> Statistics : <em class='sub'>"+result.raw_right+" / "+result.raw_total+" (" + result.raw_percent + ") "+"</em></p></div>"+
+	           "<div><p class='subtop'> Page Left : <em class='sub'>"+result.page_left_sum+"</em></p></div>"+
+	           "<div><p class='subtop'> Time Taken : <em class='sub'>"+result.seconds_sum+" seconds</em></p></div>";
     }
 
     function get_topicconcept_weights(){

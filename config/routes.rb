@@ -152,6 +152,7 @@ Coursemology::Application.routes.draw do
           post :edit, to: 'guidance_quiz_submissions#edit'
           get  :submit, to: 'guidance_quiz_submissions#submit'
           post :set_tag_to_stage, to: 'guidance_quiz_submissions#set_tag_to_stage'
+          post :page_lost_focus, to: 'guidance_quiz_submissions#page_lost_focus'
         end
       end
 
@@ -308,6 +309,7 @@ Coursemology::Application.routes.draw do
         post 'review_diagnostic_exploration_on_stage', :on => :collection
         get 'individual_submissions', :on => :collection
         get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'
+        post :get_freq_answers_feedback, on: :collection, to: 'topicconcepts#get_freq_answers_feedback'
 
         post 'submit_answer', :on => :collection
         get 'ivleapi'

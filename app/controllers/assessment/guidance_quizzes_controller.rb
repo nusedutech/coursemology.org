@@ -10,6 +10,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   before_filter :set_topicconcept_updated_timing, only: [:set_concept_edge_relation, :set_concept_edges_relation, :set_concept_criteria, :set_concepts_criteria]
 
+  TOPIC_PASSED_STATUS = "passed"
+  TOPIC_NONE_STATUS = "none"
+  TOPIC_FAILED_STATUS = "failed"
+
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
   def set_enabled
@@ -679,15 +683,35 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   end
 
   def get_topic_tree(parent ,included_topicconcepts)
-    included_topicconcepts.each do |itc|      
+    #Default is passed - will check to reach none or failed status
+    parent_status = TOPIC_PASSED_STATUS
+
+    included_topicconcepts.each do |itc|  
+      if !itc.included_topicconcepts.empty?
+        #Status is dependent on collective children status
+        status = get_topic_tree(itc, itc.included_topicconcepts)
+        parent_status = status === TOPIC_PASSED_STATUS ? parent_status : TOPIC_NONE_STATUS
+      elsif itc.is_concept? and !@submission.nil?
+        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, itc
+        if concept_stage.nil?
+          parent_status = status = TOPIC_NONE_STATUS
+        else        
+          status = concept_stage.failed ? TOPIC_FAILED_STATUS : TOPIC_PASSED_STATUS
+          #parent status to be none the moment one concept is failed
+          parent_status = concept_stage.failed ? TOPIC_NONE_STATUS : parent_status
+        end
+      else
+        #Status is passed (Since no failing child)
+        status = TOPIC_PASSED_STATUS
+      end
       @topics_concepts_with_info << {
         itc: itc,
-        parent: parent
+        parent: parent,
+        status: status
       }
-      if !itc.included_topicconcepts.empty?
-        get_topic_tree(itc, itc.included_topicconcepts)
-      end
     end
+
+    parent_status
   end
 
   #Get passing criteria for an edge

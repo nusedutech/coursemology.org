@@ -3,13 +3,13 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :set_popup_layout, only: [:get_topicconcept_area, :review_diagnostic_exploration_on_stage]
+  before_filter :set_popup_layout, only: [:get_topicconcept_area, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage]
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :get_topicconcept_overall_statistics, :diagnostic_exploration, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :review_diagnostic_exploration]
 
   before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration, :review_diagnostic_exploration, :get_quiz_feedback, :individual_submissions]
 
-  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :get_topicconcept_area, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
+  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :get_topicconcept_area, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_for_review, only: [:review_diagnostic_exploration]
 
@@ -29,6 +29,13 @@ class TopicconceptsController < ApplicationController
     #@topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank.split('.')[e[:itc].rank.split('.').length-1].to_i}
 
     Rails.cache.clear
+
+    respond_to do |format|
+      format.html
+      format.json {
+        render json: {}
+      }
+    end
   end
   
   def ivleapi   
@@ -43,6 +50,26 @@ class TopicconceptsController < ApplicationController
     @summary[:attempting] = @summary[:attempting].uniq
     @summary[:unsubmitted] = @course.student_courses - @summary[:attempting]
 
+    @freq_wrong_count = 5
+    @choose_correct = false
+    @tag = nil
+    @chosen_concept = nil
+    @concepts = @course.topicconcepts.concepts
+    @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
+                                                    .select("assessment_answers.question_id as qid, "\
+                                                            "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                                            "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                                            "COUNT(*) as count")
+                                                    .where("assessment_answers.correct = ?",@choose_correct)
+                                                    .group("qid")
+                                                    .order("count DESC")
+                                                    .limit(@freq_wrong_count)
+
+    @tags = @course.tags
+  end
+
+  def get_freq_answers_feedback
+    @summary = {}
     if params.has_key?("freq_wrong_count")
       @freq_wrong_count = params["freq_wrong_count"].to_i
     else
@@ -75,7 +102,10 @@ class TopicconceptsController < ApplicationController
       combined_mcq_answers = @chosen_concept.mcq_answers
                                             .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
       @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .select("assessment_answers.question_id as qid, "\
+                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                                              "COUNT(*) as count")
                                                       .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
                                                              @choose_correct,
                                                              combined_mcq_answers)
@@ -85,7 +115,10 @@ class TopicconceptsController < ApplicationController
     elsif @chosen_concept
       concept_mcq_answers = @chosen_concept.mcq_answers
       @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .select("assessment_answers.question_id as qid, "\
+                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                                              "COUNT(*) as count")
                                                       .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
                                                              @choose_correct,
                                                              concept_mcq_answers)
@@ -95,7 +128,10 @@ class TopicconceptsController < ApplicationController
     elsif @tag
       tag_mcq_answers = @tag.mcq_answers
       @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .select("assessment_answers.question_id as qid, "\
+                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                                              "COUNT(*) as count")
                                                       .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
                                                              @choose_correct,
                                                              tag_mcq_answers)
@@ -104,7 +140,10 @@ class TopicconceptsController < ApplicationController
                                                       .limit(@freq_wrong_count)
     else
       @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
+                                                      .select("assessment_answers.question_id as qid, "\
+                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                                              "COUNT(*) as count")
                                                       .where("assessment_answers.correct = ?",@choose_correct)
                                                       .group("qid")
                                                       .order("count DESC")
@@ -112,7 +151,6 @@ class TopicconceptsController < ApplicationController
     end
 
     @tags = @course.tags
-    @concepts = @course.topicconcepts.concepts
   end
 
   def diagnostic_exploration
@@ -679,6 +717,14 @@ class TopicconceptsController < ApplicationController
       result[:raw_total] = raw_total
       result[:raw_percent] = get_percentage_string raw_right, raw_total 
 
+      summed_units = @topicconcept.concept_stages
+                                  .select("SUM(assessment_guidance_concept_stages.total_page_left_count) as page_left_sum, "\
+                                          "SUM(assessment_guidance_concept_stages.seconds_to_complete) as seconds_sum")
+                                  .first 
+      result[:page_left_sum] = summed_units.page_left_sum
+      result[:seconds_sum] = summed_units.seconds_sum
+      result[:cats] =summed_units
+
       stroke_color = get_red_green_color raw_right, raw_total, 0, 140    
       result[:stroke] = "rgb("+ stroke_color[:red] +", "+ stroke_color[:green] +", 0)"
       fill_color = get_red_green_color raw_right, raw_total, 200, 55
@@ -688,6 +734,8 @@ class TopicconceptsController < ApplicationController
       result[:raw_right] = "nil"
       result[:raw_total] = "nil"
       result[:raw_percent] = "nil"
+      result[:page_left_sum] = "nil"
+      result[:seconds_sum] = "nil"
       result[:stroke] = "rgb(70, 70, 0)"
       result[:fill] = "rgb(227, 227, 200)"
     end
@@ -858,7 +906,7 @@ class TopicconceptsController < ApplicationController
     if params.has_key?("start_period")
       start_date = Time.parse(params[:start_period])
     else
-      start_date = Time.now - 1.months
+      start_date = Time.now - 1.month
     end
 
     #Get end period date parameter

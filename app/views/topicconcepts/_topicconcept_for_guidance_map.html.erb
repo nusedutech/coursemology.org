@@ -35,7 +35,10 @@
 
 <script>
 	
-
+  var TOPIC_TREE_ID_KEY = "topictree-";
+  var TOPIC_TREE_PASSED_STATUS = "passed";
+  var TOPIC_TREE_FAILED_STATUS = "failed";
+  var TOPIC_TREE_NONE_STATUS = "none";
 
 	var is_editing_required_concepts = false;
 	var selected_node;
@@ -56,7 +59,6 @@
 				
 	  //Create topic trees
 	  var tcdata = get_topicconcept_data_with_criteria();
-    console.log(tcdata);
     generate_entire_dependency_map(tcdata.nodelist, 
                                    tcdata.edgelist,
                                    tcdata.submission,
@@ -67,8 +69,31 @@
                                    tcdata.failedEdges);
 
 	  var topictrees = [];
-	  jQuery.each(tcdata.topictrees, function() {		  
-		  topictrees.push({"id" : this.itc.id, "parent" : this.parent == null ? "#" : this.parent.id, "text" : this.itc.name,"type" : this.itc.typename});
+	  jQuery.each(tcdata.topictrees, function() {	
+      var curclass = "";
+      switch (this.status) {
+        case TOPIC_TREE_PASSED_STATUS:
+          curclass = "topictree-passed";
+          break;
+        case TOPIC_TREE_FAILED_STATUS:
+          curclass = "topictree-failed";
+          break;
+        case TOPIC_TREE_NONE_STATUS:
+          curclass = "topictree-none";
+          break;
+        default:
+          break;
+      }
+
+		  topictrees.push(
+        {
+          "id" : TOPIC_TREE_ID_KEY+this.itc.id, 
+          "parent" : this.parent == null ? "#" : TOPIC_TREE_ID_KEY+this.parent.id, 
+          "text" : this.itc.name,
+          "type" : this.itc.typename,
+          "li_attr" : { class: curclass }
+        }
+      );
 		});
 		
 	  $('#div_tree').jstree({
@@ -96,7 +121,7 @@
 		      "icon" : "greenleaf",
 		      "valid_children" : []
 		    }
-		},
+		  },
 	    "plugins" : [ "contextmenu","types", "dnd", "crrm","search", "themes"],
 	    "contextmenu" : { "items" : function (node) {} }
 	  });
@@ -104,9 +129,10 @@
 	  //select event handler
 	  $('#div_tree').on('select_node.jstree', function (e, data) {
 	  	if(data.node.type == 'concept'){
-			  var svgGroup = d3.select("svg#svg-concept g");	 
-			  loc_x = parseInt($('#svg-concept').parent().width())/2 - parseInt(layout._nodes[data.node.id].value.x);
-			  loc_y = parseInt($('#svg-concept').parent().height())/2 - parseInt(layout._nodes[data.node.id].value.y);
+			  var svgGroup = d3.select("svg#svg-concept g");	
+        var target_id = (data.node.id.split(TOPIC_TREE_ID_KEY))[1];
+			  loc_x = parseInt($('#svg-concept').parent().width())/2 - parseInt(layout._nodes[target_id].value.x);
+			  loc_y = parseInt($('#svg-concept').parent().height())/2 - parseInt(layout._nodes[target_id].value.y);
 			    
 			  zoom.scale(1);
 	  	  zoom.translate([loc_x, loc_y]);

@@ -55,6 +55,11 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
     result
   end
 
+  def criteria_check_and_save
+    self.passed = criteria_check
+    self.save
+  end
+
   #Check for current progress on criteria and unlock if necessary
   #Return the concepts unlocked
   def check_to_unlock submission, bypass_archive_check = false
@@ -71,19 +76,36 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
       self.save
       dependent_concept = self.concept_edge.dependent_concept
       dependent_concept_stage = Assessment::GuidanceConceptStage.get_stage_simplified submission, dependent_concept.id
-      #Check for null and circular dependency (to prevent infinite recursion)
-      #Only delete if concept is not a entry type concept
-      if !dependent_concept_stage.nil? and dependent_concept.concept_option.can_enter?
-        processing_concept_stages = [dependent_concept_stage]
-	      #Iteratively find the lower level concepts and delete the content
-	      while processing_concept_stages.size > 0 do
-	        current_concept_stage = processing_concept_stages.shift
-	        processing_concept_stages |= Assessment::GuidanceConceptStage.cascade_delete_failed_concept_stage submission, current_concept_stage
-	      end
-      end
+      Assessment::GuidanceConceptStage.cascade_delete_loop submission, dependent_concept_stage
     end
 
     result
+  end
+
+  #Check for current progress and lock and unlock whenever necessary
+  def check_to_unlock_for_data_synchronisation submission 
+    result = []
+    criteria_result = criteria_check
+    dependent_concept = self.concept_edge.dependent_concept
+    dependent_concept_stage = Assessment::GuidanceConceptStage.get_passed_stage_simplified submission, dependent_concept.id
+
+    #If pass, check for next concept stage
+    # - delete if it is available (in case some other edge criteria not fulfiled)
+    # - add if it is not available (in case it can be added)
+    if criteria_result
+      self.passed = true
+      self.save
+      if dependent_concept_stage.nil?
+        cascade_unlock_loop submission, self.concept_edge.dependent_concept
+      else
+        Assessment::GuidanceConceptStage.cascade_delete_loop submission, dependent_concept_stage
+      end
+    #If fail, just send for delete
+    else
+      self.passed = false
+      self.save
+      Assessment::GuidanceConceptStage.cascade_delete_loop submission, dependent_concept_stage
+    end
   end
  
   #Returns all the concepts that were unlocked
@@ -121,7 +143,7 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
         required_concept_edges = dependent_concept.concept_edge_required_concepts
 
         #Make sure pre requisite criteria are all met
-        if concept_edges_check_all_criteria submission, required_concept_edges
+        if Assessment::GuidanceConceptEdgeStage.concept_edges_check_all_criteria submission, required_concept_edges
           dependent_concept_stage = Assessment::GuidanceConceptStage.get_failed_stage_simplified submission, dependent_concept.id
           
           #Only delete for if failed stage found
@@ -171,11 +193,12 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
 
   #Shorthand method to return true when all the concept edges sent in 
   #has met all the criteria assigned
-  def concept_edges_check_all_criteria submission, concept_edges
+  def self.concept_edges_check_all_criteria submission, concept_edges
     result = true
     concept_edges.each do |concept_edge|
       #Only check for enabled edges when unlocking
-      if (Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge) and (Assessment::GuidanceConceptOption.is_enabled_with concept_edge.required_concept)
+      if (Assessment::GuidanceConceptEdgeOption.is_enabled? concept_edge) and 
+         (Assessment::GuidanceConceptOption.is_enabled_with concept_edge.required_concept)
       	concept_stage = Assessment::GuidanceConceptStage.get_passed_stage_simplified submission, concept_edge.required_concept.id
       	#Only check if the stage before this edge_stage is found and passed
       	if concept_stage.nil?
@@ -244,12 +267,8 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
 
     def verify_passed_edge_stages submission, concept_stage
       concept_stage.concept_edge_stages.each do |concept_edge_stage|
-        verify_passed_edge_stage submission, concept_edge_stage
+        concept_edge_stage.check_to_unlock_for_data_synchronisation submission
       end
-    end
-
-    def verify_passed_edge_stage submission, concept_edge_stage
-      concept_edge_stage.check_to_unlock submission, true
     end
 
     def data_synchronisation_clean submission, concept_stages

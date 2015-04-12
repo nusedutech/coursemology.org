@@ -1,11 +1,11 @@
 class Assessment::GuidanceQuizSubmissionsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :assessment, through: :course, class: "Assessment"
-  load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission", id_param: :id, only: [:edit, :submit, :set_tag_to_stage]
+  load_and_authorize_resource :submission, through: :assessment, class: "Assessment::Submission", id_param: :id, only: [:edit, :submit, :set_tag_to_stage, :page_lost_focus]
 
   before_filter :authorize_and_load_guidance_quiz, only: [:attempt, :edit, :submit]
   before_filter :no_update_after_submission, only: [:edit, :submit]
-  before_filter :authorize_and_load_guidance_quiz_and_concept_and_conceptstage, only: [:set_tag_to_stage]
+  before_filter :authorize_and_load_guidance_quiz_and_concept_and_conceptstage, only: [:set_tag_to_stage, :page_lost_focus]
 
 
   #Create new guidance quiz entry
@@ -69,7 +69,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     concept_stage.remove_top_question
     question = @course.questions.find_by_id(question_id).specific
     response = submit_mcq(question)
-    concept_stage.record_answer(response[:answer_id])
+    concept_stage.record_answer(response[:answer])
     if (response[:is_correct])
       concept_stage.add_one_right @submission, @guidance_quiz.passing_edge_lock, question.totalRating
     else
@@ -100,6 +100,17 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
     @submission.set_submitted
 
     redirect_to course_topicconcepts_path(@course)
+  end
+
+  def page_lost_focus
+    @concept_stage.add_page_left_count
+
+    respond_to do |format|
+      format.json { 
+        render json: {
+        } 
+      }
+    end
   end
 
   def set_tag_to_stage
@@ -195,7 +206,7 @@ class Assessment::GuidanceQuizSubmissionsController < ApplicationController
       is_correct: correct,
       result: correct ? correct_str : "Incorrect!",
       explanation: explanation,
-		  answer_id: ans.id
+		  answer: ans
     }
   end
 

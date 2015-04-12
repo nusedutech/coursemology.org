@@ -1,5 +1,6 @@
 <input type="hidden" id="concept-id-val" value="<%= @concept.id %>"/>
 <input type="hidden" id="progress-bar-url" value="<%= get_progress_bar_info_course_topicconcepts_path(@course) %>"/>
+<input type="hidden" id="pageup-url" value="<%= page_lost_focus_course_assessment_guidance_quiz_submission_path(@course, @assessment, @submission) %>"/>
 
 <div class="topicconcept-spunned">
     <div class="topicconcept-spun-12">
@@ -78,8 +79,7 @@
 		});
 
 		$('#mcq-submit-button').click(function(){
-			halt();
-			setTimeout(function(){
+			halt(null ,function(){
 				var checkedAmt = $("input[name='mcq-answers']:checked").length
 				if (checkedAmt < 1){
 					alert("None of the options were selected!");
@@ -104,13 +104,20 @@
 					}
 				}
 				resume();
-			}, 250);
+			});
 		});
 
 		update_failing_criteria(get_failing_criteria());
 		update_passing_criteria(get_passing_criteria());
 	});
 	
+	$(window).on("beforeunload", function(){
+		page_up_count();
+	});
+
+	$(window).blur(function(){
+		page_up_count();
+	});
 
 	function submit_mcq(){
 		var result = null;
@@ -355,5 +362,14 @@
 
 			$("#question-area").fadeIn(200);
 		});
+	}
+
+
+	function page_up_count(){
+		var url = $("#pageup-url").prop("value");
+		var concept_id = $("#concept-id-val").prop("value");
+		server_request({concept_id: concept_id}, 
+					   "POST", 
+					   url);
 	}
 </script>

@@ -304,15 +304,18 @@
         function show_video(title, type, des, loc){
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";
-            entry_form += "<div><video id='my_video_123' class='video-js vjs-default-skin' controls width='640' height='480'>";
+            entry_form += "<div><video class='video-lecture video-js vjs-default-skin' controls width='640' height='480'>";
             entry_form += "<source src='" + loc + "' type='video/mp4'>";
             entry_form += "Your browser does not support the video tag.";
             entry_form += "</video></div>";
             $('section#detail-content').append(entry_form);
 
-            videojs("my_video_123", {'playbackRates': [0.5, 1, 1.5, 2]}, function(){
-                // Player (this) is initialized and ready.
-            });
+            var temp_videos = document.getElementsByClassName('video-lecture');
+            for (i = 0; i < temp_videos.length; i++) {
+                videojs(temp_videos[i], {'playbackRates': [0.5, 1, 1.5, 2]}, function(){
+                    // Player (this) is initialized and ready.
+                });
+            }
         }
 
         //show entry mission training

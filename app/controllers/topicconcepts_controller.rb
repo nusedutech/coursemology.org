@@ -51,7 +51,7 @@ class TopicconceptsController < ApplicationController
     @summary[:unsubmitted] = @course.student_courses - @summary[:attempting]
 
     @freq_wrong_count = 5
-    @choose_correct = false
+    @choose_correct = "wrong"
     @tag = nil
     @chosen_concept = nil
     @concepts = @course.topicconcepts.concepts
@@ -60,7 +60,7 @@ class TopicconceptsController < ApplicationController
                                                             "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
                                                             "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
                                                             "COUNT(*) as count")
-                                                    .where("assessment_answers.correct = ?",@choose_correct)
+                                                    .where("assessment_answers.correct = 0")
                                                     .group("qid")
                                                     .order("count DESC")
                                                     .limit(@freq_wrong_count)
@@ -74,12 +74,6 @@ class TopicconceptsController < ApplicationController
       @freq_wrong_count = params["freq_wrong_count"].to_i
     else
       @freq_wrong_count = 5
-    end
-
-    if params.has_key?("correct") and params[:correct] == "true"
-      @choose_correct = true
-    else
-      @choose_correct = false
     end
 
     if params.has_key?("tag_id") and params[:tag_id] != "nil"
@@ -96,62 +90,177 @@ class TopicconceptsController < ApplicationController
       @chosen_concept = nil
     end
 
-    @concepts = @course.topicconcepts.concepts
-    if @chosen_concept and @tag
-      tag_mcq_answers = @tag.mcq_answers
-      combined_mcq_answers = @chosen_concept.mcq_answers
-                                            .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, "\
-                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
-                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
-                                                              "COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
-                                                             @choose_correct,
-                                                             combined_mcq_answers)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
-    elsif @chosen_concept
-      concept_mcq_answers = @chosen_concept.mcq_answers
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, "\
-                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
-                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
-                                                              "COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
-                                                             @choose_correct,
-                                                             concept_mcq_answers)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
-    elsif @tag
-      tag_mcq_answers = @tag.mcq_answers
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, "\
-                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
-                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
-                                                              "COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
-                                                             @choose_correct,
-                                                             tag_mcq_answers)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
+    found_correct_key = params.has_key?("correct")
+    #Search for only correct and order by correct answers
+    if found_correct_key and params[:correct] == "correct"
+      @choose_correct = "correct"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_correct_wrong @chosen_concept, 
+                                                                                @tag, 
+                                                                                true,
+                                                                                @freq_wrong_count
+    #Search for only wrong and order by wrong answers
+    elsif found_correct_key and params[:correct] == "wrong"
+      @choose_correct = "wrong"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_correct_wrong @chosen_concept, 
+                                                                                @tag, 
+                                                                                false,
+                                                                                @freq_wrong_count
+    #Search for all and order by answers count
+    elsif found_correct_key and params[:correct] == "both"
+      @choose_correct = "both"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "count DESC",
+                                                                       @freq_wrong_count#Search for all
+    elsif found_correct_key and params[:correct] == "seconds"
+      @choose_correct = "seconds"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "seconds_sum DESC",
+                                                                       @freq_wrong_count#Search for all
+    elsif found_correct_key and params[:correct] == "page_left"
+      @choose_correct = "page_left"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "page_left_sum DESC",
+                                                                       @freq_wrong_count
+    elsif found_correct_key and params[:correct] == "avg_seconds"
+      @choose_correct = "avg_seconds"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "avg_seconds_sum DESC",
+                                                                       @freq_wrong_count
     else
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, "\
-                                                              "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
-                                                              "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
-                                                              "COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ?",@choose_correct)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
+      @choose_correct = "avg_page_left"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "avg_page_left_sum DESC",
+                                                                       @freq_wrong_count
     end
 
+    @concepts = @course.topicconcepts.concepts
     @tags = @course.tags
   end
+
+  def get_freq_answers_feedback_correct_wrong chosen_concept, tag, choice, limit
+    if chosen_concept and tag
+      tag_mcq_answers = tag.mcq_answers
+      combined_mcq_answers = chosen_concept.mcq_answers
+                                           .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                    choice,
+                                    combined_mcq_answers)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    elsif chosen_concept
+      concept_mcq_answers = chosen_concept.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                    choice,
+                                    concept_mcq_answers)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    elsif tag
+      tag_mcq_answers = tag.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                    choice,
+                                    tag_mcq_answers)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    else
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ?", choice)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    end
+
+    result
+  end
+
+  def get_freq_answers_feedback_both chosen_concept, tag, order_query_string, limit
+    if chosen_concept and tag
+      tag_mcq_answers = tag.mcq_answers
+      combined_mcq_answers = chosen_concept.mcq_answers
+                                           .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .where("assessment_mcq_answers.id in (?)",
+                                    combined_mcq_answers)
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    elsif chosen_concept
+      concept_mcq_answers = chosen_concept.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .where("assessment_mcq_answers.id in (?)",
+                                    concept_mcq_answers)
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    elsif tag
+      tag_mcq_answers = tag.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .where("assessment_mcq_answers.id in (?)",
+                                    tag_mcq_answers)
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    else
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    end
+
+    result
+  end
+
+
 
   def diagnostic_exploration
     set_latest_concept_stage @concept_stage

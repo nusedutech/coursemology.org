@@ -201,6 +201,11 @@
 			      			<table style="width: 99%">
 								<tbody>
 									<tr class="white-row">
+										<td style="width: 35%; padding-left: 10px; border: 1px solid #dddddd; vertical-align: top ">
+											<div style="height: 400px; overflow-y: scroll">
+												<div id="div_tree"></div>
+											</div>
+										</td>
 										<td style="width: 98%; height:400px; border: 1px solid #dddddd; padding: 5px;">	
 											<div>			
 												<svg id="svg-mastery-map" width=100% height=400>
@@ -254,6 +259,11 @@
 </div>
 
 <script>
+	var TOPIC_TREE_ID_KEY = "topictree-";
+  	var TOPIC_TREE_PASSED_STATUS = "passed";
+  	var TOPIC_TREE_FAILED_STATUS = "failed";
+  	var TOPIC_TREE_NONE_STATUS = "none";
+
 	$(document).ready(function(){
 
 	    //Create topic trees
@@ -270,6 +280,80 @@
                                     tcdata2.failedNodes,
                                     tcdata2.openAtmEdges,
                                     tcdata2.failedEdges);
+
+    	var topictrees = [];
+	  	jQuery.each(tcdata2.topictrees, function() {	
+      		var curclass = "";
+  			switch (this.status) {
+        		case TOPIC_TREE_PASSED_STATUS:
+          			curclass = "topictree-passed";
+          			break;
+        		case TOPIC_TREE_FAILED_STATUS:
+          			curclass = "topictree-failed";
+          			break;
+        		case TOPIC_TREE_NONE_STATUS:
+          			curclass = "topictree-none";
+          			break;
+        		default:
+          			break;
+      		}
+
+		  	topictrees.push(
+        		{
+          			"id" : TOPIC_TREE_ID_KEY+this.itc.id, 
+          			"parent" : this.parent == null ? "#" : TOPIC_TREE_ID_KEY+this.parent.id, 
+          			"text" : this.itc.name,
+          			"type" : this.itc.typename,
+          			"li_attr" : { class: curclass }
+        		}
+      		);
+		});
+		
+	  	$('#div_tree').jstree({
+	  		"core" : {
+			    "animation" : 0,
+			    "check_callback" : true,
+			    "themes" : {"icons" : true, "dots" : true },
+		    	'data' : topictrees		    
+	    	},
+	    	"types" : {
+			    "#" : {
+			      	"max_children" : 20, 
+				    "max_depth" : 20, 
+				    "valid_children" : ["topic"]
+			    },
+			    "topic" : {
+			      	"icon" : "greentree",
+			      	"valid_children" : ["subtopic","concept"]
+			    },
+			    "subtopic" : {
+			      	"icon" : "greenbranch",
+			      	"valid_children" : ["subtopic","concept"]
+			    },
+			    "concept" : {
+			      	"icon" : "greenleaf",
+			      	"valid_children" : []
+			    }
+		  	},
+	    	"plugins" : [ "contextmenu","types", "dnd", "crrm","search", "themes"],
+	    	"contextmenu" : { "items" : function (node) {} }
+	  	});
+	  
+	  	//select event handler
+	  	$('#div_tree').on('select_node.jstree', function (e, data) {
+		  	if(data.node.type == 'concept'){
+				var svgGroup = d3.select("svg#svg-mastery-map g");	
+	        	var target_id = (data.node.id.split(TOPIC_TREE_ID_KEY))[1];
+				loc_x = parseInt($('#svg-mastery-map').parent().width())/2 - parseInt(masteryMapLayout._nodes[target_id].value.x);
+				loc_y = parseInt($('#svg-mastery-map').parent().height())/2 - parseInt(masteryMapLayout._nodes[target_id].value.y);
+				    
+				zoom.scale(1);
+		  	  	zoom.translate([loc_x, loc_y]);
+		  		svgGroup.transition().duration(500).attr('transform', 'translate(' + zoom.translate() + ') scale(' + zoom.scale() + ')')
+		  		selected_node = data.node;
+	  		}
+	  	});
+
 
     	$('.tooltip-units').tooltip();
     	<% if @guidance_quiz.feedback_show_scoreboard %>
@@ -319,6 +403,8 @@
     		});
 	}
 
+
+	var masteryMapLayout = null;
 	function generate_entire_mastery_map(nodelist, 
                                          edgelist,
                                          submission, 
@@ -335,7 +421,7 @@
 	  	var renderer = new dagreD3.Renderer();
     	setup_graph_mastery_identification(renderer);	 	  
 	  	var layout_setting = dagreD3.layout();
-	  	var layout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-mastery-map g"));
+	  	masteryMapLayout = renderer.layout(layout_setting).run(gconcept, d3.select("svg#svg-mastery-map g"));
 	  
 	  	var svg = d3.select("svg#svg-mastery-map");
 	  	var svgGroup = d3.select("svg#svg-mastery-map g");

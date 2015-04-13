@@ -114,7 +114,7 @@
         				<div class="feedback-form-div">
         					Concept:
         					<select class="input-medium" name="freq_concept_id">
-	        					<option name="chosen_concept_id" value="nil" <%= "selected" if @chosen_concept.nil? %> >All</option>
+	        					<option value="nil" <%= "selected" if @chosen_concept.nil? %> >All</option>
 	        					<% @concepts.each do |concept| %>
 	        						<option value="<%= concept.id %>" <%= "selected" if @chosen_concept == concept %>><%= concept.name %></option>
 	        					<% end %>
@@ -122,8 +122,16 @@
         					&nbsp;&nbsp;&nbsp; 
         				</div>
         				<div class="feedback-form-div">
-        					Correct?:
-        					<input type="checkbox" name="correct" value="true" <%= "checked" if @choose_correct %>/>
+        					Order answers by?:
+        					<select name="correct">
+        						<option value="correct" <%= "selected" if @choose_correct == "correct" %> >Correct answers</option>
+        						<option value="wrong" <%= "selected" if @choose_correct == "wrong" %> >Wrong answers</option>
+        						<option value="both" <%= "selected" if @choose_correct == "both" %> >Both correct and wrong answers</option>
+        						<option value="seconds" <%= "selected" if @choose_correct == "seconds" %> >Combined longest answer timing</option>
+        						<option value="page_left" <%= "selected" if @choose_correct == "page_left" %> >Combined most page exits</option>
+        						<option value="avg_seconds" <%= "selected" if @choose_correct == "avg_seconds" %> >Average answer timing</option>
+        						<option value="avg_page_left" <%= "selected" if @choose_correct == "avg_page_left" %> >Averge page exits per submission</option>
+        					</select>
         					&nbsp;&nbsp;&nbsp; 
         				</div>
         				<div class="feedback-form-div">
@@ -259,9 +267,70 @@
 	        			</form>
         				<div id="overall-trend-nonacc" style="height: 400px; margin-top: 10px; margin-bottom: 10px;"></div>
         			</div>
+        		</div>
+      		</div>
+    	</div>
+  	</div>
 
 
-
+  	<div class="accordion" id="accordion-research-trend">
+   		<div class="accordion-group">
+      		<div class="accordion-heading">
+        		<div class="accordion-wordheading">
+          			<h4>Self-research Trends</h4>
+        		</div>
+        		<div class="accordion-right">
+	      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-research-trend" href="#collapse-research-trend"><i class="icon-minus"></i></a>
+        		</div>
+      		</div>
+      		<div id="collapse-research-trend" class="accordion-body collapse">
+        		<div class="accordion-inner">
+        			<div>
+        				<h4>Accumulative</h4>
+        				<form class="form-inline" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
+	        				<div class="feedback-form-div">
+	        					From: <input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/>&nbsp;&nbsp;&nbsp; 
+	        				</div>
+	        				<div class="feedback-form-div">
+	        					To: <input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
+	        				</div>
+	        				<div class="feedback-form-div">
+	        					Step:
+		        				<select class="input-small" name="time_step">
+		        					<option value="day">Day</option>
+		        					<option value="month">Month</option>
+		        					<option value="year">Year</option>
+		        				</select>
+	        				</div>
+        					&nbsp;&nbsp;&nbsp;
+        					<div class="feedback-form-div">
+	        					Tag type:
+		        				<select class="input-small" name="tag_id">
+		        					<option name="tag_id" value="nil" selected>All</option>
+		        					<% @tags.each do |tag| %>
+		        						<option value="<%= tag.id %>"><%= tag.name %></option>
+		        					<% end %>
+		        				</select>
+	        				</div>
+        					&nbsp;&nbsp;&nbsp;
+	        				<div class="feedback-form-div">
+	        					Answer Type:
+	        					<select class="input-small" name="correct">
+		        					<option value="correct" selected>Correct</option>
+		        					<option value="wrong">Wrong</option>
+		        					<option value="both">Both</option>
+		        					<option value="absolute">Absolute</option>
+		        				</select>
+	        				</div>
+        					&nbsp;&nbsp;&nbsp;
+        					<div class="feedback-form-div">
+        						<input class="btn" type="submit" value="Submit" />
+        					</div>
+        					<input type="hidden" name="accumulative" value="true" />
+	        			</form>
+        				<div id="research-trend-plot" style="height:400px; margin-top: 10px; margin-bottom: 10px;"></div>
+        			</div>
+        			
         		</div>
       		</div>
     	</div>

@@ -1,4 +1,13 @@
-<% choose_color = (@choose_correct ? "#00BB00" : "#FF0000") %>
+<% if @choose_correct == "correct" %>
+  <% choose_color = "#00BB00"  %>
+  <% choose_word = "correct "  %>
+<% elsif @choose_correct == "wrong" %>
+  <% choose_color = "#FF0000" %>
+  <% choose_word = "wrong "  %>
+<% else %>
+  <% choose_color = "#000000" %>
+  <% choose_word = ""  %>
+<% end %>
 
 <% @summary[:freq_wrong_questions].each_with_index do |q, i| %>
 	<% qn = @course.questions.find_by_id(q.qid) %>
@@ -7,11 +16,11 @@
         	<strong><%= i + 1 %>. </strong>
         	<%= style_format qn.description %>
         	<ul style="margin-top:10px; margin-bottom:10px; list-style:initial;">
-            <li>Answered <%= @choose_correct ? "correctly" : "wrongly" %> <strong style="color: <%= choose_color %>"><%= q.count %></strong> times</li>
-            <li>Tabulated total of <strong style="color: <%= choose_color %>"><%= q.seconds_sum %></strong> seconds <%= @choose_correct ? "correct" : "wrong" %> solve time</li>
-            <li>Average of <strong style="color: <%= choose_color %>"><%= (q.seconds_sum.to_f / q.count).round(2) %></strong> seconds <%= @choose_correct ? "correct" : "wrong" %> solve time</li>
-            <li>Tabulated total of <strong style="color: <%= choose_color %>"><%= q.page_left_sum %></strong> page left when <%= @choose_correct ? "correct" : "wrong" %></li>
-            <li>Average of <strong style="color: <%= choose_color %>"><%= (q.page_left_sum.to_f / q.count).round(2) %></strong> page left when <%= @choose_correct ? "correct" : "wrong" %></li>
+            <li>Answered <%= choose_word %> <strong style="color: <%= choose_color %>"><%= q.count %></strong> times</li>
+            <li>Tabulated total of <strong style="color: <%= choose_color %>"><%= q.seconds_sum %></strong> seconds <%= choose_word %> solve time</li>
+            <li>Average of <strong style="color: <%= choose_color %>"><%= (q.seconds_sum.to_f / q.count).round(2) %></strong> seconds <%= choose_word %> solve time</li>
+            <li>Tabulated total of <strong style="color: <%= choose_color %>"><%= q.page_left_sum %></strong> page exits when <%= choose_word %> under submission</li>
+            <li>Average of <strong style="color: <%= choose_color %>"><%= (q.page_left_sum.to_f / q.count).round(2) %></strong> page left when <%= choose_word %> under submission</li>
           </ul>
       	</div>
       	<div style="margin: 10px;">

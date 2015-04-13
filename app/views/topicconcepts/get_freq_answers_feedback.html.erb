@@ -24,8 +24,16 @@
 		&nbsp;&nbsp;&nbsp; 
 	</div>
 	<div class="feedback-form-div">
-		Correct?:
-		<input type="checkbox" name="correct" value="true" <%= "checked" if @choose_correct %>/>
+		Order answers by?:
+		<select name="correct">
+			<option value="correct" <%= "selected" if @choose_correct == "correct" %> >Correct answers</option>
+			<option value="wrong" <%= "selected" if @choose_correct == "wrong" %> >Wrong answers</option>
+			<option value="both" <%= "selected" if @choose_correct == "both" %> >Both correct and wrong answers</option>
+			<option value="seconds" <%= "selected" if @choose_correct == "seconds" %> >Combined longest answer timing</option>
+			<option value="page_left" <%= "selected" if @choose_correct == "page_left" %> >Combined most page exits</option>
+			<option value="avg_seconds" <%= "selected" if @choose_correct == "avg_seconds" %> >Average answer timing</option>
+			<option value="avg_page_left" <%= "selected" if @choose_correct == "avg_page_left" %> >Averge page exits per submission</option>
+		</select>
 		&nbsp;&nbsp;&nbsp; 
 	</div>
 	<div class="feedback-form-div">

@@ -319,6 +319,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def get_topicconcept_data_history
     respond_to do |format|
+      @submission = load_and_authorize_submission_with_id params[:submission_id]
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
@@ -326,8 +327,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       @concepts = @course.topicconcepts.concepts
       @concept_edges = ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
       
-      submission = load_and_authorize_submission_with_id params[:submission_id]
-      submission_valid = !submission.nil?
+      submission_valid = !@submission.nil?
       result =  { 
                   topictrees: @topics_concepts_with_info, 
                   submission: submission_valid
@@ -335,7 +335,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
       #Retrieve more information if has valid submission
       if submission_valid 
-        result.merge!(get_guidance_quiz_submission_data submission)
+        result.merge!(get_guidance_quiz_submission_data @submission)
         afflictedNodes = result[:openAtmNodes] + result[:failedNodes] + [result[:lastAtmNode]]
         @concepts = @concepts - afflictedNodes
         afflictedEdges = result[:openAtmEdges] + result[:failedEdges]

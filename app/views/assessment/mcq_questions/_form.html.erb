@@ -55,10 +55,8 @@
                 <td><input type="checkbox" name="options[<%= i %>][correct]" value="true"
                            <%= 'checked' if opt.correct %> />
                 </td>
-                <td>
-                  <textarea name="options[<%= i %>][text]" placeholder="Answer..." /><%= opt.text %></textarea>
-                  <textarea name="options[<%= i %>][explanation]" placeholder="Explanation..." /><%= opt.explanation %></textarea>
-                </td>
+                <td><%= cktext_area "options["+i.to_s+"]", :text, :value => opt.text, :cols => 30, :ckeditor => {:placeholder => "Answer...",:toolbar => 'xs_mini'} %></td>
+                <td><%= cktext_area "options["+i.to_s+"]", :explanation, :value => opt.explanation, :cols => 30, :ckeditor => {:placeholder => "Explanation...",:toolbar => 'xs_mini'} %></td>
               </tr>
           <% end %>
           <% if @question.options.size < 4 %>
@@ -66,14 +64,13 @@
                   <% i += 1 %>
                   <tr>
                     <td><input name="options[<%= i %>][correct]" type="checkbox" /></td>
-                    <td>
-                      <textarea name="options[<%= i %>][text]" placeholder="Answer..." /></textarea>
-                      <textarea name="options[<%= i %>][explanation]" placeholder="Explanation..." /></textarea>
-                    </td>
+                    <td><%= cktext_area "options["+i.to_s+"]", :text, :cols => 30, :ckeditor => {:placeholder => "Answer...",:toolbar => 'xs_mini'} %></td>
+                    <td><%= cktext_area "options["+i.to_s+"]", :explanation, :cols => 30, :ckeditor => {:placeholder => "Explanation...",:toolbar => 'xs_mini'} %></td>
                   </tr>
               <% end %>
+
           <% end %>
-          <tr><td></td><td><a href='#' class="add-mcq-option">Add more choices</a></td></tr>
+          <tr><td></td><td><a href='#' class="add-mcq-option">Add more choices</a></td><td></td></tr>
           </tbody>
         </table>
       </div>
@@ -102,8 +99,6 @@
 	//	  });
 	  
 	$(document).ready(function(){
-		
-		
 		$('div.group-tag-control').each( function() {
 			var all_tags = JSON.parse($(this).find(".hdf-all-tags").val());
 			var origin_tags = JSON.parse($(this).find(".hdf-original-tags").val());
@@ -143,7 +138,6 @@
 			});
 			$("#" + textarea_id).textext()[0].tags().addTags(origin_tags);
 		});
-		
 					
 		$('#assessment_mcq_question_description').click();  
 		$('#btn_submit').on("click",function() {	
@@ -154,6 +148,85 @@
 			});		
 		    	  
 		  return true;		  
-		}); 
+		});
+
+        //advanced config for editor
+
+        /*CKEDITOR.on( 'instanceReady', function( ev ) {
+            ev.editor.setData('<span style="font-family:Arial, Verdana, sans-serif;">&shy;</span>');
+        });*/
+
+        var EqnEditors = [];
+        function ProcessEditors(clickElement) {
+
+            // Readd all removed EqnEditors to the DOM.
+            for (var i = 0; i < EqnEditors.length; ++i) {
+                var editor = EqnEditors[i]
+                $(editor.owner).append(editor);
+            }
+
+            var recur = 0;
+
+            function UpdateEditor() {
+            // Grab the cke dialog that just opened.
+                var $visibleEditor = $('[name="CCEquationEditor"]:visible');
+
+                recur++;
+                if (recur >= 100) {
+                    alert('Editor did not open.');
+                    return;
+                }
+
+                // Also wait for the EqEditor and targetArea to spawn.  Sometimes this all happens too fast for the initial load.
+                if ($visibleEditor.length === 0 || !window.EqEditor || !window.EqEditor.targetArea) {
+                    setTimeout(UpdateEditor, 10);
+                    return;
+                }
+
+                // Remove all non-visible EqnEditors from the DOM.  This hides their image maps, allowing proper menu selection for the remaining visible editor.
+                $('[name="CCEquationEditor"]:not(:visible)').each(
+                    function () {
+                        var $this = $(this);
+
+                        // Establish initial array storage of all editors
+                        if (EqnEditors.indexOf($this[0]) === -1) {
+                            EqnEditors.push($this[0]);
+                        }
+
+                        $this[0].owner = $this.parent()[0];
+                        $this.remove();
+                    }
+                );
+
+                // Redirect the input and preview fields.
+                window.EqEditor.targetArea.equation_input = $visibleEditor.find('textarea')[0];
+                window.EqEditor.targetArea.equation_preview =
+                        $visibleEditor.find('img[id*="CCequ"]')[0];
+
+                // If this is a click-in, set the initial values to the clicked image content.
+                if (clickElement) {
+                    $(window.EqEditor.targetArea.equation_input).val($(clickElement.target).attr('alt'));
+                    $(window.EqEditor.targetArea.equation_preview).attr('src', $(clickElement.target).attr('src'));
+                }
+            };
+
+            setTimeout(UpdateEditor, 10);
+        };
+
+        $(document).on('click', '.cke_button__eqneditor',
+                function () {
+                    // Initialize everything needed for the dblclick action when editing an existing equation in an editor.
+                            $(this).parents('.cke_browser_gecko').find('iframe.cke_wysiwyg_frame').each(
+                            function () {
+                                var $contents = $(this).contents();
+                                $contents.off('dblclick');
+                                $contents.on('dblclick', 'img[src*="gif.latex"]', ProcessEditors);
+                            }
+                    );
+
+                    // Go through each editor and do some magic hide-y swap-y stuff.
+                    ProcessEditors();
+                }
+        );
 	});
 </script>

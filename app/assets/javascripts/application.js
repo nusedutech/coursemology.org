@@ -50,6 +50,7 @@
 //= require moment
 //= require cocoon
 //= require ckeditor/init
+//= require ckeditor/adapters/jquery
 //
 //= require_self
 //= require_tree ./templates

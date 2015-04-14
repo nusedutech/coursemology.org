@@ -1,6 +1,6 @@
 CKEDITOR.editorConfig = function (config) {
 
-    config.extraPlugins = 'eqneditor';
+    config.extraPlugins = 'eqneditor,confighelper';
 
     // Define changes to default configuration here. For example:
     // config.language = 'fr';
@@ -84,5 +84,27 @@ CKEDITOR.editorConfig = function (config) {
         ["Bold",  "Italic",  "Underline",  "Strike", "-", 'TextColor', 'BGColor',  "-",'NumberedList', 'BulletedList', 'Font', 'FontSize','Table',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar', "EqnEditor","-",'Source'],
     ];
 
+    config.toolbar = "xs_mini";
+    config.toolbar_xs_mini = [
+        ['Font', 'FontSize', "EqnEditor"]
+    ];
+
+    /*
+    config.font_style = {
+        element: 'span',
+        styles: { 'font-family': '#(Times New Roman)' },
+        overrides: [ {
+            element: 'font', attributes: { 'face': null }
+        } ]
+    };
+
+    config.fontSize_style = {
+        element: 'span',
+        styles: { 'font-size': '#(16)' },
+        overrides: [ {
+            element: 'font', attributes: { 'size': null }
+        } ]
+    };
+    */
 }
 

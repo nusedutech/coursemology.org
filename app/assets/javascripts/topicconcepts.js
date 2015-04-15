@@ -181,237 +181,311 @@ function setup_node_edges_color(nodelist) {
 	  });
   }
 
-  function setup_node_edges_color_under_submission(nodelist) {
-    $.each(nodelist, function(){  
-      if (this.enabled) {
-        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENABLED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-      }
-      else {
-        $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_DISABLED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
-          add_class(this, EDGE_DISABLED_END_CLASS);
-        });
-      }     
+function setup_node_edges_color_under_submission(nodelist) {
+  $.each(nodelist, function(){  
+    if (this.enabled) {
+      $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_ENABLED_CLASS);
+      $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_ENABLED_START_CLASS);
+      });
+      $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_ENABLED_END_CLASS);
+      });
+      $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_ENABLED_START_CLASS);
+      });
+      $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_ENABLED_END_CLASS);
+      });
+    }
+    else {
+      $("#"+G_NODE_KEY+this.concept_id).attr("class", NODE_DISABLED_CLASS);
+      $("."+G_EDGEPATH_REQUIRED_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_DISABLED_START_CLASS);
+      });
+      $("."+G_EDGEPATH_DEPENDENT_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_DISABLED_END_CLASS);
+      });
+      $("."+G_EDGELABEL_REQUIRED_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_DISABLED_START_CLASS);
+      });
+      $("."+G_EDGELABEL_DEPENDENT_KEY+this.concept_id).each(function(){
+        add_class(this, EDGE_DISABLED_END_CLASS);
+      });
+    }     
+  });
+}
+
+function setup_current_node_edges_color(lastAtmNode) {
+  if (lastAtmNode != null) {
+    $("#"+G_NODE_KEY+lastAtmNode.id).attr("class", NODE_ENTRY_CURRENT_CLASS);
+    $("."+G_EDGEPATH_REQUIRED_KEY+lastAtmNode.id).each(function(){
+      add_class(this, EDGE_ENTRY_START_CLASS);
+    });
+    $("."+G_EDGEPATH_DEPENDENT_KEY+lastAtmNode.id).each(function(){
+      add_class(this, EDGE_ENTRY_END_CLASS);
+    });
+    $("."+G_EDGELABEL_REQUIRED_KEY+lastAtmNode.id).each(function(){
+      add_class(this, EDGE_ENTRY_START_CLASS);
+    });
+    $("."+G_EDGELABEL_DEPENDENT_KEY+lastAtmNode.id).each(function(){
+      add_class(this, EDGE_ENTRY_END_CLASS);
     });
   }
+}
 
-  function setup_current_node_edges_color(lastAtmNode) {
-    if (lastAtmNode != null) {
-      $("#"+G_NODE_KEY+lastAtmNode.id).attr("class", NODE_ENTRY_CURRENT_CLASS);
-      $("."+G_EDGEPATH_REQUIRED_KEY+lastAtmNode.id).each(function(){
+function setup_passed_nodes_edges_color(openAtmNodes) {
+  if (openAtmNodes != null) {
+    $.each(openAtmNodes, function(){  
+      $("#"+G_NODE_KEY+this.id).attr("class", NODE_ENTRY_CLASS);
+      $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
         add_class(this, EDGE_ENTRY_START_CLASS);
       });
-      $("."+G_EDGEPATH_DEPENDENT_KEY+lastAtmNode.id).each(function(){
+      $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
         add_class(this, EDGE_ENTRY_END_CLASS);
       });
-      $("."+G_EDGELABEL_REQUIRED_KEY+lastAtmNode.id).each(function(){
+      $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
         add_class(this, EDGE_ENTRY_START_CLASS);
       });
-      $("."+G_EDGELABEL_DEPENDENT_KEY+lastAtmNode.id).each(function(){
+      $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
         add_class(this, EDGE_ENTRY_END_CLASS);
       });
+    }); 
+  }
+}
+
+function setup_passed_edges_color(openAtmEdges) {
+  if (openAtmEdges != null) {
+    $.each(openAtmEdges, function(){
+      var dependent_id = this.dependent_id; 
+      $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id+"."+G_EDGEPATH_DEPENDENT_KEY+dependent_id).each(function(){
+        add_class(this, EDGE_PASSED_CLASS);
+        remove_class(this, EDGE_ENABLED_START_CLASS);
+        remove_class(this, EDGE_ENABLED_END_CLASS);
+        remove_class(this, EDGE_ENTRY_START_CLASS);
+        remove_class(this, EDGE_ENTRY_END_CLASS);
+        remove_class(this, EDGE_DISABLED_START_CLASS);
+        remove_class(this, EDGE_DISABLED_END_CLASS);
+        remove_class(this, EDGE_DISABLED_CLASS);
+      });
+      $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id+"."+G_EDGELABEL_DEPENDENT_KEY+dependent_id).each(function(){
+        add_class(this, EDGE_PASSED_CLASS);
+        remove_class(this, EDGE_ENABLED_START_CLASS);
+        remove_class(this, EDGE_ENABLED_END_CLASS);
+        remove_class(this, EDGE_ENTRY_START_CLASS);
+        remove_class(this, EDGE_ENTRY_END_CLASS);
+        remove_class(this, EDGE_DISABLED_START_CLASS);
+        remove_class(this, EDGE_DISABLED_END_CLASS);
+        remove_class(this, EDGE_DISABLED_CLASS);
+      });
+    }); 
+  }
+}
+
+function setup_failed_nodes_edges_color(failedNodes) {
+  if (failedNodes != null) {
+    $.each(failedNodes, function(){  
+      $("#"+G_NODE_KEY+this.id).attr("class", NODE_FAILED_CLASS);
+      $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
+        add_class(this, EDGE_ENABLED_START_CLASS);
+      });
+      $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
+        add_class(this, EDGE_ENABLED_END_CLASS);
+      });
+      $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
+        add_class(this, EDGE_ENABLED_START_CLASS);
+      });
+      $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
+        add_class(this, EDGE_ENABLED_END_CLASS);
+      });
+    }); 
+  }
+}
+
+function setup_disabled_edges_color(edgelist) {
+  $.each(edgelist, function(){ 
+    if (!this.enabled) {
+      var dependent_id = this.dependent_id;
+      $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id+"."+G_EDGEPATH_DEPENDENT_KEY+dependent_id).each(function(){
+        add_class(this, EDGE_DISABLED_CLASS);
+        remove_class(this, EDGE_PASSED_CLASS);
+        remove_class(this, EDGE_ENABLED_START_CLASS);
+        remove_class(this, EDGE_ENABLED_END_CLASS);
+        remove_class(this, EDGE_ENTRY_START_CLASS);
+        remove_class(this, EDGE_ENTRY_END_CLASS);
+        remove_class(this, EDGE_DISABLED_START_CLASS);
+        remove_class(this, EDGE_DISABLED_END_CLASS);
+      });
+      $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id+"."+G_EDGELABEL_DEPENDENT_KEY+dependent_id).each(function(){
+        add_class(this, EDGE_DISABLED_CLASS);
+        remove_class(this, EDGE_PASSED_CLASS);
+        remove_class(this, EDGE_ENABLED_START_CLASS);
+        remove_class(this, EDGE_ENABLED_END_CLASS);
+        remove_class(this, EDGE_ENTRY_START_CLASS);
+        remove_class(this, EDGE_ENTRY_END_CLASS);
+        remove_class(this, EDGE_DISABLED_START_CLASS);
+        remove_class(this, EDGE_DISABLED_END_CLASS);
+      });
+    }
+  });
+}
+
+function setup_edgepaths_arrow_heads() {
+  $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
+    "g.edgePath."+EDGE_PASSED_CLASS+" path").each(function(){
+    $(this).attr("marker-end", "url(#arrowGreen)");
+  });
+
+  $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
+    "g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path").each(function(){
+    $(this).attr("marker-end", "url(#arrowYellow)");
+  });
+
+  $("g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
+    "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
+    "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path").each(function(){
+    $(this).attr("marker-end", "url(#arrowBlack)");
+  });
+
+  $("g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
+    "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
+    "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path").each(function(){
+    $(this).attr("marker-end", "url(#arrowBlack)");
+  });
+}
+
+function get_length(obj) {
+  var count = 0;
+  for (something in obj) {
+    ++count;
+  }
+  return count;
+}
+
+//Only for use on svg related elements
+function remove_class (obj, name) {
+  var classesStr = $(obj).attr("class");
+  var classes = classesStr.split(" ");
+  for (var i = 0; i < classes.length ; i++ ) {
+    if (classes[i] == name) {
+      classes.splice(i,1);
+      $(obj).attr("class", classes.join(" "));
+      return true;
     }
   }
+  return false;
+}
 
-  function setup_passed_nodes_edges_color(openAtmNodes) {
-    if (openAtmNodes != null) {
-      $.each(openAtmNodes, function(){  
-        $("#"+G_NODE_KEY+this.id).attr("class", NODE_ENTRY_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_START_CLASS);
-        });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENTRY_END_CLASS);
-        });
-      }); 
+//Only for use on svg related elements
+function add_class (obj, name) {
+  var classesStr = $(obj).attr("class");
+  var classes = classesStr.split(" ");
+  for (var i = 0; i < classes.length ; i++ ) {
+    if (classes[i] == name) {
+      return false;
     }
   }
+  classes.push(name);
+  $(obj).attr("class", classes.join(" "));
+  return true;
+}
 
-  function setup_passed_edges_color(openAtmEdges) {
-    if (openAtmEdges != null) {
-      $.each(openAtmEdges, function(){
-        var dependent_id = this.dependent_id; 
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id+"."+G_EDGEPATH_DEPENDENT_KEY+dependent_id).each(function(){
-          add_class(this, EDGE_PASSED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-          remove_class(this, EDGE_DISABLED_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id+"."+G_EDGELABEL_DEPENDENT_KEY+dependent_id).each(function(){
-          add_class(this, EDGE_PASSED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-          remove_class(this, EDGE_DISABLED_CLASS);
-        });
-      }); 
+//Only for use on svg related elements
+function has_class (obj, name) {
+  var classesStr = $(obj).attr("class");
+  var classes = classesStr.split(" ");
+  for (var i = 0; i < classes.length ; i++ ) {
+    if (classes[i] == name) {
+      return true;
     }
   }
+  return false;
+}
 
-  function setup_failed_nodes_edges_color(failedNodes) {
-    if (failedNodes != null) {
-      $.each(failedNodes, function(){  
-        $("#"+G_NODE_KEY+this.id).attr("class", NODE_FAILED_CLASS);
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
+function halt(message, argFunc) {
+  var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
+  $('#processing-halt-all-message').html(parsedMessage);
+  $('#processing-halt-all').modal();
+
+  if (typeof argFunc !== "undefined") {
+    setTimeout(argFunc, 250);
+  }
+}
+
+function resume() {
+  $('#processing-halt-all').modal('hide');
+}
+
+var onlySelectionItemManager = {
+    compareItems: function(item1, item2)
+    {
+        return item1.name === item2.name;
+    },
+    filter: function(list, query)
+    {
+        var result = [];
+        $.each(list, function(){
+            if (this.name.toString().toLowerCase().indexOf(query.toLowerCase()) == 0){
+                result.push(this);
+            }
         });
-        $("."+G_EDGEPATH_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_START_CLASS);
-        });
-        $("."+G_EDGELABEL_DEPENDENT_KEY+this.id).each(function(){
-          add_class(this, EDGE_ENABLED_END_CLASS);
-        });
-      }); 
+        return result;
+    },
+    itemContains: function(item, needle)
+    {
+        return item.name.indexOf(needle) == 0;
+    },
+    itemToString: function(item)
+    {
+        return item.name;
+    },
+    stringToItem: function(string)
+    {
+        return {id: "nil", name: string}
     }
+};
+
+function onSelectionTagFilter(e, data){
+  var textextItem = $(this).textext()[0];
+  var tags = textextItem.tags();
+
+  var enteredItems = $.parseJSON(textextItem.hiddenInput().val());
+  var enteredValues = extractOneParameterListFromJsonArray(enteredItems, "name");
+  //If value found in current list of tags, don't add it
+  //If all tag already entered, don't add new tags
+  if(enteredValues.indexOf(data.tag.name) >= 0 || 
+    enteredValues.indexOf("All") >= 0) {
+    data.result = false;
+    return;
   }
 
-  function setup_disabled_edges_color(edgelist) {
-    $.each(edgelist, function(){ 
-      if (!this.enabled) {
-        var dependent_id = this.dependent_id;
-        $("."+G_EDGEPATH_REQUIRED_KEY+this.required_id+"."+G_EDGEPATH_DEPENDENT_KEY+dependent_id).each(function(){
-          add_class(this, EDGE_DISABLED_CLASS);
-          remove_class(this, EDGE_PASSED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-        });
-        $("."+G_EDGELABEL_REQUIRED_KEY+this.required_id+"."+G_EDGELABEL_DEPENDENT_KEY+dependent_id).each(function(){
-          add_class(this, EDGE_DISABLED_CLASS);
-          remove_class(this, EDGE_PASSED_CLASS);
-          remove_class(this, EDGE_ENABLED_START_CLASS);
-          remove_class(this, EDGE_ENABLED_END_CLASS);
-          remove_class(this, EDGE_ENTRY_START_CLASS);
-          remove_class(this, EDGE_ENTRY_END_CLASS);
-          remove_class(this, EDGE_DISABLED_START_CLASS);
-          remove_class(this, EDGE_DISABLED_END_CLASS);
-        });
-      }
-    });
+  //If all tag entered, remove all other tags
+  if (data.tag.name === "All"){
+    for (var i = 0; i < enteredItems.length; i++) {
+      tags.removeTag(enteredItems[i]);
+    } 
   }
 
-  function setup_edgepaths_arrow_heads() {
-    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_PASSED_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowGreen)");
-    });
+  var suggestedItems = textextItem.ajax()._suggestions;
+  var suggestedValues = extractOneParameterListFromJsonArray(suggestedItems, "name");
+  //Only allow values found in suggestions
+  var index = suggestedValues.indexOf(data.tag.name)
+  if (index == -1){
+    data.result = false;
+    return;
+  }
+  //Passed tags are assigned the ids found in suggestions
+  else {
+    data.tag.id = suggestedItems[index].id;
+  }
+}
 
-    $("g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENTRY_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowYellow)");
-    });
-
-    $("g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_ENABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowBlack)");
-    });
-
-    $("g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENTRY_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_ENABLED_END_CLASS+" path, " +
-      "g.edgePath."+EDGE_DISABLED_START_CLASS+"."+EDGE_DISABLED_END_CLASS+" path").each(function(){
-      $(this).attr("marker-end", "url(#arrowBlack)");
-    });
+function extractOneParameterListFromJsonArray(arr, key)
+{
+  var result = [];
+  for (var i = 0; i < arr.length; i++) {
+    result.push(arr[i][key]);
   }
 
-  function get_length(obj) {
-    var count = 0;
-    for (something in obj) {
-      ++count;
-    }
-    return count;
-  }
-
-  //Only for use on svg related elements
-  function remove_class (obj, name) {
-    var classesStr = $(obj).attr("class");
-    var classes = classesStr.split(" ");
-    for (var i = 0; i < classes.length ; i++ ) {
-      if (classes[i] == name) {
-        classes.splice(i,1);
-        $(obj).attr("class", classes.join(" "));
-        return true;
-      }
-    }
-    return false;
-  }
-
-  //Only for use on svg related elements
-  function add_class (obj, name) {
-    var classesStr = $(obj).attr("class");
-    var classes = classesStr.split(" ");
-    for (var i = 0; i < classes.length ; i++ ) {
-      if (classes[i] == name) {
-        return false;
-      }
-    }
-    classes.push(name);
-    $(obj).attr("class", classes.join(" "));
-    return true;
-  }
-
-  //Only for use on svg related elements
-  function has_class (obj, name) {
-    var classesStr = $(obj).attr("class");
-    var classes = classesStr.split(" ");
-    for (var i = 0; i < classes.length ; i++ ) {
-      if (classes[i] == name) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function halt(message, argFunc) {
-    var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
-    $('#processing-halt-all-message').html(parsedMessage);
-    $('#processing-halt-all').modal();
-
-    if (typeof argFunc !== "undefined") {
-      setTimeout(argFunc, 250);
-    }
-  }
-
-  function resume() {
-    $('#processing-halt-all').modal('hide');
-  }
+  return result;
+}

@@ -1,0 +1,96 @@
+<div style="margin-left: 20px;">
+	<form class="form-horizontal" action="<%= get_topicconcept_track_scatter_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
+		<div class='control-group'>
+			<%= label_tag 'start_period', 'From:', class: 'control-label' %>
+	        <div class='controls'>
+	           <input type="date" name='start_period' value="<%= start_period %>" class='input-medium' />
+	        </div>
+        </div>
+        <div class='control-group'>
+			<%= label_tag 'end_period', 'To:', class: 'control-label' %>
+	        <div class='controls'>
+	           <input type="date" name='end_period' value="<%= end_period %>" class='input-medium' />
+	        </div>
+        </div>
+        <div class='control-group'>
+			<%= label_tag 'tag_type', 'Tag:', class: 'control-label' %>
+	        <div class='controls'>
+	           	<select class="input-small" name="tag_id">
+					<option value="nil" selected>All</option>
+					<% tags.each do |tag| %>
+						<option value="<%= tag.id %>" <%= "selected" if current_tag == tag %> ><%= tag.name %></option>
+					<% end %>
+				</select>
+	        </div>
+        </div>
+        <div class='control-group'>
+	        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+	        <div class="controls">
+	            <textarea id="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+	        </div>
+	    </div>						    
+	    <div class="control-group">
+	        <div class="controls">
+	            <input type="submit" class="btn" value="Go"/>
+	        </div>
+	    </div>
+	</form>
+	<hr/>
+</div>
+
+<div id="research-trend-plot" style="height:600px;"></div>
+
+<script>
+	$(document).ready(function(){
+		
+		research_trend = <%=raw data.to_json %>;
+		label_array = new Array();
+		data_array = new Array();
+		$.each (research_trend, function(){
+			label_array.push({ label: this.name });
+			data_concept_array = new Array();
+			for (var i = 0; i < this.answers.length ; i++){
+				data_concept_array.push([this.answers[i].seconds, this.answers[i].page_left]);
+			}
+			data_array.push(data_concept_array);
+		});
+
+		var plotOption = jqplotGeneralOption;
+		plotOption.title = "Research Trend"
+		plotOption.axes = {
+    		xaxis:{
+      			label:'Seconds (s)'
+    		},
+    		yaxis:{
+      			label:'Page Left Count'
+    		}
+  		}
+  		plotOption.series = label_array;
+
+  		//Setup graph
+		$.jqplot('research-trend-plot',  
+				 data_array,
+				 plotOption);
+
+		$('#concepts-textext').textext(
+        {
+            plugins : 'prompt focus arrow autocomplete tags ajax filter',
+            ajax : {
+                url : '<%= get_concepts_list_with_id_course_topicconcepts_path(@course)%>',
+                type: "POST",
+                async: false,
+                dataType : 'json',
+                cacheResults : true,
+            },
+            html : {
+                hidden: ('<input type="hidden" name="concepts" />')
+            },
+            ext : {
+                itemManager : onlySelectionItemManager
+            }
+        })
+        .bind('isTagAllowed', onSelectionTagFilter);
+	});
+
+
+</script>

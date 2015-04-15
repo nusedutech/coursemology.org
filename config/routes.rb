@@ -322,6 +322,7 @@ Coursemology::Application.routes.draw do
         post 'get_topicconcept_notbest_concepts', :on => :collection
         post 'get_topicconcept_weights', :on => :collection
         post 'get_topicconcept_area', :on => :collection
+        post 'get_topicconcept_track_scatter', :on => :collection
         get :get_progress_bar_info, :on => :collection       
     end
     

@@ -3,13 +3,13 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :set_popup_layout, only: [:get_topicconcept_area, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage]
+  before_filter :set_popup_layout, only: [:get_topicconcept_area, :get_topicconcept_track_scatter, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage]
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :get_topicconcept_overall_statistics, :diagnostic_exploration, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :review_diagnostic_exploration]
 
   before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration, :review_diagnostic_exploration, :get_quiz_feedback, :individual_submissions]
 
-  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :get_topicconcept_area, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
+  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :get_topicconcept_area, :get_topicconcept_track_scatter, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_for_review, only: [:review_diagnostic_exploration]
 
@@ -259,8 +259,6 @@ class TopicconceptsController < ApplicationController
 
     result
   end
-
-
 
   def diagnostic_exploration
     set_latest_concept_stage @concept_stage
@@ -1026,8 +1024,8 @@ class TopicconceptsController < ApplicationController
     end
 
     #Get tag type
-    if params.has_key?("tag_id") and params[:"tag_id"] != "nil"
-      tag = @course.tags.where(id: params[:"tag_id"]).first
+    if params.has_key?("tag_id") and params["tag_id"] != "nil"
+      tag = @course.tags.where(id: params["tag_id"]).first
     else
       tag = nil
     end
@@ -1107,6 +1105,94 @@ class TopicconceptsController < ApplicationController
           start_period: params[:start_period],
           end_period: params[:end_period],
           time_step: params[:time_step],
+          current_tag: tag,
+          tags: @course.tags
+        }
+      } 
+    end
+  end
+
+  def get_topicconcept_track_scatter
+    #Get start period date parameter
+    if params.has_key?("start_period")
+      start_date = Time.parse(params[:start_period])
+    else
+      start_date = Time.now - 1.month
+    end
+    #Get end period date parameter
+    if params.has_key?("end_period")
+      end_date = Time.parse(params[:end_period])
+    else
+      end_date = Time.now
+    end
+
+    #Retrieve all concepts indicated
+    concept_ids = []
+    if params.has_key?(:concepts)
+      concept_ids = JSON.parse(params[:concepts]).map { |tag| tag["id"] }
+      get_all_concepts = false
+      concept_ids.each do |concept_id|
+        if concept_id == "nil"
+          get_all_concepts = true
+          break
+        end
+      end
+    end
+
+    if get_all_concepts
+      concepts = @course.topicconcepts.concepts
+    elsif concept_ids.size == 0
+      first_concept = @course.topicconcepts.concepts.first
+      if first_concept.nil?
+        concepts = []
+      else
+        concepts = [@course.topicconcepts.concepts.first]
+      end
+    else
+      concepts = @course.topicconcepts.concepts.where(id: concept_ids)
+    end
+
+    tabulated_concept_answers = []
+    #Get tag type
+    if params.has_key?("tag_id") and params[:"tag_id"] != "nil"
+      tag = @course.tags.where(id: params[:"tag_id"]).first
+      tag_mcq_answers = tag.mcq_answers
+      concepts.each do |concept|
+        concept_mcq_answers = concept.mcq_answers
+                                     .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+        answer = @guidance_quiz.mcq_answers
+                               .select("assessment_answers.question_id as qid, "\
+                                       "assessment_mcq_answers.seconds_to_complete as seconds, "\
+                                       "assessment_mcq_answers.page_left_count as page_left")
+                               .where("assessment_mcq_answers.id in (?) and assessment_answers.updated_at <= ? and assessment_answers.updated_at >= ? ",
+                                      concept_mcq_answers, end_date, start_date)
+
+        tabulated_concept_answers << { name: concept.name, answers: answer }  
+      end
+    else
+      concepts.each do |concept|
+        concept_mcq_answers = concept.mcq_answers
+        answer = @guidance_quiz.mcq_answers
+                               .select("assessment_mcq_answers.seconds_to_complete as seconds, "\
+                                       "assessment_mcq_answers.page_left_count as page_left")
+                               .where("assessment_mcq_answers.id in (?) and assessment_answers.updated_at <= ? and assessment_answers.updated_at >= ? ",
+                                      concept_mcq_answers, end_date, start_date)
+
+        tabulated_concept_answers << { name: concept.name, answers: answer }  
+      end
+    end
+
+    respond_to do |format|
+      format.json { 
+        render json: {
+          data: tabulated_concept_answers
+        }
+      }
+      format.html {
+        render locals: {
+          data: tabulated_concept_answers,         
+          start_period: params[:start_period],
+          end_period: params[:end_period],
           current_tag: tag,
           tags: @course.tags
         }

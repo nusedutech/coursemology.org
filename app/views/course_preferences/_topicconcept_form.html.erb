@@ -184,71 +184,6 @@
 <% end %>
 
 <script>
-    var onlySelectionItemManager = {
-            compareItems: function(item1, item2)
-            {
-                return item1.name === item2.name;
-            },
-            filter: function(list, query)
-            {
-                var result = [];
-                $.each(list, function(){
-                    if (this.name.toString().toLowerCase().indexOf(query.toLowerCase()) == 0){
-                        result.push(this);
-                    }
-                });
-                return result;
-            },
-            itemContains: function(item, needle)
-            {
-                return item.name.indexOf(needle) == 0;
-            },
-            itemToString: function(item)
-            {
-                return item.name;
-            },
-            stringToItem: function(string)
-            {
-                return {id: "nil", name: string}
-            }
-        };
-
-    function onSelectionTagFilter(e, data){
-        var textextItem = $(this).textext()[0];
-        var tags = textextItem.tags();
-
-        var enteredItems = $.parseJSON(textextItem.hiddenInput().val());
-        var enteredValues = extractOneParameterListFromJsonArray(enteredItems, "name");
-        //If value found in current list of tags, don't add it
-        //If all tag already entered, don't add new tags
-        if(enteredValues.indexOf(data.tag.name) >= 0 || 
-            enteredValues.indexOf("All") >= 0) {
-            data.result = false;
-            return;
-        }
-
-        //If all tag entered, remove all other tags
-        if (data.tag.name === "All"){
-            for (var i = 0; i < enteredItems.length; i++) {
-                tags.removeTag(enteredItems[i]);
-            } 
-        }
-
-        var suggestedItems = textextItem.ajax()._suggestions;
-        var suggestedValues = extractOneParameterListFromJsonArray(suggestedItems, "name");
-        //Only allow values found in suggestions
-        var index = suggestedValues.indexOf(data.tag.name)
-        if (index == -1){
-            data.result = false;
-            return;
-        }
-        //Passed tags are assigned the ids found in suggestions
-        else {
-            data.tag.id = suggestedItems[index].id;
-        }
-
-    }
-
     $(document).ready(function(){
         $('.tooltip-units').tooltip();
         $('#concepts-textext').textext(
@@ -268,7 +203,7 @@
                 itemManager : onlySelectionItemManager
             }
         })
-        .bind('isTagAllowed', onSelectionTagFilter)
+        .bind('isTagAllowed', onSelectionTagFilter);
 
         $('#concept-edges-textext').textext(
         {
@@ -289,14 +224,4 @@
         })
         .bind('isTagAllowed', onSelectionTagFilter);
     });
-
-    function extractOneParameterListFromJsonArray(arr, key)
-    {
-        var result = [];
-        for (var i = 0; i < arr.length; i++) {
-            result.push(arr[i][key]);
-        }
-
-        return result;
-    }
 </script>

@@ -286,51 +286,46 @@
       		<div id="collapse-research-trend" class="accordion-body collapse">
         		<div class="accordion-inner">
         			<div>
-        				<h4>Accumulative</h4>
-        				<form class="form-inline" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
-	        				<div class="feedback-form-div">
-	        					From: <input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/>&nbsp;&nbsp;&nbsp; 
-	        				</div>
-	        				<div class="feedback-form-div">
-	        					To: <input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
-	        				</div>
-	        				<div class="feedback-form-div">
-	        					Step:
-		        				<select class="input-small" name="time_step">
-		        					<option value="day">Day</option>
-		        					<option value="month">Month</option>
-		        					<option value="year">Year</option>
-		        				</select>
-	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-        					<div class="feedback-form-div">
-	        					Tag type:
-		        				<select class="input-small" name="tag_id">
-		        					<option name="tag_id" value="nil" selected>All</option>
-		        					<% @tags.each do |tag| %>
-		        						<option value="<%= tag.id %>"><%= tag.name %></option>
-		        					<% end %>
-		        				</select>
-	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-	        				<div class="feedback-form-div">
-	        					Answer Type:
-	        					<select class="input-small" name="correct">
-		        					<option value="correct" selected>Correct</option>
-		        					<option value="wrong">Wrong</option>
-		        					<option value="both">Both</option>
-		        					<option value="absolute">Absolute</option>
-		        				</select>
-	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-        					<div class="feedback-form-div">
-        						<input class="btn" type="submit" value="Submit" />
-        					</div>
-        					<input type="hidden" name="accumulative" value="true" />
+        				<h4>Scatter plot</h4>
+        				<form class="form-horizontal" action="<%= get_topicconcept_track_scatter_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
+        					<div class='control-group'>
+		        				<%= label_tag 'start_period', 'From:', class: 'control-label' %>
+						        <div class='controls'>
+						           <input type="date" name='start_period' value="<%= Date.today - 1.months %>" class='input-medium' />
+						        </div>
+					        </div>
+					        <div class='control-group'>
+		        				<%= label_tag 'end_period', 'To:', class: 'control-label' %>
+						        <div class='controls'>
+						           <input type="date" name='end_period' value="<%= Date.today %>" class='input-medium' />
+						        </div>
+					        </div>
+					        <div class='control-group'>
+		        				<%= label_tag 'tag_type', 'Tag:', class: 'control-label' %>
+						        <div class='controls'>
+						           	<select class="input-small" name="tag_id">
+		        						<option value="nil" selected>All</option>
+		        						<% @tags.each do |tag| %>
+		        							<option value="<%= tag.id %>"><%= tag.name %></option>
+		        						<% end %>
+		        					</select>
+						        </div>
+					        </div>
+					        <div class='control-group'>
+						        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+						        <div class="controls">
+						            <textarea id="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+						        </div>
+						    </div>						    
+						    <div class="control-group">
+						        <div class="controls">
+						            <input type="submit" class="btn" value="Search"/>
+						        </div>
+						    </div>
 	        			</form>
-        				<div id="research-trend-plot" style="height:400px; margin-top: 10px; margin-bottom: 10px;"></div>
+	        			<hr/>
+        				<div id="research-trend-plot" style="height:500px; margin-top: 10px; margin-bottom: 10px;"></div>
         			</div>
-        			
         		</div>
       		</div>
     	</div>
@@ -356,6 +351,7 @@
 
 		generate_student_attempt_pie();
 		generate_overall_trend_data();
+		generate_research_trend_data();
 	});
 
     function generate_entire_dependency_map(nodelist, edgelist){
@@ -419,6 +415,56 @@
 		    pointSize: 3,
 		    hideHover: 'auto'
 		});
+	}
+
+	function generate_research_trend_data() {
+		research_trend = get_topicconcept_research_trend();
+		label_array = new Array();
+		data_array = new Array();
+		$.each (research_trend.data, function(){
+			label_array.push({ label: this.name });
+			data_concept_array = new Array();
+			for (var i = 0; i < this.answers.length ; i++){
+				data_concept_array.push([this.answers[i].seconds, this.answers[i].page_left]);
+			}
+			data_array.push(data_concept_array);
+		});
+
+		var plotOption = jqplotGeneralOption;
+		plotOption.title = "Research Trend"
+		plotOption.axes = {
+    		xaxis:{
+      			label:'Seconds (s)'
+    		},
+    		yaxis:{
+      			label:'Page Left Count'
+    		}
+  		}
+  		plotOption.series = label_array; 
+
+  		//Setup graph
+		$.jqplot('research-trend-plot',  
+				 data_array,
+				 plotOption);
+
+		$('#concepts-textext').textext(
+        {
+            plugins : 'prompt focus arrow autocomplete tags ajax filter',
+            ajax : {
+                url : '<%= get_concepts_list_with_id_course_topicconcepts_path(@course)%>',
+                type: "POST",
+                async: false,
+                dataType : 'json',
+                cacheResults : true,
+            },
+            html : {
+                hidden: ('<input type="hidden" name="concepts" />')
+            },
+            ext : {
+                itemManager : onlySelectionItemManager
+            }
+        })
+        .bind('isTagAllowed', onSelectionTagFilter);
 	}
 
 	function setup_graph_identification(renderer) {
@@ -524,6 +570,25 @@
 		    data: { accumulative: false , correct: true},
 		    async: false,
 		    url: "<%= get_topicconcept_area_course_topicconcepts_path(@course)%>",
+		    success: function(json) {
+		    	result = json; 
+		    },
+		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	    	}
+		});
+
+		return result;
+    }
+
+    function get_topicconcept_research_trend(){
+
+	    var result;
+		$.ajax({
+		    type: "POST",
+		    dataType: "json",
+		    async: false,
+		    url: "<%= get_topicconcept_track_scatter_course_topicconcepts_path(@course)%>",
 		    success: function(json) {
 		    	result = json; 
 		    },

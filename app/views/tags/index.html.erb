@@ -61,7 +61,7 @@
             <td><%= tag.description %></td>
             <td><%= tag.rating %></td>
             <td>
-              <% if can?(:manage, tag) %>
+              <% if can? :manage, Tag %>
                   <%= link_to edit_course_tag_path(@course, tag), class: 'btn' do %>
                       <i class="icon-edit"></i>
                   <% end %>

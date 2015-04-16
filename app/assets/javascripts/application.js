@@ -57,6 +57,8 @@
 //= require_tree .
 
 $(document).ready(function() {
+    $.getScript("https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML");
+
     (function() {
         /// Sets a date suggestion for the given datetimepicker (set as this) when it is blank.
         function setDefaultDateSuggestion(date) {

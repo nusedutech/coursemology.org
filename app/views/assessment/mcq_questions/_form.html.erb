@@ -229,17 +229,16 @@
                 }
         );
 
-        //Set default font
+        //Set default font & font size
 
         CKEDITOR.on( 'instanceReady', function( ev ) {
+            //ev.editor.removeMenuItem('eqneditor');
             ev.editor.dataProcessor.htmlFilter.addRules({
                 elements: {
                     p: function (e) { e.attributes.style = 'font-size:' + 16 + 'px; font-family:' + "Times New Roman" + ';'; }
                 }
             });
-            //ev.editor.setData('<span style="font-family:Arial, Verdana, sans-serif;">&shy;</span>');
          });
-
 
 	});
 </script>

@@ -150,11 +150,11 @@
 		  return true;		  
 		});
 
+        //////////////////////////////////////
         //advanced config for editor
+        //////////////////////////////////////
 
-        /*CKEDITOR.on( 'instanceReady', function( ev ) {
-            ev.editor.setData('<span style="font-family:Arial, Verdana, sans-serif;">&shy;</span>');
-        });*/
+        //Fixed EqnEditor Codecogs of CKeditor
 
         var EqnEditors = [];
         function ProcessEditors(clickElement) {
@@ -228,5 +228,18 @@
                     ProcessEditors();
                 }
         );
+
+        //Set default font
+
+        CKEDITOR.on( 'instanceReady', function( ev ) {
+            ev.editor.dataProcessor.htmlFilter.addRules({
+                elements: {
+                    p: function (e) { e.attributes.style = 'font-size:' + 16 + 'px; font-family:' + "Times New Roman" + ';'; }
+                }
+            });
+            //ev.editor.setData('<span style="font-family:Arial, Verdana, sans-serif;">&shy;</span>');
+         });
+
+
 	});
 </script>

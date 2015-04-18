@@ -1,0 +1,45 @@
+<form action="<%= request.original_url %>" method="POST" onsubmit="halt();">
+	<div class="feedback-form-div">
+		Top Results: <input name="freq_wrong_count" type="number" value="<%= @freq_wrong_count %>" min="0"/>
+		&nbsp;&nbsp;&nbsp; 
+	</div>
+	<div class="feedback-form-div">
+		Tag: 
+		<select class="input-medium" name="tag_id">
+			<option name="tag_id" value="nil" <%= "selected" if @tag.nil? %> >All</option>
+			<% @tags.each do |tag| %>
+				<option value="<%= tag.id %>" <%= "selected" if @tag == tag %>><%= tag.name %></option>
+			<% end %>
+		</select>
+		&nbsp;&nbsp;&nbsp; 
+	</div>
+	<div class="feedback-form-div">
+		Concept:
+		<select class="input-medium" name="freq_concept_id">
+			<option name="chosen_concept_id" value="nil" <%= "selected" if @chosen_concept.nil? %> >All</option>
+			<% @concepts.each do |concept| %>
+				<option value="<%= concept.id %>" <%= "selected" if @chosen_concept == concept %>><%= concept.name %></option>
+			<% end %>
+		</select>
+		&nbsp;&nbsp;&nbsp; 
+	</div>
+	<div class="feedback-form-div">
+		Order answers by?:
+		<select name="correct">
+			<option value="correct" <%= "selected" if @choose_correct == "correct" %> >Correct answers</option>
+			<option value="wrong" <%= "selected" if @choose_correct == "wrong" %> >Wrong answers</option>
+			<option value="both" <%= "selected" if @choose_correct == "both" %> >Both correct and wrong answers</option>
+			<option value="seconds" <%= "selected" if @choose_correct == "seconds" %> >Combined longest answer timing</option>
+			<option value="page_left" <%= "selected" if @choose_correct == "page_left" %> >Combined most page exits</option>
+			<option value="avg_seconds" <%= "selected" if @choose_correct == "avg_seconds" %> >Average answer timing</option>
+			<option value="avg_page_left" <%= "selected" if @choose_correct == "avg_page_left" %> >Averge page exits per submission</option>
+		</select>
+		&nbsp;&nbsp;&nbsp; 
+	</div>
+	<div class="feedback-form-div">
+		<input class="btn" type="submit" value="Go" />
+		&nbsp;&nbsp;&nbsp; 
+	</div>
+</form>
+
+<%= render partial: "get_freq_answers_feedback_table" %>

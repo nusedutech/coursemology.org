@@ -96,7 +96,7 @@
       		</div>
       		<div id="collapse-wrong-questions" class="accordion-body collapse">
         		<div class="accordion-inner">
-        			<form action="<%= request.original_url %>" method="GET">
+        			<form action="<%= get_freq_answers_feedback_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
 	        			<div class="feedback-form-div">
         					Top Results: <input name="freq_wrong_count" type="number" value="<%= @freq_wrong_count %>" min="0"/>
         					&nbsp;&nbsp;&nbsp; 
@@ -114,7 +114,7 @@
         				<div class="feedback-form-div">
         					Concept:
         					<select class="input-medium" name="freq_concept_id">
-	        					<option name="chosen_concept_id" value="nil" <%= "selected" if @chosen_concept.nil? %> >All</option>
+	        					<option value="nil" <%= "selected" if @chosen_concept.nil? %> >All</option>
 	        					<% @concepts.each do |concept| %>
 	        						<option value="<%= concept.id %>" <%= "selected" if @chosen_concept == concept %>><%= concept.name %></option>
 	        					<% end %>
@@ -122,8 +122,16 @@
         					&nbsp;&nbsp;&nbsp; 
         				</div>
         				<div class="feedback-form-div">
-        					Correct?:
-        					<input type="checkbox" name="correct" value="true" <%= "checked" if @choose_correct %>/>
+        					Order answers by?:
+        					<select name="correct">
+        						<option value="correct" <%= "selected" if @choose_correct == "correct" %> >Correct answers</option>
+        						<option value="wrong" <%= "selected" if @choose_correct == "wrong" %> >Wrong answers</option>
+        						<option value="both" <%= "selected" if @choose_correct == "both" %> >Both correct and wrong answers</option>
+        						<option value="seconds" <%= "selected" if @choose_correct == "seconds" %> >Combined longest answer timing</option>
+        						<option value="page_left" <%= "selected" if @choose_correct == "page_left" %> >Combined most page exits</option>
+        						<option value="avg_seconds" <%= "selected" if @choose_correct == "avg_seconds" %> >Average answer timing</option>
+        						<option value="avg_page_left" <%= "selected" if @choose_correct == "avg_page_left" %> >Averge page exits per submission</option>
+        					</select>
         					&nbsp;&nbsp;&nbsp; 
         				</div>
         				<div class="feedback-form-div">
@@ -132,42 +140,7 @@
         				</div>
 					</form>
 
-          			<% @summary[:freq_wrong_questions].each_with_index do |q, i| %>
-          				<% qn = @course.questions.find_by_id(q.qid) %>
-				        <section id="question_<%= i + 1%>" style="margin-bottom: 20px;">
-				          	<div class="grey_background" style="margin: 10px;">
-				            	<strong><%= i + 1 %>. </strong>
-				            	<%= style_format qn.description %>
-				            	
-				            	- Answered <%= @choose_correct ? "correctly" : "wrongly" %> <strong style="color: #FF0000;"><%= q.count %></strong> times
-				          	</div>
-				          	<div style="margin: 10px;">
-				            	<% qn.topicconcepts.concepts.each do |concept| %>
-				                    <span class="label label-success"><%= concept.name %></span>
-				                <% end %>
-				                <% qn.tags.each do |tag| %>
-				                    <span class="label label-info"><%= tag.name %></span>
-				                <% end %>
-				          	</div>
-					        <% if qn.specific.class == Assessment::McqQuestion %>
-					          	<table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
-						            <colgroup>
-					                	<col width="5%"/>
-						              	<col width="35%"/>
-						              	<col width="50%"/>
-						            </colgroup>
-						            <% qn.options.each do |opt| %>
-				            			<% nonuniq_stds = opt.assemt_std(@course, @guidance_quiz.assessment) %>
-							            <tr>
-								            <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
-								            <td><%= opt.text %></td>
-								            <td><%= nonuniq_stds.size %></td>
-							            </tr>
-				        			<% end %>
-					          	</table>
-					        <% end %>
-				      	</section>
-				    <% end %>
+          			<%= render  partial: "get_freq_answers_feedback_table" %>
         		</div>
       		</div>
     	</div>
@@ -205,44 +178,61 @@
         		<div class="accordion-inner">
         			<div>
         				<h4>Accumulative</h4>
-        				<form class="form-inline" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
-	        				<div class="feedback-form-div">
-	        					From: <input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/>&nbsp;&nbsp;&nbsp; 
+        				<form class="form-horizontal" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
+        					<div class='control-group'>
+        						<%= label_tag 'start_period', 'From:', class: 'control-label' %>
+	        					<div class="controls">
+	        						<input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/> 
+        						</div>
 	        				</div>
-	        				<div class="feedback-form-div">
-	        					To: <input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
+	        				<div class='control-group'>
+	        					<%= label_tag 'end_period', 'To:', class: 'control-label' %>
+		        				<div class="controls">
+		        					<input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
+		        				</div>
+		        			</div>
+	        				<div class="control-group">
+	        					<%= label_tag 'time_step', 'Step:', class: 'control-label' %>
+	        					<div class="controls">
+			        				<select class="input-small" name="time_step">
+			        					<option value="day">Day</option>
+			        					<option value="month">Month</option>
+			        					<option value="year">Year</option>
+			        				</select>
+		        				</div>	
 	        				</div>
-	        				<div class="feedback-form-div">
-	        					Step:
-		        				<select class="input-small" name="time_step">
-		        					<option value="day">Day</option>
-		        					<option value="month">Month</option>
-		        					<option value="year">Year</option>
-		        				</select>
+        					<div class="control-group">
+        						<%= label_tag 'tag_id', 'Tag type:', class: 'control-label' %>
+        						<div class="controls">
+			        				<select class="input-small" name="tag_id">
+			        					<option name="tag_id" value="nil" selected>All</option>
+			        					<% @tags.each do |tag| %>
+			        						<option value="<%= tag.id %>"><%= tag.name %></option>
+			        					<% end %>
+			        				</select>
+			        			</div>
 	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-        					<div class="feedback-form-div">
-	        					Tag type:
-		        				<select class="input-small" name="tag_id">
-		        					<option name="tag_id" value="nil" selected>All</option>
-		        					<% @tags.each do |tag| %>
-		        						<option value="<%= tag.id %>"><%= tag.name %></option>
-		        					<% end %>
-		        				</select>
+        					<div class="control-group">
+        						<%= label_tag 'correct', 'Answer Type:', class: 'control-label' %>
+		        				<div class="controls">
+		        					<select class="input-small" name="correct">
+			        					<option value="correct" selected>Correct</option>
+			        					<option value="wrong">Wrong</option>
+			        					<option value="both">Both</option>
+			        					<option value="absolute">Absolute</option>
+			        				</select>
+		        				</div>
 	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-	        				<div class="feedback-form-div">
-	        					Answer Type:
-	        					<select class="input-small" name="correct">
-		        					<option value="correct" selected>Correct</option>
-		        					<option value="wrong">Wrong</option>
-		        					<option value="both">Both</option>
-		        					<option value="absolute">Absolute</option>
-		        				</select>
-	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-        					<div class="feedback-form-div">
-        						<input class="btn" type="submit" value="Submit" />
+	        				<div class='control-group'>
+						        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+						        <div class="controls">
+						            <textarea id="acc-concepts-textext" class="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+						        </div>
+						    </div>
+        					<div class="control-group">
+	        					<div class="controls">
+	        						<input class="btn" type="submit" value="Submit" />
+	        					</div>
         					</div>
         					<input type="hidden" name="accumulative" value="true" />
 	        			</form>
@@ -251,52 +241,125 @@
         			<hr/>
         			<div>
         				<h4>Non-accumulative</h4>
-        				<form class="form-inline" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
-	        				<div class="feedback-form-div">
-	        					From: <input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/>&nbsp;&nbsp;&nbsp; 
+        				<form class="form-horizontal" action="<%= get_topicconcept_area_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
+	        				<div class='control-group'>
+        						<%= label_tag 'start_period', 'From:', class: 'control-label' %>
+	        					<div class="controls">
+	        						<input type="date" name="start_period" class="" value="<%= Date.today - 1.months %>"/> 
+        						</div>
 	        				</div>
-	        				<div class="feedback-form-div">
-	        					To: <input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
+	        				<div class='control-group'>
+	        					<%= label_tag 'end_period', 'To:', class: 'control-label' %>
+		        				<div class="controls">
+		        					<input type="date" name="end_period" value="<%= Date.today %>"/>&nbsp;&nbsp;&nbsp;
+		        				</div>
+		        			</div>
+	        				<div class="control-group">
+	        					<%= label_tag 'time_step', 'Step:', class: 'control-label' %>
+	        					<div class="controls">
+			        				<select class="input-small" name="time_step">
+			        					<option value="day">Day</option>
+			        					<option value="month">Month</option>
+			        					<option value="year">Year</option>
+			        				</select>
+		        				</div>	
 	        				</div>
-	        				<div class="feedback-form-div">
-	        					Step:
-		        				<select class="input-small" name="time_step">
-		        					<option value="day">Day</option>
-		        					<option value="month">Month</option>
-		        					<option value="year">Year</option>
-		        				</select>
+        					<div class="control-group">
+        						<%= label_tag 'tag_id', 'Tag type:', class: 'control-label' %>
+        						<div class="controls">
+			        				<select class="input-small" name="tag_id">
+			        					<option name="tag_id" value="nil" selected>All</option>
+			        					<% @tags.each do |tag| %>
+			        						<option value="<%= tag.id %>"><%= tag.name %></option>
+			        					<% end %>
+			        				</select>
+			        			</div>
 	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-        					<div class="feedback-form-div">
-	        					Tag type:
-		        				<select class="input-small" name="tag_id">
-		        					<option name="tag_id" value="nil" selected>All</option>
-		        					<% @tags.each do |tag| %>
-		        						<option value="<%= tag.id %>"><%= tag.name %></option>
-		        					<% end %>
-		        				</select>
+        					<div class="control-group">
+        						<%= label_tag 'correct', 'Answer Type:', class: 'control-label' %>
+		        				<div class="controls">
+		        					<select class="input-small" name="correct">
+			        					<option value="correct" selected>Correct</option>
+			        					<option value="wrong">Wrong</option>
+			        					<option value="both">Both</option>
+			        					<option value="absolute">Absolute</option>
+			        				</select>
+		        				</div>
 	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-	        				<div class="feedback-form-div">
-	        					Answer Type:
-	        					<select class="input-small" name="correct">
-		        					<option value="correct" selected>Correct</option>
-		        					<option value="wrong">Wrong</option>
-		        					<option value="both">Both</option>
-		        					<option value="absolute">Absolute</option>
-		        				</select>
-	        				</div>
-        					&nbsp;&nbsp;&nbsp;
-	        				<div class="feedback-form-div">
-	        					<input class="btn" type="submit" value="Submit" />
-	        				</div>
+	        				<div class='control-group'>
+						        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+						        <div class="controls">
+						            <textarea id="nonacc-concepts-textext" class="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+						        </div>
+						    </div>
+        					<div class="control-group">
+	        					<div class="controls">
+	        						<input class="btn" type="submit" value="Submit" />
+	        					</div>
+        					</div>
         					<input type="hidden" name="accumulative" value="false" />
 	        			</form>
         				<div id="overall-trend-nonacc" style="height: 400px; margin-top: 10px; margin-bottom: 10px;"></div>
         			</div>
+        		</div>
+      		</div>
+    	</div>
+  	</div>
 
 
-
+  	<div class="accordion" id="accordion-research-trend">
+   		<div class="accordion-group">
+      		<div class="accordion-heading">
+        		<div class="accordion-wordheading">
+          			<h4>Self-research Trends</h4>
+        		</div>
+        		<div class="accordion-right">
+	      			<a class="accordion-toggle btn accordion-minimise" data-toggle="collapse" data-parent="#accordion-research-trend" href="#collapse-research-trend"><i class="icon-minus"></i></a>
+        		</div>
+      		</div>
+      		<div id="collapse-research-trend" class="accordion-body collapse">
+        		<div class="accordion-inner">
+        			<div>
+        				<h4>Scatter plot</h4>
+        				<form class="form-horizontal" action="<%= get_topicconcept_track_scatter_course_topicconcepts_path(@course) %>" onsubmit="popupform(this);" method="POST">
+        					<div class='control-group'>
+		        				<%= label_tag 'start_period', 'From:', class: 'control-label' %>
+						        <div class='controls'>
+						           <input type="date" name='start_period' value="<%= Date.today - 1.months %>" class='input-medium' />
+						        </div>
+					        </div>
+					        <div class='control-group'>
+		        				<%= label_tag 'end_period', 'To:', class: 'control-label' %>
+						        <div class='controls'>
+						           <input type="date" name='end_period' value="<%= Date.today %>" class='input-medium' />
+						        </div>
+					        </div>
+					        <div class='control-group'>
+		        				<%= label_tag 'tag_type', 'Tag:', class: 'control-label' %>
+						        <div class='controls'>
+						           	<select class="input-small" name="tag_id">
+		        						<option value="nil" selected>All</option>
+		        						<% @tags.each do |tag| %>
+		        							<option value="<%= tag.id %>"><%= tag.name %></option>
+		        						<% end %>
+		        					</select>
+						        </div>
+					        </div>
+					        <div class='control-group'>
+						        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+						        <div class="controls">
+						            <textarea id="concepts-textext" class="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+						        </div>
+						    </div>						    
+						    <div class="control-group">
+						        <div class="controls">
+						            <input type="submit" class="btn" value="Search"/>
+						        </div>
+						    </div>
+	        			</form>
+	        			<hr/>
+        				<div id="research-trend-plot" style="height:500px; margin-top: 10px; margin-bottom: 10px;"></div>
+        			</div>
         		</div>
       		</div>
     	</div>
@@ -308,21 +371,34 @@
   	var G_NODE_KEY = "g-node-key-";
   	var stud_attempt_pie;
 
+  	var loadingCount = 0;
+
 	$(document).ready(function(){
 				
 	  	//Create topic trees
-	  	var tcdata = get_topicconcept_data();
-    	console.log(tcdata);
-    	generate_entire_dependency_map(tcdata.nodelist, 
-                                   tcdata.edgelist);
-
-	  	var topictrees = [];
-	  	jQuery.each(tcdata.topictrees, function() {		  
-		  	topictrees.push({"id" : this.itc.id, "parent" : this.parent == null ? "#" : 	this.parent.id, "text" : this.itc.name,"type" : this.itc.typename});
-		}); 
-
+	  	get_topicconcept_data();
 		generate_student_attempt_pie();
 		generate_overall_trend_data();
+		generate_research_trend_data();
+
+		$('.concepts-textext').textext(
+        {
+            plugins : 'prompt focus arrow autocomplete tags ajax filter',
+            ajax : {
+                url : '<%= get_enabled_concepts_list_with_id_course_topicconcepts_path(@course)%>',
+                type: "POST",
+                async: false,
+                dataType : 'json',
+                cacheResults : true,
+            },
+            html : {
+                hidden: ('<input type="hidden" name="concepts" />')
+            },
+            ext : {
+                itemManager : onlySelectionItemManager
+            }
+        })
+        .bind('isTagAllowed', onSelectionTagFilter);
 	});
 
     function generate_entire_dependency_map(nodelist, edgelist){
@@ -354,38 +430,17 @@
 	}
 
 	function generate_student_attempt_pie(){
-		var weights = get_topicconcept_weights();
-		set_student_attempt_pie_json_areas(weights.concepts);
-		stud_attempt_pie = new d3pie("student-attempted-pie", student_attempt_pie_json);
+		get_topicconcept_weights();
 	}
 
 	function generate_overall_trend_data(){
 
-		var accumulative = get_topicconcept_accumulative();
-		Morris.Area({
-		    element: 'overall-trend-acc',
-            gridEnabled: true,
-		    data: accumulative.data,
-		    xkey: accumulative.x,
-		    ykeys: accumulative.y,
-		    labels: accumulative.concepts,
-            resize: true,
-		    pointSize: 3,
-		    hideHover: 'auto'
-		});
+		get_topicconcept_accumulative();
+		get_topicconcept_nonaccumulative();
+	}
 
-		var nonaccumulative = get_topicconcept_nonaccumulative();
-		Morris.Area({
-		    element: 'overall-trend-nonacc',
-            gridEnabled: true,
-		    data: nonaccumulative.data,
-		    xkey: nonaccumulative.x,
-		    ykeys: nonaccumulative.y,
-		    labels: nonaccumulative.concepts,
-            resize: true,
-		    pointSize: 3,
-		    hideHover: 'auto'
-		});
+	function generate_research_trend_data() {
+		get_topicconcept_research_trend();
 	}
 
 	function setup_graph_identification(renderer) {
@@ -402,20 +457,30 @@
 	 }
 
 	function get_topicconcept_data(){
+		haltUp();
 		var result;
 		$.ajax({
 	    type: "POST",
 	    dataType: "json",
-	    async: false,
+	    async: true,
 	    url: "<%= get_topicconcept_data_noedit_course_topicconcepts_path(@course)%>",
 	    success: function(json) {	    	
-	    	result = json; 
+	    	generate_entire_dependency_map(json.nodelist, 
+                                   	   	   json.edgelist);
+
+		  	var topictrees = [];
+		  	jQuery.each(json.topictrees, function() {		  
+			  	topictrees.push({"id" : this.itc.id, "parent" : this.parent == null ? "#" : 	this.parent.id, "text" : this.itc.name,"type" : this.itc.typename});
+			});
+
+			resumeDown();  
 	    },
 	    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+        	alert("Status: " + textStatus + " Error: " + errorThrown);
+        	resumeDown(); 
     	}
 	  });
-	  return result;
+
 	}
 
 	function get_topicconcept_statistics(concept_id){
@@ -438,66 +503,139 @@
 		});
 
 		return "<p class='name'>"+result.name+"</p>" + 
-	           "<div><p class='subtop'> Statistics : <em class='sub'>"+result.raw_right+" / "+result.raw_total+" (" + result.raw_percent + ") "+"</em></p></div>";
+	           "<div><p class='subtop'> Statistics : <em class='sub'>"+result.raw_right+" / "+result.raw_total+" (" + result.raw_percent + ") "+"</em></p></div>"+
+	           "<div><p class='subtop'> Page Left : <em class='sub'>"+result.page_left_sum+"</em></p></div>"+
+	           "<div><p class='subtop'> Time Taken : <em class='sub'>"+result.seconds_sum+" seconds</em></p></div>";
     }
 
     function get_topicconcept_weights(){
-
+    	haltUp();
 	    var result;
 		$.ajax({
 		    type: "POST",
 		    dataType: "json",
-		    async: false,
+		    async: true,
 		    url: "<%= get_topicconcept_weights_course_topicconcepts_path(@course)%>",
 		    success: function(json) {
-		    	result = json; 
+		    	set_student_attempt_pie_json_areas(json.concepts);
+				stud_attempt_pie = new d3pie("student-attempted-pie", student_attempt_pie_json);
+				resumeDown(); 
 		    },
 		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
 	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	        	resumeDown();
 	    	}
 		});
 
-		return result;
     }
 
     function get_topicconcept_accumulative(){
-
+    	haltUp();
 	    var result;
 		$.ajax({
 		    type: "POST",
 		    dataType: "json",
 		    data: { accumulative: true , correct: true},
-		    async: false,
+		    async: true,
 		    url: "<%= get_topicconcept_area_course_topicconcepts_path(@course)%>",
 		    success: function(json) {
-		    	result = json; 
+		    	Morris.Line({
+				    element: 'overall-trend-acc',
+		            gridEnabled: true,
+				    data: json.data,
+				    xkey: json.x,
+				    ykeys: json.y,
+				    labels: json.concepts,
+		            resize: true,
+				    pointSize: 3,
+				    hideHover: 'auto'
+				}); 
+				resumeDown();
 		    },
 		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown);
+	        	resumeDown();
 	    	}
 		});
 
-		return result;
     }
 
     function get_topicconcept_nonaccumulative(){
-
+    	haltUp();
 	    var result;
 		$.ajax({
 		    type: "POST",
 		    dataType: "json",
 		    data: { accumulative: false , correct: true},
-		    async: false,
+		    async: true,
 		    url: "<%= get_topicconcept_area_course_topicconcepts_path(@course)%>",
 		    success: function(json) {
-		    	result = json; 
+		    	Morris.Line({
+				    element: 'overall-trend-nonacc',
+		            gridEnabled: true,
+				    data: json.data,
+				    xkey: json.x,
+				    ykeys: json.y,
+				    labels: json.concepts,
+		            resize: true,
+				    pointSize: 3,
+				    hideHover: 'auto'
+				}); 
+				resumeDown();
 		    },
 		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
 	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	        	resumeDown();
 	    	}
 		});
 
-		return result;
+    }
+
+    function get_topicconcept_research_trend(){
+    	haltUp();
+	    var result;
+		$.ajax({
+		    type: "POST",
+		    dataType: "json",
+		    async: true,
+		    url: "<%= get_topicconcept_track_scatter_course_topicconcepts_path(@course)%>",
+		    success: function(json) {
+		    	label_array = new Array();
+				data_array = new Array();
+				$.each (json.data, function(){
+					label_array.push({ label: this.name });
+					data_concept_array = new Array();
+					for (var i = 0; i < this.answers.length ; i++){
+						data_concept_array.push([this.answers[i].seconds, this.answers[i].page_left]);
+					}
+					data_array.push(data_concept_array);
+				});
+
+				var plotOption = jqplotGeneralOption;
+				plotOption.title = "Research Trend"
+				plotOption.axes = {
+		    		xaxis:{
+		      			label:'Seconds (s)'
+		    		},
+		    		yaxis:{
+		      			label:'Page Left Count'
+		    		}
+		  		}
+		  		plotOption.series = label_array; 
+
+		  		//Setup graph
+				$.jqplot('research-trend-plot',  
+						 data_array,
+						 plotOption);
+
+		        resumeDown();
+		    },
+		    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	alert("Status: " + textStatus + " Error: " + errorThrown); 
+	        	resumeDown();
+	    	}
+		});
+
     }
 
     function popupform(form){
@@ -509,5 +647,17 @@
     	form.target = 'popup';
 
     	return true;
+    }
+
+    function haltUp() {
+    	loadingCount += 1;
+    	halt();
+    }
+
+    function resumeDown() {
+    	loadingCount -= 1;
+    	if (loadingCount == 0) {
+    		resume();
+    	}
     }
 </script>

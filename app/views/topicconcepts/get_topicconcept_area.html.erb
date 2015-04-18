@@ -1,46 +1,65 @@
 <div style="margin-left: 20px;">
-	<form class="form-inline" action="<%= request.original_url %>" method="POST">
-		<div class="feedback-form-div">
-			From: <input type="date" name="start_period" class="" value="<%= start_period %>"/>&nbsp;&nbsp;&nbsp; 
+	<form class="form-horizontal" action="<%= request.original_url %>" method="POST" onsubmit="halt();">
+		<div class='control-group'>
+			<%= label_tag 'start_period', 'From:', class: 'control-label' %>
+			<div class="controls">
+				<input type="date" name="start_period" class="" value="<%= start_period %>"/> 
+			</div>
 		</div>
-		<div class="feedback-form-div">
-			To: <input type="date" name="end_period" value="<%= end_period %>"/>&nbsp;&nbsp;&nbsp;
+		<div class='control-group'>
+			<%= label_tag 'end_period', 'To:', class: 'control-label' %>
+			<div class="controls">
+				<input type="date" name="end_period" value="<%= end_period %>"/>&nbsp;&nbsp;&nbsp;
+			</div>
 		</div>
-		<div class="feedback-form-div">
-			Step:
-			<select class="input-small" name="time_step">
-				<option value="day" <%= "selected" if time_step == "day" %> >Day</option>
-				<option value="month" <%= "selected" if time_step == "month" %> >Month</option>
-				<option value="year" <%= "selected" if time_step == "year" %> >Year</option>
-			</select>
+		<div class="control-group">
+			<%= label_tag 'time_step', 'Step:', class: 'control-label' %>
+			<div class="controls">
+				<select class="input-small" name="time_step">
+					<option value="day" <%= "selected" if time_step == "day" %> >Day</option>
+					<option value="month" <%= "selected" if time_step == "month" %> >Month</option>
+					<option value="year" <%= "selected" if time_step == "year" %> >Year</option>
+				</select>
+			</div>	
 		</div>
-		&nbsp;&nbsp;&nbsp;
-		<div class="feedback-form-div">	
-			Answer Type:
-			<select class="input-small" name="correct">
-				<option value="correct" <%= "selected" if correct=="correct" %>>Correct</option>
-				<option value="wrong" <%= "selected" if correct=="wrong" %>>Wrong</option>
-				<option value="both" <%= "selected" if correct=="both" %>>Both</option>
-				<option value="absolute" <%= "selected" if correct=="absolute" %>>Absolute</option>
-			</select>
+		<div class="control-group">
+			<%= label_tag 'tag_id', 'Tag type:', class: 'control-label' %>
+			<div class="controls">
+				<select class="input-small" name="tag_id">
+					<option name="tag_id" value="nil" <%= "selected" if current_tag.nil? %>>All</option>
+					<% tags.each do |tag| %>
+						<option value="<%= tag.id %>" <%= "selected" if current_tag == tag %>><%= tag.name %></option>
+					<% end %>
+				</select>
+			</div>
 		</div>
-		<div class="feedback-form-div">
-			Accumulative?:
-			<input type="checkbox" name="accumulative" value="true" <%= "checked" if accumulative %> />
+		<div class="control-group">
+			<%= label_tag 'correct', 'Answer Type:', class: 'control-label' %>
+			<div class="controls">
+				<select class="input-small" name="correct">
+					<option value="correct" <%= "selected" if correct=="correct" %>>Correct</option>
+					<option value="wrong" <%= "selected" if correct=="wrong" %>>Wrong</option>
+					<option value="both" <%= "selected" if correct=="both" %>>Both</option>
+					<option value="absolute" <%= "selected" if correct=="absolute" %>>Absolute</option>
+				</select>
+			</div>
 		</div>
-		&nbsp;&nbsp;&nbsp;
-		<div class="feedback-form-div">
-			Tag type:
-			<select class="input-small" name="tag_id">
-				<option name="tag_id" value="nil" <%= "selected" if current_tag.nil? %>>All</option>
-				<% tags.each do |tag| %>
-					<option value="<%= tag.id %>" <%= "selected" if current_tag == tag %>><%= tag.name %></option>
-				<% end %>
-			</select>
+		<div class='control-group'>
+	        <%= label_tag 'concepts-textext', 'Choose Concepts: ', class: 'control-label' %>
+	        <div class="controls">
+	            <textarea id="concepts-textext" class="concepts-textext" style="padding-bottom:11px;" rows="1"></textarea>
+	        </div>
+	    </div>
+		<div class="control-group">
+			<%= label_tag 'accumulative', 'Accumulative?:', class: 'control-label' %>
+			<div class="controls">
+				<input type="checkbox" name="accumulative" value="true" <%= "checked" if accumulative %> />
+			</div>
 		</div>
-		&nbsp;&nbsp;&nbsp;
-		<div class="feedback-form-div">
-			<input class="btn" type="submit" value="Submit" />
+		<div class="control-group">
+			<div class="controls">
+				<input class="btn" type="submit" value="Submit" />
+			</div>
 		</div>
 	</form>	
 </div>
@@ -49,7 +68,7 @@
 
 <script>
 	$(document).ready(function(){
-		Morris.Area({
+		Morris.Line({
 		    element: 'overall-trend',
             gridEnabled: true,
 		    data: <%=raw data.to_json %>,
@@ -60,6 +79,25 @@
 		    pointSize: 3,
 		    hideHover: 'auto'
 		});
+
+		$('.concepts-textext').textext(
+        {
+            plugins : 'prompt focus arrow autocomplete tags ajax filter',
+            ajax : {
+                url : '<%= get_enabled_concepts_list_with_id_course_topicconcepts_path(@course)%>',
+                type: "POST",
+                async: false,
+                dataType : 'json',
+                cacheResults : true,
+            },
+            html : {
+                hidden: ('<input type="hidden" name="concepts" />')
+            },
+            ext : {
+                itemManager : onlySelectionItemManager
+            }
+        })
+        .bind('isTagAllowed', onSelectionTagFilter);
 	});
 
 

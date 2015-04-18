@@ -70,6 +70,10 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
       all_questions = CSV.parse_line(self.uncompleted_questions)
       question_id = all_questions.shift
       result = course.questions.find_by_id(question_id)
+
+      #Update only when question is generated and when nil is not invoked
+      self.question_generate_at = Time.now
+      self.save
     end
     return result
   end
@@ -86,6 +90,10 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
       all_questions = CSV.parse_line(self.uncompleted_questions)
       question_id = all_questions.shift
       result = course.questions.find_by_id(question_id)
+
+      #Update only when question is generated
+      self.question_generate_at = Time.now
+      self.save
     end
     return result
   end
@@ -116,15 +124,33 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     all_answers
   end
 
-  def record_answer(answer_id)
+  def record_answer(answer)
+    #Update student tracking statistics
+    if !self.question_generate_at.nil?
+      seconds_used = Time.now - self.question_generate_at
+      answer.seconds_to_complete = seconds_used
+      self.seconds_to_complete += seconds_used
+    end
+    answer.page_left_count = self.current_page_left_count
+    answer.save
+
+    self.question_generate_at = nil
+    self.current_page_left_count = 0
+
     if self.completed_answers.present?
       all_answers = CSV.parse_line(self.completed_answers)
     else
       all_answers = []
     end
-    all_answers.concat([answer_id])
+    all_answers.concat([answer.id])
 
     self.completed_answers = all_answers.join(",")
+    self.save
+  end
+
+  def add_page_left_count
+    self.current_page_left_count += 1
+    self.total_page_left_count += 1
     self.save
   end
 
@@ -215,7 +241,9 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     end
 
     if result && !self.failed
-      #Only set to fail and lock if there is children to unlock
+      #Only set to fail and lock if 
+      # - concept is not a entry level concept AND
+      # - there is children to unlock
       if unlock_required_children submission
         self.failed = true
         self.disabled_topicconcept_id = self.concept.id
@@ -321,25 +349,38 @@ class Assessment::GuidanceConceptStage < ActiveRecord::Base
     end
   end
 
+  def self.cascade_delete_loop submission, concept_stage
+    if !concept_stage.nil?
+      processing_concept_stages = [concept_stage]
+      #Iteratively find the lower level concepts and delete the content
+      while processing_concept_stages.size > 0 do
+        current_concept_stage = processing_concept_stages.shift
+        processing_concept_stages |= self.cascade_delete_failed_concept_stage submission, current_concept_stage
+      end
+    end
+  end
+
   #Delete failed concept stage and return the next level of concepts
   def self.cascade_delete_failed_concept_stage submission, concept_stage
     concept_edge_stages_list = Assessment::GuidanceConceptEdgeStage.get_edge_stages_simplified concept_stage
     processing_concept_stages = []
 
-    concept_edge_stages_list.each do |current_edge_stage|
-      dependent_concept = current_edge_stage.concept_edge.dependent_concept
-      dependent_concept_stage = self.get_stage_simplified submission, dependent_concept.id
-
-      #Check for null and circular dependency (to prevent infinite recursion)
-      if !dependent_concept_stage.nil? and 
-         dependent_concept_stage != self and 
-         dependent_concept_stage != concept_stage
-        processing_concept_stages << dependent_concept_stage
-      end
-    end
-
     #Destroy concept_stage and all related stages once done
-    concept_stage.destroy
+    #only if concept is not entry level
+    if !(Assessment::GuidanceConceptOption.can_enter_with concept_stage.concept)
+      concept_edge_stages_list.each do |current_edge_stage|
+        dependent_concept = current_edge_stage.concept_edge.dependent_concept
+        dependent_concept_stage = self.get_stage_simplified submission, dependent_concept.id
+
+        #Check for null and circular dependency (to prevent infinite recursion)
+        if !dependent_concept_stage.nil? and 
+          dependent_concept_stage != self and 
+          dependent_concept_stage != concept_stage
+          processing_concept_stages << dependent_concept_stage
+        end
+      end
+      concept_stage.destroy
+    end
 
     processing_concept_stages
   end 

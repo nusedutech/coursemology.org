@@ -1,0 +1,58 @@
+<% if @choose_correct == "correct" %>
+  <% choose_color = "#00BB00"  %>
+  <% choose_word = "correct "  %>
+<% elsif @choose_correct == "wrong" %>
+  <% choose_color = "#FF0000" %>
+  <% choose_word = "wrong "  %>
+<% else %>
+  <% choose_color = "#000000" %>
+  <% choose_word = ""  %>
+<% end %>
+
+<% @summary[:freq_wrong_questions].each_with_index do |q, i| %>
+	<% qn = @course.questions.find_by_id(q.qid) %>
+	<section id="question_<%= i + 1%>" style="margin-bottom: 20px;">
+      	<div class="grey_background" style="margin: 10px;">
+        	<strong><%= i + 1 %>. </strong>
+        	<%= style_format qn.description %>
+        	<ul style="margin-top:10px; margin-bottom:10px; list-style:initial;">
+            <li>Answered <%= choose_word %> <strong style="color: <%= choose_color %>"><%= q.count %></strong> times</li>
+            <li>Tabulated total of <strong style="color: <%= choose_color %>"><%= q.seconds_sum %></strong> seconds <%= choose_word %> solve time</li>
+            <li>Average of <strong style="color: <%= choose_color %>"><%= (q.seconds_sum.to_f / q.count).round(2) %></strong> seconds <%= choose_word %> solve time</li>
+            <li>Tabulated total of <strong style="color: <%= choose_color %>"><%= q.page_left_sum %></strong> page exits when <%= choose_word %> under submission</li>
+            <li>Average of <strong style="color: <%= choose_color %>"><%= (q.page_left_sum.to_f / q.count).round(2) %></strong> page left when <%= choose_word %> under submission</li>
+          </ul>
+      	</div>
+      	<div style="margin: 10px;">
+        	<% qn.topicconcepts.concepts.each do |concept| %>
+                <span class="label label-success"><%= concept.name %></span>
+            <% end %>
+            <% qn.tags.each do |tag| %>
+                <span class="label label-info"><%= tag.name %></span>
+            <% end %>
+      	</div>
+        <% if qn.specific.class == Assessment::McqQuestion %>
+          	<table class="table" style="margin: 10px; margin-left: 50px; width: auto; min-width: 90%">
+	            <colgroup>
+                	<col width="5%"/>
+	              	<col width="35%"/>
+	              	<col width="50%"/>
+	            </colgroup>
+              <tr>
+                <th></th>
+                <th>Option</th>
+                <th>Selected count</th>
+              </tr>
+	            <% qn.options.each do |opt| %>
+        			<% nonuniq_stds = opt.assemt_std(@course, @guidance_quiz.assessment) %>
+		            <tr>
+			            <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
+			            <td><%= opt.text %></td>
+			            <td><%= nonuniq_stds.size %></td>
+		            </tr>
+    			<% end %>
+          	</table>
+        <% end %>
+  	</section>
+<% end %>
+        		

@@ -774,6 +774,18 @@ g.edgeLabel.enter.passed:hover text{
   font-weight:bold;
 }
 
+li.topictree-passed > a{
+  color: #00BB00 !important;
+}
+
+li.topictree-failed > a{
+  color: #FF0000 !important;
+}
+
+li.topictree-none > a{
+  color: #000000 !important;
+}
+
 input[type = checkbox].normalized-topicconcept {
   margin-top: 4px;
   margin-right: 5px;

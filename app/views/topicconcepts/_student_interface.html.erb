@@ -24,12 +24,6 @@
 	</div>
 <div>
 
-<div class="topicconcept-loading-modal hide fade" id="processing-halt-all" data-backdrop="static" data-keyboard="true">
-  <h1 id="processing-halt-all-message">Processing.... Please wait</h1>
-  <div class="processing-ball"></div>
-  <div class="inner-processing-ball"></div>
-</div>
-
 <script>
 	
 	$(document).ready(function(){
@@ -76,18 +70,5 @@
 		});
 
 	});
-	
-
-  function halt(message) {
-    var parsedMessage = typeof message == "string" ? message : 'Processing.... Please wait';
-    $('#processing-halt-all-message').html(parsedMessage);
-    $('#processing-halt-all').modal();
-
-
-  }
-
-  function resume() {
-    $('#processing-halt-all').modal('hide');
-  }
 
 </script>

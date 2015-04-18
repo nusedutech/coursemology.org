@@ -3,13 +3,13 @@ class TopicconceptsController < ApplicationController
   load_and_authorize_resource :course
   load_and_authorize_resource :topicconcept, through: :course
 
-  before_filter :set_popup_layout, only: [:get_topicconcept_area, :review_diagnostic_exploration_on_stage]
+  before_filter :set_popup_layout, only: [:get_topicconcept_area, :get_topicconcept_track_scatter, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage]
 
   before_filter :load_general_course_data, only: [:index, :concept_questions, :get_topicconcept_rated_data, :get_topicconcept_overall_statistics, :diagnostic_exploration, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :review_diagnostic_exploration]
 
   before_filter :set_viewing_permissions, only:[:index, :diagnostic_exploration, :review_diagnostic_exploration, :get_quiz_feedback, :individual_submissions]
 
-  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :get_topicconcept_area, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
+  before_filter :authorize_and_load_guidance_quiz, only:[:get_topicconcept_overall_statistics, :get_quiz_feedback, :individual_submissions, :get_topicconcept_weights, :get_topicconcept_area, :get_topicconcept_track_scatter, :get_freq_answers_feedback, :review_diagnostic_exploration_on_stage, :get_topicconcept_single_statistics, :get_topicconcept_single_current_statistics, :get_topicconcept_best_concepts, :get_topicconcept_notbest_concepts]
 
   before_filter :authorize_and_load_guidance_quiz_and_submission_and_concept_for_review, only: [:review_diagnostic_exploration]
 
@@ -29,6 +29,13 @@ class TopicconceptsController < ApplicationController
     #@topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank.split('.')[e[:itc].rank.split('.').length-1].to_i}
 
     Rails.cache.clear
+
+    respond_to do |format|
+      format.html
+      format.json {
+        render json: {}
+      }
+    end
   end
   
   def ivleapi   
@@ -43,16 +50,30 @@ class TopicconceptsController < ApplicationController
     @summary[:attempting] = @summary[:attempting].uniq
     @summary[:unsubmitted] = @course.student_courses - @summary[:attempting]
 
+    @freq_wrong_count = 5
+    @choose_correct = "wrong"
+    @tag = nil
+    @chosen_concept = nil
+    @concepts = @course.topicconcepts.concepts
+    @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
+                                                    .select("assessment_answers.question_id as qid, "\
+                                                            "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                                            "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                                            "COUNT(*) as count")
+                                                    .where("assessment_answers.correct = 0")
+                                                    .group("qid")
+                                                    .order("count DESC")
+                                                    .limit(@freq_wrong_count)
+
+    @tags = @course.tags
+  end
+
+  def get_freq_answers_feedback
+    @summary = {}
     if params.has_key?("freq_wrong_count")
       @freq_wrong_count = params["freq_wrong_count"].to_i
     else
       @freq_wrong_count = 5
-    end
-
-    if params.has_key?("correct") and params[:correct] == "true"
-      @choose_correct = true
-    else
-      @choose_correct = false
     end
 
     if params.has_key?("tag_id") and params[:tag_id] != "nil"
@@ -69,50 +90,174 @@ class TopicconceptsController < ApplicationController
       @chosen_concept = nil
     end
 
-    @concepts = @course.topicconcepts.concepts
-    if @chosen_concept and @tag
-      tag_mcq_answers = @tag.mcq_answers
-      combined_mcq_answers = @chosen_concept.mcq_answers
-                                            .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
-                                                             @choose_correct,
-                                                             combined_mcq_answers)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
-    elsif @chosen_concept
-      concept_mcq_answers = @chosen_concept.mcq_answers
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
-                                                             @choose_correct,
-                                                             concept_mcq_answers)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
-    elsif @tag
-      tag_mcq_answers = @tag.mcq_answers
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
-                                                             @choose_correct,
-                                                             tag_mcq_answers)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
+    found_correct_key = params.has_key?("correct")
+    #Search for only correct and order by correct answers
+    if found_correct_key and params[:correct] == "correct"
+      @choose_correct = "correct"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_correct_wrong @chosen_concept, 
+                                                                                @tag, 
+                                                                                true,
+                                                                                @freq_wrong_count
+    #Search for only wrong and order by wrong answers
+    elsif found_correct_key and params[:correct] == "wrong"
+      @choose_correct = "wrong"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_correct_wrong @chosen_concept, 
+                                                                                @tag, 
+                                                                                false,
+                                                                                @freq_wrong_count
+    #Search for all and order by answers count
+    elsif found_correct_key and params[:correct] == "both"
+      @choose_correct = "both"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "count DESC",
+                                                                       @freq_wrong_count#Search for all
+    elsif found_correct_key and params[:correct] == "seconds"
+      @choose_correct = "seconds"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "seconds_sum DESC",
+                                                                       @freq_wrong_count#Search for all
+    elsif found_correct_key and params[:correct] == "page_left"
+      @choose_correct = "page_left"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "page_left_sum DESC",
+                                                                       @freq_wrong_count
+    elsif found_correct_key and params[:correct] == "avg_seconds"
+      @choose_correct = "avg_seconds"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "avg_seconds_sum DESC",
+                                                                       @freq_wrong_count
     else
-      @summary[:freq_wrong_questions] = @guidance_quiz.mcq_answers
-                                                      .select("assessment_answers.question_id as qid, COUNT(*) as count")
-                                                      .where("assessment_answers.correct = ?",@choose_correct)
-                                                      .group("qid")
-                                                      .order("count DESC")
-                                                      .limit(@freq_wrong_count)
+      @choose_correct = "avg_page_left"
+      @summary[:freq_wrong_questions] = get_freq_answers_feedback_both @chosen_concept, 
+                                                                       @tag, 
+                                                                       "avg_page_left_sum DESC",
+                                                                       @freq_wrong_count
     end
 
-    @tags = @course.tags
     @concepts = @course.topicconcepts.concepts
+    @tags = @course.tags
+  end
+
+  def get_freq_answers_feedback_correct_wrong chosen_concept, tag, choice, limit
+    if chosen_concept and tag
+      tag_mcq_answers = tag.mcq_answers
+      combined_mcq_answers = chosen_concept.mcq_answers
+                                           .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                    choice,
+                                    combined_mcq_answers)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    elsif chosen_concept
+      concept_mcq_answers = chosen_concept.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                    choice,
+                                    concept_mcq_answers)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    elsif tag
+      tag_mcq_answers = tag.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ? and assessment_mcq_answers.id in (?)",
+                                    choice,
+                                    tag_mcq_answers)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    else
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count")
+                             .where("assessment_answers.correct = ?", choice)
+                             .group("qid")
+                             .order("count DESC")
+                             .limit(limit)
+    end
+
+    result
+  end
+
+  def get_freq_answers_feedback_both chosen_concept, tag, order_query_string, limit
+    if chosen_concept and tag
+      tag_mcq_answers = tag.mcq_answers
+      combined_mcq_answers = chosen_concept.mcq_answers
+                                           .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .where("assessment_mcq_answers.id in (?)",
+                                    combined_mcq_answers)
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    elsif chosen_concept
+      concept_mcq_answers = chosen_concept.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .where("assessment_mcq_answers.id in (?)",
+                                    concept_mcq_answers)
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    elsif tag
+      tag_mcq_answers = tag.mcq_answers
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .where("assessment_mcq_answers.id in (?)",
+                                    tag_mcq_answers)
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    else
+      result = @guidance_quiz.mcq_answers
+                             .select("assessment_answers.question_id as qid, "\
+                                     "SUM(assessment_mcq_answers.seconds_to_complete) as seconds_sum, "\
+                                     "SUM(assessment_mcq_answers.page_left_count) as page_left_sum, "\
+                                     "COUNT(*) as count, "\
+                                     "100 * SUM(assessment_mcq_answers.seconds_to_complete) DIV COUNT(*) as avg_seconds_sum, "\
+                                     "100 * SUM(assessment_mcq_answers.page_left_count) DIV COUNT(*) as avg_page_left_sum")
+                             .group("qid")
+                             .order(order_query_string)
+                             .limit(limit)
+    end
+
+    result
   end
 
   def diagnostic_exploration
@@ -544,6 +689,20 @@ class TopicconceptsController < ApplicationController
     end
   end
 
+  def get_enabled_concepts_list_with_id
+    concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
+                           .concepts
+                           .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+
+    #Additional "All" parameter added
+    concepts_parsed = concepts.map { |c| { id: c.id, name: c.name}}
+    concepts_parsed << {id: "nil", name: "All"}
+
+    respond_to do |format|
+      format.json { render json: concepts_parsed }      
+    end
+  end
+
   def get_concept_edges_list_with_id
     concepts = @course.topicconcepts.concepts
     concept_edges = []
@@ -679,6 +838,14 @@ class TopicconceptsController < ApplicationController
       result[:raw_total] = raw_total
       result[:raw_percent] = get_percentage_string raw_right, raw_total 
 
+      summed_units = @topicconcept.concept_stages
+                                  .select("SUM(assessment_guidance_concept_stages.total_page_left_count) as page_left_sum, "\
+                                          "SUM(assessment_guidance_concept_stages.seconds_to_complete) as seconds_sum")
+                                  .first 
+      result[:page_left_sum] = summed_units.page_left_sum
+      result[:seconds_sum] = summed_units.seconds_sum
+      result[:cats] =summed_units
+
       stroke_color = get_red_green_color raw_right, raw_total, 0, 140    
       result[:stroke] = "rgb("+ stroke_color[:red] +", "+ stroke_color[:green] +", 0)"
       fill_color = get_red_green_color raw_right, raw_total, 200, 55
@@ -688,6 +855,8 @@ class TopicconceptsController < ApplicationController
       result[:raw_right] = "nil"
       result[:raw_total] = "nil"
       result[:raw_percent] = "nil"
+      result[:page_left_sum] = "nil"
+      result[:seconds_sum] = "nil"
       result[:stroke] = "rgb(70, 70, 0)"
       result[:fill] = "rgb(227, 227, 200)"
     end
@@ -782,15 +951,12 @@ class TopicconceptsController < ApplicationController
     end
 
     concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
-    #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * -100 / (cs.total_right + cs.total_wrong) }
-    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, right: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_right, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
+    unattempted_weight = @guidance_quiz.feedback_best_unattempted_weight
+    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, right: (cs.total_right + cs.total_wrong) == 0 ? unattempted_weight : cs.total_right, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
 
     respond_to do |format|
       format.json { render json: rehashed_stages.map{|cs| {label: cs[:concept].name, value: cs[:right] * 100 / cs[:total] }}}
     end
-    #respond_to do |format|
-    #  format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_right * 100 / (cs.total_right + cs.total_wrong) }}}
-    #end
   end
 
   def get_topicconcept_notbest_concepts
@@ -801,15 +967,12 @@ class TopicconceptsController < ApplicationController
     end
 
     concept_stages = Assessment::GuidanceConceptStage.get_stages @submission
-    #concept_stages.sort_by{|cs| (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * -100 / (cs.total_right + cs.total_wrong) }
-    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, wrong: (cs.total_right + cs.total_wrong) == 0 ? 1 : cs.total_wrong, total: (cs.total_right + cs.total_wrong) == 0 ? 2 : (cs.total_right + cs.total_wrong)} }
+    unattempted_weight = @guidance_quiz.feedback_notbest_unattempted_weight
+    rehashed_stages = concept_stages.map{|cs| {concept: cs.concept, wrong: (cs.total_right + cs.total_wrong) == 0 ? unattempted_weight : cs.total_wrong, total: (cs.total_right + cs.total_wrong) == 0 ? 100 : (cs.total_right + cs.total_wrong)} }
 
     respond_to do |format|
       format.json { render json: rehashed_stages.map{|cs| {label: cs[:concept].name, value: cs[:wrong] * 100 / cs[:total] }}}
     end
-    #respond_to do |format|
-    #  format.json { render json: concept_stages.map{|cs| {label: cs.concept.name, value: (cs.total_right + cs.total_wrong) == 0 ? 0 : cs.total_wrong * 100 / (cs.total_right + cs.total_wrong) }}}
-    #end
   end
 
   def get_topicconcept_weights
@@ -843,9 +1006,8 @@ class TopicconceptsController < ApplicationController
   end
 
   def get_topicconcept_area
-    enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
-                                   .concepts
-                                   .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+    enabled_concepts = retrieve_concept_list_from_params params, "concepts", 10
+  
     #Get accumulative boolean parameter
     if params.has_key?("accumulative")
       accumulative = params[:accumulative].to_s == "true"
@@ -864,7 +1026,7 @@ class TopicconceptsController < ApplicationController
     if params.has_key?("start_period")
       start_date = Time.parse(params[:start_period])
     else
-      start_date = Time.now - 1.months
+      start_date = Time.now - 1.month
     end
 
     #Get end period date parameter
@@ -875,8 +1037,8 @@ class TopicconceptsController < ApplicationController
     end
 
     #Get tag type
-    if params.has_key?("tag_id") and params[:"tag_id"] != "nil"
-      tag = @course.tags.where(id: params[:"tag_id"]).first
+    if params.has_key?("tag_id") and params["tag_id"] != "nil"
+      tag = @course.tags.where(id: params["tag_id"]).first
     else
       tag = nil
     end
@@ -956,6 +1118,71 @@ class TopicconceptsController < ApplicationController
           start_period: params[:start_period],
           end_period: params[:end_period],
           time_step: params[:time_step],
+          current_tag: tag,
+          tags: @course.tags
+        }
+      } 
+    end
+  end
+
+  def get_topicconcept_track_scatter
+    #Get start period date parameter
+    if params.has_key?("start_period")
+      start_date = Time.parse(params[:start_period])
+    else
+      start_date = Time.now - 1.month
+    end
+    #Get end period date parameter
+    if params.has_key?("end_period")
+      end_date = Time.parse(params[:end_period])
+    else
+      end_date = Time.now
+    end
+
+    #Retrieve all concepts indicated
+    concepts = retrieve_concept_list_from_params params, "concepts", 1
+
+    tabulated_concept_answers = []
+    #Get tag type
+    if params.has_key?("tag_id") and params[:"tag_id"] != "nil"
+      tag = @course.tags.where(id: params[:"tag_id"]).first
+      tag_mcq_answers = tag.mcq_answers
+      concepts.each do |concept|
+        concept_mcq_answers = concept.mcq_answers
+                                     .where("assessment_mcq_answers.id in (?)", tag_mcq_answers)
+        answer = @guidance_quiz.mcq_answers
+                               .select("assessment_answers.question_id as qid, "\
+                                       "assessment_mcq_answers.seconds_to_complete as seconds, "\
+                                       "assessment_mcq_answers.page_left_count as page_left")
+                               .where("assessment_mcq_answers.id in (?) and assessment_answers.updated_at <= ? and assessment_answers.updated_at >= ? ",
+                                      concept_mcq_answers, end_date, start_date)
+
+        tabulated_concept_answers << { name: concept.name, answers: answer }  
+      end
+    else
+      concepts.each do |concept|
+        concept_mcq_answers = concept.mcq_answers
+        answer = @guidance_quiz.mcq_answers
+                               .select("assessment_mcq_answers.seconds_to_complete as seconds, "\
+                                       "assessment_mcq_answers.page_left_count as page_left")
+                               .where("assessment_mcq_answers.id in (?) and assessment_answers.updated_at <= ? and assessment_answers.updated_at >= ? ",
+                                      concept_mcq_answers, end_date, start_date)
+
+        tabulated_concept_answers << { name: concept.name, answers: answer }  
+      end
+    end
+
+    respond_to do |format|
+      format.json { 
+        render json: {
+          data: tabulated_concept_answers
+        }
+      }
+      format.html {
+        render locals: {
+          data: tabulated_concept_answers,         
+          start_period: params[:start_period],
+          end_period: params[:end_period],
           current_tag: tag,
           tags: @course.tags
         }
@@ -1099,6 +1326,35 @@ private
     end
 
     result
+  end
+
+  #Retrieve list of concepts from ids in POST parameters
+  # If no ids found, retrieve top amount of concepts found for
+  # alternate size
+  def retrieve_concept_list_from_params params, key, alternate_size
+    concept_ids = []
+    if params.has_key?(key)
+      concept_ids = JSON.parse(params[key]).map { |fc| fc["id"] }
+      get_all_concepts = false
+      concept_ids.each do |concept_id|
+        if concept_id == "nil"
+          get_all_concepts = true
+          break
+        end
+      end
+    end
+
+    if get_all_concepts
+      concepts = @course.topicconcepts.concepts
+    elsif concept_ids.size > 0
+      concepts = @course.topicconcepts.concepts.where(id: concept_ids)
+    elsif alternate_size > 0
+      concepts = @course.topicconcepts.concepts.limit(alternate_size)
+    else
+      concepts = []
+    end
+
+    concepts
   end
 
   def authorize_and_load_guidance_quiz

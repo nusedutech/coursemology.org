@@ -1,4 +1,5 @@
 class Assessment::QuestionsController < ApplicationController
+  require 'mysql2'
   load_and_authorize_resource :course
   load_resource :assessment, through: :course
 
@@ -9,7 +10,7 @@ class Assessment::QuestionsController < ApplicationController
   def index
     authorize! :manage, Course
     filter = params[:tags]
-    search_string = params[:search_string].nil? ? "" : params[:search_string]
+    search_string = params[:search_string].nil? ? "" : Mysql2::Client.escape(params[:search_string])
 
     #TODO: refactoring using query join
     if (!filter.nil? && !filter.empty?)
@@ -22,14 +23,16 @@ class Assessment::QuestionsController < ApplicationController
         #find in tag
         tag_query_string = ""
         filter_tags.each do |t|
-          tag_query_string += tag_query_string.empty? ? "tags.name = '#{t}'" : " or tags.name = '#{t}'"
+          t_escape = Mysql2::Client.escape(t)
+          tag_query_string += tag_query_string.empty? ? "tags.name = '#{t_escape}'" : " or tags.name = '#{t_escape}'"
         end
         selected_tags =  @course.tags.where(tag_query_string)
 
         #find in concept
         topicconcepts_query_string = ""
         filter_tags.each do |t|
-          topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
+          t_escape = Mysql2::Client.escape(t)
+          topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t_escape}'" : " or topicconcepts.name = '#{t_escape}'"
         end
         selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
 
@@ -61,8 +64,7 @@ class Assessment::QuestionsController < ApplicationController
     authorize! :manage, Course
 
     filter = params[:tags]
-    search_string = ""
-    search_string = params[:search_string]
+    search_string = params[:search_string].nil? ? "" : Mysql2::Client.escape(params[:search_string])
     query_string = "assessment_questions.title like '%#{search_string}%' or assessment_questions.description like '%#{search_string}%'"
 
     questions = []
@@ -84,13 +86,15 @@ class Assessment::QuestionsController < ApplicationController
 
           tag_query_string = ""
           filter_tags.each do |t|
-            tag_query_string += tag_query_string.empty? ? "tags.name = '#{t}'" : " or tags.name = '#{t}'"
+          	t_escape = Mysql2::Client.escape(t)
+            tag_query_string += tag_query_string.empty? ? "tags.name = '#{t_escape}'" : " or tags.name = '#{t_escape}'"
           end
           selected_tags =  @course.tags.where(tag_query_string)
 
           topicconcepts_query_string = ""
           filter_tags.each do |t|
-            topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t}'" : " or topicconcepts.name = '#{t}'"
+          	t_escape = Mysql2::Client.escape(t)
+            topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t_escape}'" : " or topicconcepts.name = '#{t_escape}'"
           end
           selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
 

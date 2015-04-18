@@ -10,6 +10,10 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   before_filter :set_topicconcept_updated_timing, only: [:set_concept_edge_relation, :set_concept_edges_relation, :set_concept_criteria, :set_concepts_criteria]
 
+  TOPIC_PASSED_STATUS = "passed"
+  TOPIC_NONE_STATUS = "none"
+  TOPIC_FAILED_STATUS = "failed"
+
   #Only one guidance assessment per course, hence 
   #we use a collection method to constantly access it
   def set_enabled
@@ -24,6 +28,25 @@ class Assessment::GuidanceQuizzesController < ApplicationController
     respond_to do |format| 
       format.json { render json: { result: true}}
     end
+  end
+
+  def set_feedback_data
+    if params.has_key?("best_unattempted_weight") and
+       params.has_key?("notbest_unattempted_weight") and
+       integer_check params["best_unattempted_weight"] and
+       integer_check params["notbest_unattempted_weight"] and
+       params["best_unattempted_weight"].to_i >= 0 and
+       params["best_unattempted_weight"].to_i <= 100 and
+       params["notbest_unattempted_weight"].to_i >= 0 and
+       params["notbest_unattempted_weight"].to_i <= 100
+
+      Assessment::GuidanceQuiz.set_feedback_controls @course,
+                                                     params.has_key?("show_scoreboard"),
+                                                     params["best_unattempted_weight"].to_i,
+                                                     params["notbest_unattempted_weight"].to_i
+    end
+
+    redirect_to course_preferences_path(@course)+"?_tab=topicconcept"
   end
 
   def set_passing_edge_lock
@@ -296,6 +319,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   def get_topicconcept_data_history
     respond_to do |format|
+      @submission = load_and_authorize_submission_with_id params[:submission_id]
       @topics_concepts_with_info = []
       get_topic_tree(nil, Topicconcept.where(:course_id => @course.id, :typename => 'topic'))       
       @topics_concepts_with_info = @topics_concepts_with_info.uniq.sort_by{|e| e[:itc].rank}
@@ -303,8 +327,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
       @concepts = @course.topicconcepts.concepts
       @concept_edges = ConceptEdge.joins("INNER JOIN topicconcepts ON topicconcepts.id = concept_edges.dependent_id").where(:topicconcepts => {:course_id => @course.id})
       
-      submission = load_and_authorize_submission_with_id params[:submission_id]
-      submission_valid = !submission.nil?
+      submission_valid = !@submission.nil?
       result =  { 
                   topictrees: @topics_concepts_with_info, 
                   submission: submission_valid
@@ -312,7 +335,7 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
       #Retrieve more information if has valid submission
       if submission_valid 
-        result.merge!(get_guidance_quiz_submission_data submission)
+        result.merge!(get_guidance_quiz_submission_data @submission)
         afflictedNodes = result[:openAtmNodes] + result[:failedNodes] + [result[:lastAtmNode]]
         @concepts = @concepts - afflictedNodes
         afflictedEdges = result[:openAtmEdges] + result[:failedEdges]
@@ -455,6 +478,11 @@ class Assessment::GuidanceQuizzesController < ApplicationController
 
   #Get scoreboard data across students attempting submissions
   def get_scoreboard_data
+    unless @guidance_quiz.feedback_show_scoreboard
+      respond_to do |format|
+        format.json { render json: { access_denied: "Scoreboard not enabled!" } }
+      end
+    end
 
     score_data = @guidance_quiz.submissions
                                .attempting_format
@@ -655,15 +683,35 @@ class Assessment::GuidanceQuizzesController < ApplicationController
   end
 
   def get_topic_tree(parent ,included_topicconcepts)
-    included_topicconcepts.each do |itc|      
+    #Default is passed - will check to reach none or failed status
+    parent_status = TOPIC_PASSED_STATUS
+
+    included_topicconcepts.each do |itc|  
+      if !itc.included_topicconcepts.empty?
+        #Status is dependent on collective children status
+        status = get_topic_tree(itc, itc.included_topicconcepts)
+        parent_status = status === TOPIC_PASSED_STATUS ? parent_status : TOPIC_NONE_STATUS
+      elsif itc.is_concept? and !@submission.nil?
+        concept_stage = Assessment::GuidanceConceptStage.get_stage @submission, itc
+        if concept_stage.nil?
+          parent_status = status = TOPIC_NONE_STATUS
+        else        
+          status = concept_stage.failed ? TOPIC_FAILED_STATUS : TOPIC_PASSED_STATUS
+          #parent status to be none the moment one concept is failed
+          parent_status = concept_stage.failed ? TOPIC_NONE_STATUS : parent_status
+        end
+      else
+        #Status is passed (Since no failing child)
+        status = TOPIC_PASSED_STATUS
+      end
       @topics_concepts_with_info << {
         itc: itc,
-        parent: parent
+        parent: parent,
+        status: status
       }
-      if !itc.included_topicconcepts.empty?
-        get_topic_tree(itc, itc.included_topicconcepts)
-      end
     end
+
+    parent_status
   end
 
   #Get passing criteria for an edge

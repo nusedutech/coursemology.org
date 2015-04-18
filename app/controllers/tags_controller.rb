@@ -5,7 +5,7 @@ class TagsController < ApplicationController
   before_filter :load_general_course_data, only: [:new, :edit, :create, :show, :index]
 
   def new
-    @tag_groups = @course.tag_groups - @course.tag_groups.where(:name => 'Difficulty')
+    @tag_groups = @course.tag_groups
   end
 
   def create
@@ -22,7 +22,7 @@ class TagsController < ApplicationController
   end
 
   def edit
-    @tag_groups = @course.tag_groups - @course.tag_groups.where(:name => 'Difficulty')
+    @tag_groups = @course.tag_groups
   end
 
   def update

@@ -152,6 +152,7 @@ Coursemology::Application.routes.draw do
           post :edit, to: 'guidance_quiz_submissions#edit'
           get  :submit, to: 'guidance_quiz_submissions#submit'
           post :set_tag_to_stage, to: 'guidance_quiz_submissions#set_tag_to_stage'
+          post :page_lost_focus, to: 'guidance_quiz_submissions#page_lost_focus'
         end
       end
 
@@ -211,6 +212,7 @@ Coursemology::Application.routes.draw do
     resources :assessment_guidance_quizzes, path: 'guidance_quizzes', controller: :guidance_quizzes, module: :assessment do
       collection do
         post :set_enabled, to: 'guidance_quizzes#set_enabled'
+        post :set_feedback_data, to: 'guidance_quizzes#set_feedback_data'
         post :set_passing_edge_lock, to: 'guidance_quizzes#set_passing_edge_lock'
         post :set_neighbour_entry_lock, to: 'guidance_quizzes#set_neighbour_entry_lock'
 
@@ -298,6 +300,7 @@ Coursemology::Application.routes.draw do
         post 'topic_concept_data_dependency', :on => :collection
         post 'get_concepts_list', :on => :collection
         post 'get_concepts_list_with_id', :on => :collection
+        post 'get_enabled_concepts_list_with_id', :on => :collection
         post 'get_concept_edges_list_with_id', on: :collection
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection
@@ -307,6 +310,7 @@ Coursemology::Application.routes.draw do
         post 'review_diagnostic_exploration_on_stage', :on => :collection
         get 'individual_submissions', :on => :collection
         get :feedback, on: :collection, to: 'topicconcepts#get_quiz_feedback'
+        post :get_freq_answers_feedback, on: :collection, to: 'topicconcepts#get_freq_answers_feedback'
 
         post 'submit_answer', :on => :collection
         get 'ivleapi'
@@ -319,6 +323,7 @@ Coursemology::Application.routes.draw do
         post 'get_topicconcept_notbest_concepts', :on => :collection
         post 'get_topicconcept_weights', :on => :collection
         post 'get_topicconcept_area', :on => :collection
+        post 'get_topicconcept_track_scatter', :on => :collection
         get :get_progress_bar_info, :on => :collection       
     end
     

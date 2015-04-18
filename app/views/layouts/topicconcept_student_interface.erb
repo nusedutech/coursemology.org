@@ -78,6 +78,13 @@
       <%= yield %>
     </div>
 <% end %>
+
+<div class="topicconcept-loading-modal hide fade" id="processing-halt-all" data-backdrop="static" data-keyboard="true">
+  <h1 id="processing-halt-all-message">Processing.... Please wait</h1>
+  <div class="processing-ball"></div>
+  <div class="inner-processing-ball"></div>
+</div>
+
 <footer class="compress">
   <hr/>
   <div class="navbar-bottom">

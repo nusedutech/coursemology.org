@@ -76,7 +76,7 @@
         {
             plugins : 'prompt focus arrow autocomplete tags ajax filter',
             ajax : {
-                url : '<%= get_concepts_list_with_id_course_topicconcepts_path(@course)%>',
+                url : '<%= get_enabled_concepts_list_with_id_course_topicconcepts_path(@course)%>',
                 type: "POST",
                 async: false,
                 dataType : 'json',

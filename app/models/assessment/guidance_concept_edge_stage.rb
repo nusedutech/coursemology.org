@@ -98,7 +98,10 @@ class Assessment::GuidanceConceptEdgeStage < ActiveRecord::Base
       if dependent_concept_stage.nil?
         cascade_unlock_loop submission, self.concept_edge.dependent_concept
       else
-        Assessment::GuidanceConceptStage.cascade_delete_loop submission, dependent_concept_stage
+      	required_concept_edges = dependent_concept.concept_edge_required_concepts
+      	if !(Assessment::GuidanceConceptEdgeStage.concept_edges_check_all_criteria submission, required_concept_edges)
+          Assessment::GuidanceConceptStage.cascade_delete_loop submission, dependent_concept_stage
+       	end
       end
     #If fail, just send for delete
     else

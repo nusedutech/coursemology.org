@@ -689,6 +689,20 @@ class TopicconceptsController < ApplicationController
     end
   end
 
+  def get_enabled_concepts_list_with_id
+    concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
+                           .concepts
+                           .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+
+    #Additional "All" parameter added
+    concepts_parsed = concepts.map { |c| { id: c.id, name: c.name}}
+    concepts_parsed << {id: "nil", name: "All"}
+
+    respond_to do |format|
+      format.json { render json: concepts_parsed }      
+    end
+  end
+
   def get_concept_edges_list_with_id
     concepts = @course.topicconcepts.concepts
     concept_edges = []
@@ -992,9 +1006,8 @@ class TopicconceptsController < ApplicationController
   end
 
   def get_topicconcept_area
-    enabled_concepts = Topicconcept.joins("INNER JOIN assessment_guidance_concept_options ON assessment_guidance_concept_options.topicconcept_id = topicconcepts.id")
-                                   .concepts
-                                   .where(topicconcepts: {course_id: @course.id}, assessment_guidance_concept_options: {enabled: true})
+    enabled_concepts = retrieve_concept_list_from_params params, "concepts", 10
+  
     #Get accumulative boolean parameter
     if params.has_key?("accumulative")
       accumulative = params[:accumulative].to_s == "true"
@@ -1127,30 +1140,7 @@ class TopicconceptsController < ApplicationController
     end
 
     #Retrieve all concepts indicated
-    concept_ids = []
-    if params.has_key?(:concepts)
-      concept_ids = JSON.parse(params[:concepts]).map { |tag| tag["id"] }
-      get_all_concepts = false
-      concept_ids.each do |concept_id|
-        if concept_id == "nil"
-          get_all_concepts = true
-          break
-        end
-      end
-    end
-
-    if get_all_concepts
-      concepts = @course.topicconcepts.concepts
-    elsif concept_ids.size == 0
-      first_concept = @course.topicconcepts.concepts.first
-      if first_concept.nil?
-        concepts = []
-      else
-        concepts = [@course.topicconcepts.concepts.first]
-      end
-    else
-      concepts = @course.topicconcepts.concepts.where(id: concept_ids)
-    end
+    concepts = retrieve_concept_list_from_params params, "concepts", 1
 
     tabulated_concept_answers = []
     #Get tag type
@@ -1336,6 +1326,35 @@ private
     end
 
     result
+  end
+
+  #Retrieve list of concepts from ids in POST parameters
+  # If no ids found, retrieve top amount of concepts found for
+  # alternate size
+  def retrieve_concept_list_from_params params, key, alternate_size
+    concept_ids = []
+    if params.has_key?(key)
+      concept_ids = JSON.parse(params[key]).map { |fc| fc["id"] }
+      get_all_concepts = false
+      concept_ids.each do |concept_id|
+        if concept_id == "nil"
+          get_all_concepts = true
+          break
+        end
+      end
+    end
+
+    if get_all_concepts
+      concepts = @course.topicconcepts.concepts
+    elsif concept_ids.size > 0
+      concepts = @course.topicconcepts.concepts.where(id: concept_ids)
+    elsif alternate_size > 0
+      concepts = @course.topicconcepts.concepts.limit(alternate_size)
+    else
+      concepts = []
+    end
+
+    concepts
   end
 
   def authorize_and_load_guidance_quiz

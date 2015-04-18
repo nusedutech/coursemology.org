@@ -300,6 +300,7 @@ Coursemology::Application.routes.draw do
         post 'topic_concept_data_dependency', :on => :collection
         post 'get_concepts_list', :on => :collection
         post 'get_concepts_list_with_id', :on => :collection
+        post 'get_enabled_concepts_list_with_id', :on => :collection
         post 'get_concept_edges_list_with_id', on: :collection
         post 'get_concept_required_edges', :on => :collection
         post 'topic_concept_data_save_dependency', :on => :collection

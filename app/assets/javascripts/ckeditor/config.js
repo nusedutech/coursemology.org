@@ -1,6 +1,6 @@
 CKEDITOR.editorConfig = function (config) {
 
-    config.extraPlugins = 'eqneditor';
+    config.extraPlugins = 'eqneditor,confighelper,lineutils,widget,mathjax';
 
     // Define changes to default configuration here. For example:
     // config.language = 'fr';
@@ -81,8 +81,30 @@ CKEDITOR.editorConfig = function (config) {
         { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] }
     ];
     config.toolbar_mini = [
-        ["Bold",  "Italic",  "Underline",  "Strike",  "-",'Styles', 'Format', 'Font', 'FontSize',  "-", 'TextColor', 'BGColor',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar', "EqnEditor"],
+        ["Bold",  "Italic",  "Underline",  "Strike", "-", 'TextColor', 'BGColor',  "-",'NumberedList', 'BulletedList', 'Font', 'FontSize','Table',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar', "EqnEditor","Mathjax","-",'Source'],
     ];
 
+    config.toolbar = "xs_mini";
+    config.toolbar_xs_mini = [
+        ['Font', 'FontSize', "EqnEditor","Mathjax"]
+    ];
+
+    /*
+    config.font_style = {
+        element: 'span',
+        styles: { 'font-family': '#(Times New Roman)' },
+        overrides: [ {
+            element: 'font', attributes: { 'face': null }
+        } ]
+    };
+
+    config.fontSize_style = {
+        element: 'span',
+        styles: { 'font-size': '#(16)' },
+        overrides: [ {
+            element: 'font', attributes: { 'size': null }
+        } ]
+    };
+    */
 }
 

@@ -60,6 +60,10 @@
       .voting {
         font-size: 130%;
       }
+
+      .voted {
+        color: #0D4C6C;
+      }
     }
 
     .contents.answer {
@@ -101,4 +105,6 @@
   .unread-post {
     background-color: #f8e3e3;
   }
+
+
 }

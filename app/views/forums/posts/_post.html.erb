@@ -64,20 +64,22 @@
             <% end %>
         <% end %>
         <% votes = post.upvotes.size - post.downvotes.size %>
-        <% if not current_user.voted_for? post %>
+        <% if not current_user.voted_down_for? post %>
             <%= link_to course_forum_topic_post_vote_path(@course, post.topic.forum, post.topic, post, vote: -1), method: :put, rel: 'tooltip', title: 'Downvote' do %>
                 <i class="icon-thumbs-down"></i>
             <% end %>
-            <span class="muted"><%= votes %></span>
+        <% else %>
+            <%= link_to course_forum_topic_post_vote_path(@course, post.topic.forum, post.topic, post, vote: 0), method: :put, rel: 'tooltip', title: 'Undownvote', class: 'voted' do %>
+                <i class="icon-thumbs-down"></i>
+            <% end %>
+        <% end %>
+        <span class="muted"><%= votes %></span>
+        <% if not current_user.voted_up_for? post %>
             <%= link_to course_forum_topic_post_vote_path(@course, post.topic.forum, post.topic, post, vote: 1), method: :put, rel: 'tooltip', title: 'Upvote' do %>
                 <i class="icon-thumbs-up"></i>
             <% end %>
         <% else %>
-            <%= link_to course_forum_topic_post_vote_path(@course, post.topic.forum, post.topic, post, vote: 0), method: :put, rel: 'tooltip', title: 'Downvote' do %>
-                <i class="icon-thumbs-down"></i>
-            <% end %>
-            <strong><%= votes %></strong>
-            <%= link_to course_forum_topic_post_vote_path(@course, post.topic.forum, post.topic, post, vote: 0), method: :put, rel: 'tooltip', title: 'Upvote' do %>
+            <%= link_to course_forum_topic_post_vote_path(@course, post.topic.forum, post.topic, post, vote: 0), method: :put, rel: 'tooltip', title: 'Unupvote', class: 'voted' do %>
                 <i class="icon-thumbs-up"></i>
             <% end %>
         <% end %>

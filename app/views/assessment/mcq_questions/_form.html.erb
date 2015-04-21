@@ -5,8 +5,8 @@
     <% if !@parent_mpq_question.nil? %>
         <input type="hidden" name="parent_mpq_question" value="<%= @parent_mpq_question.id %>" />
     <% end %>
-    <%= f.input :description, :as => :ckeditor, :input_html => { :ckeditor => {:toolbar => 'mini'} } %>
-    <%#= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
+    <%#= f.input :description, :as => :ckeditor, :input_html => { :ckeditor => {:toolbar => 'mini'} } %>
+    <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
     <%= f.input :max_grade, as: :integer, input_html: {class: "number_field input-mini"} %>
     <%#= f.input :tags, as: :tag, url: course_tags_path, input_html: {class: "span7"}  %>
 
@@ -55,8 +55,16 @@
                 <td><input type="checkbox" name="options[<%= i %>][correct]" value="true"
                            <%= 'checked' if opt.correct %> />
                 </td>
+
+                <td>
+                  <textarea name="options[<%= i %>][text]" placeholder="Answer..." /><%= opt.text %></textarea>
+                  <textarea name="options[<%= i %>][explanation]" placeholder="Explanation..." /><%= opt.explanation %></textarea>
+                </td>
+
+                <!--
                 <td><%= cktext_area "options["+i.to_s+"]", :text, :value => opt.text, :cols => 30, :ckeditor => {:placeholder => "Answer...",:toolbar => 'xs_mini'} %></td>
                 <td><%= cktext_area "options["+i.to_s+"]", :explanation, :value => opt.explanation, :cols => 30, :ckeditor => {:placeholder => "Explanation...",:toolbar => 'xs_mini'} %></td>
+                -->
               </tr>
           <% end %>
           <% if @question.options.size < 4 %>
@@ -64,13 +72,20 @@
                   <% i += 1 %>
                   <tr>
                     <td><input name="options[<%= i %>][correct]" type="checkbox" /></td>
+                    <td>
+                      <textarea name="options[<%= i %>][text]" placeholder="Answer..." /></textarea>
+                      <textarea name="options[<%= i %>][explanation]" placeholder="Explanation..." /></textarea>
+                    </td>
+                    <!--
                     <td><%= cktext_area "options["+i.to_s+"]", :text, :cols => 30, :ckeditor => {:placeholder => "Answer...",:toolbar => 'xs_mini'} %></td>
                     <td><%= cktext_area "options["+i.to_s+"]", :explanation, :cols => 30, :ckeditor => {:placeholder => "Explanation...",:toolbar => 'xs_mini'} %></td>
+                    -->
                   </tr>
               <% end %>
 
           <% end %>
-          <tr><td></td><td><a href='#' class="add-mcq-option">Add more choices</a></td><td></td></tr>
+          <tr><td></td><td><a href='#' class="add-mcq-option">Add more choices</a></td></tr>
+          <!--<tr><td></td><td><a href='#' class="add-mcq-option">Add more choices</a></td><td></td></tr> -->
           </tbody>
         </table>
       </div>

@@ -86,7 +86,7 @@ CKEDITOR.editorConfig = function (config) {
 
     config.toolbar = "xs_mini";
     config.toolbar_xs_mini = [
-        ['Font', 'FontSize', "EqnEditor","Mathjax"]
+        ['Font', 'FontSize', "EqnEditor","Mathjax",'Source']
     ];
 
     /*

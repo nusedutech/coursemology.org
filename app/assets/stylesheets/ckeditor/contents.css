@@ -133,7 +133,7 @@ figure > figcaption
     display: block; /* For IE8 */
 }
 
-a > img {
+.cke_editable a > img {
     padding: 1px;
     margin: 1px;
     border: none;

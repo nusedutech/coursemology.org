@@ -45,43 +45,44 @@
               <% end %>
         <% end %>
       <% else %>
-          <a class="lesson-plan-anchor" name="entry-<%= entry.id %>"></a>
-          <h2>
-            <% if (cannot? :manage, LessonPlanEntry) %>
-               <%= link_to "",:id => "entity-#{entry.id}" , :class => "btn_entry" do %>
-                    <span class="entry_title"><%= entry.title %></span>
-                    <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
-                    <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
-                    <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
-                    <input type="hidden" class="entry_location" value="<%= entry.location  %>">
-                    <span class="entry_start_end" style="display: none">
-                      <% if entry.start_at %>
-                        <span class="icon-calendar"></span>
-                        <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
-                          <% if entry.end_at %> to
-                            <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
-                              <%= entry.end_at.strftime("%I:%M %p") %>
-                            <% else %>
-                              <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
-                            <% end %>
-                          <% end %>
+        <a class="lesson-plan-anchor" name="entry-<%= entry.id %>"></a>
+        <% if (cannot? :manage, LessonPlanEntry) %>
+           <%= link_to "",:id => "entity-#{entry.id}" , :class => "btn_entry" do %>
+              <h2><span class="entry_title"><%= entry.title %></span></h2>
+                <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
+                <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
+                <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
+                <input type="hidden" class="entry_location" value="<%= entry.location  %>">
+                <span class="entry_start_end" style="display: none">
+                  <% if entry.start_at %>
+                    <span class="icon-calendar"></span>
+                    <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                      <% if entry.end_at %> to
+                        <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
+                          <%= entry.end_at.strftime("%I:%M %p") %>
+                        <% else %>
+                          <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
                         <% end %>
-                    </span>
-               <% end %>
-               <div class="discussion" style="display: none">
-                    <%= render partial: 'forums/topics/discussion', locals: { owner: entry, title: (entry.entry_real_type + ' ' + entry.title)} %>
-               </div>
+                      <% end %>
+                    <% end %>
+                </span>
+           <% end %>
+           <div class="discussion" style="display: none">
+                <%= render partial: 'forums/topics/discussion', locals: { owner: entry, title: (entry.entry_real_type + ' ' + entry.title)} %>
+           </div>
+        <% else %>
+            <%if entry.entry_type === 3%>
+                <h2><a href="<%= entry.location %>"><%= entry.title %></a></h2>
+                <video class="video-js vjs-default-skin" controls width="480" height="320" data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
+                  <source src="<%= entry.location%>" type='video/mp4'>
+                </video>
             <% else %>
-                <%= entry.title %>
+                <h2><%= entry.title %></h2>
+                <h3><%= entry.location %></h3>
             <% end %>
-          </h2>
+        <% end %>
       <% end %>
       <% if (can? :manage, LessonPlanEntry) %>
-          <%if entry.entry_type === 3%>
-              <a href="<%= entry.location %>"><%= entry.location %></a>
-          <% else %>
-              <h3><%= entry.location %></h3>
-          <% end %>
           <h4>
             <% if entry.start_at %>
               <span class="icon-calendar"></span>

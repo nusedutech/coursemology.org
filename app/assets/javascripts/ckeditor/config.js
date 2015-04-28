@@ -81,12 +81,12 @@ CKEDITOR.editorConfig = function (config) {
         { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] }
     ];
     config.toolbar_mini = [
-        ["Bold",  "Italic",  "Underline",  "Strike", "-", 'TextColor', 'BGColor',  "-",'NumberedList', 'BulletedList', 'Font', 'FontSize','Table',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar', "EqnEditor","Mathjax","-",'Source'],
+        ["Bold",  "Italic",  "Underline",  "Strike", "-", 'TextColor', 'BGColor',  "-",'NumberedList', 'BulletedList', 'Font', 'FontSize','Table',  "-",  "Subscript",  "Superscript","-",'Image', 'SpecialChar',"Mathjax","-",'Source'],/*"EqnEditor"*/
     ];
 
     config.toolbar = "xs_mini";
     config.toolbar_xs_mini = [
-        ['Font', 'FontSize', "EqnEditor","Mathjax",'Source']
+        ['Font', 'FontSize',"Mathjax",'Source']/*"EqnEditor"*/
     ];
 
     /*

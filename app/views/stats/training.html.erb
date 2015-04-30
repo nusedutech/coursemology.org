@@ -13,6 +13,12 @@
 <br/>
 
 <h3>Summary</h3>
+<div>
+  <%= link_to "Click here",
+              course_stats_training_excel_path(@course, @training, format: "xls"),
+              method: "GET" %>
+  to export the statistics in Excel format.
+</div>
 <table class="table table-bordered">
   <tr>
     <th width="15%">Current Step</th>

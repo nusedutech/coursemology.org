@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:html="http://www.w3.org/TR/REC-html40">
+
+  <% if @summary[:student_courses] %>
+
+      <Worksheet ss:Name="Submitted-Attempting">
+        <Table>
+          <Row>
+            <Cell><Data ss:Type="String">Student ID</Data></Cell>
+            <Cell><Data ss:Type="String">Name</Data></Cell>
+            <Cell><Data ss:Type="String">Status</Data></Cell>
+            <Cell><Data ss:Type="String">Grade</Data></Cell>
+          </Row>
+
+          <% @summary[:submissions].each do |sbm| %>
+              <Row>
+                <Cell><Data ss:Type="String"><%= sbm.std_course.user.id %></Data></Cell>
+                <Cell><Data ss:Type="String"><%= sbm.std_course.user.name %></Data></Cell>
+                <Cell><Data ss:Type="String"><%= sbm.status %></Data></Cell>
+                <Cell><Data ss:Type="String"><%= sbm.get_final_grading.grade %></Data></Cell>
+              </Row>
+          <% end %>
+
+        </Table>
+      </Worksheet>
+
+      <Worksheet ss:Name="Unsubmitted">
+        <Table>
+          <Row>
+            <Cell><Data ss:Type="String">Name</Data></Cell>
+            <Cell><Data ss:Type="String">Email</Data></Cell>
+          </Row>
+          <% @summary[:not_started].each do |std| %>
+              <Row>
+                <Cell><Data ss:Type="String"><%= std.name %></Data></Cell>
+                <Cell><Data ss:Type="String"><%= std.user.email %></Data></Cell>
+              </Row>
+          <% end %>
+        </Table>
+      </Worksheet>
+
+
+  <% end %>
+</Workbook>

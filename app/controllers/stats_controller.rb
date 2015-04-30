@@ -51,6 +51,48 @@ class StatsController < ApplicationController
 		@policy_missions = @course.policy_missions
   end
 
+  def training_export_excel
+    @training = Assessment::Training.find(params[:training_id])
+    authorize! :manage, @training
+
+    @summary = {}
+    is_all = ((params[:mode] != nil) && params[:mode] == "all") || (curr_user_course.std_courses.count == 0)
+    #puts is_all
+
+    #TODO: may want to deal with phantom students here
+    @summary[:all] = is_all
+    std_courses = is_all ? @course.student_courses : curr_user_course.std_courses
+    @summary[:student_courses] = std_courses
+
+    submissions =  @training.submissions.where(std_course_id: std_courses)
+    submitted = submissions.map { |sbm| sbm.std_course }
+
+    @summary[:not_started] = std_courses - submitted
+    @summary[:submissions] = submissions
+
+    respond_to do |format|
+      headers["Content-Disposition"] = "attachment; filename=\"Training #{@training.title}\""
+      headers["Content-Type"] = "xls"
+      format.xls
+    end
+    #sbms_by_grade = submissions.group_by { |sbm| sbm.get_final_grading.grade }
+    #@summary[:grade_chart] = produce_submission_graph(sbms_by_grade, 'Grade', 'Grade distribution')
+
+    #sbms_by_date = submissions.group_by { |sbm| sbm.created_at.strftime("%m-%d") }
+    #@summary[:date_chart] = produce_submission_graph(sbms_by_date, 'Date', 'Start date distribution')
+
+    #@summary[:progress] = submissions.group_by{ |sbm| sbm.assessment.questions.finalised(sbm).count + 1 }
+
+    #@summary[:progress_chart] = produce_submission_graph(@summary[:progress], 'Step', 'Current step of students')
+
+    #@mcqs = @training.mcqs
+    #@coding_question = @training.coding_questions
+
+    #@missions = @course.missions
+    #@trainings = @course.trainings
+    #@policy_missions = @course.policy_missions
+  end
+
   def training
     @training = Assessment::Training.find(params[:training_id])
     authorize! :manage, @training

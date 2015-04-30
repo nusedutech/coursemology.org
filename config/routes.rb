@@ -366,6 +366,7 @@ Coursemology::Application.routes.draw do
 
 		get "stats/policy_missions/:policy_mission_id" => "stats#policy_mission", as: :stats_policy_mission
 		get "stats/policy_missions_excel/:policy_mission_id" => "stats#policy_mission_export_excel", as: :stats_policy_mission_excel
+    get "stats/tranings/:training_id/training_export_excel" => "stats#training_export_excel", as: :stats_training_excel
 
     get "duplicate" => "duplicate#manage", as: :duplicate
 

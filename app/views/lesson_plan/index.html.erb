@@ -214,6 +214,7 @@
     <input type="hidden" id="mapping_module" value="<%= @mapping_module %>" />
 <% end%>
 <script>
+    var unique_player= null;
     $(document).ready(function() {
 
         $('div.span-content').addClass('border-gray');
@@ -302,20 +303,23 @@
 
         //show video
         function show_video(title, type, des, loc){
+            if(unique_player != null){
+                unique_player.pause();
+                unique_player.src("");
+                unique_player.load();
+                $("div.video-js").remove();
+                unique_player.dispose();
+            }
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " <a href='" + loc + "'>" + title.toUpperCase() + "</a><h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";
-            entry_form += "<div><video class='video-lecture video-js vjs-default-skin' controls width='480' height='320'>";
+            entry_form += "<div><video id='video-lecture' class='video-js vjs-default-skin' controls width='480' height='320'>";
             entry_form += "<source src='" + loc + "' type='video/mp4'>";
             entry_form += "Your browser does not support the video tag.";
             entry_form += "</video></div>";
             $('section#detail-content').append(entry_form);
-
-            var temp_videos = document.getElementsByClassName('video-lecture');
-            for (i = 0; i < temp_videos.length; i++) {
-                videojs(temp_videos[i], {'playbackRates': [0.5, 1, 1.5, 2]}, function(){
-                    // Player (this) is initialized and ready.
-                });
-            }
+            unique_player = videojs('video-lecture', {'playbackRates': [0.5, 1, 1.5, 2]}, function(){
+                // Player (this) is initialized and ready.
+            });
         }
 
         //show entry mission training
@@ -547,6 +551,32 @@
         }
     });
 
+    $('.btn-play-video').click(function() {
+        if($(this).next("div.video-js").length == 0) {
+            if(unique_player != null){
+                unique_player.pause();
+                unique_player.src("");
+                unique_player.load();
+                $("div.video-js").remove();
+                unique_player.dispose();
+            }
+            $(".btn-play-video").text("show video");
+            var title = $(this).prev("h2").find("a.video-title").attr('href');
+            var entry_form = "<video id='video-lecture' class='video-js vjs-default-skin' preload='none' controls width='480' height='320'>";
+            entry_form += "<source src='" + title + "' type='video/mp4'>";
+            entry_form += "Your browser does not support the video tag.";
+            entry_form += "</video>";
+
+            $(this).after(entry_form);
+            unique_player = videojs('video-lecture', {'playbackRates': [0.5, 1, 1.5, 2]}, function () {
+                // Player (this) is initialized and ready.
+            });
+            $(this).text("hide video");
+        }else{
+            $(this).next("div.video-js").remove();
+            $(this).text("show video");
+        }
+    });
 
 
 </script>

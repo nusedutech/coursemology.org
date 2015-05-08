@@ -72,10 +72,11 @@
            </div>
         <% else %>
             <%if entry.entry_type === 3%>
-                <h2><a href="<%= entry.location %>"><%= entry.title %></a></h2>
-                <video class="video-js vjs-default-skin" controls width="480" height="320" data-setup='{ "playbackRates": [0.5, 1, 1.5, 2] }'>
-                  <source src="<%= entry.location%>" type='video/mp4'>
-                </video>
+                <h2><a class="video-title" href="<%= entry.location %>"><%= entry.title %></a></h2>
+                <a class="btn-play-video">show video</a>
+                <div class="div-player">
+
+                </div>
             <% else %>
                 <h2><%= entry.title %></h2>
                 <h3><%= entry.location %></h3>

@@ -244,14 +244,14 @@
         //show entry
         $('#lesson-plan-content a.btn_entry').click(function(){
             $('section#detail-content').empty();
-            var entry_type =$(this).find('input.entry_type').val();
+            var entry_type =$(this).parent().find('span.entry_type').text();
             var title = $(this).find('span.entry_title').text();
-            var type  = $(this).find('input.entry_text_type').val();
-            var des  = $(this).find('input.entry_description').val();
-            var loc  = $(this).find('input.entry_location').val();
+            var type  = $(this).parent().find('span.entry_text_type').text();
+            var des  = $(this).parent().find('span.entry_description').html();
+            var loc  = $(this).parent().find('span.entry_location').text();
             var $dis = $(this).next('div.discussion');
             var $resource = $(this).parent().parent().find('div.resource-hide ul');
-            var entry_start_end = $(this).find('span.entry_start_end').html();
+            var entry_start_end = $(this).parent().find('span.entry_start_end').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
                 show_lecture(title, type, des, loc, entry_start_end, $resource);
             }else if(entry_type =='3'){
@@ -324,10 +324,10 @@
 
         //show entry mission training
         function show_mission_training(entry, title, type, des, loc, $resource){
-            var start  = $(entry).find('input.entry_start').val();
-            var end  = $(entry).find('input.entry_end').val();
-            var action = $(entry).find('input.entry_action').val();
-            var url  = $(entry).find('input.entry_url').val();
+            var start  = $(entry).parent().find('input.entry_start').val();
+            var end  = $(entry).parent().find('input.entry_end').val();
+            var action = $(entry).parent().find('input.entry_action').val();
+            var url  = $(entry).parent().find('input.entry_url').val();
 
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";
@@ -368,14 +368,14 @@
 
         //show entry for policy mission with reattempt option
         function show_policymission_with_additional_details(entry, title, type, des, loc, $resource){
-            var start  = $(entry).find('input.entry_start').val();
-            var end  = $(entry).find('input.entry_end').val();
-            var action = $(entry).find('input.entry_action').val();
-            var url  = $(entry).find('input.entry_url').val();
-            var actionSecondary = $(entry).find('input.entry_action_secondary').val();
-            var urlSecondary  = $(entry).find('input.entry_url_secondary').val();
-            var actionTertiary = $(entry).find('input.entry_action_tertiary').val();
-            var urlTertiary  = $(entry).find('input.entry_url_tertiary').val();
+            var start  = $(entry).parent().find('input.entry_start').val();
+            var end  = $(entry).parent().find('input.entry_end').val();
+            var action = $(entry).parent().find('input.entry_action').val();
+            var url  = $(entry).parent().find('input.entry_url').val();
+            var actionSecondary = $(entry).parent().find('input.entry_action_secondary').val();
+            var urlSecondary  = $(entry).parent().find('input.entry_url_secondary').val();
+            var actionTertiary = $(entry).parent().find('input.entry_action_tertiary').val();
+            var urlTertiary  = $(entry).parent().find('input.entry_url_tertiary').val();
 
             var entry_form = "<div><p style=''><h3>" + type.toUpperCase() + " " + title.toUpperCase() + "<h3></p></div>";
             entry_form += "<div><p style=''>" + des + "</p></div>";

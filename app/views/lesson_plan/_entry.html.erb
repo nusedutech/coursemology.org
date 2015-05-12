@@ -18,56 +18,61 @@
               <%= entry.title %>
             <% end %>
         <% else %>
-              <%= link_to "",:id => "virtual-entity-#{entry.assessment.id}",  :class => "btn_entry" do %>
-                  <span class="entry_title"><%= entry.title %></span>
-                  <input type="hidden" class="entry_action" value="<%= entry.submission[:action]  %>">
-                  <input type="hidden" class="entry_url" value="<%= entry.submission[:url]  %>">
-                  <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
-                  <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
-                  <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
-                  <input type="hidden" class="entry_location" value="<%= entry.location  %>">
-                  <% if entry.start_at %>
-                      <input type="hidden" class="entry_start" value="<%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>">
-                      <% if entry.end_at %>
-                          <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
-                              <input type="hidden" class="entry_end" value="<%= entry.end_at.strftime("%I:%M %p") %>">
-                          <% else %>
-                              <input type="hidden" class="entry_end" value="<%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>">
-                          <% end %>
-                      <% end %>
-                  <% end %>
-                  <% if entry.entry_type == 5 %>
-		                <input type="hidden" class="entry_action_secondary" value="<%= entry.submission[:actionSecondary] %>">
-		                <input type="hidden" class="entry_url_secondary" value="<%= entry.submission[:urlSecondary]  %>">
-                    <input type="hidden" class="entry_action_tertiary" value="<%= entry.submission[:actionTertiary] %>">
-		                <input type="hidden" class="entry_url_tertiary" value="<%= entry.submission[:urlTertiary]  %>">
-                  <% end %>
-              <% end %>
+          <%= link_to "",:id => "virtual-entity-#{entry.assessment.id}",  :class => "btn_entry" do %>
+              <span class="entry_title"><%= entry.title %></span>
+          <% end %>
+          <div class="hide">
+              <input type="hidden" class="entry_action" value="<%= entry.submission[:action]%>">
+              <input type="hidden" class="entry_url" value="<%= entry.submission[:url]%>">
+              <span class="entry_text_type"><%= entry.entry_real_type  %></span>
+              <span class="entry_type"><%= entry.entry_type  %></span>
+              <span class="entry_description"><%= entry.description.html_safe  %></span>
+              <span class="entry_location"><%= entry.location  %></span>
+            <% if entry.start_at %>
+                <input type="hidden" class="entry_start" value="<%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>">
+                <% if entry.end_at %>
+                    <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
+                        <input type="hidden" class="entry_end" value="<%= entry.end_at.strftime("%I:%M %p") %>">
+                    <% else %>
+                        <input type="hidden" class="entry_end" value="<%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>">
+                    <% end %>
+                <% end %>
+            <% end %>
+            <% if entry.entry_type == 5 %>
+                <input type="hidden" class="entry_action_secondary" value="<%= entry.submission[:actionSecondary] %>">
+                <input type="hidden" class="entry_url_secondary" value="<%= entry.submission[:urlSecondary]  %>">
+                <input type="hidden" class="entry_action_tertiary" value="<%= entry.submission[:actionTertiary] %>">
+                <input type="hidden" class="entry_url_tertiary" value="<%= entry.submission[:urlTertiary]  %>">
+            <% end %>
+          </div>
         <% end %>
       <% else %>
         <a class="lesson-plan-anchor" name="entry-<%= entry.id %>"></a>
         <% if (cannot? :manage, LessonPlanEntry) %>
            <%= link_to "",:id => "entity-#{entry.id}" , :class => "btn_entry" do %>
               <h2><span class="entry_title"><%= entry.title %></span></h2>
-                <input type="hidden" class="entry_text_type" value="<%= entry.entry_real_type  %>">
-                <input type="hidden" class="entry_type" value="<%= entry.entry_type  %>">
-                <input type="hidden" class="entry_description" value="<%= entry.description.html_safe  %>">
-                <input type="hidden" class="entry_location" value="<%= entry.location  %>">
-                <span class="entry_start_end" style="display: none">
-                  <% if entry.start_at %>
-                    <span class="icon-calendar"></span>
-                    <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
-                      <% if entry.end_at %> to
-                        <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
-                          <%= entry.end_at.strftime("%I:%M %p") %>
-                        <% else %>
-                          <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
-                        <% end %>
-                      <% end %>
-                    <% end %>
-                </span>
            <% end %>
-           <div class="discussion" style="display: none">
+            <div class="hide">
+                <span class="entry_text_type"><%= entry.entry_real_type  %></span>
+                <span class="entry_type"><%= entry.entry_type  %></span>
+                <span class="entry_description"><%= entry.description.html_safe  %></span>
+                <span class="entry_location"><%= entry.location  %></span>
+            </div>
+            <span class="entry_start_end hide">
+              <% if entry.start_at %>
+                <span class="icon-calendar"></span>
+                <%= entry.start_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                  <% if entry.end_at %> to
+                    <% if entry.start_at.yday == entry.end_at.yday and entry.start_at.year == entry.end_at.year %>
+                      <%= entry.end_at.strftime("%I:%M %p") %>
+                    <% else %>
+                      <%= entry.end_at.strftime("%A, %d %b %Y %I:%M %p") %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+            </span>
+
+           <div class="discussion hide">
                 <%= render partial: 'forums/topics/discussion', locals: { owner: entry, title: (entry.entry_real_type + ' ' + entry.title)} %>
            </div>
         <% else %>

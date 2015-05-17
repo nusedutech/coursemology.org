@@ -71,11 +71,11 @@ class Assessment::QuestionsController < ApplicationController
     assessment_based_questions = [];
     #filter question by kind of assessment
     if @assessment.is_mission?
-      assessment_based_questions = @course.questions.general_and_coding_question
+      assessment_based_questions = @course.questions.general_and_coding_question.without_sub_questions
     elsif @assessment.is_training?
-      assessment_based_questions = @course.questions.mcq_and_coding_question
+      assessment_based_questions = @course.questions.mcq_and_coding_question.without_sub_questions
     elsif @assessment.is_policy_mission?
-      assessment_based_questions = @course.questions.mcq_question
+      assessment_based_questions = @course.questions.mcq_question.without_sub_questions
     end
 
     if !assessment_based_questions.empty?

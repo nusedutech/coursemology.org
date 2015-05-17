@@ -12,13 +12,16 @@ class Assessment::Question < ActiveRecord::Base
   scope :coding_question, -> { where(as_question_type: "Assessment::CodingQuestion") }
   scope :mcq_question, -> { where(as_question_type: "Assessment::McqQuestion") }
   scope :mpq_question, -> { where(as_question_type: "Assessment::MpqQuestion") }
+  scope :sub_questions, -> { joins(:sub_question) }
+  scope :without_sub_questions, -> { includes(:sub_question).where('assessment_mpq_sub_questions.id is null') }
   scope :general_and_coding_question, -> { where(as_question_type: ["Assessment::GeneralQuestion", "Assessment::CodingQuestion"]) }
   scope :mcq_and_coding_question, -> { where(as_question_type: ["Assessment::McqQuestion", "Assessment::CodingQuestion"]) }
 
   belongs_to  :course
   belongs_to  :creator, class_name: "User"
   belongs_to  :dependent_on, class_name: "Assessment::Question", foreign_key: "dependent_id"
-
+  has_one  :sub_question, class_name: Assessment::MpqSubQuestion, foreign_key: "child_id"
+  has_one  :parent, through: :sub_question, as: :parent
 
   #TODO, dependent: :destroy here
   has_many  :question_assessments, dependent: :destroy

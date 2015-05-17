@@ -4,4 +4,6 @@ class Assessment::MpqQuestion < ActiveRecord::Base
 
   has_many  :children, class_name: Assessment::MpqSubQuestion, dependent: :destroy, foreign_key: "parent_id"
   has_many :sub_questions, :through => :children, class_name: Assessment::Question, dependent: :destroy, :source => :child
+
+
 end

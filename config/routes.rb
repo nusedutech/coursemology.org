@@ -194,6 +194,9 @@ Coursemology::Application.routes.draw do
         get 'stats' => 'missions#stats'
         get 'submissions' => 'assessments#listall', type: 'mission'
       end
+      member do
+        put 'update_questions' => 'missions#update_questions'
+      end
       get 'dump_code' => 'missions#dump_code'
     end
 

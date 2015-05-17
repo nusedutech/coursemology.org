@@ -72,8 +72,6 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
   def update_questions
     if !params[:assessment].nil?
       ques_list = params[:assessment][:question_assessments]
-    else
-      ques_list = []
     end
 
     if (!ques_list.nil?)

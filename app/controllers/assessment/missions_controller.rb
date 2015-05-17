@@ -73,11 +73,6 @@ class Assessment::MissionsController < Assessment::AssessmentsController
 
   def update
     respond_to do |format|
-      if !params[:assessment].nil? 
-        update_questions params[:assessment][:question_assessments]
-      else
-        update_questions []
-      end      
       if @mission.update_attributes(params[:assessment_mission])
         update_single_question_type
         format.html { redirect_to course_assessment_mission_path(@course, @mission),
@@ -88,7 +83,10 @@ class Assessment::MissionsController < Assessment::AssessmentsController
     end
   end
   
-  def update_questions ques_list
+  def update_questions
+    if !params[:assessment].nil?
+      ques_list = params[:assessment][:question_assessments]
+    end
     if (!ques_list.nil?)
       old_list = @mission.as_assessment.question_assessments
       ques_list.each do |q|
@@ -105,7 +103,16 @@ class Assessment::MissionsController < Assessment::AssessmentsController
           qa.destroy
         end
       end
-    end      
+    end
+
+    respond_to do |format|
+      if @mission.update_attributes(params[:assessment_mission])
+        format.html { redirect_to course_assessment_mission_url(@course, @mission),
+                                  notice: "The mission '#{@mission.title}' has been updated." }
+      else
+        format.html { render action: "edit" }
+      end
+    end
   end
   
   def destroy

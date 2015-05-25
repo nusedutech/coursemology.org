@@ -279,9 +279,8 @@
                     var parts = $(this).find('a').text().split('.');
                     var ext = parts[parts.length - 1];
                     $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
-                    $('section#detail-content .material_list').append($("<tr><td colspan='2'>"+ $(this).html()+"</td></tr>"));
+                    $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='https://edutech.comp.nus.edu.sg/Material/files/"+$(this).text()+"'></td></tr>"));
                 });
-
                 //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
                 //$('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://localhost:3000/data/lecture01.pdf'></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {

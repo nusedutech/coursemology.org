@@ -76,7 +76,7 @@ class LessonPlanMilestone < ActiveRecord::Base
       :start_at => start_date, :cutoff => cutoff_time, :course_id => self.course_id)
 
     #check for tutorial group, load for specific student lesson plan
-    if user_course.is_student?
+    if !user_course.nil? and user_course.is_student?
       student_tutorial_groups = user_course.tut_group_courses.order(:created_at).to_a
       current_tutorial = user_course.tut_group_courses.where(:milestone_id => self.id).first
 

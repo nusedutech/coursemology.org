@@ -59,7 +59,7 @@ class Course < ActiveRecord::Base
   has_one   :topicconcepts_updated_timing, class_name: "TopicconceptsUpdatedTiming", dependent: :destroy
 
   amoeba do
-    include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences,
+    include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences, :questions,
                    :assessments, :achievements, :lesson_plan_milestones,
                    :lesson_plan_entries, :root_folder, :comics, :tag_groups,
                    :surveys, :forums]

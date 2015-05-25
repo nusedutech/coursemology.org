@@ -1,5 +1,6 @@
 class Topicconcept < ActiveRecord::Base
   acts_as_paranoid
+  acts_as_duplicable
   attr_accessible :course_id, :deleted_at, :description, :name, :rank, :typename
   
   include Rails.application.routes.url_helpers

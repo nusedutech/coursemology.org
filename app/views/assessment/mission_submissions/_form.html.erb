@@ -36,7 +36,22 @@
                           <%= answer.content %>
                       <% end %>
                     </textarea>
-                <% else %>
+                <% elsif question.class == Assessment::MpqQuestion %>
+                  <% q.specific.sub_questions.each_with_index do |sq, si| %>
+                    <h3><%=  sq.title%></h3>
+                    <div class="row">
+                      <div class="span8">
+                        <span><%= style_format(sq.description) %></span>
+                      </div>
+                    </div>
+                    <textarea name="answers[<%= sq.id %>]" class="span8 html-editor" rows="8">
+                      <%- sanswer = @submission.answers.where(question_id: sq.id).first %>
+                      <% if sanswer %>
+                          <%= sanswer.content %>
+                      <% end %>
+                    </textarea>
+                  <% end %>
+                <% elsif question.class == Assessment::CodingQuestion %>
                     <%=render partial: 'do_coding',
                               locals: { answer: answer,
                                         question: question,

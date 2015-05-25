@@ -14,7 +14,7 @@ class Assessment::Question < ActiveRecord::Base
   scope :mpq_question, -> { where(as_question_type: "Assessment::MpqQuestion") }
   scope :sub_questions, -> { joins(:sub_question) }
   scope :without_sub_questions, -> { includes(:sub_question).where('assessment_mpq_sub_questions.id is null') }
-  scope :general_and_coding_question, -> { where(as_question_type: ["Assessment::GeneralQuestion", "Assessment::CodingQuestion"]) }
+  scope :general_coding_mpq_question, -> { where(as_question_type: ["Assessment::GeneralQuestion", "Assessment::CodingQuestion", "Assessment::MpqQuestion"]) }
   scope :mcq_and_coding_question, -> { where(as_question_type: ["Assessment::McqQuestion", "Assessment::CodingQuestion"]) }
 
   belongs_to  :course

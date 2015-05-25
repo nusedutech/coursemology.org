@@ -35,7 +35,7 @@
 				            <% nonuniq_stds = opt.assemt_std(@course, @policy_mission.assessment) %>
 				            <tr>
 				              <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
-				              <td><%= opt.text %></td>
+				              <td><%= style_format opt.text %></td>
 				              <td><%= nonuniq_stds.size %></td>
 											<td></td>
 				            </tr>

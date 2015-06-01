@@ -12,8 +12,7 @@ class Tag < ActiveRecord::Base
   belongs_to :tag_group
   
   has_many :taggable_tags, as: :tag, dependent: :destroy
-  has_many :questions, class_name: "Assessment::Question",
-           through: :taggable_tags
+  has_many :questions, through: :taggable_tags, source: :taggable, source_type: "Assessment::Question"
 
   has_many :mcq_questions, class_name: "Assessment::McqQuestion",
            through: :questions,
@@ -27,7 +26,7 @@ class Tag < ActiveRecord::Base
             source: :as_answer, source_type: "Assessment::McqAnswer"
 
   has_many :forward_policy_levels, as: :forward_policy_theme, dependent: :destroy, class_name: "Assessment::ForwardPolicyLevel"
-  
+
 	has_many :taggings, dependent: :destroy, class_name: 'TaggableTag'
   
   before_save :assign_default_group
@@ -73,7 +72,7 @@ class Tag < ActiveRecord::Base
   # has_many :std_tags, dependent: :destroy
   has_many :taggings, class_name:"TaggableTag", dependent: :destroy
   #
-  has_many :questions, through: :taggings, source: :taggable, source_type: "Assessment::Question"
+  #has_many :questions, through: :taggings, source: :taggable, source_type: "Assessment::Question"
 
   amoeba do
     include_field :taggings

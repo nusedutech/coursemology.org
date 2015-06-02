@@ -16,11 +16,11 @@
         <td><%= index + 1 %></td>
         <td>
           <% if ans.options.length == 1 %>
-              <%= ans.options.first.text %>
+              <%= style_format ans.options.first.text %>
           <% else %>
               <ul>
                 <% ans.options.each do |opt| %>
-                    <li><%= opt.text %></li>
+                    <li><%= style_format opt.text %></li>
                 <% end %>
               </ul>
           <% end %>

@@ -243,7 +243,7 @@
                 }
         );
 
-        //Set default font & font size
+        //Set default font & font size * nobreak at the end
 
         CKEDITOR.on( 'instanceReady', function( ev ) {
             //ev.editor.removeMenuItem('eqneditor');
@@ -252,6 +252,15 @@
                     p: function (e) { e.attributes.style = 'font-size:' + 16 + 'px; font-family:' + "Times New Roman" + ';'; }
                 }
             });
+            // Output paragraphs as <p>Text</p>.
+            ev.editor.dataProcessor.writer.setRules( 'p',
+                    {
+                        indent : false,
+                        breakBeforeOpen : false,
+                        breakAfterOpen : false,
+                        breakBeforeClose : false,
+                        breakAfterClose : false
+                    });
          });
 
 	});

@@ -101,7 +101,7 @@
                 <% uniq_stds = opt.uniq_std(@course).uniq %>
                 <tr>
                   <td><input type="checkbox" disabled <%= "checked" if opt.correct %> /></td>
-                  <td><%= opt.text %></td>
+                  <td><%= style_format opt.text %></td>
                   <td><%= uniq_stds.size %></td>
                   <td>
                     <% uniq_stds.each do |std| %>

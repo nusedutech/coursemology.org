@@ -29,6 +29,7 @@ module AutoGrader
         if answer.nil? || !answer.correct
           ag.grade = 0
         else
+
           ag.grade = mcq.max_grade.nil? ? 0 : mcq.max_grade
         end
       else

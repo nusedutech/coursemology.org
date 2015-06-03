@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150411180141) do
+ActiveRecord::Schema.define(:version => 20150525055457) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -473,10 +473,11 @@ ActiveRecord::Schema.define(:version => 20150411180141) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-    t.boolean  "test",       :default => false
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.boolean  "test"
     t.integer  "duration"
+    t.boolean  "option_grading"
   end
 
   create_table "assessment_wrong_percent_thresholds", :force => true do |t|

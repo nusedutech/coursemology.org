@@ -24,6 +24,9 @@
     <%= f.input :allow_discussion, as: :boolean, label: "Allow Discussion",
                 input_html: {class: ""},
                 inline_label:"Check to allow Discussion" %>
+    <%= f.input :option_grading, as: :boolean,
+                input_html: {class: ""},
+                inline_label:"Check to grade by each option" %>
     <div id="uploaded_files_div"></div>
     <%= f.button :form_submit, value: @training.id.nil? ? "Create #{@test_flag ? 'Test' : 'Training'}" : "Update #{@training.test ? 'Test' : 'Training'}", cancel: course_assessment_trainings_path %>
     <%= render :partial => "layouts/html_editor" %>

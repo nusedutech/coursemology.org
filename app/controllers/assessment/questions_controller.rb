@@ -234,6 +234,21 @@ class Assessment::QuestionsController < ApplicationController
               :type => "application/csv"
   end
 
+  def question_bank_export_excel
+    authorize! :manage, @course
+
+    @questions = {}
+    @questions[:general_questions] = @course.questions.general_question.without_sub_questions
+    @questions[:mcq_questions] = @course.questions.mcq_question.without_sub_questions
+    @questions[:coding_questions] = @course.questions.coding_question.without_sub_questions
+
+    respond_to do |format|
+      headers["Content-Disposition"] = "attachment; filename=\"Question Bank #{@course.title}\""
+      headers["Content-Type"] = "xls"
+      format.xls
+    end
+  end
+
   protected
 
   def extract_tags

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:html="http://www.w3.org/TR/REC-html40">
+
+  <% if @questions %>
+      <% if @questions[:mcq_questions] %>
+          <Worksheet ss:Name="Mcq Question">
+            <Table>
+              <Row>
+                <Cell><Data ss:Type="String">Question ID</Data></Cell>
+                <Cell><Data ss:Type="String">Description</Data></Cell>
+                <Cell><Data ss:Type="String">Max Grade</Data></Cell>
+                <Cell><Data ss:Type="String">Tag</Data></Cell>
+                <Cell><Data ss:Type="String">Select All?</Data></Cell>
+                <Cell><Data ss:Type="String">Option 1</Data></Cell>
+                <Cell><Data ss:Type="String">Option 1 Explanation</Data></Cell>
+                <Cell><Data ss:Type="String">Option 1 Correct?</Data></Cell>
+                <Cell><Data ss:Type="String">Option 2</Data></Cell>
+                <Cell><Data ss:Type="String">Option 2 Explanation</Data></Cell>
+                <Cell><Data ss:Type="String">Option 2 Correct?</Data></Cell>
+                <Cell><Data ss:Type="String">Option 3</Data></Cell>
+                <Cell><Data ss:Type="String">Option 3 Explanation</Data></Cell>
+                <Cell><Data ss:Type="String">Option 4 Correct?</Data></Cell>
+                <Cell><Data ss:Type="String">Option 4</Data></Cell>
+                <Cell><Data ss:Type="String">Option 4 Explanation</Data></Cell>
+                <Cell><Data ss:Type="String">Option 4 Correct?</Data></Cell>
+                <Cell><Data ss:Type="String">Option 5</Data></Cell>
+                <Cell><Data ss:Type="String">Option 5 Explanation</Data></Cell>
+                <Cell><Data ss:Type="String">Option 5 Correct?</Data></Cell>
+                <Cell><Data ss:Type="String">Option 6</Data></Cell>
+                <Cell><Data ss:Type="String">Option 6 Explanation</Data></Cell>
+                <Cell><Data ss:Type="String">Option 6 Correct?</Data></Cell>
+              </Row>
+
+              <% @questions[:mcq_questions].each do |mcq| %>
+                  <Row>
+                    <Cell><Data ss:Type="String"><%= mcq.id %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%= mcq.description %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%= mcq.max_grade %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%=  %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%= mcq.as_question.select_all %></Data></Cell>
+                    <% mcq.as_question.options.each do |op| %>
+                        <Cell><Data ss:Type="String"><%= op.text %></Data></Cell>
+                        <Cell><Data ss:Type="String"><%= op.explanation %></Data></Cell>
+                        <Cell><Data ss:Type="String"><%= op.correct %></Data></Cell>
+                    <% end %>
+                  </Row>
+              <% end %>
+
+            </Table>
+          </Worksheet>
+      <% end %>
+      <% if @questions[:general_questions] %>
+          <Worksheet ss:Name="General Question">
+            <Table>
+              <Row>
+                <Cell><Data ss:Type="String">Question ID</Data></Cell>
+                <Cell><Data ss:Type="String">Title</Data></Cell>
+                <Cell><Data ss:Type="String">Description</Data></Cell>
+                <Cell><Data ss:Type="String">File Submission?</Data></Cell>
+              </Row>
+
+              <% @questions[:general_questions].each do |gq| %>
+                  <Row>
+                    <Cell><Data ss:Type="String"><%= gq.id %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%= gq.title %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%= gq.description %></Data></Cell>
+                    <Cell><Data ss:Type="String"><%= gq.file_submission %></Data></Cell>
+                  </Row>
+              <% end %>
+
+            </Table>
+          </Worksheet>
+      <% end %>
+
+  <% end %>
+</Workbook>

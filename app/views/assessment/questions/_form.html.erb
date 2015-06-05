@@ -48,6 +48,8 @@
 	</p>
     <p>Import Question (<%= link_to "Download Template",download_import_question_template_course_assessment_questions_path %>) </p>
     <%= render partial: "import", locals: {url: import_course_assessment_questions_path}%>
+    <p><%= link_to "Click here", question_bank_export_excel_course_assessment_questions_path(@course, format: "xls"),method: "GET" %> to export question bank</p>
+
 	<%= render partial: "fields"%>
 <%- elsif @assessment.is_mission? %>
     <%= simple_form_for [@course,@assessment.as_assessment], url: update_question_path do |f| %>

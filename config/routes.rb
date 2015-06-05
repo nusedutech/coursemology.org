@@ -175,6 +175,7 @@ Coursemology::Application.routes.draw do
         get :index, to: 'questions#index', type: 'question'
         post :import, to: 'questions#import'
         match :download_import_question_template,to: 'questions#download_import_question_template', as: :download_import_question_template
+        get :question_bank_export_excel, to: 'questions#question_bank_export_excel', as: :question_bank_export_excel
       end
     end
     

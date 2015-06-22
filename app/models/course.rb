@@ -53,6 +53,9 @@ class Course < ActiveRecord::Base
   has_many  :trainings, class_name: "Assessment::Training", through: :assessments,
             source: :as_assessment, source_type: "Assessment::Training"
 
+  has_many  :realtime_trainings, class_name: "Assessment::RealtimeTraining", through: :assessments,
+            source: :as_assessment, source_type: "Assessment::RealtimeTraining"
+
   has_many   :guidance_quizzes, class_name: "Assessment::GuidanceQuiz", through: :assessments,
             source: :as_assessment, source_type: "Assessment::GuidanceQuiz"
 

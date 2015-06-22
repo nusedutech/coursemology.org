@@ -1243,3 +1243,26 @@ p.p-bold {
 div.div-slide {
   overflow-x: scroll;
 }
+
+//added 2015/06/18 for regulared training & realtime training
+.tag-name, .foward-question-input {
+  margin: 0px;
+}
+
+.add-fields {
+  margin-left:15px;
+}
+
+.multi-field {
+  margin-bottom: 10px;
+}
+
+.move-icon {
+  cursor: pointer;
+  margin-left:5px;
+  margin-right:5px;
+}
+
+.move-icon:hover {
+  cursor: move;
+}

@@ -1,0 +1,76 @@
+<div class="page-header">
+  <h1><%= @realtime_training.title %></h1>
+</div>
+<p class="well"><%= @realtime_training.description.html_safe %></p>
+
+<%= render partial: "file_uploads/download_files",
+           locals: {owner: @realtime_training}%>
+
+<div id="training-stop-pos"><br></div>
+
+<hr/>
+<div class="step-list">
+  <% (1..@summary[:questions].length).each do |i| %>
+      <% if i == @summary[:step] %>
+          <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-current" %>
+      <% elsif @summary[:finalised].include? @summary[:questions][i - 1] %>
+          <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-done" %>
+      <% else %>
+          <% can_access = (curr_user_course.is_staff? or i == @summary[:next_undone]) %>
+          <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-disabled'}" %>
+      <% end %>
+  <% end %>
+</div>
+<hr/>
+
+<% if !@summary[:current] %>
+    <h2>Congratulations, you're done!</h2>
+    <p>
+      <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
+        Click here
+      </a> to review your answers.
+    </p>
+<% else %>
+    <form id="training-step-form">
+      <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">
+      <input type="hidden" name="next_undone" class="next-undone" value="<%= @summary[:next_undone] %>">
+      <input type="hidden" name="update_url"
+             value="<%= submit_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+      <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />
+
+      <% if @summary[:current].class == Assessment::McqQuestion %>
+          <%= render partial:"assessment/training_submissions/do_mcq", locals: {mcq: @summary[:current]} %>
+      <% elsif @summary[:current].class == Assessment::CodingQuestion %>
+          <%= render partial:"assessment/training_submissions/do_coding", locals: {question: @summary[:current], prefilled: @summary[:prefilled]} %>
+      <% end %>
+
+      <div class="form-actions">
+
+    <!--show buttons for normal training-->
+    <% if @summary[:current].class == Assessment::McqQuestion %>
+        <%= link_to "Submit", '#', :class => 'btn btn-primary', :id => 'submit-btn' %>
+    <% elsif @summary[:current].class == Assessment::CodingQuestion %>
+        <%= link_to "Run (ALT+R)", '#', class:'btn btn-danger', id:"pathrun" %>
+
+    <% end %>
+    <%= link_to "Continue",
+                edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
+                :id => 'continue-btn' %>
+
+      </div>
+    </form>
+
+    <% if curr_user_course.is_staff? %>
+        <%= render partial: "comments/list",
+                   locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic, curr_user_course),
+                             target:    @summary[:current],
+                             header:    "Comments on the Question",
+                             margin_left: "0px" } %>
+    <% end %>
+    <% if @realtime_training.assessment.allow_discussion? %>
+        <div id="discussion-wrapper">
+            <%= render partial: 'forums/topics/discussion', locals: { owner: @summary[:current].question, title: (@summary[:current].class.name + '-' + @summary[:current].question.get_title_for_nil), sub: @submission.id, step: @summary[:step], from_lesson_plan: (local_assigns[:from_lesson_plan].nil? ? nil : true)} %>
+        </div>
+    <% end %>
+<% end %>
+

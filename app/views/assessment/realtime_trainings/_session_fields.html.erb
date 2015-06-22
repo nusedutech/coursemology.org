@@ -1,0 +1,14 @@
+<%= f.fields_for :sessions do |s| %>
+    <div class = "sort-table-entry multi-field">
+      <i class="icon-move move-icon"></i>
+      <%= s.hidden_field :id %>
+      <input type="text" class="input-medium" disabled="disabled" value="<%= s.object.student_group.name.humanize %>" />
+      <%= s.hidden_field :student_group_id %>
+      <%= s.input_field :number_of_table, as: :integer, class: "number_field input-small number-of-table-input", min: "1", label: false %>
+      <%= s.input_field :seat_per_table, as: :integer, class: "number_field input-small seat-per-table-input", min: "1", label:false  %>
+      <%= s.input_field :start_time, as: :datetime_picker, class: "input-medium", label: false %>
+      <%= s.input_field :end_time, as: :datetime_picker, class: "input-medium", label: false %>
+      <div class="hidden"><%= s.check_box :_destroy %></div>
+      <!--<a class = "btn btn-danger pull-right" ><i class="icon-remove remove-field"></i></a>-->
+    </div>
+<% end %>

@@ -1,0 +1,107 @@
+<input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
+<input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
+<div class="page-header">
+  <h1> <%= @realtime_training.title %></h1>
+</div>
+
+<h2 class="assignments-description-title">Session of <%= @session.student_group.name %></h2>
+
+<table class="table-top-align">
+  <tr>
+    <td>
+      <div class="pull-left">
+        <%= render partial: "assessment/realtime_trainings/group_details", locals: {session: @session } %>
+      </div>
+    </td>
+
+  </tr>
+</table>
+
+<%= render partial: "file_uploads/download_local_files",
+           locals: { owner: @realtime_training.assessment }%>
+<hr/>
+
+ <table class="table asm-qns-table sort">
+  <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
+  <% @session.session_questions.each_with_index do |sq, index| %>
+      <% qn = sq.question_assessment.question %>
+      <% q = qn.as_question %>
+      <tr class="asm-qn" id="sortable-item_<%= qn.id %>" >
+        <td width="80%">
+          <div>
+            <div class="asm-qn-handler">
+              <i class="icon-move handler-icon"></i>
+              <h3 class="handler-text">Question <span class="asm-qn-index"><%= index + 1 %></span>
+                <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
+              </h3>
+            </div>
+
+            <% if q.class == Assessment::McqQuestion %>
+                <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+            <% elsif q.class == Assessment::MpqQuestion %>
+                <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
+            <% else %>
+                <%= style_format(q.description) %>
+            <% end %>
+          </div>
+        </td>
+
+
+        <% if can? :manage, Assessment::Training %>
+            <td class="action-there-icons">
+              <div class="">
+                <span class="count-submission"></span>
+                <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
+                <%= link_to 'Statictis','', class: 'btn btn-info stats-answer' %>
+                <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+              </div>
+            </td>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<script>
+  var session_interval = null;
+  $(document).ready(function(){
+      $('.unlock-question').click(function(){
+          var url = $(".switch-lock-ajax-url").val();
+          var $this = $(this);
+          var session_question_id = $(this).parent().find(".session-question-id").val();
+          if($($this).text()== 'Lock'){
+              clearInterval( session_interval );
+          }
+          $.ajax({
+              url : url,
+              type : 'POST',
+              dataType : 'json',
+              data : {session_question_id: session_question_id},
+              success : function(result) {
+                  //start counting as unlock
+                  if(result.result && $($this).text() == 'Unlock'){
+                      session_interval = setInterval(function(){
+                          var url = $(".count-submission-ajax-url").val();
+                          var result = server_request({session_question_id: session_question_id}, "POST", url);
+                          $($this).parent().find('.count-submission').text(result.count);
+                          //alert(result.count);
+                      }, 1000);
+                      $($this).text('Lock');
+                  }else if(result.result && $($this).text()== 'Lock'){
+                      $($this).text('Unlock');
+                  }
+              }
+          });
+          //var result = server_request({question_id: $(this).parent().find(".question-id").val()}, "POST", url);
+
+      });
+
+      $('.unlock-question').click(function() {
+
+      });
+  });
+
+
+
+
+</script>

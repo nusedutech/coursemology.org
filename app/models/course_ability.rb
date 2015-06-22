@@ -23,7 +23,7 @@ class CourseAbility  < Ability
     can :read, UserCourse
     unless user.persisted?
       # not logged in user
-      cannot :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission]
+      cannot :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission, Assessment::RealtimeTraining]
     end
 
     if user.is_lecturer?
@@ -152,7 +152,7 @@ class CourseAbility  < Ability
 
       can :read, Assessment, published: true
       can :access_denied, Assessment
-      can :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission], assessment: {published: true}
+      can :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission, Assessment::RealtimeTraining], assessment: {published: true}
       can :answer_sheet, Assessment::PolicyMission
       can :read, Survey, publish: true
 

@@ -36,11 +36,22 @@ class Assessment::QuestionsController < ApplicationController
         end
         selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
 
-        selected_tags.each do |tag|
-          questions = questions + tag.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
-        end
-        selected_topicconcepts.each do |topicconcept|
-          questions = questions + topicconcept.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+        if params[:and]
+          @summary[:and] = 1
+          if selected_tags.count > 0
+            questions = @course.questions.joins(:tags).where(selected_tags.map{|t| " tags.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(tags.id)>=#{selected_tags.count}")
+          end
+          if selected_topicconcepts.count > 0
+            questions = questions.joins(:topicconcepts).where(selected_topicconcepts.map{|t| " topicconcepts.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(topicconcepts.id)>=#{selected_topicconcepts.count}").to_a
+          end
+          questions = questions.to_a
+        else
+          selected_tags.each do |tag|
+            questions = questions + tag.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+          end
+          selected_topicconcepts.each do |topicconcept|
+            questions = questions + topicconcept.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+          end
         end
       end
       @questions = questions.uniq
@@ -72,7 +83,7 @@ class Assessment::QuestionsController < ApplicationController
     #filter question by kind of assessment
     if @assessment.is_mission?
       assessment_based_questions = @course.questions.general_coding_mpq_question.without_sub_questions
-    elsif @assessment.is_training?
+    elsif @assessment.is_training? or @assessment.is_realtime_training?
       assessment_based_questions = @course.questions.mcq_and_coding_question.without_sub_questions
     elsif @assessment.is_policy_mission?
       assessment_based_questions = @course.questions.mcq_question.without_sub_questions
@@ -97,19 +108,29 @@ class Assessment::QuestionsController < ApplicationController
             topicconcepts_query_string += topicconcepts_query_string.empty? ? "topicconcepts.name = '#{t_escape}'" : " or topicconcepts.name = '#{t_escape}'"
           end
           selected_topicconcepts =  @course.topicconcepts.concepts.where(topicconcepts_query_string)
+          if params[:and]
+            @summary[:and] = 1
+            if selected_tags.count > 0
+              questions = @course.questions.joins(:tags).where(selected_tags.map{|t| " tags.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(tags.id)>=#{selected_tags.count}")
+            end
+            if selected_topicconcepts.count > 0
+              questions = questions.joins(:topicconcepts).where(selected_topicconcepts.map{|t| " topicconcepts.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(topicconcepts.id)>=#{selected_topicconcepts.count}").to_a
+            end
+            questions = questions.to_a
+          else
+            selected_taggable_tags = []
+            selected_tags.each do |tag|
+              selected_taggable_tags = selected_taggable_tags + tag.taggable_tags
+            end
+            selected_topicconcepts.each do |topicconcept|
+              selected_taggable_tags = selected_taggable_tags + topicconcept.taggable_tags
+            end
+            selected_taggable_tags = selected_taggable_tags.uniq
 
-          selected_taggable_tags = []
-          selected_tags.each do |tag|
-            selected_taggable_tags = selected_taggable_tags + tag.taggable_tags
-          end
-          selected_topicconcepts.each do |topicconcept|
-            selected_taggable_tags = selected_taggable_tags + topicconcept.taggable_tags
-          end
-          selected_taggable_tags = selected_taggable_tags.uniq
-
-          #Link broken for question to taggable_tag - temp fix
-          selected_taggable_tags.each do |taggable_tag|
-            questions = questions + assessment_based_questions.where(query_string + " and assessment_questions.id = ? ", taggable_tag.taggable_id)
+            #Link broken for question to taggable_tag - temp fix
+            selected_taggable_tags.each do |taggable_tag|
+              questions = questions + assessment_based_questions.where(query_string + " and assessment_questions.id = ? ", taggable_tag.taggable_id)
+            end
           end
         end
       else

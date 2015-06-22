@@ -29,6 +29,10 @@ class CoursePreference < ActiveRecord::Base
       item('Policy Mission')
     end
 
+    def realtime_training
+      item('Realtime Training')
+    end
+
     def column
       item_type('Column')
     end

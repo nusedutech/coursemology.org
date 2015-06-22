@@ -1,0 +1,29 @@
+<h2>Groups</h2>
+<div>
+
+	<table class="table">
+		<tr>
+			<th>Group</th>
+			<th>Number of Tables</th>
+			<th>Seats per Table</th>
+			<th>Start Time</th>
+            <th>End Time</th>
+            <th></th>
+		</tr>
+		<% sessions.each_with_index do |session, index| %>
+			<tr>
+				<td><%= session.student_group.name %></td>
+				<td><%= session.number_of_table %></td>
+				<td><%= session.seat_per_table %></td>
+				<td><%= session.start_time %></td>
+                <td><%= session.end_time %></td>
+                <td>
+                  <%= link_to 'Show Seat Plan','', :class => 'btn' %>
+                  <%= link_to 'Start',
+                              start_session_course_assessment_realtime_training_session_path(@course, @realtime_training, session),
+                              :class => 'btn btn-success' %>
+                </td>
+			</tr>
+		<% end %>
+	</table>
+</div>

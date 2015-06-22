@@ -841,3 +841,77 @@ if PreferableItem.count == 74
                          description:     "Number of questions to display per page",
                          default_display: true
 end
+
+if PreferableItem.count == 75
+
+  #Realtime Training
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Column",
+                         name:          "title",
+                         default_value: "Realtime Training",
+                         description:   "Realtime Training title",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Column",
+                         name:          "tag",
+                         default_value: "Tag",
+                         description:   "Realtime Training tags" ,
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Column",
+                         name:          "exp",
+                         default_value: "Max Exp",
+                         description:   "Realtime Training exp gainable",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Column",
+                         name:          "award",
+                         default_value: "Requirement for",
+                         description:   "Requirement for achievement",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Column",
+                         name:          "start",
+                         default_value: "Start Time",
+                         description:   "Realtime Training start time",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Column",
+                         name:          "end",
+                         default_value: "End Time",
+                         description:   "Realtime Training end time",
+                         default_display: true
+
+end
+
+if PreferableItem.count == 81
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Time",
+                         name:          "time_format",
+                         default_value: "%d-%m-%Y",
+                         description:   "Realtime Training time display format",
+                         default_display: true
+end
+
+if PreferableItem.count == 82
+  PreferableItem.create! item:          "Realtime Training",
+                         item_type:     "Table",
+                         name:          "paging",
+                         default_value: "10",
+                         description:   "Number of rows to display in Realtime Training table",
+                         default_display: true
+end
+
+if PreferableItem.count == 83
+  PreferableItem.create! item:            "Paging",
+                         item_type:       "Realtime_Trainings",
+                         name:            "Realtime Trainings",
+                         default_value:   "50",
+                         description:     "Number of Realtime Trainings to display per page",
+                         default_display: true
+end

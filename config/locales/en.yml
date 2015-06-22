@@ -43,6 +43,7 @@ en:
     Mission:  Mission
     Policy_Mission: Policy Mission
     Training: Training
+    Realtime_Training: Real Time Training
   simple_form:
     form_submit:
       default:

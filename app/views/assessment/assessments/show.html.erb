@@ -7,10 +7,14 @@
     <% ast_edit_path = lambda {|a| edit_course_assessment_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_mission_path(@course, a) } %>
     <%- display_name = @course.customized_title(@summary[:type]).singularize -%>
-<% else #if @summary[:type] == 'policy mission'  %>
+<% elsif @summary[:type] == 'policy_mission'  %>
     <% ast_edit_path = lambda {|a| edit_course_assessment_policy_mission_path(@course, a)} %>
     <% ast_path = lambda {|a| course_assessment_policy_mission_path(@course, a) } %>
     <%- display_name = "Regulated Training" -%>
+<% elsif @summary[:type] == 'realtime_training'  %>
+    <% ast_edit_path = lambda {|a| edit_course_assessment_realtime_training_path(@course, a)} %>
+    <% ast_path = lambda {|a| course_assessment_realtime_training_path(@course, a) } %>
+    <%- display_name = "Realtime Training" -%>
 <% end %>
 
 <div class="page-header">
@@ -44,7 +48,7 @@
       </div>
     </td>
 
-    <% if can? :manage, Assessment::Submission %>
+    <% if can? :manage, Assessment::Submission and @summary[:type] != 'realtime_training' %>
         <td>
           <%= render partial: "assessment/#{@summary[:type].pluralize}/action", locals: {ast: @assessment} %>
         </td>
@@ -98,6 +102,10 @@
 	<% end %>
 <% end %>
 
+<% if (can? :manage, @assessment) && (@summary[:type] == 'realtime_training') %>
+    <%= render partial: "assessment/#{@summary[:type].pluralize}/groups", locals: {sessions: @summary[:specific].sessions} %>
+<% end %>
+
 <% if can? :view_detail, @assessment %>
     <h2 class="asm-qns-title"><%= display_name %> Questions</h2>
     <p><%= link_to 'Add Questions',course_assessment_path(@course,@assessment) + '/questions/add_question', :class => 'btn btn-primary'%></p>
@@ -110,7 +118,7 @@
               <div>
                 <div class="asm-qn-handler">
                   <i class="icon-move handler-icon"></i>
-                  <h3 class="handler-text">Question <span class="asm-qn-index"><%= index + 1 %></span>
+                  <h3 class="handler-text"><%= index + 1 %>. Question <span class="asm-qn-index"><%= qn.id %> </span>
                     <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
                   </h3>
                 </div>

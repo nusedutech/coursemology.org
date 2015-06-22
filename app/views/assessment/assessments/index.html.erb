@@ -7,6 +7,10 @@
     <%- model_name = "Training" %>
     <%- title =  "Tests" %>
     <%- singularTitle = "Test" %>
+<%- elsif  @summary[:module] == "Realtime training" %>
+    <%- model_name = @summary[:module] %>
+    <%- title =  "Realtime Trainings" %>
+    <%- singularTitle = "Realtime Training" %>
   <%- else %>
   	<%- model_name = @summary[:module] %>
   	<%- title = @course.customized_title(model_name).pluralize %>
@@ -31,7 +35,13 @@
 	  <%- new_url = new_course_assessment_policy_mission_path(@course) %>
 	  <%- ast_path = lambda { |c, a| course_assessment_policy_mission_path(c, a) } %>
       <%- asts_path = course_assessment_policy_missions_path %>
+  <% elsif model_name == 'Realtime training' %>
+      <%= render  partial: "assessment/trainings/tabs" %>
+      <%- new_url = new_course_assessment_realtime_training_path(@course) %>
+      <%- ast_path = lambda { |c, a| course_assessment_realtime_training_path(c, a) } %>
+      <%- asts_path = course_assessment_realtime_trainings_path %>
   <% end %>
+
   <% to_display = @summary[:columns].keys %>
 
   <%= form_tag asts_path, :method => 'get', class: "form-inline" do %>

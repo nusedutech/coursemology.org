@@ -1,6 +1,8 @@
 Coursemology::Application.routes.draw do
 
 
+  get "realtime_training_sessions/start_session"
+
   mount Ckeditor::Engine => '/ckeditor'
 
   authenticated :user do
@@ -121,6 +123,17 @@ Coursemology::Application.routes.draw do
                 constraints: TrainingConstraint.new do
         member do
           get 'submit' => 'training_submissions#submit'
+        end
+      end
+
+      resources :assessment_submissions,
+                path:       :submissions,
+                as:         :submissions,
+                controller: :realtime_training_submissions,
+                except: [:create],
+                constraints: RealtimeTrainingConstraint.new do
+        member do
+          get 'submit' => 'realtime_training_submissions#submit'
         end
       end
 
@@ -251,6 +264,26 @@ Coursemology::Application.routes.draw do
       member do
         put 'update_questions' => 'trainings#update_questions'
       end
+    end
+
+    resources :assessment_realtime_trainings, path: 'realtime_trainings', controller: :realtime_trainings, module: :assessment do
+      collection do
+        get :index, to: 'assessments#index', type: 'realtime_training'
+        get 'overview' => 'realtime_trainings#overview'
+        get 'stats' => 'realtime_trainings#stats'
+        get 'submissions' => 'assessments#listall', type: 'realtime_training'
+      end
+      member do
+        put 'update_questions' => 'realtime_trainings#update_questions'
+      end
+      resources :sessions, path: 'sessions', controller: :realtime_training_sessions do
+        member do
+          get 'start_session' => 'realtime_training_sessions#start_session'
+          post :switch_lock_question, to: 'realtime_training_sessions#switch_lock_question'
+          post :count_submission, to: 'realtime_training_sessions#count_submission'
+        end
+      end
+
     end
 
     scope module: 'assessment' do

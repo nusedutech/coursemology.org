@@ -8,6 +8,7 @@ class Assessment::Answer < ActiveRecord::Base
         .readonly(false) }
 
   scope :finalised,  -> { where(finalised: true) }
+  scope :correct, -> { where(correct: true) }
 
   belongs_to  :question, class_name: Assessment::Question
   belongs_to  :std_course, class_name: "UserCourse"

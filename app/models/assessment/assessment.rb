@@ -41,6 +41,7 @@ class Assessment < ActiveRecord::Base
     end
   end
 	scope :policy_mission, -> { where(as_assessment_type: "Assessment::PolicyMission") }
+  scope :realtime_training, -> { where(as_assessment_type: "Assessment::RealtimeTraining") }
 
   belongs_to  :tab
   belongs_to  :course
@@ -154,6 +155,10 @@ class Assessment < ActiveRecord::Base
 
   def is_policy_mission?
     as_assessment_type == Assessment::PolicyMission.name
+  end
+
+  def is_realtime_training?
+    as_assessment_type == Assessment::RealtimeTraining.name
   end
 
   def is_guidance_quiz?

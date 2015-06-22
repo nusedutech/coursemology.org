@@ -1,0 +1,33 @@
+<!--TODO:TOFIX-->
+
+<strong>Answer attempts</strong>
+<table class="table">
+  <thead>
+  <tr>
+    <th width="2%"></th>
+    <th>Answer</th>
+    <th>Attempts</th>
+    <th width="15%">Submitted at</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% answers.each_with_index do |ans, index| %>
+      <tr class="<%= (defined?(show_answer) ? show_answer : true) ? (ans.correct ? "mcq-ans-correct" : "mcq-ans-incorrect") : "mcq-ans-hide" %>">
+        <td><%= index + 1 %></td>
+        <td>
+          <% if ans.options.length == 1 %>
+              <%= style_format ans.options.first.text %>
+          <% else %>
+              <ul>
+                <% ans.options.each do |opt| %>
+                    <li><%= style_format opt.text %></li>
+                <% end %>
+              </ul>
+          <% end %>
+        </td>
+        <td><%= ans.count %></td>
+        <td><%= time_ago_in_words(ans.created_at) + " ago"  %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>

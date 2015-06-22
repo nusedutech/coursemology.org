@@ -22,7 +22,7 @@ class Assessment::AssessmentsController < ApplicationController
     end
 
     #TODO: refactoring
-    if assessment_type == 'training' || assessment_type == 'policy_mission'
+    if assessment_type == 'training' || assessment_type == 'policy_mission' || assessment_type == 'realtime_training'
       @tabs = @course.tabs.training
       @tab_id = params['_tab']
 
@@ -36,6 +36,8 @@ class Assessment::AssessmentsController < ApplicationController
       elsif params['_tab'] and params['_tab'] == 'Tests'
         @tab_id = params['_tab']
         @assessments = @assessments.test
+      elsif assessment_type == 'realtime_training'
+        @tab_id='Realtime Trainings'
       else
         @tab_id = 'Trainings'
         @assessments = @assessments.retry_training
@@ -93,6 +95,7 @@ class Assessment::AssessmentsController < ApplicationController
         #potential bug
         #1, can mange, 2, opened and fulfil the dependency requirements
       elsif ((ast.opened? and (ast.as_assessment.class == Assessment::Training or
+          ast.as_assessment.class == Assessment::RealtimeTraining or
           ast.dependent_id.nil? or ast.dependent_id == 0 or
           (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or
           can?(:manage, ast)) and ast.can_access_with_end_check? (curr_user_course)

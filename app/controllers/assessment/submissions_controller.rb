@@ -18,7 +18,7 @@ class Assessment::SubmissionsController < ApplicationController
       @submission.std_course = curr_user_course
     end
 
-    if @assessment.is_a?(Assessment::Training)
+    if @assessment.is_a?(Assessment::Training) || @assessment.is_a?(Assessment::RealtimeTraining)
       @reattempt = @course.training_reattempt
       #continue unfinished training, or go to finished training of can't reattempt
       if sbm && (!sbm.graded? ||  !@reattempt || !@reattempt.display)

@@ -28,6 +28,9 @@
       <li class="<%= "active" if @tab_id == 'Tests' %>">
         <a href="<%= course_assessment_trainings_path(@course, _tab: 'Tests') %>" ><h4>Tests</h4></a>
       </li>
+      <li class="<%= "active" if @tab_id == 'RealtimeTrainings' %>">
+        <a href="<%= course_assessment_realtime_trainings_path(@course, _tab: 'RealtimeTrainings') %>" ><h4>Realtime Training</h4></a>
+      </li>
   <% else %>
       <% @tabs.each do |tab| %>
           <li class="<%= "active" if @tab_id == tab.id.to_s %>">

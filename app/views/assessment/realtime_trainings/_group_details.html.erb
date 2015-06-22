@@ -1,0 +1,19 @@
+<table class="table table-bordered assignments-details-table">
+  <tr>
+    <td><strong><%= session.class.human_attribute_name(:number_of_table) %>:</strong></td>
+    <td><%= session.number_of_table %></td>
+  </tr>
+  <tr>
+    <td><strong><%= session.class.human_attribute_name(:seat_per_table) %>:</strong></td>
+    <td><%= session.seat_per_table %></td>
+  </tr>
+  <tr>
+    <td><strong><%= session.class.human_attribute_name(:start_time) %>:</strong></td>
+    <td><%= datetime_format(session.start_time) %></td>
+  </tr>
+  <tr>
+    <td><strong><%= session.class.human_attribute_name(:end_time) %>:</strong></td>
+    <td><%= datetime_format(session.end_time) %></td>
+  </tr>
+
+</table>

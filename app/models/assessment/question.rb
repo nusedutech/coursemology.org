@@ -43,6 +43,10 @@ class Assessment::Question < ActiveRecord::Base
   after_update  :update_assessment_grade, if: :max_grade_changed?
   after_update  :update_attempt_limit, if: :attempt_limit_changed?
 
+  def comment_topic_temp
+    CommentTopic.where(topic_type: self.as_question.class, topic_id: self.as_question.id).first
+  end
+
   def self.import (file, current_user, course)
     csv_text = File.read(file.path)
     csv = CSV.parse(csv_text, :headers => true)

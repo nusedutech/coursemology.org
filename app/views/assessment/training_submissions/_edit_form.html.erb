@@ -70,7 +70,7 @@
 
     <% if curr_user_course.is_staff? %>
         <%= render partial: "comments/list",
-                   locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic, curr_user_course),
+                   locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic_temp, curr_user_course),
                              target:    @summary[:current],
                              header:    "Comments on the Question",
                              margin_left: "0px" } %>

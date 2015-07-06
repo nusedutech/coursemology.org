@@ -125,6 +125,13 @@
 
                 <% if q.class == Assessment::McqQuestion %>
                     <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+                    <% if curr_user_course.is_staff? %>
+                        <%= render partial: "comments/list",
+                                   locals: { comments:  CommentTopic.comments_to_json(q.comment_topic_temp, curr_user_course),
+                                             target:    q,
+                                             header:    "Comments on the Question",
+                                             margin_left: "0px" } %>
+                    <% end %>
                 <% elsif q.class == Assessment::MpqQuestion %>
                     <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
                 <% else %>

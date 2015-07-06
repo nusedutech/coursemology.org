@@ -19,6 +19,9 @@ css = css.length > 0 ? css.join(';') : nil
 <input type="hidden" id="<%= ecid %>_commentable_id" value="<%= target.id %>">
 
 <script>
+    $(document).ready( function (){
+
+    });
     Comment.init('<%= ecid %>', true);
-    Comment.parseComment(<%= raw(comments.to_json) %>, '<%= ecid %>')
+    Comment.parseComment(<%= raw(comments.to_json) %>, '<%= ecid %>');
 </script>

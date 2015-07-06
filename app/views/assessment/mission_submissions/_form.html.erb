@@ -31,7 +31,7 @@
                 <%- answer = @submission.answers.where(question_id: q.id).first %>
                 <%- question = q.specific %>
                 <% if question.class == Assessment::GeneralQuestion %>
-                    <textarea name="answers[<%= q.id %>]" class="span8 html-editor" rows="8">
+                    <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8">
                       <% if answer %>
                           <%= answer.content %>
                       <% end %>
@@ -44,10 +44,10 @@
                         <span><%= style_format(sq.description) %></span>
                       </div>
                     </div>
-                    <textarea name="answers[<%= sq.id %>]" class="span8 html-editor" rows="8">
-                      <%- sanswer = @submission.answers.where(question_id: sq.id).first %>
-                      <% if sanswer %>
-                          <%= sanswer.content %>
+                    <textarea name="answers[<%= sq.id %>]" class="span8 ck-editor" rows="8">
+                      <%- answer = @submission.answers.where(question_id: sq.id).first %>
+                      <% if answer %>
+                          <%= answer.content %>
                       <% end %>
                     </textarea>
                   <% end %>
@@ -106,3 +106,6 @@
     </div>
 <% end %>
 
+<script>
+    $('textarea.ck-editor').ckeditor();
+</script>

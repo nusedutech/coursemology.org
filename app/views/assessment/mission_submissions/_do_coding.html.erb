@@ -1,6 +1,6 @@
 <div class="row-fluid">
   <div class="code-submission span10">
-    <% if mode == "view" %>
+    <% if mode == "view" and !answer.nil? %>
         <div class="btn-group" style="float: right" >
           <a class="btn" href="#" id="select-all-code-<%= answer.id  %>" title="Select entire code"><i class="icon-file"></i></a>
           <a class="btn" href="#" id="toggle-comment-<%= answer.id  %>" title="Toggle Annotations"><i class="icon-comment"></i></a>

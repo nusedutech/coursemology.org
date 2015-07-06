@@ -13,14 +13,24 @@
         <h3>Your answer:</h3>
     <% end %>
 
-    <%- answer = @submission.answers.where(question_id: q.id).first %>
     <%- question = q.specific %>
     <% if question.class == Assessment::GeneralQuestion %>
+        <%- answer = @submission.answers.where(question_id: q.id).first %>
         <div class="row-fluid">
           <div class="submission-question-block span10">
             <%= answer.content.html_safe %>
           </div>
         </div>
+    <% elsif question.class == Assessment::MpqQuestion%>
+        <% question.sub_questions.each do |sq| %>
+            <%- answer = @submission.answers.where(question_id: sq.id).first %>
+            <%- squestion = sq.specific %>
+            <div class="row-fluid">
+              <div class="submission-question-block span10">
+                <%= answer.content.html_safe %>
+              </div>
+            </div>
+        <% end %>
     <% else %>
         <%=render partial: 'do_coding',
                   locals: { answer: answer,

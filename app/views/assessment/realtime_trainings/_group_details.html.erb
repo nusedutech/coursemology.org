@@ -15,5 +15,38 @@
     <td><strong><%= session.class.human_attribute_name(:end_time) %>:</strong></td>
     <td><%= datetime_format(session.end_time) %></td>
   </tr>
-
+  <tr>
+    <td><strong>Total of students:</strong></td>
+    <td><%= session.students.count %></td>
+  </tr>
+  <tr>
+    <td colspan='2' style="text-align: right"><a href="#" class="btn" data-toggle="modal" data-target="#seat_plan" >Seating Plan</a></td>
+  </tr>
 </table>
+<div id="seat_plan" class="modal hide fade" data-backdrop="static">
+  <div class="modal-header">
+    <h3>Seat Plan</h3>
+  </div>
+  <div class="modal-body hidden">
+  </div>
+  <div class="modal-body">
+    <table>
+      <% (1..session.number_of_table).each_with_index do |t,i| %>
+          <tr>
+            <td><%= "Table #{t}: "%></td>
+            <td>
+              <% (1..session.seat_per_table).each_with_index do |s,s_i| %>
+                  <% seat = session.get_student_seats_by_seat(t,s).first %>
+                  <% if !seat.nil? and !seat.student.nil? %>
+                    <span class="label label-info"><%= seat.student.name %></span>
+                  <% end %>
+              <% end %>
+            </td>
+          </tr>
+      <% end %>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button data-dismiss="modal" class="btn">Close</button>
+  </div>
+</div>

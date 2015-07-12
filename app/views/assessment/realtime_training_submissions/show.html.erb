@@ -43,7 +43,7 @@
     <% grade = qn.answer_gradings.
             where("assessment_answers.std_course_id = ? and assessment_answer_gradings.grading_id = ?",
                   @submission.std_course, @submission.gradings.last).last %>
-    <% if grade %>
+    <% if grade && show_answer %>
         <p><strong>Final Grade: </strong><%= grade.grade %> / <%= qn.max_grade %></p>
     <% end %>
     <hr />

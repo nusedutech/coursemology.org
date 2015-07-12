@@ -25,7 +25,11 @@ $(document).ready(function() {
                             klass = 'btn-success';
                             break;
                     }
-                    $div.html('<a href="' + actions_map[mid].url + '" class="btn ' + klass + '" >' + actions_map[mid].action + '</a>')
+                    if(actions_map[mid].action == 'Notstart'){
+                        $div.html(actions_map[mid].flash)
+                    }else{
+                        $div.html('<a href="' + actions_map[mid].url + '" class="btn ' + klass + '" >' + actions_map[mid].action + '</a>')
+                    }
                 }
                 
                 var $divSecondary = $("#"+mid+"-secondary");

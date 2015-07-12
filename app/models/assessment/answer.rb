@@ -10,6 +10,9 @@ class Assessment::Answer < ActiveRecord::Base
   scope :finalised,  -> { where(finalised: true) }
   scope :correct, -> { where(correct: true) }
 
+  scope :in_student_list, lambda { |list_std| where(["std_course_id IN (?)", list_std]) }
+  scope :in_submission_list, lambda { |list_sub| where(["submission_id IN (?)", list_sub]) }
+
   belongs_to  :question, class_name: Assessment::Question
   belongs_to  :std_course, class_name: "UserCourse"
   belongs_to  :submission, class_name: Assessment::Submission

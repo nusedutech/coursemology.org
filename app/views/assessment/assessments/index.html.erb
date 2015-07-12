@@ -115,15 +115,22 @@
           <% if to_display.include? 'exp' %>
               <td><%= ast.exp %></td>
           <% end %>
-          <% if to_display.include? 'award' %>
+          <%if model_name != 'Realtime training' %>
+              <% if to_display.include? 'award' %>
+                  <td>
+                    <% ast.as_requirements.each do |req| %>
+                        <a href='#' title="<%= req.obj.title %>">
+                          <img class="asm-ach-icon" src="<%= req.obj.icon_url %>" >
+                        </a>
+                    <% end %>
+                  </td>
+              <% end %>
+          <% else %>
               <td>
-                <% ast.as_requirements.each do |req| %>
-                    <a href='#' title="<%= req.obj.title %>">
-                      <img class="asm-ach-icon" src="<%= req.obj.icon_url %>" >
-                    </a>
-                <% end %>
+                <%= @summary[:actions][ast.id][:seat] %>
               </td>
           <% end %>
+
           <% if to_display.include? 'start' %>
               <td>
                 <% if  @summary[:time_format].prefer_value == 'ago' %>

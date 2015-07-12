@@ -134,6 +134,7 @@ Coursemology::Application.routes.draw do
                 constraints: RealtimeTrainingConstraint.new do
         member do
           get 'submit' => 'realtime_training_submissions#submit'
+          post 'check_question_unlocked' => 'realtime_training_submissions#check_question_unlocked'
         end
       end
 
@@ -275,12 +276,15 @@ Coursemology::Application.routes.draw do
       end
       member do
         put 'update_questions' => 'realtime_trainings#update_questions'
+        post 'update_seating_plan' => 'realtime_trainings#update_seating_plan'
       end
       resources :sessions, path: 'sessions', controller: :realtime_training_sessions do
         member do
+          get 'finalize_grade' => 'realtime_training_sessions#finalize_grade'
           get 'start_session' => 'realtime_training_sessions#start_session'
           post :switch_lock_question, to: 'realtime_training_sessions#switch_lock_question'
           post :count_submission, to: 'realtime_training_sessions#count_submission'
+          post :answers_stats, to: 'realtime_training_sessions#answers_stats'
         end
       end
 

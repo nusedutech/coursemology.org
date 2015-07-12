@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150411180141) do
+ActiveRecord::Schema.define(:version => 20150705144118) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -461,9 +461,11 @@ ActiveRecord::Schema.define(:version => 20150411180141) do
   create_table "assessment_realtime_training_seat_allocations", :force => true do |t|
     t.integer  "std_course_id"
     t.integer  "session_id"
-    t.string   "seat_number"
+    t.integer  "seat_number"
     t.datetime "created_at",    :null => false
     t.datetime "updated_at",    :null => false
+    t.integer  "table_number"
+    t.float    "team_grade"
   end
 
   create_table "assessment_realtime_training_session_questions", :force => true do |t|

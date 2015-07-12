@@ -153,6 +153,10 @@ class Assessment < ActiveRecord::Base
     as_assessment_type == Assessment::Training.name
   end
 
+  def is_test?
+    is_training? and self.assessment.test
+  end
+
   def is_policy_mission?
     as_assessment_type == Assessment::PolicyMission.name
   end

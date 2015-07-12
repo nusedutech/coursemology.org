@@ -1,3 +1,7 @@
+<input type="hidden" id="ajax_url" value="<%= check_question_unlocked_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+<input type="hidden" id="session_id" value="<%= @summary[:session].id%>" />
+<input type="hidden" id="session_question_id" value="<%= @summary[:session_question].nil? ? "0" : @summary[:session_question].id%>" />
+<input type="hidden" id="submission_id" value="<%= @submission.id%>" />
 <div class="page-header">
   <h1><%= @realtime_training.title %></h1>
 </div>
@@ -23,8 +27,13 @@
 </div>
 <hr/>
 
-<% if !@summary[:current] %>
+<% if @summary[:session_question] and !@summary[:session_question].unlock %>
+    <h4>This question is not unlocked yet. Please wait!</h4>
+    <input type="hidden" id="wait_unlock" value="true" />
+<% elsif !@summary[:current] %>
     <h2>Congratulations, you're done!</h2>
+    <p>Your individual grade is <strong><%=@submission.get_final_grading.grade%></strong></p>
+    <p>Your team grade is <strong><%=@summary[:session].student_seats.belong_to_std(@submission.std_course).last.team_grade%></strong></p>
     <p>
       <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
         Click here
@@ -74,3 +83,26 @@
     <% end %>
 <% end %>
 
+<script>
+    var session_interval = null;
+    $(document).ready(function(){
+        var sq_id = $('#session_question_id').val();
+        var url = $('#ajax_url').val();
+        if($('#wait_unlock').length){
+            session_interval = setInterval(function(){
+                $.ajax({
+                    url : url,
+                    type : 'POST',
+                    dataType : 'json',
+                    async : false,
+                    data : {session_question_id: sq_id},
+                    success : function(result) {
+                        if(result.result == true){
+                            location.reload();
+                        }
+                    }
+                });
+            }, 1000);
+        }
+    });
+</script>

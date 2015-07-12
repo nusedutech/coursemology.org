@@ -1,4 +1,5 @@
 <input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
+<input type="hidden" class="answers-stats-ajax-url" value="<%= answers_stats_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
 <input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
 <div class="page-header">
   <h1> <%= @realtime_training.title %></h1>
@@ -26,7 +27,7 @@
   <% @session.session_questions.each_with_index do |sq, index| %>
       <% qn = sq.question_assessment.question %>
       <% q = qn.as_question %>
-      <tr class="asm-qn" id="sortable-item_<%= qn.id %>" >
+      <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
         <td width="80%">
           <div>
             <div class="asm-qn-handler">
@@ -37,7 +38,7 @@
             </div>
 
             <% if q.class == Assessment::McqQuestion %>
-                <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
+                <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: false } %>
             <% elsif q.class == Assessment::MpqQuestion %>
                 <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
             <% else %>
@@ -52,7 +53,7 @@
               <div class="">
                 <span class="count-submission"></span>
                 <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
-                <%= link_to 'Statictis','', class: 'btn btn-info stats-answer' %>
+                <a href="#" class="btn btn-info stats-answer" data-toggle="modal" data-target="#show_statistic" >Statistic</a>
                 <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
               </div>
             </td>
@@ -61,17 +62,45 @@
   <% end %>
   </tbody>
 </table>
+<div style="height: 20px">
+    <div style="float: left"><input type="button" class="btn btn-prev" value="Previous"></div>
+    <div style="float: right"><input type="button" class="btn btn-next" value="Next"></div>
+</div>
+
+<div class="form-actions" style="text-align: center">
+    <%= link_to "Finalize Grade", finalize_grade_course_assessment_realtime_training_session_path(@course, @realtime_training, @session),:class => 'btn btn-primary' %>
+    <%= link_to "Close Session", course_assessment_realtime_training_path(@course, @realtime_training),:class => 'btn' %>
+</div>
+<div id="show_statistic" class="modal hide fade" data-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Question Statistic</h3>
+      </div>
+      <div class="modal-body">
+        <div class="modal-body-up"></div>
+        <div class="modal-body-bottom">
+            <div id="bar-chart" style="height: 300px; width: 500px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button data-dismiss="modal" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
   var session_interval = null;
   $(document).ready(function(){
       $('.unlock-question').click(function(){
+          if($(this).text()== 'Lock'){
+              clearInterval( session_interval );
+          }
           var url = $(".switch-lock-ajax-url").val();
           var $this = $(this);
           var session_question_id = $(this).parent().find(".session-question-id").val();
-          if($($this).text()== 'Lock'){
-              clearInterval( session_interval );
-          }
+
           $.ajax({
               url : url,
               type : 'POST',
@@ -79,7 +108,7 @@
               data : {session_question_id: session_question_id},
               success : function(result) {
                   //start counting as unlock
-                  if(result.result && $($this).text() == 'Unlock'){
+                  if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
                       session_interval = setInterval(function(){
                           var url = $(".count-submission-ajax-url").val();
                           var result = server_request({session_question_id: session_question_id}, "POST", url);
@@ -87,8 +116,13 @@
                           //alert(result.count);
                       }, 1000);
                       $($this).text('Lock');
-                  }else if(result.result && $($this).text()== 'Lock'){
+                      $($this).removeClass('btn-success').addClass('btn-warning');
+                  }else if(result.result && $($this).text()== 'Lock' && result.u_c == 0){
                       $($this).text('Unlock');
+                      $($this).removeClass('btn-warning').addClass('btn-success');
+                  }else if(result.result && $($this).text()== 'Lock' && result.u_c >= 1){
+                      $($this).text('Reunlock');
+                      $($this).removeClass('btn-warning').addClass('btn-success');
                   }
               }
           });
@@ -96,9 +130,90 @@
 
       });
 
-      $('.unlock-question').click(function() {
+      var statistic_data = null;
+      $('.stats-answer').click(function() {
+
+          $('.modal-body-up').empty();
+          //clone question to modal
+          var $td = $(this).closest("tr.asm-qn").find("td:first-child").clone();
+          $td.find(".asm-qn-handler").remove();
+          $td.children().prependTo('.modal-body-up');
+
+          var url = $(".answers-stats-ajax-url").val();
+          var $this = $(this);
+          var session_question_id = $(this).parent().find(".session-question-id").val();
+
+          $.ajax({
+              url : url,
+              type : 'POST',
+              dataType : 'json',
+              async : false,
+              data : {session_question_id: session_question_id},
+              success : function(result) {
+                  //start counting as unlock
+                  statistic_data = result;
+
+              }
+          });
+      });
+
+      $('#show_statistic').on('shown', function(){
+          build_bar(statistic_data);
 
       });
+
+      function build_bar(para){
+          var data = [];
+          for (var key in para.result) {
+              data.push({x: "option " + key, y: para.result[key]});
+          }
+          $('#bar-chart').empty();
+          Morris.Bar({
+              element: 'bar-chart',
+              data: data,
+              xkey: 'x',
+              ykeys: ['y'],
+              labels: ['Options'],
+              hideHover: 'auto',
+              hoverCallback: function (index, options, content, row) {
+                  return row.y ;
+              }
+              /*barColors: function (row, series, type) {
+               console.log("--> "+row.x, series, type);
+               if(row.x == "2006"){ return "#AD1D28";}
+               else {return "#DEBB27";}
+               }*/
+          });
+      }
+
+      var cur_index_ques = 0;
+      $('.btn-prev').addClass("hidden");
+      $('.btn-prev').click(function() {
+          $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
+          $('tbody tr.asm-qn').eq(cur_index_ques-1).removeClass("hidden");
+          cur_index_ques--;
+
+          $('.btn-next').removeClass("hidden");
+          if (cur_index_ques == 0){
+              $('.btn-prev').addClass("hidden");
+          }
+      });
+
+      $('.btn-next').click(function() {
+          $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
+          $('tbody tr.asm-qn').eq(cur_index_ques+1).removeClass("hidden");
+          cur_index_ques++;
+
+          $('.btn-prev').removeClass("hidden");
+          if (cur_index_ques == $('tbody tr.asm-qn').length - 1){
+              $('.btn-next').addClass("hidden");
+          }
+      });
+
+
+
+
+
   });
 
 

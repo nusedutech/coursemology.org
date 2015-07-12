@@ -13,6 +13,11 @@ class Assessment::RealtimeTrainingsController < Assessment::AssessmentsControlle
     @summary[:type] = 'realtime_training'
     @summary[:specific] = @realtime_training
 
+    #reset all session
+    @realtime_training.sessions.each do |s|
+      s.update_attribute(:status, false)
+    end
+
     respond_to do |format|
       format.html { render "assessment/assessments/show" }
     end
@@ -45,6 +50,9 @@ class Assessment::RealtimeTrainingsController < Assessment::AssessmentsControlle
 
     respond_to do |format|
       if @realtime_training.save
+        @realtime_training.sessions.each do |s|
+          s.allocate_seats
+        end
         @realtime_training.create_local_file
         format.html { redirect_to course_assessment_realtime_training_path(@course, @realtime_training),
                                   notice: "The Realtime Training '#{@realtime_training.title}' has been created." }
@@ -108,6 +116,20 @@ class Assessment::RealtimeTrainingsController < Assessment::AssessmentsControlle
       else
         format.html { render action: "edit" }
       end
+    end
+  end
+
+  def update_seating_plan
+    respond_to do |format|
+      params[:data].values.each do |d|
+        seat = Assessment::RealtimeTrainingSession.find(d[:session]).get_student_seats_by_seat(d[:table],d[:seat]).first
+        if !seat.nil?
+          seat.update_attribute(:std_course_id, d[:student])
+        else
+          Assessment::RealtimeTrainingSession.find(d[:session]).student_seats.create(table_number: d[:table], seat_number: d[:seat], std_course_id: d[:student])
+        end
+      end
+      format.json { render json: { result: true}}
     end
   end
 

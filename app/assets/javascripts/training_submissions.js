@@ -13,6 +13,9 @@ $(document).ready(function(){
         var aids = [];
         var step = form.children("input[name=step]").val();
         var btn_id = $(this).attr('id');
+        var sq_id = $('#session_question_id').val();
+        var submission_id = $('#submission_id').val();
+
         $.each(checkboxes, function(i, cb) {
             choices.push($(cb).val());
             if ($(cb).is(":checked")) {
@@ -25,7 +28,9 @@ $(document).ready(function(){
                 'step':step,
                 'qid': qid,
                 'aid': aids,
-                'choices': choices
+                'choices': choices,
+                'sq_id' : sq_id,
+                'sid' :submission_id
             };
             // send ajax request to get result
             // update result form
@@ -40,12 +45,14 @@ $(document).ready(function(){
                 $('#explanation').removeClass('mcq-ans-incorrect');
                 $('#explanation').removeClass('mcq-ans-correct');
 
+
                 if (resp.is_correct) {
                     $('#continue-btn').removeClass('disabled');
                     $('#continue-btn').addClass('btn-primary');
                     $('#submit-btn').removeClass('btn-primary');
                     $('#explanation').addClass('mcq-ans-correct');
                 } else {
+                    $('#continue-btn').removeClass('disabled');
                     $('#explanation').addClass('mcq-ans-incorrect');
                 }
                 //To next question right after answering pre one

@@ -71,9 +71,9 @@ class Assessment::AssessmentsController < ApplicationController
         attempting = sub_map[ast.id].attempting?
         action_map[ast.id] = {}
         if !attempting
-		  action_map[ast.id][:action] = "Review"
-		  action_map[ast.id][:url] = course_assessment_submission_path(@course, ast, sub_map[ast.id])
-        #Ensure controls are not revealed when assessment has ended
+          action_map[ast.id][:action] = "Review"
+          action_map[ast.id][:url] = course_assessment_submission_path(@course, ast, sub_map[ast.id])
+          #Ensure controls are not revealed when assessment has ended
         elsif ast.can_access_with_end_check? (curr_user_course)
           action_map[ast.id][:action] = "Resume"
           action_map[ast.id][:url] = edit_course_assessment_submission_path(@course, ast, sub_map[ast.id])
@@ -100,8 +100,24 @@ class Assessment::AssessmentsController < ApplicationController
           (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or
           can?(:manage, ast)) and ast.can_access_with_end_check? (curr_user_course)
 
-          action_map[ast.id] = {action: "Attempt",
-                                url: new_course_assessment_submission_path(@course, ast)}
+          #Check student's realtime_training_session status
+          if curr_user_course.is_student? and ast.is_realtime_training?
+            session = ast.as_assessment.sessions.include_std(curr_user_course)
+            if session.started.count == 0
+              seat = Assessment::RealtimeTrainingSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
+              action_map[ast.id] = {action: "Notstart",
+                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}",
+                                    flash: "Not Started"}
+            else
+              seat = Assessment::RealtimeTrainingSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
+              action_map[ast.id] = {action: "Attempt",
+                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}",
+                                    url: new_course_assessment_submission_path(@course, ast)}
+            end
+          else
+            action_map[ast.id] = {action: "Attempt",
+                                  url: new_course_assessment_submission_path(@course, ast)}
+          end
 
         if ast.is_policy_mission?
           @listed_tags[ast.id] = nil

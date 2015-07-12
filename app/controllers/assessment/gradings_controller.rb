@@ -17,7 +17,13 @@ class Assessment::GradingsController < ApplicationController
     @summary = {qn_ans: {}}
 
     @assessment.questions.each_with_index do |q,i|
-      @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+      if q.as_question.class==Assessment::MpqQuestion
+        q.as_question.sub_questions.each_with_index do |sq, si|
+          @summary[:qn_ans][sq.id] = { qn: sq.specific, i: si + 1 }
+        end
+      else
+        @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+      end
     end
 
     eval_answer

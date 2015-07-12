@@ -16,6 +16,10 @@ class Assessment::Submission < ActiveRecord::Base
     joins("left join assessments on assessment_submissions.assessment_id = assessments.id ").
         where("assessments.as_assessment_type = 'Assessment::PolicyMission'") }
 
+  scope :realtime_training_submissions, -> {
+    joins("left join assessments on assessment_submissions.assessment_id = assessments.id ").
+        where("assessments.as_assessment_type = 'Assessment::RealtimeTraining'") }
+
   scope :graded, -> { where(status: 'graded') }
 
   scope :submitted_format, -> { where(status: 'submitted') }
@@ -133,7 +137,8 @@ class Assessment::Submission < ActiveRecord::Base
   end
 
   def done?
-    if self.assessment.as_assessment.is_a?(Assessment::Training) and self.assessment.as_assessment.test
+    if (self.assessment.as_assessment.is_a?(Assessment::Training) and self.assessment.as_assessment.test) or
+        self.assessment.as_assessment.is_a?(Assessment::RealtimeTraining)
       self.assessment.questions.finalised_for_test(self).count == self.assessment.questions.count
     else
       self.assessment.questions.finalised(self).count == self.assessment.questions.count
@@ -159,6 +164,8 @@ class Assessment::Submission < ActiveRecord::Base
         case
           when qn.is_a?(Assessment::GeneralQuestion)
             ans_class = Assessment::GeneralAnswer
+          when qn.is_a?(Assessment::MpqQuestion)
+            ans_class = Assessment::GeneralAnswer
           when qn.is_a?(Assessment::CodingQuestion)
             ans_class = Assessment::CodingAnswer
           when qn.is_a?(Assessment::McqQuestion)
@@ -167,12 +174,23 @@ class Assessment::Submission < ActiveRecord::Base
             ans_class = Assessment::GeneralAnswer
         end
 
-        ans_class.create!({std_course_id: std_course_id,
-                           question_id: qn.id,
-                           #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
-                           content: qn.specific.respond_to?(:template) ? qn.template : nil,
-                           submission_id: self.id,
-                           attempt_left: qn.attempt_limit})
+        if qn.is_a?(Assessment::MpqQuestion)
+          qn.sub_questions.each do |sub|
+            ans_class.create!({std_course_id: std_course_id,
+                               question_id: sub.id,
+                               #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
+                               content: sub.specific.respond_to?(:template) ? sub.template : nil,
+                               submission_id: self.id,
+                               attempt_left: sub.attempt_limit})
+          end
+        else
+          ans_class.create!({std_course_id: std_course_id,
+                             question_id: qn.id,
+                             #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
+                             content: qn.specific.respond_to?(:template) ? qn.template : nil,
+                             submission_id: self.id,
+                             attempt_left: qn.attempt_limit})
+        end
       end
     end
   end

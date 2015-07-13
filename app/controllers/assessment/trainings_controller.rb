@@ -92,8 +92,10 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
       end
     end
 
+    @training.update_max_grade
     respond_to do |format|
-      if @training.update_attributes(params[:assessment_training])
+      if @training.save and @training.update_attributes(params[:assessment_training])
+
         format.html { redirect_to course_assessment_training_url(@course, @training),
                                   notice: "The training '#{@training.title}' has been updated." }
       else

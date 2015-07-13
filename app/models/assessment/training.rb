@@ -51,4 +51,7 @@ class Assessment::Training < ActiveRecord::Base
     entry
   end
 
+  def update_max_grade
+    self.max_grade = questions.sum(&:max_grade)
+  end
 end

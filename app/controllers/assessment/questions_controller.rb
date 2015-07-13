@@ -44,7 +44,7 @@ class Assessment::QuestionsController < ApplicationController
           if selected_topicconcepts.count > 0
             questions = questions.joins(:topicconcepts).where(selected_topicconcepts.map{|t| " topicconcepts.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(topicconcepts.id)>=#{selected_topicconcepts.count}").to_a
           end
-          questions = questions.to_a
+          questions = questions.without_sub_questions.to_a
         else
           selected_tags.each do |tag|
             questions = questions + tag.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
@@ -52,14 +52,16 @@ class Assessment::QuestionsController < ApplicationController
           selected_topicconcepts.each do |topicconcept|
             questions = questions + topicconcept.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
           end
+          questions = questions.without_sub_questions
         end
       end
+
       @questions = questions.uniq
 
     elsif (!search_string.nil? && !search_string.empty?)
-      @questions = @course.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+      @questions = @course.questions.without_sub_questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
     else
-      @questions = @course.questions.uniq
+      @questions = @course.questions.without_sub_questions.uniq
     end
 
     paging_setup
@@ -230,6 +232,9 @@ class Assessment::QuestionsController < ApplicationController
   end
 
   def destroy
+    if !params[:assessment_mpq_question_id].nil?
+      @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:assessment_mpq_question_id])
+    end
     if !@assessment.nil?
       qa = QuestionAssessment.find_by_assessment_id_and_question_id(@assessment.id, @question.question.id)
       if !qa.nil?
@@ -242,6 +247,9 @@ class Assessment::QuestionsController < ApplicationController
       if !@assessment.nil?
         format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                                 notice: "Question has been successfully deleted." }
+      elsif !@parent_mpq_question.nil?
+        format.html { redirect_to main_app.course_assessment_mpq_question_url(@course,@parent_mpq_question),
+                                  notice: 'Question updated.'}
       else
         format.html { redirect_to main_app.course_assessment_questions_url(@course),
                                   notice: "Question has been successfully deleted." }

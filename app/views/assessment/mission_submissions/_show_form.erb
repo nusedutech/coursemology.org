@@ -22,9 +22,10 @@
           </div>
         </div>
     <% elsif question.class == Assessment::MpqQuestion%>
-        <% question.sub_questions.each do |sq| %>
+        <% question.sub_questions.each_with_index do |sq,si| %>
             <%- answer = @submission.answers.where(question_id: sq.id).first %>
-            <%- squestion = sq.specific %>
+            <%- sq = sq.specific %>
+            <span><strong><%= "Sub question #{si+1}: " %></strong><%= style_format(sq.description) %></span>
             <div class="row-fluid">
               <div class="submission-question-block span10">
                 <%= answer.content.html_safe %>

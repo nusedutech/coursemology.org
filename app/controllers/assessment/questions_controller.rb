@@ -42,17 +42,16 @@ class Assessment::QuestionsController < ApplicationController
             questions = @course.questions.joins(:tags).where(selected_tags.map{|t| " tags.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(tags.id)>=#{selected_tags.count}")
           end
           if selected_topicconcepts.count > 0
-            questions = questions.joins(:topicconcepts).where(selected_topicconcepts.map{|t| " topicconcepts.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(topicconcepts.id)>=#{selected_topicconcepts.count}").to_a
+            questions = questions.joins(:topicconcepts).where(selected_topicconcepts.map{|t| " topicconcepts.id=#{t.id} "}.join('or')).group("assessment_questions.id").having("COUNT(topicconcepts.id)>=#{selected_topicconcepts.count}")
           end
           questions = questions.without_sub_questions.to_a
         else
           selected_tags.each do |tag|
-            questions = questions + tag.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+            questions = questions + tag.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq.without_sub_questions
           end
           selected_topicconcepts.each do |topicconcept|
-            questions = questions + topicconcept.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").uniq
+            questions = questions + topicconcept.questions.where("assessment_questions.title like ? or assessment_questions.description like ?", "%#{search_string}%", "%#{search_string}%").without_sub_questions.uniq.without_sub_questions
           end
-          questions = questions.without_sub_questions
         end
       end
 

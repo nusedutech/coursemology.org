@@ -45,6 +45,9 @@ $(document).ready(function(){
                 $('#explanation').removeClass('mcq-ans-incorrect');
                 $('#explanation').removeClass('mcq-ans-correct');
 
+                var el = document.getElementById("explanation");
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, el]);
+
 
                 if (resp.is_correct) {
                     $('#continue-btn').removeClass('disabled');

@@ -208,6 +208,7 @@ class Assessment::QuestionsController < ApplicationController
   def create
     @question.creator = current_user
     @question.course = @course
+    
     @question.save
     if !params[:parent_mpq_question].nil?
       @parent_mpq_question = Assessment::MpqQuestion.find_by_id(params[:parent_mpq_question])

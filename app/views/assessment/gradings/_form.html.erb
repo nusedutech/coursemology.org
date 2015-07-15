@@ -1,8 +1,4 @@
-<% if @assessment.specific.respond_to? :single_question? and @assessment.specific.single_question? %>
-    <%= render :partial => 'single_question_form', locals: {mode: "edit"} %>
-<% else %>
-    <%= render :partial => 'multiple_question_form', locals: {mode: "edit"} %>
-<% end %>
+<%= render :partial => 'multiple_question_form', locals: {mode: "edit"} %>
 
 <script>
     function suggestEXP(max, exp, sum) {

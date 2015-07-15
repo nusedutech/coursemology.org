@@ -10,12 +10,12 @@
           </div>
         </div>
 
-        <h3>Your answer:</h3>
     <% end %>
 
     <%- question = q.specific %>
     <% if question.class == Assessment::GeneralQuestion %>
         <%- answer = @submission.answers.where(question_id: q.id).first %>
+        <h4>Your answer:</h4>
         <div class="row-fluid">
           <div class="submission-question-block span10">
             <%= answer.content.html_safe %>
@@ -26,6 +26,7 @@
             <%- answer = @submission.answers.where(question_id: sq.id).first %>
             <%- sq = sq.specific %>
             <span><strong><%= "Sub question #{si+1}: " %></strong><%= style_format(sq.description) %></span>
+            <h4>Your answer:</h4>
             <div class="row-fluid">
               <div class="submission-question-block span10">
                 <%= answer.content.html_safe %>

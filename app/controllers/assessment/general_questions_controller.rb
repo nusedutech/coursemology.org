@@ -30,8 +30,11 @@ class Assessment::GeneralQuestionsController < Assessment::QuestionsController
           format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                       notice: 'Question has been added.'}
         elsif !@parent_mpq_question.nil?
-          format.html { redirect_to main_app.course_assessment_mpq_question_url(@course,@parent_mpq_question),
+          @parent_mpq_question.update_max_grade
+          if @parent_mpq_question.save
+            format.html { redirect_to main_app.course_assessment_mpq_question_url(@course,@parent_mpq_question),
                                     notice: 'Question has been added.'}
+          end
         else
           format.html { redirect_to main_app.course_assessment_questions_url(@course),
                       notice: 'Question has been added.'}

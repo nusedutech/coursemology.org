@@ -45,10 +45,5 @@
 
 <div class="well"><%= @assessment.description.html_safe %></div>
 
+<%= render :partial => 'multiple_question_form', locals: {mode: "view"} %>
 
-
-<% if @assessment.specific.respond_to? :single_question? and @assessment.specific.single_question? %>
-    <%= render :partial => 'single_question_form', locals: {mode: "view"} %>
-<% else %>
-    <%= render :partial => 'multiple_question_form', locals: {mode: "view"} %>
-<% end %>

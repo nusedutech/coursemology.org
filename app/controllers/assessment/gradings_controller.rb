@@ -17,9 +17,11 @@ class Assessment::GradingsController < ApplicationController
     @summary = {qn_ans: {}}
 
     @assessment.questions.each_with_index do |q,i|
-      if q.as_question.class==Assessment::MpqQuestion
+      if q.is_a?(Assessment::MpqQuestion)
+        @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+        @summary[:qn_ans][q.id][:sub_q] = {}
         q.as_question.sub_questions.each_with_index do |sq, si|
-          @summary[:qn_ans][sq.id] = { qn: sq.specific, i: si + 1 }
+          @summary[:qn_ans][q.id][:sub_q][sq.id] = { qn: sq.specific, i: si + 1 }
         end
       else
         @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
@@ -30,7 +32,12 @@ class Assessment::GradingsController < ApplicationController
 
     @submission.answers.each do |ans|
       qn = ans.question
-      @summary[:qn_ans][qn.id][:ans] = ans
+      if qn.parent
+        @summary[:qn_ans][qn.parent.question.id][:sub_q][qn.id][:ans] = ans
+      else
+        @summary[:qn_ans][qn.id][:ans] = ans
+      end
+
 
       #suggest grading for auto grading question
       if qn.is_a?(Assessment::CodingQuestion) && qn.auto_graded?
@@ -233,19 +240,36 @@ class Assessment::GradingsController < ApplicationController
     end
 
     @assessment.questions.each_with_index do |q,i|
-      @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+      if q.is_a?(Assessment::MpqQuestion)
+        @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+        @summary[:qn_ans][q.id][:sub_q] = {}
+        q.as_question.sub_questions.each_with_index do |sq, si|
+          @summary[:qn_ans][q.id][:sub_q][sq.id] = { qn: sq.specific, i: si + 1 }
+        end
+      else
+        @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+      end
     end
 
     @submission.answers.each do |sa|
       qn = sa.question
-      @summary[:qn_ans][qn.id][:ans] = sa
+      if qn.parent
+        @summary[:qn_ans][qn.parent.question.id][:sub_q][qn.id][:ans] = sa
+      else
+        @summary[:qn_ans][qn.id][:ans] = sa
+      end
       # @qadata[:aws][sa.id] = sa
     end
 
     #TODO, potential read row by row
     @grading.answer_gradings.each do |ag|
       qn = ag.answer.question
-      @summary[:qn_ans][qn.id][:grade] = ag
+      if qn.parent
+        @summary[:qn_ans][qn.parent.question.id][:sub_q][qn.id][:grade] = ag
+        @summary[:qn_ans][qn.parent.question.id][:grade] = @summary[:qn_ans][qn.parent.question.id][:grade].nil? ? Assessment::AnswerGrading.new(grade: ag.grade) : Assessment::AnswerGrading.new(grade: @summary[:qn_ans][qn.parent.question.id][:grade].grade + ag.grade)
+      else
+        @summary[:qn_ans][qn.id][:grade] = ag
+      end
     end
   end
 end

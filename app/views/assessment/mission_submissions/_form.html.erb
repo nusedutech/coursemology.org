@@ -27,10 +27,10 @@
             <% if @mission.file_submission_only? %>
                 <p style="font-style: italic"> Please include you answer in file(s).</p>
             <% else %>
-                <h3>Your answer:</h3>
                 <%- answer = @submission.answers.where(question_id: q.id).first %>
                 <%- question = q.specific %>
                 <% if question.class == Assessment::GeneralQuestion %>
+                    <h4>Your answer:</h4>
                     <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8">
                       <% if answer %>
                           <%= answer.content %>
@@ -38,12 +38,13 @@
                     </textarea>
                 <% elsif question.class == Assessment::MpqQuestion %>
                   <% q.specific.sub_questions.each_with_index do |sq, si| %>
-                    <h3><%=  sq.title%></h3>
+                    <h4>Sub question <%= si+1%></h4>
                     <div class="row">
                       <div class="span8">
                         <span><%= style_format(sq.description) %></span>
                       </div>
                     </div>
+                    <h4>Your answer:</h4>
                     <textarea name="answers[<%= sq.id %>]" class="span8 ck-editor" rows="8">
                       <%- answer = @submission.answers.where(question_id: sq.id).first %>
                       <% if answer %>

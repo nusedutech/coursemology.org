@@ -105,8 +105,9 @@ class Assessment::MissionsController < Assessment::AssessmentsController
       end
     end
 
+    @mission.update_max_grade
     respond_to do |format|
-      if @mission.update_attributes(params[:assessment_mission])
+      if @mission.save and @mission.update_attributes(params[:assessment_mission])
         format.html { redirect_to course_assessment_mission_url(@course, @mission),
                                   notice: "The mission '#{@mission.title}' has been updated." }
       else

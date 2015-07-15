@@ -249,6 +249,10 @@ class Assessment < ActiveRecord::Base
     self.save
   end
 
+  def update_max_grade
+    self.max_grade = questions.sum(&:max_grade)
+  end
+
   #TODO
   def can_start?(curr_user_course)
     if open_at > Time.now

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150705144118) do
+ActiveRecord::Schema.define(:version => 20150715072939) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -446,7 +446,7 @@ ActiveRecord::Schema.define(:version => 20150705144118) do
     t.integer  "dependent_id"
     t.string   "title"
     t.text     "description"
-    t.float    "max_grade"
+    t.float    "max_grade",        :default => 0.0
     t.integer  "attempt_limit"
     t.boolean  "file_submission",  :default => false
     t.text     "staff_comments"
@@ -551,7 +551,7 @@ ActiveRecord::Schema.define(:version => 20150705144118) do
     t.text     "description"
     t.integer  "position"
     t.integer  "exp"
-    t.float    "max_grade"
+    t.float    "max_grade",          :default => 0.0
     t.boolean  "published"
     t.boolean  "comment_per_qn",     :default => true
     t.integer  "dependent_id"

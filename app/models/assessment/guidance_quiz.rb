@@ -77,4 +77,8 @@ class Assessment::GuidanceQuiz < ActiveRecord::Base
   def self.get_guidance_quiz (course)
     course.guidance_quizzes.first
   end
+
+  def full_title
+    "#{I18n.t('Assessment.Guidance_Quiz')} : #{self.title}"
+  end
 end

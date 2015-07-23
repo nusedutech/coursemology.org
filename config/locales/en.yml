@@ -8,6 +8,7 @@ en:
       new_cq:   "New Coding Question"
       new_mrq:  "New MRQ Question"
       new_qn:   "New Question"
+      new_mpq:   "New MPQ Question"
 
   forum:
     post:
@@ -43,6 +44,7 @@ en:
     Mission:  Mission
     Policy_Mission: Policy Mission
     Training: Training
+    Guidance_Quiz: Guidance Quiz
     Realtime_Training: Real Time Training
   simple_form:
     form_submit:

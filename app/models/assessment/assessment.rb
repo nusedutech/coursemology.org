@@ -42,6 +42,7 @@ class Assessment < ActiveRecord::Base
   end
 	scope :policy_mission, -> { where(as_assessment_type: "Assessment::PolicyMission") }
   scope :realtime_training, -> { where(as_assessment_type: "Assessment::RealtimeTraining") }
+  scope :without_guidance_quiz, -> { where('assessments.as_assessment_type <> "Assessment::GuidanceQuiz"') }
 
   belongs_to  :tab
   belongs_to  :course

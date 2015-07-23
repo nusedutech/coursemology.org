@@ -48,12 +48,15 @@ $(document).ready(function(){
                 var el = document.getElementById("explanation");
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, el]);
 
-
-                if (resp.is_correct) {
+                if (resp.is_test || resp.is_correct) {
                     $('#continue-btn').removeClass('disabled');
                     $('#continue-btn').addClass('btn-primary');
                     $('#submit-btn').removeClass('btn-primary');
-                    $('#explanation').addClass('mcq-ans-correct');
+                    if (resp.is_test){
+                        $('#explanation').addClass('alert-info');
+                    }else {
+                        $('#explanation').addClass('mcq-ans-correct');
+                    }
                 } else {
                     $('#continue-btn').removeClass('disabled');
                     $('#explanation').addClass('mcq-ans-incorrect');

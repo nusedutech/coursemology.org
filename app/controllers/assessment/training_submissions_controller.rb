@@ -10,6 +10,8 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
   def show
     @training = @assessment.specific
     @grading = @submission.get_final_grading
+    @show_answer = (!@training.test or ((can? :manage, Assessment::Grading) or(!@training.assessment.bonus_cutoff_at.nil? and @training.assessment.bonus_cutoff_at.to_datetime < DateTime.now)))
+
   end
 
   def edit
@@ -155,10 +157,13 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
         explanation = selected_options.first.explanation
       end
 
-      {is_correct: correct,
-       result: correct ? correct_str : "Incorrect!",
-       explanation: explanation
+      {
+          is_test: @submission.assessment.as_assessment.test,
+          is_correct: correct,
+          result: @submission.assessment.as_assessment.test ? "Answer is saved!" : (correct ? correct_str : "Incorrect!"),
+          explanation: @submission.assessment.as_assessment.test ? "" : explanation
       }
+
     end
   end
 

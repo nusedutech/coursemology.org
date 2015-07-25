@@ -58,7 +58,7 @@ $(document).ready(function(){
                         $('#explanation').addClass('mcq-ans-correct');
                     }
                 } else {
-                    $('#continue-btn').removeClass('disabled');
+                    //$('#continue-btn').removeClass('disabled');
                     $('#explanation').addClass('mcq-ans-incorrect');
                 }
                 //To next question right after answering pre one

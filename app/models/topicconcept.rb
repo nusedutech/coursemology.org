@@ -34,6 +34,9 @@ class Topicconcept < ActiveRecord::Base
   has_one :concept_option, class_name: Assessment::GuidanceConceptOption, dependent: :destroy, foreign_key: "topicconcept_id"
   has_many :concept_stages, class_name: Assessment::GuidanceConceptStage, foreign_key: "topicconcept_id"
 
+  amoeba do
+    include_field [:taggable_tags,:topic_edge_included_topicconcepts,:concept_edge_required_concepts]
+  end
 
   def is_concept?
     self.typename == "concept"

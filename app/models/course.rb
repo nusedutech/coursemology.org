@@ -17,6 +17,7 @@ class Course < ActiveRecord::Base
   has_many  :levels, dependent: :destroy
   has_many  :achievements, dependent: :destroy
   has_many  :assessments, dependent: :destroy
+  has_many  :question_assessments, through: :assessments
   has_many  :assessment_questions, through: :assessments, source: :questions
   has_many  :lesson_plan_milestones, dependent: :destroy
   has_many  :lesson_plan_entries, dependent: :destroy
@@ -26,6 +27,7 @@ class Course < ActiveRecord::Base
   has_many  :tag_groups, dependent: :destroy
   has_many  :tags, through: :tag_groups, dependent: :destroy
   has_many  :taggings, through: :tags
+  has_many  :taggable_tags, through: :tags
   has_many  :surveys, dependent: :destroy
   has_many  :forums, dependent: :destroy, class_name: 'ForumForum'
   has_many  :tabs, dependent: :destroy
@@ -37,6 +39,9 @@ class Course < ActiveRecord::Base
   has_many :questions, class_name: "Assessment::Question", dependent: :destroy
   has_many :exclusion_statuses, through: :questions, class_name: "Assessment::GuidanceQuizExcludedQuestion"
   has_many :topicconcepts, dependent: :destroy
+  has_many :topic_edge_included_topicconcepts, through: :topicconcepts
+  has_many :concept_edge_required_concepts, through: :topicconcepts
+  has_many :concept_taggable_tags, through: :topicconcepts, source: :taggable_tags
   has_many :tagged_questions, through: :topicconcepts, source: :questions, dependent: :destroy
   has_many :concept_edges, class_name: "ConceptEdge", through: :topicconcepts, source: :concept_edge_dependent_concepts
 
@@ -63,7 +68,7 @@ class Course < ActiveRecord::Base
 
   amoeba do
     include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences, :questions,
-                   :assessments, :achievements, :lesson_plan_milestones,
+                   :assessments, :achievements, :lesson_plan_milestones, :topicconcepts,
                    :lesson_plan_entries, :root_folder, :comics, :tag_groups,
                    :surveys, :forums]
     prepend :title => "Clone of: "

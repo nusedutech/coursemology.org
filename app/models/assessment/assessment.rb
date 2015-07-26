@@ -113,8 +113,8 @@ class Assessment < ActiveRecord::Base
 
 
   amoeba do
-    clone [:questions]
-    include_field [:questions, :as_asm_reqs]
+    #clone [:questions]
+    include_field [:question_assessments,:as_asm_reqs]
     # as_requirements
   end
 

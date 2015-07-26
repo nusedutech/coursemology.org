@@ -75,7 +75,7 @@ class Tag < ActiveRecord::Base
   #has_many :questions, through: :taggings, source: :taggable, source_type: "Assessment::Question"
 
   amoeba do
-    include_field :taggings
+    include_field :taggable_tags
   end
 
   def self.max_exp

@@ -169,21 +169,63 @@ class DuplicateController < ApplicationController
       asm.save
     end
 
-    #tags
+    #questions - assessments
+    q_logs = clone.questions.all_dest_logs
+    clone.question_assessments.each do |qa|
+      q = (qa.question.duplicate_logs_orig & q_logs).first
+      unless q
+        next
+      end
+      qa.question = q.dest_obj
+      qa.save
+    end
+
+    #tags - questions
     clone.tag_groups.each do |tg|
       tg.tags.each do |t|
-        t.course = tg.course
+        t.course = clone
         t.save
       end
     end
-    q_logs = clone.questions.all_dest_logs
-    clone.taggings.each do |tt|
-      l = (tt.taggable.duplicate_logs_orig & q_logs).first
+    clone.taggable_tags.each do |tt|
+      l = (tt.taggable.duplicate_logs_orig & q_logs).first if tt.taggable
       unless l
         next
       end
       tt.taggable = l.dest_obj
       tt.save
     end
+
+    #topicconcepts - questions
+    clone.concept_taggable_tags.each do |ct|
+      q = (ct.taggable.duplicate_logs_orig & q_logs).first if ct.taggable
+      unless q
+        next
+      end
+      ct.taggable = q.dest_obj
+      ct.save
+    end
+
+    #topics - concepts (parent - children)
+    tc_logs = clone.topicconcepts.all_dest_logs
+    clone.topic_edge_included_topicconcepts.each do |it|
+      t = (it.included_topicconcept.duplicate_logs_orig & tc_logs).first if it.included_topicconcept
+      unless t
+        next
+      end
+      it.included_topicconcept = t.dest_obj
+      it.save
+    end
+
+    #concepts - concepts (dependent concepts - required concepts)
+    clone.concept_edge_required_concepts.each do |rt|
+      t = (rt.required_concept.duplicate_logs_orig & tc_logs).first if rt.required_concept
+      unless t
+        next
+      end
+      rt.required_concept = t.dest_obj
+      rt.save
+    end
+
   end
 end

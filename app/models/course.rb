@@ -70,7 +70,7 @@ class Course < ActiveRecord::Base
     include_field [:levels, :tabs, :course_preferences, :course_navbar_preferences, :questions,
                    :assessments, :achievements, :lesson_plan_milestones, :topicconcepts,
                    :lesson_plan_entries, :root_folder, :comics, :tag_groups,
-                   :surveys, :forums]
+                   :surveys]#, :forums]
     prepend :title => "Clone of: "
     set :is_publish => false
   end

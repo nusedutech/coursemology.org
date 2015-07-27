@@ -10,8 +10,8 @@ class DuplicateController < ApplicationController
     staff_courses = current_user.user_courses.staff
     @my_courses = staff_courses.map { |uc| uc.course }
     @duplicable_items = {
-        Mission: @course.missions,
-        Training: @course.trainings,
+        Mission: @course.assessments.mission,
+        Training: @course.assessments.training,
         Achievement: @course.achievements,
         Level: @course.levels,
         TagGroup: @course.tag_groups,
@@ -32,6 +32,8 @@ class DuplicateController < ApplicationController
     authorize! :manage, dest_course
     authorize! :duplicate, @course
 
+    questions = @course.questions
+    topicconcepts = @course.topicconcepts
     assessments = @course.assessments.where(id: (params[:Training] || []) + (params[:Mission] || []))
     achievements = @course.achievements.where(id: params[:Achievement] || [])
     levels = @course.levels.where(id: params[:Level] || [])
@@ -40,12 +42,12 @@ class DuplicateController < ApplicationController
     forums = @course.forums.where(id: params[:Forum] || [])
     surveys = @course.surveys.where(id: params[:Survey] || [])
 
-    (assessments + achievements + levels + milestones + entries +
+    (questions + topicconcepts + assessments + achievements + levels + milestones + entries +
         forums + surveys).each do |record|
        c = record.amoeba_dup
        c.course = dest_course
-       if record.respond_to? dependent_id
-         record.dependent_id = 0
+       if record.respond_to? :dependent_id
+         record.dependent_id = nil
        end
        c.save
     end
@@ -58,6 +60,8 @@ class DuplicateController < ApplicationController
     tags = @course.tags.where(id: tag_ids)
 
     groups.map {|grp| Duplication.duplicate_tag_group(current_user, grp, tags, @course, dest_course) }
+
+    handle_default_relationships(dest_course)
 
     material_folder_ids = params[:MaterialFolder] || []
     folders = @course.root_folder.subfolders.where(id: material_folder_ids)
@@ -169,8 +173,13 @@ class DuplicateController < ApplicationController
       asm.save
     end
 
-    #questions - assessments
+    handle_default_relationships(clone)
+
+  end
+
+  def handle_default_relationships(clone)
     q_logs = clone.questions.all_dest_logs
+    #questions - assessments
     clone.question_assessments.each do |qa|
       q = (qa.question.duplicate_logs_orig & q_logs).first
       unless q
@@ -226,6 +235,5 @@ class DuplicateController < ApplicationController
       rt.required_concept = t.dest_obj
       rt.save
     end
-
   end
 end

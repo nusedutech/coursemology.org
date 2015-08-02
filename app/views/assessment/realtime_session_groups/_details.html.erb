@@ -1,0 +1,13 @@
+<%- model_class = Assessment::RealtimeSessionGroup -%>
+<table class="table table-bordered assignments-details-table">
+  <tr>
+    <td><strong><%= model_class.human_attribute_name(:exp) %>:</strong></td>
+    <td><%= ast.exp %></td>
+  </tr>
+  <tr>
+    <td><strong><%= model_class.human_attribute_name(:open_at) %>:</strong></td>
+    <td><%= datetime_format(ast.open_at) %></td>
+  </tr>
+
+
+</table>

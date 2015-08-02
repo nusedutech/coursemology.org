@@ -1,6 +1,6 @@
-<input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
-<input type="hidden" class="answers-stats-ajax-url" value="<%= answers_stats_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
-<input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_training_session_path(@course, @realtime_training, @session) %>"/>
+<input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+<input type="hidden" class="answers-stats-ajax-url" value="<%= answers_stats_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+<input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
 <div class="page-header">
   <h1> <%= @realtime_training.title %></h1>
 </div>
@@ -24,7 +24,7 @@
 
  <table class="table asm-qns-table sort">
   <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
-  <% @session.session_questions.each_with_index do |sq, index| %>
+  <% @session.session_questions.relate_to_assessment(@realtime_training.assessment.id).each_with_index do |sq, index| %>
       <% qn = sq.question_assessment.question %>
       <% q = qn.as_question %>
       <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
@@ -68,8 +68,8 @@
 </div>
 
 <div class="form-actions" style="text-align: center">
-    <%= link_to "Finalize Grade", finalize_grade_course_assessment_realtime_training_session_path(@course, @realtime_training, @session),:class => 'btn btn-primary' %>
-    <%= link_to "Close Session", course_assessment_realtime_training_path(@course, @realtime_training),:class => 'btn' %>
+    <%= link_to "Finalize Grade", finalize_grade_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn btn-primary' %>
+    <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
 </div>
 <div id="show_statistic" class="modal hide fade" data-backdrop="static">
   <div class="modal-dialog modal-lg">
@@ -135,7 +135,7 @@
 
           $('.modal-body-up').empty();
           //clone question to modal
-          var $td = $(this).closest("tr.asm-qn").find("td:first-child").clone();
+          var $td = $(this).closest("tr.asm-qn").children(":first").clone();
           $td.find(".asm-qn-handler").remove();
           $td.children().prependTo('.modal-body-up');
 

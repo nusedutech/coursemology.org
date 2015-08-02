@@ -22,7 +22,7 @@ class Assessment::AssessmentsController < ApplicationController
     end
 
     #TODO: refactoring
-    if assessment_type == 'training' || assessment_type == 'policy_mission' || assessment_type == 'realtime_training'
+    if assessment_type == 'training' || assessment_type == 'policy_mission' || assessment_type == 'realtime_training' || assessment_type == 'realtime_session_group'
       @tabs = @course.tabs.training
       @tab_id = params['_tab']
 
@@ -38,6 +38,8 @@ class Assessment::AssessmentsController < ApplicationController
         @assessments = @assessments.test
       elsif assessment_type == 'realtime_training'
         @tab_id='Realtime Trainings'
+      elsif assessment_type == 'realtime_session_group'
+        @tab_id='Realtime Session Groups'
       else
         @tab_id = 'Trainings'
         @assessments = @assessments.retry_training
@@ -95,24 +97,27 @@ class Assessment::AssessmentsController < ApplicationController
         #potential bug
         #1, can mange, 2, opened and fulfil the dependency requirements
       elsif ((ast.opened? and (ast.as_assessment.class == Assessment::Training or
-          ast.as_assessment.class == Assessment::RealtimeTraining or
+          ast.as_assessment.class == Assessment::RealtimeSessionGroup or
           ast.dependent_id.nil? or ast.dependent_id == 0 or
           (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or
           can?(:manage, ast)) and ast.can_access_with_end_check? (curr_user_course)
 
-          #Check student's realtime_training_session status
-          if curr_user_course.is_student? and ast.is_realtime_training?
+          #Check student's realtime_session status
+          if curr_user_course.is_student? and ast.is_realtime_session_group?
             session = ast.as_assessment.sessions.include_std(curr_user_course)
             if session.started.count == 0
-              seat = Assessment::RealtimeTrainingSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
-              action_map[ast.id] = {action: "Notstart",
-                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}",
-                                    flash: "Not Started"}
+              seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
+              action_map[ast.id] = {action: "realtime_session",
+                                    training: {action: "Notstart",flash: "Attempt Training"},
+                                    mission: {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
+                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}"}
             else
-              seat = Assessment::RealtimeTrainingSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
-              action_map[ast.id] = {action: "Attempt",
-                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}",
-                                    url: new_course_assessment_submission_path(@course, ast)}
+              seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
+              action_map[ast.id] = {action: "realtime_session",
+                                    training: {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)},
+                                    mission: {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
+                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}"
+                                    }
             end
           else
             action_map[ast.id] = {action: "Attempt",

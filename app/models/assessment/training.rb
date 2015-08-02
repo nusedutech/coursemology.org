@@ -16,6 +16,8 @@ class Assessment::Training < ActiveRecord::Base
 
   validates_with DateValidator, fields: [:open_at, :bonus_cutoff_at]
 
+  has_many :realtime_session_groups, class_name: Assessment::RealtimeSessionGroup, foreign_key: :training_id
+  has_many :sessions, through: :realtime_session_groups
   def full_title
     "#{I18n.t('Assessment.Training')} : #{self.title}"
   end

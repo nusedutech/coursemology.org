@@ -1,15 +1,16 @@
-class Assessment::RealtimeTrainingSession < ActiveRecord::Base
+class Assessment::RealtimeSession < ActiveRecord::Base
+  acts_as_paranoid
   attr_accessible :end_time, :number_of_table, :seat_per_table, :start_time, :status, :student_group_id, :student_group
 
   scope :include_std, lambda { |std_user_couse| where(student_group_id: std_user_couse.tut_group_courses.last.group_id) }
   scope :started, -> { where(status: true) }
 
-  belongs_to :realtime_training, class_name: Assessment::RealtimeTraining, foreign_key: :realtime_training_id
+  belongs_to :realtime_session_group, class_name: Assessment::RealtimeSessionGroup, foreign_key: :session_group_id
   belongs_to :student_group
   has_many :students, through: :student_group
 
-  has_many :student_seats, class_name: Assessment::RealtimeTrainingSeatAllocation, foreign_key: :session_id, dependent: :destroy
-  has_many :session_questions, class_name: Assessment::RealtimeTrainingSessionQuestion, foreign_key: :session_id, dependent: :destroy
+  has_many :student_seats, class_name: Assessment::RealtimeSeatAllocation, foreign_key: :session_id, dependent: :destroy
+  has_many :session_questions, class_name: Assessment::RealtimeSessionQuestion, foreign_key: :session_id, dependent: :destroy
   has_many :question_assessments, through: :session_questions, source: :question_assessment
   has_many :questions, through: :question_assessments
 

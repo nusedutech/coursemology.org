@@ -96,6 +96,7 @@ class Assessment::RealtimeTrainingsController < Assessment::AssessmentsControlle
           qa.assessment_id =  @realtime_training.assessment.id
           qa.position = @realtime_training.questions.count
           qa.save
+
           #create session_question
           @realtime_training.sessions.each do |s|
             s.session_questions.create(question_assessment_id: qa.id, unlock: false, unlock_count: 0)

@@ -8,7 +8,7 @@ class Assessment::RealtimeTraining < ActiveRecord::Base
 
   validates_presence_of :title, :exp, :open_at
 
-  has_many  :sessions, class_name: Assessment::RealtimeTrainingSession, dependent: :destroy
+  has_many  :sessions, class_name: Assessment::RealtimeSession, dependent: :destroy
 
   accepts_nested_attributes_for :sessions, allow_destroy: true
 

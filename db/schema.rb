@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150715072939) do
+ActiveRecord::Schema.define(:version => 20150731051619) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -458,7 +458,7 @@ ActiveRecord::Schema.define(:version => 20150715072939) do
 
   add_index "assessment_questions", ["as_question_id", "as_question_type"], :name => "index_on_as_question", :unique => true
 
-  create_table "assessment_realtime_training_seat_allocations", :force => true do |t|
+  create_table "assessment_realtime_seat_allocations", :force => true do |t|
     t.integer  "std_course_id"
     t.integer  "session_id"
     t.integer  "seat_number"
@@ -468,7 +468,17 @@ ActiveRecord::Schema.define(:version => 20150715072939) do
     t.float    "team_grade"
   end
 
-  create_table "assessment_realtime_training_session_questions", :force => true do |t|
+  create_table "assessment_realtime_session_groups", :force => true do |t|
+    t.integer  "training_id"
+    t.integer  "mission_id"
+    t.boolean  "seat_randomizable"
+    t.boolean  "average_grading"
+    t.datetime "created_at",        :null => false
+    t.datetime "updated_at",        :null => false
+    t.datetime "deleted_at"
+  end
+
+  create_table "assessment_realtime_session_questions", :force => true do |t|
     t.integer  "session_id"
     t.integer  "question_assessment_id"
     t.boolean  "unlock"
@@ -477,16 +487,17 @@ ActiveRecord::Schema.define(:version => 20150715072939) do
     t.datetime "updated_at",             :null => false
   end
 
-  create_table "assessment_realtime_training_sessions", :force => true do |t|
+  create_table "assessment_realtime_sessions", :force => true do |t|
     t.integer  "student_group_id"
-    t.integer  "realtime_training_id"
+    t.integer  "session_group_id"
     t.integer  "number_of_table"
     t.integer  "seat_per_table"
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "status"
-    t.datetime "created_at",           :null => false
-    t.datetime "updated_at",           :null => false
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+    t.datetime "deleted_at"
   end
 
   create_table "assessment_realtime_trainings", :force => true do |t|

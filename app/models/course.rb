@@ -61,6 +61,9 @@ class Course < ActiveRecord::Base
   has_many  :realtime_trainings, class_name: "Assessment::RealtimeTraining", through: :assessments,
             source: :as_assessment, source_type: "Assessment::RealtimeTraining"
 
+  has_many  :realtime_session_groups, class_name: "Assessment::RealtimeSessionGroup", through: :assessments,
+            source: :as_assessment, source_type: "Assessment::RealtimeSessionGroup"
+
   has_many   :guidance_quizzes, class_name: "Assessment::GuidanceQuiz", through: :assessments,
             source: :as_assessment, source_type: "Assessment::GuidanceQuiz"
 
@@ -353,7 +356,7 @@ class Course < ActiveRecord::Base
   end
 
   def customized_title(tab)
-    self.course_navbar_preferences.find_by_item(tab.pluralize).name
+    self.course_navbar_preferences.find_by_item(tab.pluralize).nil? ? "" : self.course_navbar_preferences.find_by_item(tab.pluralize).name
   end
 
   def customized_title_by_model(model_class)

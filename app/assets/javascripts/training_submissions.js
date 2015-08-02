@@ -52,7 +52,7 @@ $(document).ready(function(){
                     $('#continue-btn').removeClass('disabled');
                     $('#continue-btn').addClass('btn-primary');
                     $('#submit-btn').removeClass('btn-primary');
-                    if (resp.is_test){
+                    if (resp.is_test || resp.realtime){
                         $('#explanation').addClass('alert-info');
                     }else {
                         $('#explanation').addClass('mcq-ans-correct');

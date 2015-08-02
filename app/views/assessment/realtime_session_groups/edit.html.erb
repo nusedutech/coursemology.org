@@ -1,0 +1,8 @@
+<div class="alert alert-error hidden"></div>
+<%- model_class = Assessment::RealtimeSessionGroup -%>
+<div class="page-header">
+  <h1><%=t '.title', :default => t('helpers.titles.edit', :model => model_class.model_name.human,
+                                   :default => "Edit Realtime Session Group") %></h1>
+</div>
+<p><i>Click <%= link_to "here", course_assessment_realtime_session_group_path(@course, @realtime_session_group) %> if you wish to review the questions for this assignment.</i></p>
+<%= render :partial => 'form' %>

@@ -1,0 +1,105 @@
+<input type="hidden" class="update-seating-plan-ajax-url" value="<%= update_seating_plan_course_assessment_realtime_session_group_path(@course, @realtime_session_group) %>"/>
+<h2>Groups</h2>
+<div>
+
+	<table class="table">
+		<tr>
+			<th>Group</th>
+			<th>No. of Tables</th>
+			<th>Seat/Table</th>
+			<th>Start Time</th>
+            <th>End Time</th>
+            <th></th>
+		</tr>
+		<% sessions.each_with_index do |session, index| %>
+			<tr>
+				<td><%= session.student_group.name %></td>
+				<td><%= session.number_of_table %></td>
+				<td><%= session.seat_per_table %></td>
+				<td><%= session.start_time.strftime("%d/%m/%yy %I:%M %p") if session.start_time %></td>
+                <td><%= session.end_time.strftime("%d/%m/%yy %I:%M %p") if session.end_time %></td>
+                <td>
+                  <a href="#" class="seating-plan btn" data-toggle="modal" data-target="#seat_plan_<%= session.id%>" >Seating Plan</a>
+                  <%= link_to 'Start Training',
+                              start_session_course_assessment_realtime_session_group_session_path(@course, @realtime_session_group, session, t: "training"),
+                              :class => 'btn btn-success' %>
+                  <%= link_to 'Start Mission',
+                              start_session_course_assessment_realtime_session_group_session_path(@course, @realtime_session_group, session, t: "mission"),
+                              :class => 'btn btn-success' %>
+                  <div id="seat_plan_<%= session.id%>" class="modal hide fade" data-backdrop="static">
+                    <div class="modal-header">
+                      <h3>Seating Plan</h3>
+                    </div>
+                    <div class="modal-body hidden">
+                    </div>
+                    <div class="alert alert-success alert-seating-plan" style="margin: 0" role="alert"></div>
+                    <div class="modal-body">
+                      <table>
+                        <% std_group = session.student_group.students %>
+                        <% (1..session.number_of_table).each_with_index do |t,i| %>
+                            <tr>
+                              <td><%= "Table #{t}: "%></td>
+                              <td>
+                                <% (1..session.seat_per_table).each_with_index do |s,s_i| %>
+                                    <% seat = session.get_student_seats_by_seat(t,s).first %>
+                                    <span>
+                                        <input type="hidden" id="session_id" value="<%= session.id%>">
+                                        <input type="hidden" id="table_number" value="<%= t%>">
+                                        <input type="hidden" id="seat_number" value="<%= s%>">
+                                        <%= collection_select(:session,:seat_allocation,std_group,:id,:name,{:include_blank => 'Empty Seat', :selected => seat.nil? ? nil : (seat.student.nil? ? nil : seat.student.id.to_i)}, {:class => 'allocate-seat'})%>
+                                    </span>
+                                <% end %>
+                              </td>
+                            </tr>
+                        <% end %>
+                      </table>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-primary update-seating-plan">Update</button>
+                      <button data-dismiss="modal" class="btn">Close</button>
+                    </div>
+                  </div>
+                </td>
+			</tr>
+		<% end %>
+	</table>
+</div>
+
+<script>
+  //TODO: the same code with edit-seating-plan in start_session view - refactoring them into 1
+    $(document).ready(function() {
+        var data_seat = [];
+        //Edit seating plan
+        //Store all change
+        $('.allocate-seat').change(function() {
+            var student = $(this).val();
+            var table = $(this).parent().find("#table_number").val();
+            var seat = $(this).parent().find("#seat_number").val();
+            var session = $(this).parent().find("#session_id").val();
+            data_seat.push({table: table, seat: seat, session: session, student: student });
+
+        });
+
+        $('.seating-plan').click(function() {
+            data_seat = [];
+            $('.alert-seating-plan').hide();
+        });
+
+        $('.update-seating-plan').click(function() {
+            var url = $('input.update-seating-plan-ajax-url').val();
+            $.ajax({
+                url : url,
+                type : 'POST',
+                dataType : 'json',
+                data : {data: data_seat},
+                success : function(result) {
+                    $('.alert-seating-plan').html("Seating Plan is updated.");
+                    $('.alert-seating-plan').show();
+                    $('.alert-seating-plan').alert();
+                    window.setTimeout(function() { $('.alert-seating-plan').hide(); }, 1000);
+                }
+            });
+        });
+    });
+
+</script>

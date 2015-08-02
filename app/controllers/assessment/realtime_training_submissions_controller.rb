@@ -24,7 +24,8 @@ class Assessment::RealtimeTrainingSubmissionsController < Assessment::Submission
     #check student's realtime training session started
     session = @realtime_training.sessions.include_std(curr_user_course).started.first
     if curr_user_course.is_student? and !session
-      redirect_to     else
+      redirect_to
+    else
       questions = @assessment.questions
       finalised = @assessment.questions.finalised_for_test(@submission)
       current =  (questions - finalised).first
@@ -61,7 +62,7 @@ class Assessment::RealtimeTrainingSubmissionsController < Assessment::Submission
   def check_question_unlocked
     if params[:session_question_id]
       respond_to do |format|
-        if Assessment::RealtimeTrainingSessionQuestion.find(params[:session_question_id]).unlock
+        if Assessment::RealtimeSessionQuestion.find(params[:session_question_id]).unlock
           format.json { render json: { result: true}}
         else
           format.json { render json: { result: false}}
@@ -74,7 +75,7 @@ class Assessment::RealtimeTrainingSubmissionsController < Assessment::Submission
     if params[:sq_id] and params[:sid]
       question = @assessment.questions.find_by_id(params[:qid]).specific
       answers = question.answers.where(submission_id: params[:sid], std_course_id: curr_user_course.id)
-      session_question = Assessment::RealtimeTrainingSessionQuestion.find(params[:sq_id])
+      session_question = Assessment::RealtimeSessionQuestion.find(params[:sq_id])
       session_question.update_attribute(:unlock_count, answers.count + 1) if session_question.unlock_count > answers.count + 1
       response = {}
       if !session_question.unlock
@@ -104,7 +105,7 @@ class Assessment::RealtimeTrainingSubmissionsController < Assessment::Submission
   end
 
   def submit_mcq(question)
-    session_question = Assessment::RealtimeTrainingSessionQuestion.find(params[:sq_id])
+    session_question = Assessment::RealtimeSessionQuestion.find(params[:sq_id])
     selected_options = question.options.find_all_by_id(params[:aid])
     eval_array = selected_options.map(&:correct)
     incomplete = false

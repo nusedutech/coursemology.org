@@ -1,8 +1,5 @@
 Coursemology::Application.routes.draw do
 
-
-  get "realtime_training_sessions/start_session"
-
   mount Ckeditor::Engine => '/ckeditor'
 
   authenticated :user do
@@ -123,6 +120,7 @@ Coursemology::Application.routes.draw do
                 constraints: TrainingConstraint.new do
         member do
           get 'submit' => 'training_submissions#submit'
+          post 'check_question_unlocked' => 'training_submissions#check_question_unlocked'
         end
       end
 
@@ -267,24 +265,20 @@ Coursemology::Application.routes.draw do
       end
     end
 
-    resources :assessment_realtime_trainings, path: 'realtime_trainings', controller: :realtime_trainings, module: :assessment do
+    resources :assessment_realtime_session_groups, path: 'realtime_session_groups', controller: :realtime_session_groups, module: :assessment do
       collection do
-        get :index, to: 'assessments#index', type: 'realtime_training'
-        get 'overview' => 'realtime_trainings#overview'
-        get 'stats' => 'realtime_trainings#stats'
-        get 'submissions' => 'assessments#listall', type: 'realtime_training'
+        get :index, to: 'assessments#index', type: 'realtime_session_group'
       end
       member do
-        put 'update_questions' => 'realtime_trainings#update_questions'
-        post 'update_seating_plan' => 'realtime_trainings#update_seating_plan'
+        post 'update_seating_plan' => 'realtime_session_groups#update_seating_plan'
       end
-      resources :sessions, path: 'sessions', controller: :realtime_training_sessions do
+      resources :sessions, path: 'sessions', controller: :realtime_sessions do
         member do
-          get 'finalize_grade' => 'realtime_training_sessions#finalize_grade'
-          get 'start_session' => 'realtime_training_sessions#start_session'
-          post :switch_lock_question, to: 'realtime_training_sessions#switch_lock_question'
-          post :count_submission, to: 'realtime_training_sessions#count_submission'
-          post :answers_stats, to: 'realtime_training_sessions#answers_stats'
+          get 'finalize_grade' => 'realtime_sessions#finalize_grade'
+          get 'start_session' => 'realtime_sessions#start_session'
+          post :switch_lock_question, to: 'realtime_sessions#switch_lock_question'
+          post :count_submission, to: 'realtime_sessions#count_submission'
+          post :answers_stats, to: 'realtime_sessions#answers_stats'
         end
       end
 

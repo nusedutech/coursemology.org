@@ -1,0 +1,79 @@
+<%- display_name = "Realtime Session Group" -%>
+<%= simple_form_for [@course, @realtime_session_group],
+                    :html => { :class => 'form-horizontal' },
+                    defaults: { input_html: { class: 'span7' } } do |f| %>
+    <%= f.input :title %>
+    <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
+    <%= f.association :training,
+                      collection: @course.trainings,
+                      input_html: {class: "input-large"}, include_blank: true %>
+    <%= f.association :mission,
+                      collection: @course.missions,
+                      input_html: {class: "input-large"}, include_blank: true %>
+    <%= f.input :open_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
+    <%= f.input :published, as: :boolean,
+                input_html: {class: ""},
+                inline_label:"Check to publish #{display_name.downcase}" %>
+    <hr/>
+
+
+    <% if !@realtime_session_group.published %>
+        <h4>Groups</h4>
+        <hr/>
+        <div class = "multi-field-wrapper">
+          <div class = "sort-table multi-fields">
+
+            <%= render :partial => 'session_fields', :locals => { :f => f } %>
+
+          </div>
+          <!--<a class="btn add-fields">Add new tag</a>-->
+        </div>
+    <% else %>
+        <h4>Cannot edit groups as assessment is already published.</h4>
+        <hr/>
+    <% end %>
+    <hr/>
+
+    <div id="uploaded_files_div"></div>
+    <%= f.button :form_submit, value: @realtime_session_group.id.nil? ? "Create Sessions" : "Update Sessions", cancel: course_assessment_realtime_session_groups_path %>
+    <%= render :partial => "layouts/html_editor" %>
+<% end %>
+
+<h3>Upload lesson materials</h3>
+<br/>
+
+<%= render partial: "layouts/file_uploader_complicated",
+           locals: { owner: @realtime_session_group.assessment, access_control: true } %>
+
+<script>
+
+    $(function() {
+        $(".sort-table").sortable({
+            connectWith: ".sort-table-entry",
+            handle: ".move-icon",
+            cancel: ".student-group,.seat-per-table-input, .number-of-table-input, .remove-field"
+        });
+    });
+
+    $(".multi-field-wrapper").each(function() {
+
+        var concentratedFields = $(".multi-fields", this);
+
+        $(".add-fields", $(this)).click(function(e) {
+            $(".multi-field:first-child", concentratedFields).clone(true)
+                    .fadeIn("slow")
+                    .appendTo(concentratedFields);
+        });
+
+        $(".multi-field .remove-field", concentratedFields).click(function(e) {
+            if ($(".multi-field", concentratedFields).length > 1) {
+                $(this).closest('.multi-field').remove();
+            }
+            else {
+                alert("Need at least one field for realtime session group.")
+            }
+        });
+
+    });
+
+</script>

@@ -7,10 +7,14 @@
     <%- model_name = "Training" %>
     <%- title =  "Tests" %>
     <%- singularTitle = "Test" %>
-<%- elsif  @summary[:module] == "Realtime training" %>
+  <%- elsif  @summary[:module] == "Realtime training" %>
     <%- model_name = @summary[:module] %>
     <%- title =  "Realtime Trainings" %>
     <%- singularTitle = "Realtime Training" %>
+  <%- elsif  @summary[:module] == "Realtime session group" %>
+    <%- model_name = @summary[:module] %>
+    <%- title =  "Realtime Session Groups" %>
+    <%- singularTitle = "Realtime Session Group" %>
   <%- else %>
   	<%- model_name = @summary[:module] %>
   	<%- title = @course.customized_title(model_name).pluralize %>
@@ -40,6 +44,11 @@
       <%- new_url = new_course_assessment_realtime_training_path(@course) %>
       <%- ast_path = lambda { |c, a| course_assessment_realtime_training_path(c, a) } %>
       <%- asts_path = course_assessment_realtime_trainings_path %>
+  <% elsif model_name == 'Realtime session group' %>
+    <%= render  partial: "assessment/trainings/tabs" %>
+    <%- new_url = new_course_assessment_realtime_session_group_path(@course) %>
+    <%- ast_path = lambda { |c, a| course_assessment_realtime_session_group_path(c, a) } %>
+    <%- asts_path = course_assessment_realtime_session_groups_path %>
   <% end %>
 
   <% to_display = @summary[:columns].keys %>
@@ -71,7 +80,7 @@
           <% elsif key == 'title' %>
           25%
           <% end %>
-          "><%= key == 'title' ? (@tab_id == 'Tests' ? @tab_id : val) : val %></th>
+          "><%= key == 'title' ? (@tab_id == 'Tests' ? @tab_id : val) : ((key == 'exp' and model_name == 'Realtime session group') ? "Seat" : val) %></th>
       <% end %>
       <% if @summary[:module] == "Policy mission" %>
           <th width="10%">Latest Level Achieved</th>
@@ -112,22 +121,23 @@
                 <% end %>
               </td>
           <% end %>
-          <% if to_display.include? 'exp' %>
-              <td><%= ast.exp %></td>
-          <% end %>
-          <%if model_name != 'Realtime training' %>
-              <% if to_display.include? 'award' %>
-                  <td>
-                    <% ast.as_requirements.each do |req| %>
-                        <a href='#' title="<%= req.obj.title %>">
-                          <img class="asm-ach-icon" src="<%= req.obj.icon_url %>" >
-                        </a>
-                    <% end %>
-                  </td>
+          <%if model_name != 'Realtime session group' %>
+              <% if to_display.include? 'exp' %>
+                  <td><%= ast.exp %></td>
               <% end %>
           <% else %>
               <td>
                 <%= @summary[:actions][ast.id][:seat] %>
+              </td>
+          <% end %>
+
+          <% if to_display.include? 'award' %>
+              <td>
+                <% ast.as_requirements.each do |req| %>
+                    <a href='#' title="<%= req.obj.title %>">
+                      <img class="asm-ach-icon" src="<%= req.obj.icon_url %>" >
+                    </a>
+                <% end %>
               </td>
           <% end %>
 

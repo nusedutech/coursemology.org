@@ -5,7 +5,7 @@ class QuestionAssessment < ActiveRecord::Base
   belongs_to :assessment
   #TOFIX, if we put depend: :destroy here, what will happen if question is pointed to multiple assessments
   belongs_to :question, class_name: "Assessment::Question"
-  has_many :session_questions, class_name: Assessment::RealtimeTrainingSessionQuestion, foreign_key: :question_assessment_id
+  has_many :session_questions, class_name: Assessment::RealtimeSessionQuestion, foreign_key: :question_assessment_id
 
   after_create  :update_assessment_grade
   after_destroy :update_assessment_grade, :update_question_pos

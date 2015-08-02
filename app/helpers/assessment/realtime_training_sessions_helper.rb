@@ -1,2 +1,0 @@
-module Assessment::RealtimeTrainingSessionsHelper
-end

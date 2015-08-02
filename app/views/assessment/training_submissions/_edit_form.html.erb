@@ -1,54 +1,61 @@
-<div class="page-header">
-  <h1><%= @training.title %></h1>
-</div>
-<p class="well"><%= @training.description.html_safe %></p>
+<%- if @training.realtime_session_groups.count > 0 %>
+    <input type="hidden" id="ajax_url" value="<%= check_question_unlocked_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+    <input type="hidden" id="session_id" value="<%= @summary[:session].id%>" />
+    <input type="hidden" id="session_question_id" value="<%= @summary[:session_question].nil? ? "0" : @summary[:session_question].id%>" />
+    <input type="hidden" id="submission_id" value="<%= @submission.id%>" />
+    <div class="page-header">
+      <h1><%= @training.title %></h1>
+    </div>
+    <p class="well"><%= @training.description.html_safe %></p>
 
-<%= render partial: "file_uploads/download_files",
-           locals: {owner: @training}%>
+    <%= render partial: "file_uploads/download_files",
+               locals: {owner: @training}%>
 
-<div id="training-stop-pos"><br></div>
+    <div id="training-stop-pos"><br></div>
 
-<hr/>
-<div class="step-list">
-  <% (1..@summary[:questions].length).each do |i| %>
-      <% if i == @summary[:step] %>
-          <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-current" %>
-      <% elsif @summary[:finalised].include? @summary[:questions][i - 1] %>
-          <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-done" %>
-      <% else %>
-          <% can_access = (curr_user_course.is_staff? or @training.skippable? or i == @summary[:next_undone]) %>
-          <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-disabled'}" %>
+    <hr/>
+    <div class="step-list">
+      <% (1..@summary[:questions].length).each do |i| %>
+          <% if i == @summary[:step] %>
+              <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-current" %>
+          <% elsif @summary[:finalised].include? @summary[:questions][i - 1] %>
+              <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-done" %>
+          <% else %>
+              <% can_access = (curr_user_course.is_staff? or i == @summary[:next_undone]) %>
+              <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-disabled'}" %>
+          <% end %>
       <% end %>
-  <% end %>
-  <% if @assessment.as_assessment.test and @summary[:current] %>
-    <div id="div-timer" class="countdown-right countdown-15 countdown-me"></div>
-  <% end %>
-</div>
-<hr/>
+    </div>
+    <hr/>
 
-<% if !@summary[:current] %>
-    <h2>Congratulations, you're done!</h2>
-    <p>
-      <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
-        Click here
-      </a> to review your answers.
-    </p>
-<% else %>
-    <form id="training-step-form">
-      <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">
-      <input type="hidden" name="next_undone" class="next-undone" value="<%= @summary[:next_undone] %>">
-      <input type="hidden" name="update_url"
-             value="<%= submit_course_assessment_submission_path(@course, @assessment, @submission) %>" />
-      <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />
+    <% if @summary[:session_question] and !@summary[:session_question].unlock %>
+        <h4>This question is not unlocked yet. Please wait!</h4>
+        <input type="hidden" id="wait_unlock" value="true" />
+    <% elsif !@summary[:current] %>
+        <h2>Congratulations, you're done!</h2>
+        <p>Your individual grade is <strong><%=@submission.get_final_grading.grade%></strong></p>
+        <p>Your team grade is <strong><%=@summary[:session].student_seats.belong_to_std(@submission.std_course).last.team_grade%></strong></p>
+        <p>
+          <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
+            Click here
+          </a> to review your answers.
+        </p>
+    <% else %>
+        <form id="training-step-form">
+          <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">
+          <input type="hidden" name="next_undone" class="next-undone" value="<%= @summary[:next_undone] %>">
+          <input type="hidden" name="update_url"
+                 value="<%= submit_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+          <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />
 
-      <% if @summary[:current].class == Assessment::McqQuestion %>
-          <%= render partial:"assessment/training_submissions/do_mcq", locals: {mcq: @summary[:current]} %>
-      <% elsif @summary[:current].class == Assessment::CodingQuestion %>
-          <%= render partial:"assessment/training_submissions/do_coding", locals: {question: @summary[:current], prefilled: @summary[:prefilled]} %>
-      <% end %>
+          <% if @summary[:current].class == Assessment::McqQuestion %>
+              <%= render partial:"assessment/training_submissions/do_mcq", locals: {mcq: @summary[:current]} %>
+          <% elsif @summary[:current].class == Assessment::CodingQuestion %>
+              <%= render partial:"assessment/training_submissions/do_coding", locals: {question: @summary[:current], prefilled: @summary[:prefilled]} %>
+          <% end %>
 
-      <div class="form-actions">
-        <% if !@assessment.as_assessment.test %>
+          <div class="form-actions">
+
             <!--show buttons for normal training-->
             <% if @summary[:current].class == Assessment::McqQuestion %>
                 <%= link_to "Submit", '#', :class => 'btn btn-primary', :id => 'submit-btn' %>
@@ -59,40 +66,144 @@
             <%= link_to "Continue",
                         edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
                         :id => 'continue-btn' %>
-        <% else %>
-            <!--show button for test-->
-            <%= link_to "Next",
-                    edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn btn-primary',
-                    :id => 'test-next-btn' %>
+
+          </div>
+        </form>
+
+        <% if curr_user_course.is_staff? %>
+            <%= render partial: "comments/list",
+                       locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic, curr_user_course),
+                                 target:    @summary[:current],
+                                 header:    "Comments on the Question",
+                                 margin_left: "0px" } %>
         <% end %>
-      </div>
-    </form>
+        <% if @training.assessment.allow_discussion? %>
+            <div id="discussion-wrapper">
+              <%= render partial: 'forums/topics/discussion', locals: { owner: @summary[:current].question, title: (@summary[:current].class.name + '-' + @summary[:current].question.get_title_for_nil), sub: @submission.id, step: @summary[:step], from_lesson_plan: (local_assigns[:from_lesson_plan].nil? ? nil : true)} %>
+            </div>
+        <% end %>
+    <% end %>
 
-    <% if curr_user_course.is_staff? %>
-        <%= render partial: "comments/list",
-                   locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic_temp, curr_user_course),
-                             target:    @summary[:current],
-                             header:    "Comments on the Question",
-                             margin_left: "0px" } %>
+    <script>
+        var session_interval = null;
+        $(document).ready(function(){
+            var sq_id = $('#session_question_id').val();
+            var url = $('#ajax_url').val();
+            if($('#wait_unlock').length){
+                session_interval = setInterval(function(){
+                    $.ajax({
+                        url : url,
+                        type : 'POST',
+                        dataType : 'json',
+                        async : false,
+                        data : {session_question_id: sq_id},
+                        success : function(result) {
+                            if(result.result == true){
+                                location.reload();
+                            }
+                        }
+                    });
+                }, 1000);
+            }
+        });
+    </script>
+<% else %>
+    <div class="page-header">
+      <h1><%= @training.title %></h1>
+    </div>
+    <p class="well"><%= @training.description.html_safe %></p>
+
+    <%= render partial: "file_uploads/download_files",
+               locals: {owner: @training}%>
+
+    <div id="training-stop-pos"><br></div>
+
+    <hr/>
+    <div class="step-list">
+      <% (1..@summary[:questions].length).each do |i| %>
+          <% if i == @summary[:step] %>
+              <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-current" %>
+          <% elsif @summary[:finalised].include? @summary[:questions][i - 1] %>
+              <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-done" %>
+          <% else %>
+              <% can_access = (curr_user_course.is_staff? or @training.skippable? or i == @summary[:next_undone]) %>
+              <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-disabled'}" %>
+          <% end %>
+      <% end %>
+      <% if @assessment.as_assessment.test and @summary[:current] %>
+          <div id="div-timer" class="countdown-right countdown-15 countdown-me"></div>
+      <% end %>
+    </div>
+    <hr/>
+
+    <% if !@summary[:current] %>
+        <h2>Congratulations, you're done!</h2>
+        <p>
+          <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
+            Click here
+          </a> to review your answers.
+        </p>
+    <% else %>
+        <form id="training-step-form">
+          <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">
+          <input type="hidden" name="next_undone" class="next-undone" value="<%= @summary[:next_undone] %>">
+          <input type="hidden" name="update_url"
+                 value="<%= submit_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+          <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />
+
+          <% if @summary[:current].class == Assessment::McqQuestion %>
+              <%= render partial:"assessment/training_submissions/do_mcq", locals: {mcq: @summary[:current]} %>
+          <% elsif @summary[:current].class == Assessment::CodingQuestion %>
+              <%= render partial:"assessment/training_submissions/do_coding", locals: {question: @summary[:current], prefilled: @summary[:prefilled]} %>
+          <% end %>
+
+          <div class="form-actions">
+            <% if !@assessment.as_assessment.test %>
+                <!--show buttons for normal training-->
+                <% if @summary[:current].class == Assessment::McqQuestion %>
+                    <%= link_to "Submit", '#', :class => 'btn btn-primary', :id => 'submit-btn' %>
+                <% elsif @summary[:current].class == Assessment::CodingQuestion %>
+                    <%= link_to "Run (ALT+R)", '#', class:'btn btn-danger', id:"pathrun" %>
+
+                <% end %>
+                <%= link_to "Continue",
+                            edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn disabled',
+                            :id => 'continue-btn' %>
+            <% else %>
+                <!--show button for test-->
+                <%= link_to "Next",
+                            edit_course_assessment_submission_path(@course, @assessment, @submission, from_lesson_plan: @from_lesson_plan.nil? ? false : true, anchor: 'training-stop-pos', step: @summary[:step] + 1), :class => 'btn btn-primary',
+                            :id => 'test-next-btn' %>
+            <% end %>
+          </div>
+        </form>
+
+        <% if curr_user_course.is_staff? %>
+            <%= render partial: "comments/list",
+                       locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic_temp, curr_user_course),
+                                 target:    @summary[:current],
+                                 header:    "Comments on the Question",
+                                 margin_left: "0px" } %>
+        <% end %>
+        <% if @training.assessment.allow_discussion? %>
+            <div id="discussion-wrapper">
+              <%= render partial: 'forums/topics/discussion', locals: { owner: @summary[:current].question, title: (@summary[:current].class.name + '-' + @summary[:current].question.get_title_for_nil), sub: @submission.id, step: @summary[:step], from_lesson_plan: (local_assigns[:from_lesson_plan].nil? ? nil : true)} %>
+            </div>
+        <% end %>
     <% end %>
-    <% if @training.assessment.allow_discussion? %>
-        <div id="discussion-wrapper">
-            <%= render partial: 'forums/topics/discussion', locals: { owner: @summary[:current].question, title: (@summary[:current].class.name + '-' + @summary[:current].question.get_title_for_nil), sub: @submission.id, step: @summary[:step], from_lesson_plan: (local_assigns[:from_lesson_plan].nil? ? nil : true)} %>
-        </div>
-    <% end %>
+
+    <script>
+        $(document).ready(function() {
+            var remain_time = <%= @summary[:remain_time] %>;
+            if(remain_time != 0) {
+                $("#div-timer").countdown({until: +remain_time, format: 'MS', onExpiry: time_up});
+            }
+            function time_up() {
+                $("#test-next-btn").text("Time up! Close Test");
+                $( "#test-next-btn").unbind( "click" );
+                //alert('Time up! Please close Test');
+            }
+        });
+
+    </script>
 <% end %>
-
-<script>
-    $(document).ready(function() {
-        var remain_time = <%= @summary[:remain_time] %>;
-        if(remain_time != 0) {
-            $("#div-timer").countdown({until: +remain_time, format: 'MS', onExpiry: time_up});
-        }
-        function time_up() {
-            $("#test-next-btn").text("Time up! Close Test");
-            $( "#test-next-btn").unbind( "click" );
-            //alert('Time up! Please close Test');
-        }
-    });
-
-</script>

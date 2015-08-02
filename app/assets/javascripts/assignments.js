@@ -24,10 +24,24 @@ $(document).ready(function() {
                         case 'Attempt':
                             klass = 'btn-success';
                             break;
+                        case 'realtime_session':
+                            klass = 'btn-success';
+                            break;
                     }
-                    if(actions_map[mid].action == 'Notstart'){
-                        $div.html(actions_map[mid].flash)
-                    }else{
+                    if(actions_map[mid].action == 'realtime_session'){
+                        $div.html("");
+                        $div.parent().css("width","15%");
+                        if(actions_map[mid]['training'].action == 'Notstart'){
+                            $div.html('<a disabled="true" class="btn ' + klass + '" >' + actions_map[mid]['training'].flash + '</a>')
+                        }else{
+                            $div.html('<a href="' + actions_map[mid]['training'].url + '" class="btn ' + klass + '" >' + actions_map[mid]['training'].flash + '</a>')
+                        }
+                        if(actions_map[mid]['mission'].action == 'Notstart'){
+                            $div.html('<a disabled="true" style="margin-top:3px;" class="btn ' + klass + '" >' + actions_map[mid]['training'].flash + '</a>')
+                        }else{
+                            $div.append('<a href="' + actions_map[mid]['mission'].url + '" style="margin-top:3px;" class="btn ' + klass + '" >' + actions_map[mid]['mission'].flash + '</a>')
+                        }
+                    }else {
                         $div.html('<a href="' + actions_map[mid].url + '" class="btn ' + klass + '" >' + actions_map[mid].action + '</a>')
                     }
                 }

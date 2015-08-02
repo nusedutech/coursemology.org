@@ -28,8 +28,8 @@
       <li class="<%= "active" if @tab_id == 'Tests' %>">
         <a href="<%= course_assessment_trainings_path(@course, _tab: 'Tests') %>" ><h4>Tests</h4></a>
       </li>
-      <li class="<%= "active" if @tab_id == 'RealtimeTrainings' %>">
-        <a href="<%= course_assessment_realtime_trainings_path(@course, _tab: 'RealtimeTrainings') %>" ><h4>Realtime Training</h4></a>
+      <li class="<%= "active" if @tab_id == 'RealtimeSessionGroups' %>">
+        <a href="<%= course_assessment_realtime_session_groups_path(@course, _tab: 'RealtimeSessionGroups') %>" ><h4>Realtime Session Groups</h4></a>
       </li>
   <% else %>
       <% @tabs.each do |tab| %>

@@ -33,6 +33,10 @@ class CoursePreference < ActiveRecord::Base
       item('Realtime Training')
     end
 
+    def realtime_session_group
+      item('Realtime Session Group')
+    end
+
     def column
       item_type('Column')
     end

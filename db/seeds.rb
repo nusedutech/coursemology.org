@@ -915,3 +915,77 @@ if PreferableItem.count == 83
                          description:     "Number of Realtime Trainings to display per page",
                          default_display: true
 end
+
+if PreferableItem.count == 84
+
+  #Realtime Training
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Column",
+                         name:          "title",
+                         default_value: "Realtime Session Group",
+                         description:   "Realtime Session Group title",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Column",
+                         name:          "tag",
+                         default_value: "Tag",
+                         description:   "Realtime Session Group tags" ,
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Column",
+                         name:          "exp",
+                         default_value: "Max Exp",
+                         description:   "Realtime Session Group exp gainable",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Column",
+                         name:          "award",
+                         default_value: "Requirement for",
+                         description:   "Requirement for achievement",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Column",
+                         name:          "start",
+                         default_value: "Start Time",
+                         description:   "Realtime Session Group start time",
+                         default_display: true
+
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Column",
+                         name:          "end",
+                         default_value: "End Time",
+                         description:   "Realtime Session Group end time",
+                         default_display: true
+
+end
+
+if PreferableItem.count == 90
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Time",
+                         name:          "time_format",
+                         default_value: "%d-%m-%Y",
+                         description:   "Realtime Session Group time display format",
+                         default_display: true
+end
+
+if PreferableItem.count == 91
+  PreferableItem.create! item:          "Realtime Session Group",
+                         item_type:     "Table",
+                         name:          "paging",
+                         default_value: "10",
+                         description:   "Number of rows to display in Realtime Session Group table",
+                         default_display: true
+end
+
+if PreferableItem.count == 92
+  PreferableItem.create! item:            "Paging",
+                         item_type:       "Realtime_Session_Groups",
+                         name:            "Realtime Session Groups",
+                         default_value:   "50",
+                         description:     "Number of Realtime Session Groups to display per page",
+                         default_display: true
+end

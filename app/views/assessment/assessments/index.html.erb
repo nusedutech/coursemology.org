@@ -184,13 +184,15 @@
             </td>
           <% end %>
           <% if curr_user_course.id %>
-							<td>
-								<div id="<%= ast.id %>" style="margin-top: 4px; margin-bottom: 4px;"></div>
+            <td>
+              <% unless model_name == 'Realtime session group' and can? :manage, ast %>
+                <div id="<%= ast.id %>" style="margin-top: 4px; margin-bottom: 4px;"></div>
                 <% if model_name == "policy_mission" %>
                   <div id="<%= ast.id %>-secondary" style="margin-top: 4px; margin-bottom: 4px;"></div>
                   <div id="<%= ast.id %>-tertiary" style="margin-top: 4px; margin-bottom: 4px;"></div>
                 <% end %>
-              </td>
+              <% end %>
+            </td>
           <% end %>
           <% if can? :view_detail, ast %>
               <td>

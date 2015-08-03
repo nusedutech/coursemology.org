@@ -1,0 +1,7 @@
+<% if can? :bulk_update, Assessment %>
+<ul class="nav nav-tabs">
+  <li class="<%= 'active' if current_page?(:course_assessment_realtime_session_groups) %>">
+    <a href="<%=  course_assessment_realtime_session_groups_path %>"><h4><%= title %></h4></a>
+  </li>
+</ul>
+<% end %>

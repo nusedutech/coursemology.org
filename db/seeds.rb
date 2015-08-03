@@ -731,6 +731,15 @@ if NavbarPreferableItem.count == 13
                                pos: 14
 end
 
+if NavbarPreferableItem.count == 14
+  NavbarPreferableItem.create! item:  "realtime_sessions",
+                               navbar_link_type_id:  1,
+                               name: "Realtime Session",
+                               is_displayed: true,
+                               is_enabled: true,
+                               description: "course realtime session",
+                               pos: 15
+end
 
 if ProgrammingLanguage.count == 0
   ProgrammingLanguage.create!({name: "Python",

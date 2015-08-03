@@ -257,6 +257,9 @@ class ApplicationController < ActionController::Base
       when 'topicconcepts'
         url = main_app.course_topicconcepts_path(@course)
         icon = 'icon-star'
+      when 'realtime_sessions'
+        url = main_app.course_assessment_realtime_session_groups_path(@course)
+        icon = 'icon-fighter-jet'
     end
     [url, icon]
   end
@@ -292,6 +295,8 @@ class ApplicationController < ActionController::Base
         url = main_app.course_comics_path(@course)
       when 'topicconcepts'
         url = main_app.course_topicconcepts_path(@course)
+      when 'realtime_sessions'
+        url = main_app.course_assessment_realtime_session_groups_path(@course)
     end
     url
   end

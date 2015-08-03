@@ -206,9 +206,15 @@ class DuplicateController < ApplicationController
     end
 
     #topicconcepts - questions
+    l_logs = clone.lesson_plan_entries.all_dest_logs
     clone.concept_taggable_tags.each do |ct|
-      q = (ct.taggable.duplicate_logs_orig & q_logs).first if ct.taggable
+      if ct.taggable and ct.taggable.class.name==Assessment::Question.name and ct.taggable.respond_to? :duplicate_logs_orig
+        q = (ct.taggable.duplicate_logs_orig & q_logs).first
+      elsif ct.taggable and ct.taggable.class.name==LessonPlanEntry.name and ct.taggable.respond_to? :duplicate_logs_orig
+        q = (ct.taggable.duplicate_logs_orig & l_logs).first
+      end
       unless q
+        ct.destroy
         next
       end
       ct.taggable = q.dest_obj

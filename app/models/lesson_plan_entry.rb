@@ -1,4 +1,5 @@
 class LessonPlanEntry < ActiveRecord::Base
+  acts_as_duplicable
   attr_accessible :title, :entry_type, :description, :start_at, :end_at, :location, :resources
 
   validates_with DateValidator, fields: [:start_at, :end_at]

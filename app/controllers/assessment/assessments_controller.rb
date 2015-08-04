@@ -108,14 +108,14 @@ class Assessment::AssessmentsController < ApplicationController
             if session.started.count == 0
               seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
               action_map[ast.id] = {action: "realtime_session",
-                                    training: {action: "Notstart",flash: "Attempt Training"},
-                                    mission: {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
+                                    training: !ast.training ? {action: "Null",flash: "No Training"} : {action: "Notstart",flash: "Attempt Training"},
+                                    mission: !ast.mission ? {action: "Null",flash: "No Mission"} : {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
                                     seat: "Table #{seat.table_number} - Seat #{seat.seat_number}"}
             else
               seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
               action_map[ast.id] = {action: "realtime_session",
-                                    training: {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)},
-                                    mission: {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
+                                    training: !ast.training ? {action: "Null",flash: "No Training"} : {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)},
+                                    mission: !ast.mission ? {action: "Null",flash: "No Mission"} : {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
                                     seat: "Table #{seat.table_number} - Seat #{seat.seat_number}"
                                     }
             end

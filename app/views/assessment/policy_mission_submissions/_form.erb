@@ -9,7 +9,7 @@
 <% if @summary.has_key?(:lastResult) && @summary.has_key?(:explanation) %>
     <div id="explanation" class="well">
       <h3 class="result">For last question: <%= @summary[:lastResult] %></h3>
-      <p class="reason"><%= @summary[:explanation] %></p>
+      <p class="reason"><%= style_format(@summary[:explanation]) %></p>
       <% if @summary.has_key?(:promoted) %>
           <p class="reason">You have now advanced to <%= @summary[:tagName] %></p>
       <% end %>

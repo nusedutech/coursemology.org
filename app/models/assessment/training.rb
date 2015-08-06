@@ -45,7 +45,7 @@ class Assessment::Training < ActiveRecord::Base
     entry = LessonPlanEntry.create_virtual
     entry.title = self.title
     entry.description = self.description
-    entry.entry_type = 4
+    entry.entry_type = 5
     entry.entry_real_type = course.customized_title("Training")
     entry.start_at = self.open_at
     entry.end_at = self.close_at  if self.respond_to? :close_at

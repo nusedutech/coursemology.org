@@ -252,14 +252,14 @@
             var $dis = $(this).next('div.discussion');
             var $resource = $(this).parent().parent().find('div.resource-hide ul');
             var entry_start_end = $(this).parent().find('span.entry_start_end').html();
-            if(entry_type =='0' || entry_type =='1'|| entry_type =='2'){
+            if(entry_type =='0' || entry_type =='1'|| entry_type =='2' || entry_type =='4'){
                 show_lecture(title, type, des, loc, entry_start_end, $resource);
             }else if(entry_type =='3'){
                 loc = loc.replace(".html", "/media/video.mp4");
                 show_video(title, type, des, loc);
-            }else if(entry_type =='4'){
+            }else if(entry_type =='5'){
                 show_mission_training(this,title, type, des, loc, $resource);
-            }else if(entry_type == '5'){
+            }else if(entry_type == '6'){
                 show_policymission_with_additional_details(this,title, type, des, loc, $resource);
             }
             show_discussion($dis);
@@ -278,11 +278,10 @@
                 $resource.children().each(function(){
                     var parts = $(this).find('a').text().split('.');
                     var ext = parts[parts.length - 1];
-                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
-                    $('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='https://edutech.comp.nus.edu.sg/Material/files/"+$(this).text()+"'></td></tr>"));
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td></tr>"));
+                    //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+                    //$('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='https://edutech.comp.nus.edu.sg/Material/files/"+$(this).text()+"'></td></tr>"));
                 });
-                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                //$('section#detail-content .material_list').append($("<tr><td colspan='2'><a class='a_test' href='http://localhost:3000/data/lecture01.pdf'></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
                         $(this).parent().parent().next().find('a').gdocsViewer({width: 650, height: 450});
@@ -340,11 +339,11 @@
                 $resource.children().each(function(){
                     var parts = $(this).find('a').text().split('.');
                     var ext = parts[parts.length - 1];
-                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td></tr>"));
+                    //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
                 });
 
-                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
                         $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});
@@ -388,11 +387,11 @@
                 $resource.children().each(function(){
                     var parts = $(this).find('a').text().split('.');
                     var ext = parts[parts.length - 1];
-                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
+
+                    $('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td></tr>"));
+                    //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'>" + $(this).html()+ "</td><td>" + (ext == "pdf" ? "<a class='open-viewer' style='cursor: pointer'>View Online</a>" : "") + "</td></tr>"));
                 });
 
-                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='http://localhost:3000/data/lecture01.pdf'>lecture01.pdf</a></td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
-                //$('section#detail-content .material_list').append($("<tr><td style='width: 450px'><a href='https://docs.google.com/gview?url=http://localhost:3000/data/lecture01.pdf&embedded=true'>Your Pdf Viewer</a> </td><td><a class='open-viewer' style='cursor: pointer'>View Online</a></td></tr>"));
                 $('section#detail-content .material_list .open-viewer').click(function() {
                     if($(this).text()=="View Online") {
                         $(this).parent().prev().find('a').gdocsViewer({width: 650, height: 450});

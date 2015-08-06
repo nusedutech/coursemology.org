@@ -41,17 +41,17 @@ class Assessment::PolicyMission < ActiveRecord::Base
     entry.assessment = self
     entry.is_published = self.published
     entry.submission = user_course ?  get_modified_submission(course, user_course, manage_assessment) : nil
-    entry.entry_type = 4
+    entry.entry_type = 5
 
     lastSbm = self.submissions.where(std_course_id: user_course).last
     if self.multipleAttempts? and lastSbm and lastSbm.submitted? and can_access_with_end_check? user_course
-      entry.entry_type = 5
+      entry.entry_type = 6
       entry.submission[:actionSecondary] = "Reattempt"
       entry.submission[:urlSecondary] = reattempt_course_assessment_submissions_path(course, self.assessment, from_lesson_plan: true)
     end
     
     if !user_course.nil? and self.revealAnswers? (user_course)
-      entry.entry_type = 5
+      entry.entry_type = 6
       entry.submission[:actionTertiary] = "Answers"
       entry.submission[:urlTertiary] = answer_sheet_course_assessment_policy_mission_path(course, self)
     end

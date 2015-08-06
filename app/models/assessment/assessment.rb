@@ -35,6 +35,11 @@ class Assessment < ActiveRecord::Base
       joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")
       .where("assessment_trainings.test is null or assessment_trainings.test = 0")
     end
+    def retry_training_without_realtime
+      joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")
+      .where("(assessment_trainings.test is null or assessment_trainings.test = 0) and assessment_trainings.id not in (?)",
+             Assessment::RealtimeSessionGroup.where("training_id is not null").select(:training_id).uniq.map(&:training_id))
+    end
     def test
       joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")
       .where(:assessment_trainings => {:test => true})

@@ -40,9 +40,14 @@ class Assessment::AssessmentsController < ApplicationController
         @tab_id='Realtime Trainings'
       elsif assessment_type == 'realtime_session_group'
         @tab_id='Realtime Session Groups'
+        assessment_id_list = []
+        @assessments.each do |a|
+          assessment_id_list << a.training.assessment.id if a.training
+          assessment_id_list << a.mission.assessment.id if a.mission
+        end
       else
         @tab_id = 'Trainings'
-        @assessments = @assessments.retry_training
+        @assessments = curr_user_course.is_student? ? @assessments.retry_training_without_realtime : @assessments.retry_training
       end
     end
     @assessments = @assessments.includes(:as_assessment)
@@ -53,7 +58,8 @@ class Assessment::AssessmentsController < ApplicationController
       @assessments = @assessments.accessible_by(current_ability)
     end
 
-    submissions = @course.submissions.where(assessment_id: @assessments.map {|m| m.id},
+
+    submissions = @course.submissions.where(assessment_id: (assessment_type == 'realtime_session_group') ? assessment_id_list : @assessments.map { |m| m.id },
                                             std_course_id: curr_user_course.id)
 
     sub_ids = submissions.map {|s| s.assessment_id}
@@ -105,20 +111,20 @@ class Assessment::AssessmentsController < ApplicationController
           #Check student's realtime_session status
           if curr_user_course.is_student? and ast.is_realtime_session_group?
             session = ast.as_assessment.sessions.include_std(curr_user_course)
-            if session.started.count == 0
-              seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
-              action_map[ast.id] = {action: "realtime_session",
-                                    training: !ast.training ? {action: "Null",flash: "No Training"} : {action: "Notstart",flash: "Attempt Training"},
-                                    mission: !ast.mission ? {action: "Null",flash: "No Mission"} : {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
-                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}"}
-            else
-              seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
-              action_map[ast.id] = {action: "realtime_session",
-                                    training: !ast.training ? {action: "Null",flash: "No Training"} : {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)},
-                                    mission: !ast.mission ? {action: "Null",flash: "No Mission"} : {action: "Attemptmission",flash: "Attempt Mission", url: new_course_assessment_submission_path(@course, ast.mission.assessment)},
-                                    seat: "Table #{seat.table_number} - Seat #{seat.seat_number}"
-                                    }
-            end
+            seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
+            t_attempting = ast.training ? (sub_ids.include? ast.training.assessment.id and !sub_map[ast.training.assessment.id].attempting? ? true : false) : nil
+            m_attempting = ast.mission ? (sub_ids.include? ast.mission.assessment.id and !sub_map[ast.mission.assessment.id].attempting? ? true : false) : nil
+
+            action_map[ast.id] = {action: "realtime_session",
+                                  training: t_attempting.nil? ? {action: "Null",flash: "No Training"} :
+                                       ( t_attempting ? {action: "Review",flash: "Review Training",url: course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])} :
+                                          (session.started.count == 0 ? {action: "Notstart",flash: "Attempt Training"} : ((sub_ids.include? ast.training.assessment.id) ? {action: "Resumetraining",flash: "Resume Training",url: edit_course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])} :
+                                              {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)}))),
+                                  mission: m_attempting.nil? ? {action: "Null",flash: "No Mission"} :
+                                      ( m_attempting ? {action: "Review",flash: "Review Mission",url: course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} :
+                                          ((sub_ids.include? ast.mission.assessment.id) ? {action: "Resumemission",flash: "Resume Mission",url: edit_course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} :
+                                              {action: "Attemptmission",flash: "Attempt Mission",url: new_course_assessment_submission_path(@course, ast.mission.assessment)})),
+                                  seat: seat ? "Table #{seat.table_number} - Seat #{seat.seat_number}": "Not allocated"}
           else
             action_map[ast.id] = {action: "Attempt",
                                   url: new_course_assessment_submission_path(@course, ast)}

@@ -137,7 +137,7 @@ class Assessment::Submission < ActiveRecord::Base
   end
 
   def done?
-    if (self.assessment.as_assessment.is_a?(Assessment::Training) and self.assessment.as_assessment.test) or
+    if (self.assessment.as_assessment.is_a?(Assessment::Training) and (self.assessment.as_assessment.test or self.assessment.as_assessment.realtime_session_groups.count > 0)) or
         self.assessment.as_assessment.is_a?(Assessment::RealtimeTraining)
       self.assessment.questions.finalised_for_test(self).count == self.assessment.questions.count
     else

@@ -16,6 +16,9 @@ class Assessment::Training < ActiveRecord::Base
 
   validates_with DateValidator, fields: [:open_at, :bonus_cutoff_at]
 
+  scope :not_test, -> { where("test is null or test = 0") }
+  scope :without_session_group, -> { includes(:realtime_session_groups).where("assessment_realtime_session_groups.id is null") }
+
   has_many :realtime_session_groups, class_name: Assessment::RealtimeSessionGroup, foreign_key: :training_id
   has_many :sessions, through: :realtime_session_groups
   def full_title

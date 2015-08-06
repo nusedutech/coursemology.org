@@ -5,12 +5,12 @@ class UserCoursesController < ApplicationController
   before_filter :load_general_course_data, only: [:show,:staff, :group, :achievements]
 
   def show
-    @tag_groups = @course.tag_groups.includes(:tags)
-    uc = @course.tag_groups.uncategorized
-    @tag_groups -= [uc]
-    @tag_groups << uc
+    #@tag_groups = @course.tag_groups.includes(:tags)
+    #uc = @course.tag_groups.uncategorized
+    #@tag_groups -= [uc]
+    #@tag_groups << uc
 
-    @concepts = @course.topicconcepts.concepts
+    #@concepts = @course.topicconcepts.concepts
   end
 
   def destroy

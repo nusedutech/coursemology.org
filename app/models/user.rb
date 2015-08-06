@@ -151,7 +151,8 @@ class User < ActiveRecord::Base
 
   def use_default_photo_pic?
     self.profile_photo_url ==
-        'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg'
+        'http://d60fioy2d5xzm.cloudfront.net/dp_web_jony/images/ico-user-empty.png'
+        #'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg'
   end
 
   def self.search(search, role = nil)
@@ -234,7 +235,8 @@ class User < ActiveRecord::Base
   def set_default_profile_pic
     unless self.profile_photo_url
       self.profile_photo_url =
-          'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg'
+          'http://d60fioy2d5xzm.cloudfront.net/dp_web_jony/images/ico-user-empty.png'
+          #'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash4/c178.0.604.604/s160x160/252231_1002029915278_1941483569_n.jpg'
     end
   end
 

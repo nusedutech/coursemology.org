@@ -4,7 +4,8 @@
                     defaults: { input_html: { class: 'span7' } } do |f| %>
     <%= f.input :title %>
     <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
-    <%- training_collection = @realtime_session_group.training ? @course.trainings.not_test.without_session_group.unshift(@realtime_session_group.training) : @course.trainings.not_test.without_session_group %>
+    <%- eligible_trainings = @course.trainings.not_test - @course.trainings.with_session_group %>
+    <%- training_collection = @realtime_session_group.training ? eligible_trainings.unshift(@realtime_session_group.training) : eligible_trainings %>
     <%= f.association :training,
                       collection: training_collection,
                       input_html: {class: "input-large"}, include_blank: true %>

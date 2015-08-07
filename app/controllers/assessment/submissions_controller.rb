@@ -46,7 +46,7 @@ class Assessment::SubmissionsController < ApplicationController
       new_policy_mission
       return
     elsif @submission.save
-      session[:attempt_flag] = true
+      flash[:attempt_flag] = true
       redirect_to_edit params
     end
   end

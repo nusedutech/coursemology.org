@@ -74,9 +74,9 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
           step = next_undone
         elsif ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @assessment.duration * 60
           step = next_undone
-          if session[:attempt_flag] and @submission.answers.count == 0
+          if flash[:attempt_flag] and @submission.answers.count == 0
             remain_time = @assessment.duration * 60
-            session[:attempt_flag] = nil
+            flash[:attempt_flag] = nil
           else
             remain_time = (@assessment.duration * 60) - ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i
           end

@@ -239,7 +239,7 @@ class Assessment::QuestionsController < ApplicationController
       qa = QuestionAssessment.find_by_assessment_id_and_question_id(@assessment.id, @question.question.id)
       if !qa.nil?
         qa.destroy
-        @assessment.update_max_grade
+        @assessment.update_max_grade if !@assessment.is_policy_mission?
       end
     else
       @question.destroy

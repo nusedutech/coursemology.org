@@ -193,8 +193,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
       end
     end
 
-    @policy_mission.update_max_grade
-    respond_to do |format|      
+    respond_to do |format|
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
         invalidPublish = false 
         forward_policy_levels = @policy_mission.progression_policy.getForwardPolicy.forward_policy_levels

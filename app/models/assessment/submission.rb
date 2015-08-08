@@ -88,8 +88,8 @@ class Assessment::Submission < ActiveRecord::Base
 
   def get_bonus
     specific = assessment.specific
-    if specific.respond_to? :bonus_cutoff
-      if specific.bonus_cutoff && specific.bonus_cutoff > Time.now
+    if specific.respond_to? :bonus_cutoff_at
+      if specific.bonus_cutoff_at && specific.bonus_cutoff_at > Time.now
         return specific.bonus_exp
       end
     end

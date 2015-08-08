@@ -12,12 +12,6 @@
     <% end %>
     <%= f.input :bonus_exp, as: :integer, input_html: {class: "number_field input-medium"} %>
     <%= f.input :bonus_cutoff_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
-    <%= f.input :show_solution_after_close, as: :boolean, label: "Solution after close?",
-                input_html: {class: ""},
-                inline_label:"Check to only show solution after close date"%>
-    <%= f.input :always_full_exp, as: :boolean, label: "Always full EXP?",
-                input_html: {class: ""},
-                inline_label:"Check to allow students to earn full EXP regardless of grade"%>
     <% if !@test_flag and !@training.test %>
         <%= f.input :skippable, as: :boolean, label: "Allow skip?",
                 input_html: {class: ""},
@@ -25,6 +19,12 @@
     <% else %>
         <%= f.input :duration, as: :integer, input_html: {class: "number_field input-medium"}  %>
     <% end %>
+    <%= f.input :show_solution_after_close, as: :boolean, label: "Solution after close?",
+                input_html: {class: ""},
+                inline_label:"Check to only show solution after close date"%>
+    <%= f.input :always_full_exp, as: :boolean, label: "Always full EXP?",
+                input_html: {class: ""},
+                inline_label:"Check to allow students to earn full EXP regardless of grade"%>
     <%= f.input :published, as: :boolean,
                 input_html: {class: ""},
                 inline_label:"Check to publish #{display_name.downcase}" %>

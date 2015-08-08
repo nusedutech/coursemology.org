@@ -12,7 +12,7 @@
       <tr>
         <td><strong>Total grade:</strong> </td>
         <td>
-          <%= @show_answer ? @grading.grade : 0 %> / <%= @training.max_grade %>
+          <%= @show_answer ? @grading.grade.to_s : '_' %> / <%= @training.max_grade %>
         </td>
       </tr>
 
@@ -26,10 +26,10 @@
     <h4>Question: <%= index + 1 %> </h4>
     <% if qn.specific.class == Assessment::McqQuestion %>
         <% answers = qn.specific.mcq_answers(std_course_id: @submission.std_course, submission_id: @submission.id).group_by_options.includes(:options) %>
-        <%=render partial: "assessment/mcq_questions/one", locals: {q: qn, show_answer: @show_answer, show_explanation: true} %>
+        <%=render partial: "assessment/mcq_questions/one", locals: {q: qn, show_answer: @show_answer, show_explanation: @show_answer} %>
         <% if answers.length > 0 %>
             <!--<%=render partial: "assessment/mcq_questions/one", locals: {q: qn} %>-->
-            <%=render partial: "mcq_review", locals: {answers: answers, show_answer: @show_answer, show_explanation: true} %>
+            <%=render partial: "mcq_review", locals: {answers: answers, show_answer: @show_answer, show_explanation: @show_answer} %>
         <% end %>
     <% elsif qn.specific.class == Assessment::CodingQuestion %>
         <% answers = qn.answers.where(std_course_id: @submission.std_course, submission_id: @submission.id) %>

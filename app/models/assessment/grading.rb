@@ -45,12 +45,16 @@ class Assessment::Grading < ActiveRecord::Base
       self.save
     end
 
-    self.exp_transaction.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+    if submission.done? and asm.is_training? and asm.as_assessment.always_full_exp
+      self.exp_transaction.exp = asm.exp
+    else
+      self.exp_transaction.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+    end
 
     if submission.has_multiplier?
       self.exp_transaction.exp *= submission.multiplier
     else
-      self.exp_transaction.exp += submission.get_bonus
+      self.exp_transaction.exp += submission.get_bonus if submission.done?
     end
 
     self.exp_transaction.save

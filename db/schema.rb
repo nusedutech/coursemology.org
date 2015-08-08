@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150731051619) do
+ActiveRecord::Schema.define(:version => 20150808141521) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -409,10 +409,11 @@ ActiveRecord::Schema.define(:version => 20150731051619) do
 
   create_table "assessment_policy_missions", :force => true do |t|
     t.datetime "deleted_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.boolean  "multiple_submissions", :default => false
-    t.boolean  "reveal_answers",       :default => false
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
+    t.boolean  "multiple_submissions",     :default => false
+    t.boolean  "reveal_answers",           :default => false
+    t.boolean  "hide_solution_from_wrong", :default => false
   end
 
   create_table "assessment_progression_groups", :force => true do |t|
@@ -523,11 +524,13 @@ ActiveRecord::Schema.define(:version => 20150731051619) do
   create_table "assessment_trainings", :force => true do |t|
     t.boolean  "skippable"
     t.datetime "deleted_at"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
     t.boolean  "test"
     t.integer  "duration"
     t.boolean  "option_grading"
+    t.boolean  "show_solution_after_close", :default => false
+    t.boolean  "always_full_exp",           :default => false
   end
 
   create_table "assessment_wrong_percent_thresholds", :force => true do |t|

@@ -2,8 +2,6 @@ class Assessment::Training < ActiveRecord::Base
   acts_as_paranoid
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
-  attr_accessible :skippable, :test, :duration, :option_grading
-
   #TODO, fix
   attr_accessible :exp, :bonus_exp
   attr_accessible :title, :description
@@ -11,6 +9,8 @@ class Assessment::Training < ActiveRecord::Base
   attr_accessible :open_at, :close_at, :bonus_cutoff_at
   attr_accessible :tab_id, :display_mode_id, :dependent_id
   attr_accessible :allow_discussion
+
+  attr_accessible :skippable, :test, :duration, :option_grading, :show_solution_after_close, :always_full_exp
 
   validates_presence_of :title, :exp, :open_at
 

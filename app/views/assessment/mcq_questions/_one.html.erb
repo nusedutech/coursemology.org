@@ -9,7 +9,7 @@
           <td style="vertical-align: top"><input type="checkbox" disabled <%= "checked" if (opt.correct? and (defined?(show_answer) ? show_answer : true)) %> /></td>
           <td>
             <span><%= style_format(opt.text) %></span>
-            <%-  if defined?(show_explanation) %>
+            <%-  if defined?(show_explanation) and show_explanation %>
                 <span><strong>Explanation: </strong><%=  style_format(opt.explanation) %></span>
             <% end %>
           </td>

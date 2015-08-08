@@ -10,7 +10,9 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
   def show
     @training = @assessment.specific
     @grading = @submission.get_final_grading
-    @show_answer = (!@training.test or ((can? :manage, Assessment::Grading) or(!@training.assessment.bonus_cutoff_at.nil? and @training.assessment.bonus_cutoff_at.to_datetime < DateTime.now)))
+    @show_answer = ( !@training.show_solution_after_close or
+        (@training.show_solution_after_close and (@training.close_at.to_datetime < DateTime.now)) or
+        ((can? :manage, Assessment::Grading)))
 
   end
 

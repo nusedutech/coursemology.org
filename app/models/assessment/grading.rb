@@ -45,7 +45,7 @@ class Assessment::Grading < ActiveRecord::Base
       self.save
     end
 
-    if submission.done? and asm.is_training? and asm.as_assessment.always_full_exp
+    if (submission.done? and asm.is_training? and asm.as_assessment.always_full_exp) or (asm.is_policy_mission? and submission.submitted?)
       self.exp_transaction.exp = asm.exp
     else
       self.exp_transaction.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)

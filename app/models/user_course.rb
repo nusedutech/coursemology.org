@@ -135,7 +135,7 @@ class UserCourse < ActiveRecord::Base
     # find all submission_grading and calculate the score
     # get all (final grading)
 
-    self.exp = self.exp_transactions.sum(&:exp)
+    self.exp = self.exp_transactions.where("exp is not null").sum(&:exp)
     self.exp = self.exp >= 0 ? self.exp : 0
 
     new_level = self.course.levels.where("exp_threshold <=? ", self.exp ).last || self.level

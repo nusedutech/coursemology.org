@@ -212,6 +212,8 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
           forwardGroup.save
         end
         @submission.set_submitted
+        grading = @submission.get_final_grading
+        grading.update_exp_transaction
         #@submission.update_grade
       end
 

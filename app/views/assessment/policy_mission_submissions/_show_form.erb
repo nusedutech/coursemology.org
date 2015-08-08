@@ -75,9 +75,11 @@
                         <% singleLevelQuestion[:chosenOption].each do |option| %>
                             <p style="color:red; margin-left: 10px;"><%= style_format option.text %></p>
                         <% end %>
-                        <label>Correct option : </label>
-                        <% singleLevelQuestion[:rightOption].each do |option| %>
-                            <p style="margin-left: 10px;"><%= style_format option.text %></p>
+                        <% if !@assessment.hide_solution_from_wrong %>
+                            <label>Correct option : </label>
+                            <% singleLevelQuestion[:rightOption].each do |option| %>
+                                <p style="margin-left: 10px;"><%= style_format option.text %></p>
+                            <% end %>
                         <% end %>
                     <% end %>
                   </div>

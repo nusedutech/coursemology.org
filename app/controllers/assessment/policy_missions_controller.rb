@@ -193,6 +193,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
       end
     end
 
+    @policy_mission.update_max_grade
     respond_to do |format|      
       if @policy_mission.update_attributes(params[:assessment_policy_mission])
         invalidPublish = false 

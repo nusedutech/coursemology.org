@@ -11,7 +11,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     @training = @assessment.specific
     @grading = @submission.get_final_grading
     @show_answer = ( !@training.show_solution_after_close or
-        (@training.show_solution_after_close and (@training.close_at.to_datetime < DateTime.now)) or
+        (@training.show_solution_after_close and @training.close_at and @training.close_at.to_datetime < DateTime.now) or
         ((can? :manage, Assessment::Grading)))
 
   end

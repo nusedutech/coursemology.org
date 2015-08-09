@@ -124,7 +124,7 @@ class Assessment::AssessmentsController < ApplicationController
                                       ( m_attempting ? {action: "Review",flash: "Review Mission",url: course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} :
                                           ((sub_ids.include? ast.mission.assessment.id) ? {action: "Resumemission",flash: "Resume Mission",url: edit_course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} :
                                               {action: "Attemptmission",flash: "Attempt Mission",url: new_course_assessment_submission_path(@course, ast.mission.assessment)})),
-                                  seat: seat ? "Table #{seat.table_number} - Seat #{seat.seat_number}": "Not allocated"}
+                                  seat: (session.last.start_time and session.last.start_time < Time.now) ? (seat ? "Table #{seat.table_number} - Seat #{seat.seat_number}": "Not allocated") : "Not published"}
           else
             action_map[ast.id] = {action: "Attempt",
                                   url: new_course_assessment_submission_path(@course, ast)}

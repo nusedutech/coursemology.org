@@ -44,7 +44,9 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
     if params[:files]
       @realtime_session_group.attach_files(params[:files].values)
     end
-    @realtime_session_group.training.update_attributes(open_at: @realtime_session_group.open_at,close_at:@realtime_session_group.close_at,bonus_cutoff_at: @realtime_session_group.open_at + 1.days)
+    #@realtime_session_group.training.update_attributes(open_at: @realtime_session_group.open_at,
+    #                                                   close_at:@realtime_session_group.close_at,
+    #                                                   bonus_cutoff_at: @realtime_session_group.open_at + 1.days)
 
     respond_to do |format|
       if @realtime_session_group.save
@@ -76,7 +78,9 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
       old_mission = @realtime_session_group.mission
 
       if @realtime_session_group.update_attributes(params[:assessment_realtime_session_group])
-        @realtime_session_group.training.update_attributes(open_at: @realtime_session_group.open_at,close_at:@realtime_session_group.close_at,bonus_cutoff_at: @realtime_session_group.open_at + 1.days)
+        #@realtime_session_group.training.update_attributes(open_at: @realtime_session_group.open_at,
+        #                                                   close_at:@realtime_session_group.close_at,
+        #                                                   bonus_cutoff_at: @realtime_session_group.open_at + 1.days)
         @realtime_session_group.update_session_questions(old_training,old_mission)
         format.html { redirect_to course_assessment_realtime_session_group_url(@course, @realtime_session_group),
                                   notice: "Realtime Session Group #{@realtime_session_group.title} has been updated." }

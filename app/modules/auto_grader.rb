@@ -24,7 +24,8 @@ module AutoGrader
 
     unless ag.grade
       std_answers = submission.answers.where(question_id: ans.question_id)
-      if submission.assessment.as_assessment.is_a?(Assessment::Training) and submission.assessment.as_assessment.test
+      if submission.assessment.as_assessment.is_a?(Assessment::Training) and
+          (submission.assessment.as_assessment.test or submission.assessment.realtime_session_groups.count > 0)
         answer = std_answers.first
         if answer.nil? || !answer.correct
           ag.grade = 0

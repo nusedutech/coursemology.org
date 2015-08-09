@@ -19,8 +19,14 @@ module AutoGrader
 
     grading = submission.get_final_grading
     grading.save unless grading.persisted?
-    ag = grading.answer_gradings.for_question(mcq.question).first ||
-        grading.answer_gradings.create({answer_id: ans.id})
+    if submission.assessment.is_training? and submission.assessment.as_assessment.realtime_session_groups.count > 0
+      ag = grading.answer_gradings.for_question(mcq.question).last ||
+          grading.answer_gradings.create({answer_id: ans.id})
+    else
+      ag = grading.answer_gradings.for_question(mcq.question).first ||
+          grading.answer_gradings.create({answer_id: ans.id})
+    end
+
 
     unless ag.grade
       std_answers = submission.answers.where(question_id: ans.question_id)

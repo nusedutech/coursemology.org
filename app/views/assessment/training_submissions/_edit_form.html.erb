@@ -17,7 +17,7 @@
     <div class="step-list">
       <% (1..@summary[:questions].length).each do |i| %>
           <% if i == @summary[:step] %>
-              <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-current" %>
+              <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-current a-step" %>
           <% elsif @summary[:finalised].include? @summary[:questions][i - 1] %>
               <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-done" %>
           <% else %>
@@ -107,6 +107,10 @@
                     });
                 }, 1000);
             }
+
+            $(".a-step").click(function(){
+                location.reload();
+            });
         });
     </script>
 <% else %>
@@ -205,6 +209,7 @@
                 $( "#test-next-btn").unbind( "click" );
                 //alert('Time up! Please close Test');
             }
+
         });
 
     </script>

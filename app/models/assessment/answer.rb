@@ -12,6 +12,8 @@ class Assessment::Answer < ActiveRecord::Base
 
   scope :in_student_list, lambda { |list_std| where(["std_course_id IN (?)", list_std]) }
   scope :in_submission_list, lambda { |list_sub| where(["submission_id IN (?)", list_sub]) }
+  scope :after_question_unlock, lambda { |sq| where(["updated_at >= (?)", sq.updated_at]) }
+  scope :after_unlock_time, lambda { |t| where(["updated_at >= (?)", t]) }
 
   belongs_to  :question, class_name: Assessment::Question
   belongs_to  :std_course, class_name: "UserCourse"

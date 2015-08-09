@@ -109,6 +109,7 @@
               success : function(result) {
                   //start counting as unlock
                   if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
+                      $($this).parent().find('.count-submission').text("0");
                       session_interval = setInterval(function(){
                           var url = $(".count-submission-ajax-url").val();
                           var result = server_request({session_question_id: session_question_id}, "POST", url);

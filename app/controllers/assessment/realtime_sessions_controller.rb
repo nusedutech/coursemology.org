@@ -21,25 +21,30 @@ class Assessment::RealtimeSessionsController < ApplicationController
       end
     end
 
+    @realtime_session.reset
     flash[:notice] = "Grade finalization is done!"
     redirect_to :back
   end
 
   def start_session
     if params[:t] == "training"
+      @realtime_session.reset
       @realtime_training = @realtime_session.realtime_session_group.training
       authorize! :manage, @realtime_training
       @realtime_session.update_attribute(:status, true)
       @session = @realtime_session
+
     end
   end
 
   def switch_lock_question
     session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
+    session[:sq_update_time] = session_question.updated_at if session_question.unlock
     session_question.unlock_count = session_question.unlock_count + 1 if !session_question.unlock
     session_question.unlock = session_question.unlock? ? false : true;
     respond_to do |format|
       if session_question.save
+        session[:sq_update_time] = session_question.updated_at if session_question.unlock
         format.json { render json: { result: true, u_c: session_question.unlock_count}}
       else
         format.json { render json: { result: false}}
@@ -51,7 +56,8 @@ class Assessment::RealtimeSessionsController < ApplicationController
     session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
     question_answers = session_question.question_assessment.question.answers.
         in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
-        in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id })
+        in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
+        after_question_unlock(session_question)
 
     #question_answers = @realtime_session.realtime_training.submissions.answers.in_list(@realtime_session.student_seats.map{|s| s.std_course_id })
     respond_to do |format|
@@ -62,7 +68,9 @@ class Assessment::RealtimeSessionsController < ApplicationController
   def answers_stats
     session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
     question = session_question.question_assessment.question
-    answers = question.answers.in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id })
+    answers = question.answers.in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
+        in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
+        after_unlock_time(session[:sq_update_time])
 
     #TODO: Refactoring get list answers stats (can refer to stats page)
     @summary = {}

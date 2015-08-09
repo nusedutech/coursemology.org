@@ -33,4 +33,9 @@ class Assessment::RealtimeSession < ActiveRecord::Base
     self.student_seats.where(table_number: table)
   end
 
+  def reset
+    self.session_questions.each do |sq|
+      sq.lock
+    end
+  end
 end

@@ -163,9 +163,10 @@
       });
 
       function build_bar(para){
+          var k_list = ['','A','B','C','D','E','F','G','H']
           var data = [];
           for (var key in para.result) {
-              data.push({x: "option " + key, y: para.result[key]});
+              data.push({x: "option " + k_list[key], y: para.result[key]});
           }
           $('#bar-chart').empty();
           Morris.Bar({

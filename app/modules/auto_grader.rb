@@ -19,14 +19,8 @@ module AutoGrader
 
     grading = submission.get_final_grading
     grading.save unless grading.persisted?
-    if submission.assessment.is_training? and submission.assessment.as_assessment.realtime_session_groups.count > 0
-      ag = grading.answer_gradings.for_question(mcq.question).last ||
+    ag = grading.answer_gradings.for_question(mcq.question).first ||
           grading.answer_gradings.create({answer_id: ans.id})
-    else
-      ag = grading.answer_gradings.for_question(mcq.question).first ||
-          grading.answer_gradings.create({answer_id: ans.id})
-    end
-
 
     unless ag.grade
       std_answers = submission.answers.where(question_id: ans.question_id)
@@ -48,9 +42,14 @@ module AutoGrader
           num_wrong_choices = mcq.options.find_all_by_correct(false).count
           uniq_wrong_attempts = std_answers.unique_attempts(false).count
           ag.grade = (num_wrong_choices <= uniq_wrong_attempts) ? 0 : 1
-    end
-  end
-  ag.save
+        end
+      end
+      ag.save
+    else
+      if submission.assessment.as_assessment.is_a?(Assessment::Training) and submission.assessment.realtime_session_groups.count > 0
+        ag.grade = (ans.correct and !mcq.max_grade.nil?) ? mcq.max_grade : 0
+        ag.save
+      end
     end
 
     return ag.grade

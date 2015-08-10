@@ -278,10 +278,9 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
 
     if !@submission.graded?
       grade = AutoGrader.mcq_grader(@submission, ans.answer, question, pref_grader)
-      if @submission.done?
-        @submission.update_grade
-
-      end
+      #if @submission.done?
+      #  @submission.update_grade
+      #end
     end
 
     if pref_grader == 'two-one-zero'

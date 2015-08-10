@@ -25,6 +25,8 @@ class Assessment::Submission < ActiveRecord::Base
   scope :submitted_format, -> { where(status: 'submitted') }
   scope :attempting_format, -> { where(status: 'attempting') }
 
+  scope :belong_to_stds, lambda { |std_list| where("std_course_id in (?)",std_list) }
+
   belongs_to :assessment
   belongs_to :std_course, class_name: "UserCourse"
   has_many :answers, class_name: Assessment::Answer, dependent: :destroy

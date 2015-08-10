@@ -9,11 +9,18 @@ class Assessment::RealtimeSessionsController < ApplicationController
 
   def finalize_grade_training
     #TODO: REFACRORING - update grade for all student on table
+    #finalize all submission first
+    sms = @realtime_session.realtime_session_group.training.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
+    sms.each do |sm|
+      sm.update_grade
+    end
     (1..@realtime_session.number_of_table).each_with_index do |t,i|
       session_students = @realtime_session.get_student_seats_by_table(t).has_student
       total_grade = 0
       sm_list = {}
       no_sm_count = 0
+
+      #update team grade and exp
       session_students.each do |ss|
         sm = ss.student.submissions.where(assessment_id: @realtime_session.realtime_session_group.training.assessment.id).last
         no_sm_count+=1 if sm.nil?
@@ -116,5 +123,9 @@ class Assessment::RealtimeSessionsController < ApplicationController
     respond_to do |format|
       format.json { render json: { result: @summary}}
     end
+  end
+
+  def reattempt_next_unlock
+
   end
 end

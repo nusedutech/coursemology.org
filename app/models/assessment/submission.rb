@@ -1,7 +1,7 @@
 class Assessment::Submission < ActiveRecord::Base
   acts_as_paranoid
 
-  attr_accessible :created_at, :updated_at
+  attr_accessible :created_at, :updated_at, :std_course_id
 
   include Rails.application.routes.url_helpers
   scope :mission_submissions, -> {

@@ -68,7 +68,7 @@
 </div>
 
 <div class="form-actions" style="text-align: center">
-    <%= link_to "Finalize Grade", finalize_grade_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn btn-primary' %>
+    <%= link_to "Finalize Grade", finalize_grade_training_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn btn-primary' %>
     <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
 </div>
 <div id="show_statistic" class="modal hide fade" data-backdrop="static">
@@ -164,10 +164,11 @@
       });
 
       function build_bar(para){
-          var k_list = ['','A','B','C','D','E','F','G','H']
+          var k_list = ['A','B','C','D','E','F','G','H']
           var data = [];
-          for (var key in para.result) {
-              data.push({x: "option " + k_list[key], y: para.result[key]});
+          var keys = Object.keys(para.result)
+          for (var i = 0 ; i < keys.length; i++) {
+              data.push({x: "option " + k_list[i], y: para.result[keys[i]]});
           }
           $('#bar-chart').empty();
           Morris.Bar({

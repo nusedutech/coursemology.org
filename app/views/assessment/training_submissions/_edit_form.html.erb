@@ -32,14 +32,20 @@
         <h4>This question is not unlocked yet. Please wait!</h4>
         <input type="hidden" id="wait_unlock" value="true" />
     <% elsif !@summary[:current] %>
-        <h2>Congratulations, you're done!</h2>
-        <p>Your individual grade is <strong><%=@submission.get_final_grading.grade%></strong></p>
-        <p>Your team grade is <strong><%=@summary[:session].student_seats.belong_to_std(@submission.std_course).last.team_grade%></strong></p>
-        <p>
-          <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
-            Click here
-          </a> to review your answers.
-        </p>
+        <% if !@summary[:student_seat].nil? and @summary[:student_seat].team_grade.nil? %>
+            <h2>Congratulations, you're done!</h2>
+            <p>Waiting for finalization</p>
+            <p>After Lecturer finalizes, refresh page to see grade</p>
+        <% else %>
+            <h2>Congratulations, you're done!</h2>
+            <p>Your individual grade is <strong><%=@submission.get_final_grading.grade%></strong></p>
+            <p>Your team grade is <strong><%=@summary[:session].student_seats.belong_to_std(@submission.std_course).last.team_grade%></strong></p>
+            <p>
+              <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
+                Click here
+              </a> to review your answers.
+            </p>
+        <% end %>
     <% else %>
         <form id="training-step-form">
           <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">

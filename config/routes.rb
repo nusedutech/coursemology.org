@@ -274,7 +274,7 @@ Coursemology::Application.routes.draw do
       end
       resources :sessions, path: 'sessions', controller: :realtime_sessions do
         member do
-          get 'finalize_grade' => 'realtime_sessions#finalize_grade'
+          get 'finalize_grade_training' => 'realtime_sessions#finalize_grade_training'
           get 'start_session' => 'realtime_sessions#start_session'
           post :switch_lock_question, to: 'realtime_sessions#switch_lock_question'
           post :count_submission, to: 'realtime_sessions#count_submission'

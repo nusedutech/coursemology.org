@@ -53,9 +53,11 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
       end
 
       #check current (current question) is unclocked
+      student_seat =  session.student_seats.where(std_course_id: curr_user_course.id).first
       session_question = current.nil? ? nil : session.session_questions.relate_to_question(@assessment.question_assessments.where(question_id: current.question.id).first).first
-      @summary = {session: session, session_question: session_question, questions: questions, finalised: finalised, step: step,
-                  current: (!@submission.graded? ? current : nil), next_undone: next_undone, prefilled: prefilled_code, remain_time: ( defined? remain_time ? remain_time : 0)}
+      @summary = {session: session, session_question: session_question, student_seat: student_seat, questions: questions, finalised: finalised, step: step,
+                  current: (!@submission.graded? ? current : nil), next_undone: next_undone, prefilled: prefilled_code,
+                  remain_time: ( defined? remain_time ? remain_time : 0)}
 
       #Training in lesson plan
       if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"

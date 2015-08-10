@@ -10,3 +10,11 @@
   min-width: 97px;
   margin-top:3px;
 }
+
+body .modal-60 {
+  /* new custom width */
+  width: 60%;
+  /* must be half of the width, minus scrollbar on the left (30px) */
+  margin-left: -30%;
+  margin-top: -20%;
+}

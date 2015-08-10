@@ -52,11 +52,42 @@ $(document).ready(function(){
                     $('#continue-btn').removeClass('disabled');
                     $('#continue-btn').addClass('btn-primary');
                     $('#submit-btn').removeClass('btn-primary');
+                    $('#submit-btn').addClass('disabled');
+                    $('#submit-btn').attr("disabled", true);
                     if (resp.is_test || resp.realtime){
                         $('#explanation').addClass('alert-info');
                     }else {
                         $('#explanation').addClass('mcq-ans-correct');
                     }
+
+                    //run reunlock-next-unlock ajax( this function is in training_submissions\_edit_from.html.erb
+                    var reunlock_session_interval = null;
+                    if($('#reattempt_next_ajax_url').length){
+                        var reattempt_next_url = $('#reattempt_next_ajax_url').val();
+                        reunlock_session_interval = setInterval(function(){
+                            $.ajax({
+                                url : reattempt_next_url,
+                                type : 'POST',
+                                dataType : 'json',
+                                async : false,
+                                data : {session_question_id: sq_id, count: resp.count},
+                                success : function(result) {
+                                    if(result.result == true){
+                                        $('#explanation .result').html(resp.result);
+                                        $('#explanation .reason').html("Question is reunlocked, re-answer if you want");
+                                        $('#explanation').removeClass('mcq-ans-incorrect');
+                                        $('#explanation').addClass('alert-info');
+                                        $('#submit-btn').removeClass('disabled');
+                                        $('#submit-btn').addClass('btn-primary');
+                                        $('#submit-btn').attr("disabled", false);
+                                        clearInterval(reunlock_session_interval);
+                                        //location.reload();
+                                    }
+                                }
+                            });
+                        }, 1000);
+                    }
+
                 } else {
                     //$('#continue-btn').removeClass('disabled');
                     $('#explanation').addClass('mcq-ans-incorrect');

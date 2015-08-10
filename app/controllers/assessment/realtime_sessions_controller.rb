@@ -125,7 +125,4 @@ class Assessment::RealtimeSessionsController < ApplicationController
     end
   end
 
-  def reattempt_next_unlock
-
-  end
 end

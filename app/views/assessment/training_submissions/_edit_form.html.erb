@@ -1,5 +1,6 @@
 <%- if @training.realtime_session_groups.count > 0 %>
-    <input type="hidden" id="ajax_url" value="<%= check_question_unlocked_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+    <input type="hidden" id="unlock_ajax_url" value="<%= check_question_unlocked_course_assessment_submission_path(@course, @assessment, @submission) %>" />
+    <input type="hidden" id="reattempt_next_ajax_url" value="<%= reattempt_next_unlock_course_assessment_submission_path(@course, @assessment, @submission) %>" />
     <input type="hidden" id="session_id" value="<%= @summary[:session].id%>" />
     <input type="hidden" id="session_question_id" value="<%= @summary[:session_question].nil? ? "0" : @summary[:session_question].id%>" />
     <input type="hidden" id="submission_id" value="<%= @submission.id%>" />
@@ -96,7 +97,7 @@
         var session_interval = null;
         $(document).ready(function(){
             var sq_id = $('#session_question_id').val();
-            var url = $('#ajax_url').val();
+            var url = $('#unlock_ajax_url').val();
             if($('#wait_unlock').length){
                 session_interval = setInterval(function(){
                     $.ajax({

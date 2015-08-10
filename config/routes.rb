@@ -121,6 +121,7 @@ Coursemology::Application.routes.draw do
         member do
           get 'submit' => 'training_submissions#submit'
           post 'check_question_unlocked' => 'training_submissions#check_question_unlocked'
+          post :reattempt_next_unlock, to: 'training_submissions#reattempt_next_unlock'
         end
       end
 

@@ -128,6 +128,21 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     end
   end
 
+
+  def reattempt_next_unlock
+    if params[:session_question_id]
+      count = params[:count].to_i
+      respond_to do |format|
+        sq = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
+        if sq.unlock and sq.unlock_count == count+1
+          format.json { render json: { result: true}}
+        else
+          format.json { render json: { result: false}}
+        end
+      end
+    end
+  end
+
   def submit
     question = @assessment.questions.find_by_id(params[:qid]).specific
     response = {}
@@ -305,6 +320,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
         realtime: true,
         result: true,
         is_correct: true,
+        count: session_question.unlock_count,
         explanation: "Your answer is submited."
     }
   end

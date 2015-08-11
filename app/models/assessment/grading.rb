@@ -16,7 +16,13 @@ class Assessment::Grading < ActiveRecord::Base
 
 
   def grade_or_exp_changed?
-    exp_changed? or grade_changed?
+    asm = submission.assessment
+    if submission.done? and asm.is_training? and asm.as_assessment.always_full_exp
+      true
+    else
+      exp_changed? or grade_changed?
+    end
+
   end
 
   def create_log

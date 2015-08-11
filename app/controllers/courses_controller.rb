@@ -229,10 +229,16 @@ class CoursesController < ApplicationController
           password = User.new(password: e).encrypted_password
           user = User.where(:provider => "ivle", :uid => e).first
           unless user
-            user = User.new(:name => name, :email => email, :student_id => e, :provider => "ivle" ,:uid => e, :password => password, :password_confirmation => password)
-            user.skip_confirmation!
-            user.save
-            count_import_student = count_import_student+1
+            user = User.find_by_email(email)
+            unless user
+              user = User.new(:name => name, :email => email, :student_id => e, :provider => "ivle" ,:uid => e, :password => password, :password_confirmation => password)
+              user.skip_confirmation!
+              user.save
+              count_import_student = count_import_student+1
+            else
+              #existing += " #{e},"
+              count_existing = count_existing+1
+            end
           else
             #existing += " #{e},"
             count_existing = count_existing+1

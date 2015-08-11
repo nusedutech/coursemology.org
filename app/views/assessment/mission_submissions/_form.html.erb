@@ -91,7 +91,7 @@
     <div class="form-actions">
 
       <%= f.submit 'Save', :class => 'btn btn-primary', id: "mission-save" %>
-      <%= f.submit 'Finalize Submission', :class => 'btn btn-danger', id:"mission_submit" %>
+      <%= f.submit 'Finalize Submission', :class => 'btn btn-danger', id:"mission_submit" if !@mission.used_as_realtime? %>
     </div>
 <% end %>
 

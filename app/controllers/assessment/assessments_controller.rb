@@ -49,6 +49,8 @@ class Assessment::AssessmentsController < ApplicationController
         @tab_id = 'Trainings'
         @assessments = curr_user_course.is_student? ? @assessments.retry_training_without_realtime : @assessments.retry_training
       end
+    else
+      @assessments = @assessments.mission_without_realtime if assessment_type== 'mission' and curr_user_course.is_student?
     end
     @assessments = @assessments.includes(:as_assessment)
 

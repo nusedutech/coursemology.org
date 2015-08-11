@@ -29,7 +29,14 @@ class Assessment < ActiveRecord::Base
   scope :future, -> { where("open_at > ? ", Time.now) }
   scope :published, -> { where(published: true) }
   scope :exclude_guidance_quiz, -> { where("as_assessment_type != ?", "Assessment::GuidanceQuiz") }
-  scope :mission, -> { where(as_assessment_type: "Assessment::Mission") }
+  scope :mission, -> { where(as_assessment_type: "Assessment::Mission") } do
+    def mission_without_realtime
+      joins("INNER JOIN assessment_missions ON assessments.as_assessment_id = assessment_missions.id")
+      .where("assessment_missions.id not in (?)",
+             Assessment::RealtimeSessionGroup.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
+    end
+  end
+
   scope :training, -> { where(as_assessment_type: "Assessment::Training") } do
     def retry_training
       joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")

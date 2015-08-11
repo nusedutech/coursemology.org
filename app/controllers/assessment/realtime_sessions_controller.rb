@@ -29,7 +29,8 @@ class Assessment::RealtimeSessionsController < ApplicationController
       end
       session_students.each do |ss|
         if !sm_list[ss.id].nil?
-          ss.update_attribute(:team_grade, total_grade/(session_students.count-no_sm_count))
+          team_grade = total_grade/(session_students.count-no_sm_count)
+          ss.update_attribute(:team_grade, team_grade)
           asm = sm_list[ss.id].assessment
           grading = sm_list[ss.id].get_final_grading
           unless grading.exp_transaction
@@ -43,7 +44,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
             grading.save
           end
 
-          grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : (total_grade/(session_students.count-no_sm_count) || 0) * asm.exp / asm.max_grade
+          grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : ((team_grade*25/100 + (grading.grade.nil? ? 0 : grading.grade)*75/100) || 0) * asm.exp / asm.max_grade
           grading.exp_transaction.save
         end
 

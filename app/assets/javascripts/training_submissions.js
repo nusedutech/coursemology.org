@@ -52,15 +52,16 @@ $(document).ready(function(){
                     $('#continue-btn').removeClass('disabled');
                     $('#continue-btn').addClass('btn-primary');
                     $('#submit-btn').removeClass('btn-primary');
-                    $('#submit-btn').addClass('disabled');
-                    $('#submit-btn').attr("disabled", true);
+                    //$('#submit-btn').addClass('disabled');
+                    //$('#submit-btn').attr("disabled", true);
                     if (resp.is_test || resp.realtime){
-                        $('#explanation').addClass('alert-info');
+                        $('#explanation').addClass('alert-info',500);
                     }else {
                         $('#explanation').addClass('mcq-ans-correct');
                     }
 
                     //run reunlock-next-unlock ajax( this function is in training_submissions\_edit_from.html.erb
+                    /*
                     var reunlock_session_interval = null;
                     if($('#reattempt_next_ajax_url').length){
                         var reattempt_next_url = $('#reattempt_next_ajax_url').val();
@@ -86,7 +87,7 @@ $(document).ready(function(){
                                 }
                             });
                         }, 1000);
-                    }
+                    }*/
 
                 } else {
                     //$('#continue-btn').removeClass('disabled');

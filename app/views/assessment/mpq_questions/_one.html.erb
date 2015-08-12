@@ -1,5 +1,6 @@
 <table>
   <% if !mpq_q.nil? %>
+      <%= style_format(mpq_q.description) %>
       <% mpq_q.sub_questions.each_with_index do |qn, index| %>
           <% q = qn.as_question %>
           <tr>

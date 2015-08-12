@@ -29,13 +29,9 @@
     </div>
     <hr/>
 
-    <% if @summary[:session_question] and !@summary[:session_question].unlock %>
-        <h4>This question is not unlocked yet. Please wait!</h4>
-        <input type="hidden" id="wait_unlock" value="true" />
-    <% elsif !@summary[:current] %>
+    <% if !@summary[:current] %>
         <% if !@summary[:student_seat].nil? and @summary[:student_seat].team_grade.nil? %>
-            <h2>Congratulations, you're done!</h2>
-            <p>Waiting for finalization</p>
+            <h2>Waiting for finalization!</h2>
             <p>After Lecturer finalizes, refresh page to see grade</p>
         <% else %>
             <h2>Congratulations, you're done!</h2>
@@ -47,6 +43,9 @@
               </a> to review your answers.
             </p>
         <% end %>
+    <!--<%# elsif @summary[:session_question] and !@summary[:session_question].unlock %>
+        <h4>This question is not unlocked yet. Please wait!</h4>
+        <input type="hidden" id="wait_unlock" value="true" />-->
     <% else %>
         <form id="training-step-form">
           <input type="hidden" name="step" class="doing-step" value="<%= @summary[:step] %>">
@@ -98,6 +97,7 @@
         $(document).ready(function(){
             var sq_id = $('#session_question_id').val();
             var url = $('#unlock_ajax_url').val();
+            /*
             if($('#wait_unlock').length){
                 session_interval = setInterval(function(){
                     $.ajax({
@@ -114,7 +114,7 @@
                     });
                 }, 1000);
             }
-
+            */
             $(".a-step").click(function(){
                 location.reload();
             });

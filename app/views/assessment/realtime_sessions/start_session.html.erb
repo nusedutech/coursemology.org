@@ -1,225 +1,363 @@
-<input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
-<input type="hidden" class="answers-stats-ajax-url" value="<%= answers_stats_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
-<input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
-<div class="page-header">
-  <h1> <%= @realtime_training.title %></h1>
-</div>
+<%- if @realtime_training %>
+    <input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+    <input type="hidden" class="answers-stats-ajax-url" value="<%= answers_stats_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+    <input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+    <div class="page-header">
+      <h1> <%= @realtime_training.title %></h1>
+    </div>
 
-<h2 class="assignments-description-title">Session of <%= @session.student_group.name %></h2>
+    <h2 class="assignments-description-title">Session of <%= @session.student_group.name %></h2>
 
-<table class="table-top-align">
-  <tr>
-    <td>
-      <div class="pull-left">
-        <%= render partial: "assessment/realtime_trainings/group_details", locals: {session: @session } %>
-      </div>
-    </td>
-
-  </tr>
-</table>
-
-<%= render partial: "file_uploads/download_local_files",
-           locals: { owner: @realtime_training.assessment }%>
-<hr/>
-
- <table class="table asm-qns-table sort">
-  <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
-  <% @session.session_questions.relate_to_assessment(@realtime_training.assessment.id).each_with_index do |sq, index| %>
-      <% qn = sq.question_assessment.question %>
-      <% q = qn.as_question %>
-      <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
-        <td width="80%">
-          <div>
-            <div class="asm-qn-handler">
-              <i class="icon-move handler-icon"></i>
-              <h3 class="handler-text">Question <span class="asm-qn-index"><%= index + 1 %></span>
-                <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
-              </h3>
-            </div>
-
-            <% if q.class == Assessment::McqQuestion %>
-                <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: false } %>
-            <% elsif q.class == Assessment::MpqQuestion %>
-                <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
-            <% else %>
-                <%= style_format(q.description) %>
-            <% end %>
+    <table class="table-top-align">
+      <tr>
+        <td>
+          <div class="pull-left">
+            <%= render partial: "assessment/realtime_trainings/group_details", locals: {session: @session } %>
           </div>
         </td>
 
+      </tr>
+    </table>
 
-        <% if can? :manage, Assessment::Training %>
-            <td class="action-there-icons">
-              <div class="">
-                <span class="count-submission"></span>
-                <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
-                <a href="#" class="btn btn-info stats-answer" data-toggle="modal" data-target="#show_statistic" >Statistic</a>
-                <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+    <%= render partial: "file_uploads/download_local_files",
+               locals: { owner: @realtime_training.assessment }%>
+    <hr/>
+
+     <table class="table asm-qns-table sort">
+      <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
+      <% @session.session_questions.relate_to_assessment(@realtime_training.assessment.id).each_with_index do |sq, index| %>
+          <% qn = sq.question_assessment.question %>
+          <% q = qn.as_question %>
+          <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
+            <td width="80%">
+              <div>
+                <div class="asm-qn-handler">
+                  <i class="icon-move handler-icon"></i>
+                  <h3 class="handler-text">Question <span class="asm-qn-index"><%= index + 1 %></span>
+                    <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
+                  </h3>
+                </div>
+
+                <% if q.class == Assessment::McqQuestion %>
+                    <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: false } %>
+                <% elsif q.class == Assessment::MpqQuestion %>
+                    <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
+                <% else %>
+                    <%= style_format(q.description) %>
+                <% end %>
               </div>
             </td>
-        <% end %>
-      </tr>
-  <% end %>
-  </tbody>
-</table>
-<div style="height: 20px">
-    <div style="float: left"><input type="button" class="btn btn-prev" value="Previous"></div>
-    <div style="float: right"><input type="button" class="btn btn-next" value="Next"></div>
-</div>
 
-<div class="form-actions" style="text-align: center">
-    <%= link_to "Finalize Grade", finalize_grade_training_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn btn-primary' %>
-    <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
-</div>
-<div id="show_statistic" class="modal hide fade" data-backdrop="static">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Question Statistic</h3>
-      </div>
-      <div class="modal-body">
-        <div class="modal-body-up"></div>
-        <div class="modal-body-bottom">
-            <div id="bar-chart" style="height: 300px; width: 500px;"></div>
+
+            <% if can? :manage, Assessment::Training %>
+                <td class="action-there-icons">
+                  <div class="">
+                    <span class="count-submission"></span>
+                    <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
+                    <a href="#" class="btn btn-info stats-answer" data-toggle="modal" data-target="#show_statistic" >Statistic</a>
+                    <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+                  </div>
+                </td>
+            <% end %>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div style="height: 20px">
+        <div style="float: left"><input type="button" class="btn btn-prev" value="Previous"></div>
+        <div style="float: right"><input type="button" class="btn btn-next" value="Next"></div>
+    </div>
+
+    <div class="form-actions" style="text-align: center">
+        <%= link_to "Finalize Grade", finalize_grade_training_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn btn-primary' %>
+        <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
+    </div>
+    <div id="show_statistic" class="modal hide fade" data-backdrop="static">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Question Statistic</h3>
+          </div>
+          <div class="modal-body">
+            <div class="modal-body-up"></div>
+            <div class="modal-body-bottom">
+                <div id="bar-chart" style="height: 300px; width: 500px;"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button data-dismiss="modal" class="btn">Close</button>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button data-dismiss="modal" class="btn">Close</button>
-      </div>
     </div>
-  </div>
-</div>
 
-<script>
-  var session_interval = null;
-  $(document).ready(function(){
-      $('.unlock-question').click(function(){
-          if($(this).text()== 'Lock'){
-              clearInterval( session_interval );
-          }
-          var url = $(".switch-lock-ajax-url").val();
-          var $this = $(this);
-          var session_question_id = $(this).parent().find(".session-question-id").val();
+    <script>
+      var session_interval = null;
+      $(document).ready(function(){
+          $('.unlock-question').click(function(){
+              if($(this).text()== 'Lock'){
+                  clearInterval( session_interval );
+              }
+              var url = $(".switch-lock-ajax-url").val();
+              var $this = $(this);
+              var session_question_id = $(this).parent().find(".session-question-id").val();
 
-          $.ajax({
-              url : url,
-              type : 'POST',
-              dataType : 'json',
-              data : {session_question_id: session_question_id},
-              success : function(result) {
-                  //start counting as unlock
-                  if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
-                      $($this).parent().find('.count-submission').text("0");
-                      session_interval = setInterval(function(){
-                          var url = $(".count-submission-ajax-url").val();
-                          var result = server_request({session_question_id: session_question_id}, "POST", url);
-                          $($this).parent().find('.count-submission').text(result.count);
-                          //alert(result.count);
-                      }, 1000);
-                      $($this).text('Lock');
-                      $($this).removeClass('btn-success').addClass('btn-warning');
-                  }else if(result.result && $($this).text()== 'Lock' && result.u_c == 0){
-                      $($this).text('Unlock');
-                      $($this).removeClass('btn-warning').addClass('btn-success');
-                  }else if(result.result && $($this).text()== 'Lock' && result.u_c >= 1){
-                      $($this).text('Reunlock');
-                      $($this).removeClass('btn-warning').addClass('btn-success');
+              $.ajax({
+                  url : url,
+                  type : 'POST',
+                  dataType : 'json',
+                  data : {session_question_id: session_question_id},
+                  success : function(result) {
+                      //start counting as unlock
+                      if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
+                          $($this).parent().find('.count-submission').text("0");
+                          session_interval = setInterval(function(){
+                              var url = $(".count-submission-ajax-url").val();
+                              var result = server_request({session_question_id: session_question_id}, "POST", url);
+                              $($this).parent().find('.count-submission').text(result.count);
+                              //alert(result.count);
+                          }, 3000);
+                          $($this).text('Lock');
+                          $($this).removeClass('btn-success').addClass('btn-warning');
+                      }else if(result.result && $($this).text()== 'Lock' && result.u_c == 0){
+                          $($this).text('Unlock');
+                          $($this).removeClass('btn-warning').addClass('btn-success');
+                      }else if(result.result && $($this).text()== 'Lock' && result.u_c >= 1){
+                          $($this).text('Reunlock');
+                          $($this).removeClass('btn-warning').addClass('btn-success');
+                      }
                   }
+              });
+              //var result = server_request({question_id: $(this).parent().find(".question-id").val()}, "POST", url);
+
+          });
+
+          var statistic_data = null;
+          $('.stats-answer').click(function() {
+
+              $('.modal-body-up').empty();
+              //clone question to modal
+              var $td = $(this).closest("tr.asm-qn").children(":first").clone();
+              $td.find(".asm-qn-handler").remove();
+              $td.children().prependTo('.modal-body-up');
+
+              var url = $(".answers-stats-ajax-url").val();
+              var $this = $(this);
+              var session_question_id = $(this).parent().find(".session-question-id").val();
+
+              $.ajax({
+                  url : url,
+                  type : 'POST',
+                  dataType : 'json',
+                  async : false,
+                  data : {session_question_id: session_question_id},
+                  success : function(result) {
+                      //start counting as unlock
+                      statistic_data = result;
+
+                  }
+              });
+          });
+
+          $('#show_statistic').on('shown', function(){
+              build_bar(statistic_data);
+
+          });
+
+          function build_bar(para){
+              var k_list = ['A','B','C','D','E','F','G','H']
+              var data = [];
+              var keys = Object.keys(para.result)
+              for (var i = 0 ; i < keys.length; i++) {
+                  data.push({x: "option " + k_list[i], y: para.result[keys[i]]});
+              }
+              $('#bar-chart').empty();
+              Morris.Bar({
+                  element: 'bar-chart',
+                  data: data,
+                  xkey: 'x',
+                  ykeys: ['y'],
+                  labels: ['Options'],
+                  hideHover: 'auto',
+                  hoverCallback: function (index, options, content, row) {
+                      return row.y ;
+                  }
+                  /*barColors: function (row, series, type) {
+                   console.log("--> "+row.x, series, type);
+                   if(row.x == "2006"){ return "#AD1D28";}
+                   else {return "#DEBB27";}
+                   }*/
+              });
+          }
+
+          var cur_index_ques = 0;
+          $('.btn-prev').addClass("hidden");
+          $('.btn-prev').click(function() {
+              $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
+              $('tbody tr.asm-qn').eq(cur_index_ques-1).removeClass("hidden");
+              cur_index_ques--;
+
+              $('.btn-next').removeClass("hidden");
+              if (cur_index_ques == 0){
+                  $('.btn-prev').addClass("hidden");
               }
           });
-          //var result = server_request({question_id: $(this).parent().find(".question-id").val()}, "POST", url);
 
-      });
+          $('.btn-next').click(function() {
+              $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
+              $('tbody tr.asm-qn').eq(cur_index_ques+1).removeClass("hidden");
+              cur_index_ques++;
 
-      var statistic_data = null;
-      $('.stats-answer').click(function() {
-
-          $('.modal-body-up').empty();
-          //clone question to modal
-          var $td = $(this).closest("tr.asm-qn").children(":first").clone();
-          $td.find(".asm-qn-handler").remove();
-          $td.children().prependTo('.modal-body-up');
-
-          var url = $(".answers-stats-ajax-url").val();
-          var $this = $(this);
-          var session_question_id = $(this).parent().find(".session-question-id").val();
-
-          $.ajax({
-              url : url,
-              type : 'POST',
-              dataType : 'json',
-              async : false,
-              data : {session_question_id: session_question_id},
-              success : function(result) {
-                  //start counting as unlock
-                  statistic_data = result;
-
+              $('.btn-prev').removeClass("hidden");
+              if (cur_index_ques == $('tbody tr.asm-qn').length - 1){
+                  $('.btn-next').addClass("hidden");
               }
           });
-      });
-
-      $('#show_statistic').on('shown', function(){
-          build_bar(statistic_data);
 
       });
 
-      function build_bar(para){
-          var k_list = ['A','B','C','D','E','F','G','H']
-          var data = [];
-          var keys = Object.keys(para.result)
-          for (var i = 0 ; i < keys.length; i++) {
-              data.push({x: "option " + k_list[i], y: para.result[keys[i]]});
-          }
-          $('#bar-chart').empty();
-          Morris.Bar({
-              element: 'bar-chart',
-              data: data,
-              xkey: 'x',
-              ykeys: ['y'],
-              labels: ['Options'],
-              hideHover: 'auto',
-              hoverCallback: function (index, options, content, row) {
-                  return row.y ;
-              }
-              /*barColors: function (row, series, type) {
-               console.log("--> "+row.x, series, type);
-               if(row.x == "2006"){ return "#AD1D28";}
-               else {return "#DEBB27";}
-               }*/
-          });
-      }
+    </script>
 
-      var cur_index_ques = 0;
-      $('.btn-prev').addClass("hidden");
-      $('.btn-prev').click(function() {
-          $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
-          $('tbody tr.asm-qn').eq(cur_index_ques-1).removeClass("hidden");
-          cur_index_ques--;
+<%- elsif @realtime_mission %>
+    <input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+    <input type="hidden" class="count-submission-ajax-url" value="<%= count_submission_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
+    <div class="page-header">
+      <h1> <%= @realtime_mission.title %></h1>
+    </div>
 
-          $('.btn-next').removeClass("hidden");
-          if (cur_index_ques == 0){
-              $('.btn-prev').addClass("hidden");
-          }
-      });
+    <h2 class="assignments-description-title">Session of <%= @session.student_group.name %></h2>
 
-      $('.btn-next').click(function() {
-          $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
-          $('tbody tr.asm-qn').eq(cur_index_ques+1).removeClass("hidden");
-          cur_index_ques++;
+    <table class="table-top-align">
+      <tr>
+        <td>
+          <div class="pull-left">
+            <%= render partial: "assessment/realtime_trainings/group_details", locals: {session: @session } %>
+          </div>
+        </td>
 
-          $('.btn-prev').removeClass("hidden");
-          if (cur_index_ques == $('tbody tr.asm-qn').length - 1){
-              $('.btn-next').addClass("hidden");
-          }
-      });
+      </tr>
+    </table>
 
+    <%= render partial: "file_uploads/download_local_files",
+               locals: { owner: @realtime_mission.assessment }%>
+    <hr/>
 
+    <table class="table asm-qns-table sort">
+      <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_mission.assessment) %>">
+      <% @session.session_questions.relate_to_assessment(@realtime_mission.assessment.id).each_with_index do |sq, index| %>
+          <% qn = sq.question_assessment.question %>
+          <% q = qn.as_question %>
+          <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
+            <td width="80%">
+              <div>
+                <div class="asm-qn-handler">
+                  <i class="icon-move handler-icon"></i>
+                  <h3 class="handler-text">Question <span class="asm-qn-index"><%= index + 1 %></span>
+                    <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
+                  </h3>
+                </div>
 
+                <% if q.class == Assessment::McqQuestion %>
+                    <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: false } %>
+                <% elsif q.class == Assessment::MpqQuestion %>
+                    <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
+                <% else %>
+                    <%= style_format(q.description) %>
+                <% end %>
+              </div>
+            </td>
 
 
-  });
+            <% if can? :manage, Assessment::Mission %>
+                <td class="action-there-icons">
+                  <div class="">
+                    <span class="count-submission"></span>
+                    <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
+                    <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+                  </div>
+                </td>
+            <% end %>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+    <div style="height: 20px">
+      <div style="float: left"><input type="button" class="btn btn-prev" value="Previous"></div>
+      <div style="float: right"><input type="button" class="btn btn-next" value="Next"></div>
+    </div>
+
+    <div class="form-actions" style="text-align: center">
+      <%= link_to "Finalize Grade", finalize_grade_training_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn btn-primary' %>
+      <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
+    </div>
+
+    <script>
+        var session_interval = null;
+        $(document).ready(function(){
+            $('.unlock-question').click(function(){
+                if($(this).text()== 'Lock'){
+                    clearInterval( session_interval );
+                }
+                var url = $(".switch-lock-ajax-url").val();
+                var $this = $(this);
+                var session_question_id = $(this).parent().find(".session-question-id").val();
+
+                $.ajax({
+                    url : url,
+                    type : 'POST',
+                    dataType : 'json',
+                    data : {session_question_id: session_question_id},
+                    success : function(result) {
+                        //start counting as unlock
+                        if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
+                            $($this).parent().find('.count-submission').text("0");
+                            session_interval = setInterval(function(){
+                                var url = $(".count-submission-ajax-url").val();
+                                var result = server_request({session_question_id: session_question_id}, "POST", url);
+                                $($this).parent().find('.count-submission').text(result.count);
+                                //alert(result.count);
+                            }, 1000);
+                            $($this).text('Lock');
+                            $($this).removeClass('btn-success').addClass('btn-warning');
+                        }else if(result.result && $($this).text()== 'Lock' && result.u_c == 0){
+                            $($this).text('Unlock');
+                            $($this).removeClass('btn-warning').addClass('btn-success');
+                        }else if(result.result && $($this).text()== 'Lock' && result.u_c >= 1){
+                            $($this).text('Reunlock');
+                            $($this).removeClass('btn-warning').addClass('btn-success');
+                        }
+                    }
+                });
+                //var result = server_request({question_id: $(this).parent().find(".question-id").val()}, "POST", url);
+
+            });
 
 
+            var cur_index_ques = 0;
+            $('.btn-prev').addClass("hidden");
+            $('.btn-prev').click(function() {
+                $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
+                $('tbody tr.asm-qn').eq(cur_index_ques-1).removeClass("hidden");
+                cur_index_ques--;
 
+                $('.btn-next').removeClass("hidden");
+                if (cur_index_ques == 0){
+                    $('.btn-prev').addClass("hidden");
+                }
+            });
 
-</script>
+            $('.btn-next').click(function() {
+                $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
+                $('tbody tr.asm-qn').eq(cur_index_ques+1).removeClass("hidden");
+                cur_index_ques++;
+
+                $('.btn-prev').removeClass("hidden");
+                if (cur_index_ques == $('tbody tr.asm-qn').length - 1){
+                    $('.btn-next').addClass("hidden");
+                }
+            });
+
+        });
+
+    </script>
+<%- end %>

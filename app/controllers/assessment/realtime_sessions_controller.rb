@@ -73,7 +73,12 @@ class Assessment::RealtimeSessionsController < ApplicationController
       authorize! :manage, @realtime_training
       @realtime_session.update_attribute(:status, true)
       @session = @realtime_session
-
+    elsif params[:t] == "mission"
+      @realtime_session.reset
+      @realtime_mission = @realtime_session.realtime_session_group.mission
+      authorize! :manage, @realtime_mission
+      @realtime_session.update_attribute(:status, true)
+      @session = @realtime_session
     end
   end
 

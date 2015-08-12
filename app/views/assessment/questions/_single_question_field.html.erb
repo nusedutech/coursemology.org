@@ -7,7 +7,6 @@
       <% if q.as_question.class == Assessment::McqQuestion %>
           <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: true } %>
       <% elsif q.as_question.class == Assessment::MpqQuestion %>
-          <%= style_format(q.description) %>
           <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
       <% else %>
           <%= style_format(q.description) %>

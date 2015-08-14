@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150808141521) do
+ActiveRecord::Schema.define(:version => 20150813040505) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -235,8 +235,9 @@ ActiveRecord::Schema.define(:version => 20150808141521) do
 
   create_table "assessment_general_answers", :force => true do |t|
     t.datetime "deleted_at"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.integer  "voted_answer_id"
   end
 
   create_table "assessment_general_questions", :force => true do |t|
@@ -463,10 +464,11 @@ ActiveRecord::Schema.define(:version => 20150808141521) do
     t.integer  "std_course_id"
     t.integer  "session_id"
     t.integer  "seat_number"
-    t.datetime "created_at",    :null => false
-    t.datetime "updated_at",    :null => false
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
     t.integer  "table_number"
     t.float    "team_grade"
+    t.integer  "team_submission_id"
   end
 
   create_table "assessment_realtime_session_groups", :force => true do |t|

@@ -23,6 +23,7 @@
                locals: { owner: @realtime_training.assessment }%>
     <hr/>
 
+    <span class="count-submission-info"></span>
      <table class="table asm-qns-table sort">
       <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
       <% @session.session_questions.relate_to_assessment(@realtime_training.assessment.id).each_with_index do |sq, index| %>
@@ -111,10 +112,13 @@
                       //start counting as unlock
                       if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
                           $($this).parent().find('.count-submission').text("0");
+                          $('.count-submission-info').text("");
                           session_interval = setInterval(function(){
                               var url = $(".count-submission-ajax-url").val();
                               var result = server_request({session_question_id: session_question_id}, "POST", url);
                               $($this).parent().find('.count-submission').text(result.count);
+                              $('.count-submission-info').text(result.info);
+
                               //alert(result.count);
                           }, 3000);
                           $($this).text('Lock');
@@ -242,45 +246,119 @@
                locals: { owner: @realtime_mission.assessment }%>
     <hr/>
 
-    <table class="table asm-qns-table sort">
-      <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_mission.assessment) %>">
-      <% @session.session_questions.relate_to_assessment(@realtime_mission.assessment.id).each_with_index do |sq, index| %>
+    <%- cur_step = 1 %>
+    <%- sq_list = @session.session_questions.relate_to_assessment(@realtime_mission.assessment.id) %>
+    <!--
+    <div class="step-list">
+      <% sq_list.each_with_index do |sq,sq_i| %>
+          <%= link_to (sq_i+1), "?step=#{sq_i+1}#training-stop-pos", class: (sq_i+1)==cur_step ? "step step-current a-step" : "step a-step" %>
+          <%- if sq.question_assessment.question.is_a? Assessment::MpqQuestion %>
+              <% sq.question_assessment.question.sub_questions.each_with_index do |sub_q,sub_q_i| %>
+                  <%= link_to "#{(sq_i+1)}.#{(sub_q_i+1)}", "?step=#{sq_i+1}&sub=#{sub_q.id}#training-stop-pos", class: "step step-available a-step" %>
+              <% end %>
+          <% end %>
+      <% end %>
+    </div>
+    -->
+    <div class="step-list">
+      <% sq_list.each_with_index do |sq,sq_i| %>
+          <%= link_to (sq_i+1), "",id: "step_#{sq_i+1}", class: sq_i==0 ? "step step-current a-step" : "step step-available a-step"  %>
+          <%- if sq.question_assessment.question.is_a? Assessment::MpqQuestion %>
+              <% sq.question_assessment.question.sub_questions.each_with_index do |sub_q,sub_q_i| %>
+                  <%= link_to "#{(sq_i+1)}.#{(sub_q_i+1)}", "",id: "step_#{sq_i+1}_#{sub_q_i+1}", class: "step step-available a-step" %>
+              <% end %>
+          <% end %>
+      <% end %>
+    </div>
+    <table class="table asm-qns-table">
+      <tbody class="asm-qns">
+      <% sq_list.each_with_index do |sq, sq_i| %>
           <% qn = sq.question_assessment.question %>
           <% q = qn.as_question %>
-          <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
-            <td width="80%">
-              <div>
-                <div class="asm-qn-handler">
-                  <i class="icon-move handler-icon"></i>
-                  <h3 class="handler-text">Question <span class="asm-qn-index"><%= index + 1 %></span>
-                    <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
-                  </h3>
-                </div>
-
-                <% if q.class == Assessment::McqQuestion %>
-                    <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: false } %>
-                <% elsif q.class == Assessment::MpqQuestion %>
-                    <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
-                <% else %>
-                    <%= style_format(q.description) %>
-                <% end %>
-              </div>
-            </td>
-
-
-            <% if can? :manage, Assessment::Mission %>
-                <td class="action-there-icons">
-                  <div class="">
-                    <span class="count-submission"></span>
-                    <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
-                    <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+          <%- if qn.is_a? Assessment::MpqQuestion %>
+              <tr id="step_<%= sq_i+1 %>" class="asm-qn <%= sq_i != 0 ? "hidden" : "current" %>" >
+                <td width="90%">
+                  <div>
+                    <div class="asm-qn-handler">
+                      <i class="icon-move handler-icon"></i>
+                      <h3 class="handler-text">Question <span class="asm-qn-index"><%= sq_i + 1 %></span>
+                        <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
+                      </h3>
+                    </div>
+                  <%= style_format(q.description) %>
                   </div>
                 </td>
-            <% end %>
-          </tr>
+              </tr>
+              <% qn.sub_questions.each_with_index do |sub_q,sub_q_i| %>
+                  <tr id="step_<%= sq_i+1 %>_<%= sub_q_i+1 %>" class="asm-qn hidden" >
+                    <td width="90%">
+                      <div>
+                        <div class="asm-qn-handler">
+                          <i class="icon-move handler-icon"></i>
+                          <h3 class="handler-text">Question <%= sq_i + 1 %> - Sub Question <span class="asm-qn-index"><%= sub_q_i + 1 %></span>
+                            <%= ": #{sub_q.title}" if !sub_q.title.nil? and !sub_q.title.empty? %>
+                          </h3>
+                        </div>
+
+                        <% if sub_q.class == Assessment::McqQuestion %>
+                            <%= render partial: "assessment/mcq_questions/one", locals: { q: sub_q, show_answer: false } %>
+                        <% elsif sub_q.class == Assessment::MpqQuestion %>
+                            <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: sub_q } %>
+                        <% else %>
+                            <%= style_format(sub_q.description) %>
+                        <% end %>
+                      </div>
+                    </td>
+
+                    <% if can? :manage, Assessment::Mission %>
+                        <td class="action-there-icons">
+                          <div class="">
+                            <span class="count-submission"></span>
+                            <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
+                            <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+                            <input type="hidden" class="sub-question-id" value="<%= sub_q.id %>" >
+                          </div>
+                        </td>
+                    <% end %>
+                  </tr>
+              <% end %>
+          <% else %>
+              <tr id="step_<%= sq_i+1 %>" class="asm-qn <%= sq_i != 0 ? "hidden" : "current" %>" >
+                <td width="90%">
+                  <div>
+                    <div class="asm-qn-handler">
+                      <i class="icon-move handler-icon"></i>
+                      <h3 class="handler-text">Question <span class="asm-qn-index"><%= sq_i + 1 %></span>
+                        <%= ": #{q.title}" if !q.title.nil? and !q.title.empty? %>
+                      </h3>
+                    </div>
+
+                    <% if q.class == Assessment::McqQuestion %>
+                        <%= render partial: "assessment/mcq_questions/one", locals: { q: q, show_answer: false } %>
+                    <% elsif q.class == Assessment::MpqQuestion %>
+                        <%= render partial: "assessment/mpq_questions/one", locals: { mpq_q: q } %>
+                    <% else %>
+                        <%= style_format(q.description) %>
+                    <% end %>
+                  </div>
+                </td>
+
+
+                <% if can? :manage, Assessment::Training %>
+                    <td class="action-there-icons">
+                      <div class="">
+                        <span class="count-submission"></span>
+                        <%= link_to 'Unlock','', class: 'btn btn-success unlock-question' %>
+                        <input type="hidden" class="session-question-id" value="<%= sq.id %>" >
+                      </div>
+                    </td>
+                <% end %>
+              </tr>
+          <% end %>
       <% end %>
       </tbody>
     </table>
+
     <div style="height: 20px">
       <div style="float: left"><input type="button" class="btn btn-prev" value="Previous"></div>
       <div style="float: right"><input type="button" class="btn btn-next" value="Next"></div>
@@ -301,28 +379,29 @@
                 var url = $(".switch-lock-ajax-url").val();
                 var $this = $(this);
                 var session_question_id = $(this).parent().find(".session-question-id").val();
+                var $sub_question = $(this).parent().find(".sub-question-id");
 
                 $.ajax({
                     url : url,
                     type : 'POST',
                     dataType : 'json',
-                    data : {session_question_id: session_question_id},
+                    data : {session_question_id: session_question_id, sub_question_id: $sub_question.length ? $sub_question.val() : null, unlock: $($this).text() == 'Lock' ? false : true},
                     success : function(result) {
                         //start counting as unlock
                         if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
                             $($this).parent().find('.count-submission').text("0");
-                            session_interval = setInterval(function(){
-                                var url = $(".count-submission-ajax-url").val();
-                                var result = server_request({session_question_id: session_question_id}, "POST", url);
-                                $($this).parent().find('.count-submission').text(result.count);
-                                //alert(result.count);
-                            }, 1000);
                             $($this).text('Lock');
                             $($this).removeClass('btn-success').addClass('btn-warning');
+                            session_interval = setInterval(function(){
+                                var url = $(".count-submission-ajax-url").val();
+                                var result = server_request({session_question_id: session_question_id, sub_question_id: $sub_question.length ? $sub_question.val() : null}, "POST", url);
+                                $($this).parent().find('.count-submission').text(result.count);
+                                //alert(result.count);
+                            }, 3000);
                         }else if(result.result && $($this).text()== 'Lock' && result.u_c == 0){
                             $($this).text('Unlock');
                             $($this).removeClass('btn-warning').addClass('btn-success');
-                        }else if(result.result && $($this).text()== 'Lock' && result.u_c >= 1){
+                        }else if(result.result && $($this).text()== 'Lock' && result.u_c != 1){
                             $($this).text('Reunlock');
                             $($this).removeClass('btn-warning').addClass('btn-success');
                         }
@@ -336,27 +415,29 @@
             var cur_index_ques = 0;
             $('.btn-prev').addClass("hidden");
             $('.btn-prev').click(function() {
-                $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
-                $('tbody tr.asm-qn').eq(cur_index_ques-1).removeClass("hidden");
-                cur_index_ques--;
-
-                $('.btn-next').removeClass("hidden");
-                if (cur_index_ques == 0){
-                    $('.btn-prev').addClass("hidden");
-                }
+                $('.step-list a.a-step').eq(cur_index_ques-1).click();
             });
 
             $('.btn-next').click(function() {
-                $('tbody tr.asm-qn').eq(cur_index_ques).addClass("hidden");
-                $('tbody tr.asm-qn').eq(cur_index_ques+1).removeClass("hidden");
-                cur_index_ques++;
-
-                $('.btn-prev').removeClass("hidden");
-                if (cur_index_ques == $('tbody tr.asm-qn').length - 1){
-                    $('.btn-next').addClass("hidden");
-                }
+                $('.step-list a.a-step').eq(cur_index_ques+1).click();
             });
 
+            $(".a-step").click(function(){
+                if(!$(this).hasClass("step-current")) {
+                    $('.step-list a.step-current').removeClass("step-current").addClass("step-available");
+                    $(this).removeClass("step-available").addClass("step-current");
+                    $('tbody tr.current').removeClass("current").addClass("hidden");
+                    $('tbody tr#' + $(this).attr('id')).removeClass("hidden").addClass("current");
+                    cur_index_ques = $(this).index();
+                    $('.btn-prev').removeClass("hidden");
+                    $('.btn-next').removeClass("hidden");
+                    if (cur_index_ques == 0){
+                        $('.btn-prev').addClass("hidden");
+                    }else if (cur_index_ques == $('tbody tr.asm-qn').length - 1){
+                        $('.btn-next').addClass("hidden");
+                    }
+                }
+            });
         });
 
     </script>

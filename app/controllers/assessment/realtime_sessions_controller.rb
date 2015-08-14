@@ -83,30 +83,71 @@ class Assessment::RealtimeSessionsController < ApplicationController
   end
 
   def switch_lock_question
-    session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
-    session[:sq_update_time] = session_question.updated_at if session_question.unlock
-    session_question.unlock_count = session_question.unlock_count + 1 if !session_question.unlock
-    session_question.unlock = session_question.unlock? ? false : true;
-    respond_to do |format|
-      if session_question.save
-        session[:sq_update_time] = session_question.updated_at if session_question.unlock
-        format.json { render json: { result: true, u_c: session_question.unlock_count}}
-      else
-        format.json { render json: { result: false}}
+    if params[:sub_question_id] and !params[:sub_question_id].empty?
+      session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
+      session[:sq_update_time] = session_question.updated_at if session_question.unlock
+      # Using unlock_count as temp variable for sub question unlock
+      session_question.unlock_count = params[:sub_question_id]
+      session_question.unlock = params[:unlock];
+      respond_to do |format|
+        if session_question.save
+          session[:sq_update_time] = session_question.updated_at if session_question.unlock
+          format.json { render json: { result: true, u_c: session_question.unlock_count}}
+        else
+          format.json { render json: { result: false}}
+        end
+      end
+    else
+      session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
+      session[:sq_update_time] = session_question.updated_at if session_question.unlock
+      session_question.unlock_count = session_question.unlock_count + 1 if !session_question.unlock
+      session_question.unlock = session_question.unlock? ? false : true;
+      respond_to do |format|
+        if session_question.save
+          session[:sq_update_time] = session_question.updated_at if session_question.unlock
+          format.json { render json: { result: true, u_c: session_question.unlock_count}}
+        else
+          format.json { render json: { result: false}}
+        end
       end
     end
+
   end
 
   def count_submission
     session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
-    question_answers = session_question.question_assessment.question.answers.
-        in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
-        in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
-        after_question_unlock(session_question)
+    asm = session_question.question_assessment.assessment
+    if asm.is_mission?
+      if params[:sub_question_id] and !params[:sub_question_id].empty?
+        question_answers = Assessment::Question.find(params[:sub_question_id]).answers.general.
+            in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
+            in_submission_list(@realtime_session.realtime_session_group.mission.assessment.submissions.map{|s| s.id }).give_vote(session_question)
 
-    #question_answers = @realtime_session.realtime_training.submissions.answers.in_list(@realtime_session.student_seats.map{|s| s.std_course_id })
-    respond_to do |format|
-      format.json { render json: { count: question_answers.count}}
+        #question_answers = @realtime_session.realtime_training.submissions.answers.in_list(@realtime_session.student_seats.map{|s| s.std_course_id })
+        respond_to do |format|
+          format.json { render json: { count: question_answers.count}}
+        end
+      else
+        question_answers = session_question.question_assessment.question.answers.general.
+            in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
+            in_submission_list(@realtime_session.realtime_session_group.mission.assessment.submissions.map{|s| s.id }).give_vote(session_question)
+
+        #question_answers = @realtime_session.realtime_training.submissions.answers.in_list(@realtime_session.student_seats.map{|s| s.std_course_id })
+        respond_to do |format|
+          format.json { render json: { count: question_answers.count}}
+        end
+      end
+    else
+      question_answers = session_question.question_assessment.question.answers.
+          in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
+          in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
+          after_question_unlock(session_question)
+
+      #question_answers = @realtime_session.realtime_training.submissions.answers.in_list(@realtime_session.student_seats.map{|s| s.std_course_id })
+      respond_to do |format|
+        format.json { render json: { count: question_answers.count, info: "check submissions updated after #{session_question.updated_at}, run at #{Time.now}"}}
+        logger.debug "Do count_submission to check for submission updated after #{session_question.updated_at}, run at #{Time.now}"
+      end
     end
   end
 

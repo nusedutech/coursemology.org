@@ -1,98 +1,208 @@
-<%= form_for @submission, url: (@from_lesson_plan.nil? ? course_assessment_submission_path(@course, @assessment, @submission): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
-    <div class="tabbable tabs-below">
-      <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
-          <ul class="nav nav-tabs" id="assign-qn-tabs">
-            <% @questions.each_with_index do |q, i| %>
-                <li class="<%= 'active' if i == 0 %>"><a href="#tab<%= i %>" data-toggle="tab"><%=  q.get_title %></a></li>
-            <% end %>
-          </ul>
-      <% else %>
+<%- if @mission.realtime_session_groups.count > 0 and @summary[:session] %>
+    <%= form_for @submission, url: (@from_lesson_plan.nil? ? course_assessment_submission_path(@course, @assessment, @submission, anchor: 'training-stop-pos', step: @summary[:step]): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
+        <% q = @summary[:current].question %>
+        <input type="hidden" name="session_id" value="<%= @summary[:session].id %>" >
+        <input type="hidden" name="session_question_id" value="<%= @summary[:session_question].id %>" >
+        <input type="hidden" name="question_id" value="<%= @summary[:current].question.id if @summary[:current]%>" >
+        <div class="tabbable tabs-below">
+          <div id="training-stop-pos"><br></div>
           <hr />
-      <% end %>
-      <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
-        <% @questions.each_with_index do |q, i| %>
-            <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
-                <div class="tab-pane <%= 'active' if i == 0%>" id="tab<%= i %>">
+          <div class="step-list">
+            <%- index = 0 %>
+            <% @mission.questions.each_with_index do |sq,sq_i| %>
+                <%- index += 1 %>
+                <%= link_to sq_i+1, "?step=#{index}#training-stop-pos",
+                            id: "step_#{index}", class: index==@summary[:step] ? "step step-current a-step" : "step step-available a-step"  %>
+                <%- if sq.is_a? Assessment::MpqQuestion %>
+                    <% sq.sub_questions.each_with_index do |sub_q,sub_q_i| %>
+                        <%- index += 1 %>
+                        <%= link_to "#{(sq_i+1)}.#{(sub_q_i+1)}", "?step=#{index}#training-stop-pos",id: "step_#{index}", class: index==@summary[:step] ? "step step-current a-step" : "step step-available a-step" %>
+                    <% end %>
+                <% end %>
             <% end %>
-            <% unless @mission.single_question? %>
-                <h3><%=  q.get_title%></h3>
-            <% end %>
+          </div>
+          <hr />
+          <%- if params[:result]%>
+              <div class="<%= params[:result]=="true" ? "well alert-info" : "well mcq-ans-incorrect" %>">
+                <p><%= params[:result]=="true" ? "Your answer is submitted. Please wait for Lecturer's instruction of next step." : "This question is locked." %></p>
+              </div>
+          <% end %>
+          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
+            <h3><%=  q.title%></h3>
             <div class="row">
               <div class="span8">
                 <span><%= style_format(q.description) %></span>
               </div>
             </div>
+            <%- if !q.is_a? Assessment::MpqQuestion %>
+                <h4>Choose final answer:</h4>
+                <table>
+                  <%- answer = @submission.answers.where(question_id: q.id).first %>
+                  <%- @summary[:teammate_answers].each do |ta| %>
+                  <tr>
+                    <td><input class="choices" type="radio" name="votes[<%= q.id %>]" value="<%= ta.id %>" id="value=<%= ta.id %>"/></td>
+                    <td width="80%">
+                      <% if @mission.file_submission_only? %>
+                          <p style="font-style: italic"> Please include you answer in file(s).</p>
+                      <% else %>
+                          <%- question = q.specific %>
+                          <% if question.class == Assessment::GeneralQuestion and answer and answer == ta %>
+                              <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8">
+                                <%= ta.content %>
+                              </textarea>
+                          <% elsif question.class == Assessment::GeneralQuestion and answer != ta %>
+                              <%= ta.content %>
+                          <% elsif question.class == Assessment::CodingQuestion %>
+                              <%=render partial: 'do_coding',
+                                        locals: { answer: answer,
+                                                  question: question,
+                                                  submission: @submission,
+                                                  mode: "edit" } %>
+                          <% end %>
+                      <% end %>
 
-            <%- answer = @submission.answers.where(question_id: q.id).first %>
-            <% if @mission.file_submission_only? %>
-                <p style="font-style: italic"> Please include you answer in file(s).</p>
-            <% else %>
-                <%- answer = @submission.answers.where(question_id: q.id).first %>
-                <%- question = q.specific %>
-                <% if question.class == Assessment::GeneralQuestion %>
-                    <h4>Your answer:</h4>
-                    <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8">
-                      <% if answer %>
-                          <%= answer.content %>
-                      <% end %>
-                    </textarea>
-                <% elsif question.class == Assessment::MpqQuestion %>
-                  <% q.specific.sub_questions.each_with_index do |sq, si| %>
-                    <h4>Sub question <%= si+1%></h4>
-                    <div class="row">
-                      <div class="span8">
-                        <span><%= style_format(sq.description) %></span>
-                      </div>
-                    </div>
-                    <h4>Your answer:</h4>
-                    <textarea name="answers[<%= sq.id %>]" class="span8 ck-editor" rows="8">
-                      <%- answer = @submission.answers.where(question_id: sq.id).first %>
-                      <% if answer %>
-                          <%= answer.content %>
-                      <% end %>
-                    </textarea>
+                      <!--
+                    <% if @mission.comment_per_qn? %>
+                        <hr />
+
+                        <% require 'digest/md5' %>
+                        <% ecid =  Digest::MD5.hexdigest(answer.id.to_s) if answer %>
+                        <input type="hidden" id="submission_url_<%= ecid %>" value="<%= course_assessment_submission_url(@course, @assessment, @submission) %>">
+
+                        <div class="row-fluid">
+                          <div class="span10">
+                            <%= render partial: "comments/list",
+                                       locals: { comments:  CommentTopic.comments_to_json(answer.comment_topic, curr_user_course),
+                                                 target:    answer,
+                                                 header:    'Comments',
+                                                 ecid:      ecid } %>
+                          </div>
+                        </div>
+                    <% end %>
+                    -->
+                    </td>
+                  </tr>
                   <% end %>
-                <% elsif question.class == Assessment::CodingQuestion %>
-                    <%=render partial: 'do_coding',
-                              locals: { answer: answer,
-                                        question: question,
-                                        submission: @submission,
-                                        mode: "edit" } %>
-                <% end %>
+                </table>
+
             <% end %>
+          </div>
+        </div>
 
-            <% if @mission.comment_per_qn? %>
-                <hr />
+        <br />
 
-                <% require 'digest/md5' %>
-                <% ecid =  Digest::MD5.hexdigest(answer.id.to_s) %>
-                <input type="hidden" id="submission_url_<%= ecid %>" value="<%= course_assessment_submission_url(@course, @assessment, @submission) %>">
+        <div id="uploaded_files_div"></div>
 
-                <div class="row-fluid">
-                  <div class="span10">
-                    <%= render partial: "comments/list",
-                               locals: { comments:  CommentTopic.comments_to_json(answer.comment_topic, curr_user_course),
-                                         target:    answer,
-                                         header:    'Comments',
-                                         ecid:      ecid } %>
+        <div class="form-actions">
+
+          <%= f.submit 'Submit Answer', :class => 'btn btn-primary', id:"mission_save" if !q.is_a? Assessment::MpqQuestion %>
+          <%= link_to "Continue",
+                      edit_course_assessment_submission_path(@course, @assessment, @submission,
+                                                             from_lesson_plan: @from_lesson_plan.nil? ? false : true,
+                                                             anchor: 'training-stop-pos', step: @summary[:step] + 1),
+                                                             class: (params[:result] || (q.is_a? Assessment::MpqQuestion)) ? 'btn btn-primary' : 'btn disabled',
+                                                             id: 'continue-btn' %>
+        </div>
+    <% end %>
+
+<% else %>
+    <%= form_for @submission, url: (@from_lesson_plan.nil? ? course_assessment_submission_path(@course, @assessment, @submission): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
+        <div class="tabbable tabs-below">
+          <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
+              <ul class="nav nav-tabs" id="assign-qn-tabs">
+                <% @questions.each_with_index do |q, i| %>
+                    <li class="<%= 'active' if i == 0 %>"><a href="#tab<%= i %>" data-toggle="tab"><%=  q.get_title %></a></li>
+                <% end %>
+              </ul>
+          <% else %>
+              <hr />
+          <% end %>
+          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
+            <% @questions.each_with_index do |q, i| %>
+                <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
+                    <div class="tab-pane <%= 'active' if i == 0%>" id="tab<%= i %>">
+                <% end %>
+                <% unless @mission.single_question? %>
+                    <h3><%=  q.get_title%></h3>
+                <% end %>
+                <div class="row">
+                  <div class="span8">
+                    <span><%= style_format(q.description) %></span>
                   </div>
                 </div>
+
+                <%- answer = @submission.answers.where(question_id: q.id).first %>
+                <% if @mission.file_submission_only? %>
+                    <p style="font-style: italic"> Please include you answer in file(s).</p>
+                <% else %>
+                    <%- answer = @submission.answers.where(question_id: q.id).first %>
+                    <%- question = q.specific %>
+                    <% if question.class == Assessment::GeneralQuestion %>
+                        <h4>Your answer:</h4>
+                        <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8">
+                          <% if answer %>
+                              <%= answer.content %>
+                          <% end %>
+                        </textarea>
+                    <% elsif question.class == Assessment::MpqQuestion %>
+                        <% q.specific.sub_questions.each_with_index do |sq, si| %>
+                            <h4>Sub question <%= si+1%></h4>
+                            <div class="row">
+                              <div class="span8">
+                                <span><%= style_format(sq.description) %></span>
+                              </div>
+                            </div>
+                            <h4>Your answer:</h4>
+                            <textarea name="answers[<%= sq.id %>]" class="span8 ck-editor" rows="8">
+                              <%- answer = @submission.answers.where(question_id: sq.id).first %>
+                              <% if answer %>
+                                  <%= answer.content %>
+                              <% end %>
+                            </textarea>
+                        <% end %>
+                    <% elsif question.class == Assessment::CodingQuestion %>
+                        <%=render partial: 'do_coding',
+                                  locals: { answer: answer,
+                                            question: question,
+                                            submission: @submission,
+                                            mode: "edit" } %>
+                    <% end %>
+                <% end %>
+
+                <% if @mission.comment_per_qn? %>
+                    <hr />
+
+                    <% require 'digest/md5' %>
+                    <% ecid =  Digest::MD5.hexdigest(answer.id.to_s) %>
+                    <input type="hidden" id="submission_url_<%= ecid %>" value="<%= course_assessment_submission_url(@course, @assessment, @submission) %>">
+
+                    <div class="row-fluid">
+                      <div class="span10">
+                        <%= render partial: "comments/list",
+                                   locals: { comments:  CommentTopic.comments_to_json(answer.comment_topic, curr_user_course),
+                                             target:    answer,
+                                             header:    'Comments',
+                                             ecid:      ecid } %>
+                      </div>
+                    </div>
+                <% end %>
+                <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
+                    </div>
+                <% end %>
             <% end %>
-            <% if @mission.display_mode == AssignmentDisplayMode.tab_mode && !@mission.single_question? %>
-                </div>
-            <% end %>
-        <% end %>
-      </div>
-    </div>
+          </div>
+        </div>
 
-    <br />
+        <br />
 
-    <div id="uploaded_files_div"></div>
-    <div class="form-actions">
+        <div id="uploaded_files_div"></div>
+        <div class="form-actions">
 
-      <%= f.submit 'Save', :class => 'btn btn-primary', id: "mission-save" %>
-      <%= f.submit 'Finalize Submission', :class => 'btn btn-danger', id:"mission_submit" if !@mission.used_as_realtime? %>
-    </div>
+          <%= f.submit 'Save', :class => 'btn btn-primary', id: "mission-save" %>
+          <%= f.submit 'Finalize Submission', :class => 'btn btn-danger', id:"mission_submit" if !@mission.used_as_realtime? %>
+        </div>
+    <% end %>
+
 <% end %>
 
 <% if @mission.file_submission? || @mission.file_submission_only  %>

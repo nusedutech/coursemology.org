@@ -36,6 +36,50 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
     @questions = @assessment.questions
     @submission.build_initial_answers
 
+    #process for realtime session training
+    if @mission.realtime_session_groups.count > 0
+      @questions = []
+      @assessment.questions.each do |qu|
+        if qu.is_a? Assessment::MpqQuestion
+          @questions << qu
+          qu.sub_questions.each do |s_qu|
+            @questions << s_qu
+          end
+        else
+          @questions << qu
+        end
+      end
+      #check student's realtime training session started
+      session = @mission.sessions.include_std(curr_user_course).started.first
+      finalised = []#@assessment.questions.finalised_for_test(@submission)
+      current =  (@questions - finalised).first
+      next_undone = (@questions.index(current) || @questions.length) + 1
+
+      request_step = (params[:step] || next_undone).to_i
+      step = request_step #curr_user_course.is_staff? ? request_step : [next_undone , request_step].min
+      step = step > @questions.length ? @questions.length+1 : step # next_undone : step
+      current = step > @questions.length ? current : @questions[step - 1]
+
+      current = current.specific if current
+
+      #check current (current question) is unclocked
+      student_seat = session.student_seats.where(std_course_id: curr_user_course.id).first
+      #get all teammate
+      table_answers = []
+      teammate_seats = session.student_seats.where(table_number: student_seat.table_number)
+      teammate_answers = @assessment.answers.where("assessment_answers.question_id = (?) and assessment_answers.std_course_id in (?)",current.question.id,teammate_seats.map {|ts| ts.std_course_id})
+
+      if !current.nil? and current.parent
+        session_question = session.session_questions.relate_to_question(@assessment.question_assessments.where(question_id: current.parent.question.id).first).first
+      else
+        session_question = current.nil? ? nil : session.session_questions.relate_to_question(@assessment.question_assessments.where(question_id: current.question.id).first).first
+      end
+
+      @summary = {session: session, session_question: session_question, student_seat: student_seat, questions: @questions, finalised: finalised, step: step,
+                  current: (!@submission.submitted? ? current : nil), next_undone: next_undone, teammate_answers: teammate_answers}
+
+    end
+
     #Mission in lesson plan - Edit view
     if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
       render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
@@ -43,26 +87,52 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
   end
 
   def update
-    @submission.fetch_params_answers(params)
-    if params[:files]
-      @submission.attach_files(params[:files].values)
-    end
+    @mission = @assessment.as_assessment
+    session = @assessment.sessions.find(params[:session_id])
+    s_q = session ? session.session_questions.find(params[:session_question_id]) : nil
+    q = s_q.question_assessment.question.sub_questions.find(params[:question_id]) if s_q and s_q.question_assessment.question.is_a? Assessment::MpqQuestion
+    if @assessment.realtime_session_groups.count > 0 and session and session.status and s_q and
+        (!s_q.unlock or (s_q.unlock and q and q.id != s_q.unlock_count ))
+      respond_to do |format|
+      @submission.set_attempting
+      format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission,step: params[:step],result: 'locked', anchor: 'training-stop-pos'),
+                                error: "This question is locked." }
+      end
+    else
+      @submission.fetch_params_answers(params)
+      if params[:files]
+        @submission.attach_files(params[:files].values)
+      end
 
-    respond_to do |format|
-      if @submission.save
-        if params[:commit] == 'Save'
-          @submission.set_attempting
-          format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission),
-                                    notice: "Your submission has been saved." }
+      #set voted answer for realtime mission submission
+      votes = params[:votes] || []
+      votes.each do |qid, q_id|
+        ans = @submission.answers.find_by_question_id(qid)
+        ans.as_answer.voted_answer_id = q_id
+        ans.as_answer.save
+      end
+
+      respond_to do |format|
+        if @submission.save
+          if params[:commit] == 'Save'
+            @submission.set_attempting
+            format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission),
+                                      notice: "Your submission has been saved." }
+          elsif params[:commit] == 'Submit Answer'
+            @submission.set_attempting
+            format.html { redirect_to edit_course_assessment_submission_path(@course, @assessment, @submission,step: params[:step],result: true, anchor: 'training-stop-pos'),
+                                      notice: "Your answer has been saved." }
+          else
+            @submission.set_submitted
+            format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission),
+                                      notice: "Your submission has been updated." }
+          end
         else
-          @submission.set_submitted
-          format.html { redirect_to course_assessment_submission_path(@course, @assessment, @submission),
-                                    notice: "Your submission has been updated." }
+          format.html { render action: "edit" }
         end
-      else
-        format.html { render action: "edit" }
       end
     end
+
   end
 
   def unsubmit

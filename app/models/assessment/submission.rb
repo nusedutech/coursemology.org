@@ -54,8 +54,9 @@ class Assessment::Submission < ActiveRecord::Base
   # Update might be required on MTI Gem
 	has_many :progression_groups, class_name: "Assessment::ProgressionGroup"
 
-  has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"  
+  has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"
 
+  has_many :std_seats, class_name: Assessment::RealtimeSeatAllocation, foreign_key: :team_submission_id
 
   after_create :set_attempting
   after_save   :status_change_tasks, if: :status_changed?
@@ -162,22 +163,21 @@ class Assessment::Submission < ActiveRecord::Base
 
   def build_initial_answers
     self.assessment.questions.includes(:as_question).each do |qn|
-      unless self.answers.find_by_question_id(qn.id)
-        case
-          when qn.is_a?(Assessment::GeneralQuestion)
-            ans_class = Assessment::GeneralAnswer
-          when qn.is_a?(Assessment::MpqQuestion)
-            ans_class = Assessment::GeneralAnswer
-          when qn.is_a?(Assessment::CodingQuestion)
-            ans_class = Assessment::CodingAnswer
-          when qn.is_a?(Assessment::McqQuestion)
-            ans_class = Assessment::McqAnswer
-          else
-            ans_class = Assessment::GeneralAnswer
-        end
-
-        if qn.is_a?(Assessment::MpqQuestion)
-          qn.sub_questions.each do |sub|
+      if qn.is_a?(Assessment::MpqQuestion)
+        qn.sub_questions.each do |sub|
+          unless self.answers.find_by_question_id(sub.id)
+            case
+              when sub.is_a?(Assessment::GeneralQuestion)
+                ans_class = Assessment::GeneralAnswer
+              when sub.is_a?(Assessment::MpqQuestion)
+                ans_class = Assessment::GeneralAnswer
+              when sub.is_a?(Assessment::CodingQuestion)
+                ans_class = Assessment::CodingAnswer
+              when sub.is_a?(Assessment::McqQuestion)
+                ans_class = Assessment::McqAnswer
+              else
+                ans_class = Assessment::GeneralAnswer
+            end
             ans_class.create!({std_course_id: std_course_id,
                                question_id: sub.id,
                                #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
@@ -185,15 +185,30 @@ class Assessment::Submission < ActiveRecord::Base
                                submission_id: self.id,
                                attempt_left: sub.attempt_limit})
           end
-        else
+        end
+      else
+        unless self.answers.find_by_question_id(qn.id)
+          case
+            when qn.is_a?(Assessment::GeneralQuestion)
+              ans_class = Assessment::GeneralAnswer
+            when qn.is_a?(Assessment::MpqQuestion)
+              ans_class = Assessment::GeneralAnswer
+            when qn.is_a?(Assessment::CodingQuestion)
+              ans_class = Assessment::CodingAnswer
+            when qn.is_a?(Assessment::McqQuestion)
+              ans_class = Assessment::McqAnswer
+            else
+              ans_class = Assessment::GeneralAnswer
+          end
           ans_class.create!({std_course_id: std_course_id,
-                             question_id: qn.id,
-                             #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
-                             content: qn.specific.respond_to?(:template) ? qn.template : nil,
-                             submission_id: self.id,
-                             attempt_left: qn.attempt_limit})
+                           question_id: qn.id,
+                           #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
+                           content: qn.specific.respond_to?(:template) ? qn.template : nil,
+                           submission_id: self.id,
+                           attempt_left: qn.attempt_limit})
         end
       end
+
     end
   end
 

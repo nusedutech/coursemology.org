@@ -66,6 +66,19 @@ class Assessment::RealtimeSessionsController < ApplicationController
     redirect_to :back
   end
 
+  def finalize_grade_mission
+    #TODO: REFACRORING - update grade for all student on table
+    #finalize all submission first
+    sms = @realtime_session.realtime_session_group.mission.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
+    sms.each do |sm|
+      sm.update_grade
+    end
+
+    @realtime_session.reset
+    flash[:notice] = "Finalization is done!"
+    redirect_to :back
+  end
+
   def start_session
     if params[:t] == "training"
       @realtime_session.reset

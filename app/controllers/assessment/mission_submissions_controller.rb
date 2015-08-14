@@ -37,7 +37,7 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
     @submission.build_initial_answers
 
     #process for realtime session training
-    if @mission.realtime_session_groups.count > 0
+    if @mission.realtime_session_groups.count > 0 and @mission.sessions.include_std(curr_user_course).started.first
       @questions = []
       @assessment.questions.each do |qu|
         if qu.is_a? Assessment::MpqQuestion
@@ -88,7 +88,7 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
 
   def update
     @mission = @assessment.as_assessment
-    session = @assessment.sessions.find(params[:session_id])
+    session = @assessment.sessions.find(params[:session_id]) if !params[:session_id].nil?
     s_q = session ? session.session_questions.find(params[:session_question_id]) : nil
     q = s_q.question_assessment.question.sub_questions.find(params[:question_id]) if s_q and s_q.question_assessment.question.is_a? Assessment::MpqQuestion
     if @assessment.realtime_session_groups.count > 0 and session and session.status and s_q and

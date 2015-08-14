@@ -1,4 +1,4 @@
-<%- if @mission.realtime_session_groups.count > 0 and @summary[:session] %>
+<%- if @mission.realtime_session_groups.count > 0 and @summary and @summary[:session] %>
     <%= form_for @submission, url: (@from_lesson_plan.nil? ? course_assessment_submission_path(@course, @assessment, @submission, anchor: 'training-stop-pos', step: @summary[:step]): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
         <% q = @summary[:current].question %>
         <input type="hidden" name="session_id" value="<%= @summary[:session].id %>" >
@@ -51,7 +51,7 @@
                                 <%= ta.content %>
                               </textarea>
                           <% elsif question.class == Assessment::GeneralQuestion and answer != ta %>
-                              <%= ta.content %>
+                              <%= style_format(ta.content) %>
                           <% elsif question.class == Assessment::CodingQuestion %>
                               <%=render partial: 'do_coding',
                                         locals: { answer: answer,

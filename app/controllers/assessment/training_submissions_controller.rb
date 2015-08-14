@@ -321,7 +321,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
         result: true,
         is_correct: true,
         count: session_question.unlock_count,
-        explanation: "Your answer is #{session_question.unlock_count > 1 ? "resubmitted" : "submitted"}. Please wait for Lecturer's instruction of next step."
+        explanation: "Your answer is #{session_question.unlock_count > 1 ? "<strong> resubmitted </strong>" : "submitted"}. Please wait for Lecturer's instruction of next step."
     }
   end
 

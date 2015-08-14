@@ -55,6 +55,7 @@ $(document).ready(function(){
                     //$('#submit-btn').addClass('disabled');
                     //$('#submit-btn').attr("disabled", true);
                     if (resp.is_test || resp.realtime){
+                        $('#explanation').removeClass('alert-info');
                         $('#explanation').addClass('alert-info',500);
                     }else {
                         $('#explanation').addClass('mcq-ans-correct');

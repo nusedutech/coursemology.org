@@ -1,6 +1,8 @@
 class TutorialGroup < ActiveRecord::Base
   attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id, :milestone_id
 
+  scope :assigned, -> { where("tutorial_groups.group_id <> -1")}
+
   belongs_to :course
   belongs_to :std_course, class_name: "UserCourse"
   belongs_to :tut_course, class_name: "UserCourse"
@@ -16,6 +18,8 @@ class TutorialGroup < ActiveRecord::Base
   after_destroy :after_destroy
 
   default_scope includes(:std_course, :tut_course)
+
+
 
   def unsubscribe_comments
     # TODO: update subscription

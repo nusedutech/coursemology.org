@@ -2,7 +2,8 @@ class Assessment::RealtimeSession < ActiveRecord::Base
   acts_as_paranoid
   attr_accessible :end_time, :number_of_table, :seat_per_table, :start_time, :status, :student_group_id, :student_group
 
-  scope :include_std, lambda { |std_user_couse| where(student_group_id: std_user_couse.tut_group_courses.last.group_id) }
+  scope :include_std, lambda { |std_user_couse| joins(:student_seats).
+      where("assessment_realtime_seat_allocations.std_course_id=?", std_user_couse.id) }
   scope :started, -> { where(status: true) }
 
   belongs_to :realtime_session_group, class_name: Assessment::RealtimeSessionGroup, foreign_key: :session_group_id

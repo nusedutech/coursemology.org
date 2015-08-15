@@ -291,6 +291,7 @@ class Assessment::QuestionsController < ApplicationController
   end
 
   def build_resource
+    authorize! :manage, Course
     resource = params[:controller].classify.constantize
     if params[:id]
       @question = resource.send(:find, params[:id])

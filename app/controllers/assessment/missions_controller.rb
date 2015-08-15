@@ -126,7 +126,7 @@ class Assessment::MissionsController < Assessment::AssessmentsController
 
 
   def update_single_question_type
-    unless @mission.single_question?
+    if !@mission.single_question? or @mission.single_question_with_mpq?
       return
     end
 

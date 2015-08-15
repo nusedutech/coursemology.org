@@ -29,17 +29,17 @@
       <div class="controls" >
         <div class="checkbox-text">
           <input name="single_question" type="hidden" value="0">
-          <input name="single_question" type="checkbox" value="<%= @mission.single_question? ? 1 : 0  %>"
+          <input name="single_question" type="checkbox" value="<%= @mission.single_question_not_mpq? ? 1 : 0  %>"
                  data-toggle="collapse"
                  data-target="#question-types"
                  id="mission-format-checkbox"
-                 <%= 'checked' if @mission.single_question? %>>
+                 <%= 'checked' if @mission.single_question_not_mpq? %>>
           <label>
             A single question <%= display_name.downcase %>
           </label>
         </div>
         <br>
-        <div id="question-types" class="collapse <%= @mission.single_question? ? 'in' : 'out'  %>">
+        <div id="question-types" class="collapse <%= @mission.single_question_not_mpq? ? 'in' : 'out'  %>">
           <div class="control-group">
             <%= f.label "Question Type", class: 'control-label' %>
             <div class="controls">

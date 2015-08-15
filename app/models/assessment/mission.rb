@@ -39,6 +39,14 @@ class Assessment::Mission < ActiveRecord::Base
     questions.count == 1
   end
 
+  def single_question_not_mpq?
+    single_question? and (!questions.first.is_a? Assessment::MpqQuestion)
+  end
+
+  def single_question_with_mpq?
+    single_question? and (questions.first.is_a? Assessment::MpqQuestion)
+  end
+
   def missions_dep_on_published
     missions_dependent_on.where(publish:true)
   end

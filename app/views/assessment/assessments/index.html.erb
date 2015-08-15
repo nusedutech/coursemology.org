@@ -99,10 +99,16 @@
         <tr id="row-<%= ast.id %>">
           <% if to_display.include? 'title' %>
               <td>
-                <%= link_to "", id: "link-#{ast.id}" do %>
+                <% if curr_user_course.is_student? and ast.is_realtime_session_group? %>
                     <h4 id="title-<%= ast.id %>">
                       <%= ast.title %>
                     </h4>
+                <% else %>
+                    <%= link_to "", id: "link-#{ast.id}" do %>
+                        <h4 id="title-<%= ast.id %>">
+                          <%= ast.title %>
+                        </h4>
+                    <% end %>
                 <% end %>
               </td>
           <% end %>

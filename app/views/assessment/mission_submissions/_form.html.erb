@@ -219,4 +219,22 @@
 
 <script>
     $('textarea.ck-editor').ckeditor();
+
+    $(document).ready(function() {
+
+        $("#mission-save").click(function() {
+            var index = 0;
+            for (var i in CKEDITOR.instances) {
+                index++;
+                try {
+                    CKEDITOR.instances[i].updateElement();
+                }
+                catch (e) {
+                    alert("It seems you have some crashed Math Formula, please check again for Answer "+index);
+                    return false;
+                }
+            }
+            return true;
+        });
+    });
 </script>

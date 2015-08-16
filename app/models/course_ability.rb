@@ -201,6 +201,8 @@ class CourseAbility  < Ability
 
       cannot :modify, Assessment::Submission
       cannot :see_all, Assessment::Submission
+
+      can :read, Assessment::McqQuestion
     end
   end
 end

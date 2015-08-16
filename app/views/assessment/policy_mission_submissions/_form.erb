@@ -59,9 +59,16 @@
             <button type="submit" class="btn btn-primary">Next</button>
           </div>
       <% else %>
-          <h2>Current mission does not support non-mcq questions.</h2>
+          <h2>Regulated Training does not support non-mcq questions.</h2>
       <% end %>
     </form>
 
+    <% if @policy_mission.comment_per_qn? %>
+        <%= render partial: "comments/list",
+                   locals: { comments:  CommentTopic.comments_to_json(@summary[:current].comment_topic_temp, curr_user_course),
+                             target:    @summary[:current],
+                             header:    "Comments on the Question",
+                             margin_left: "0px" } %>
+    <% end %>
 
 <% end %>

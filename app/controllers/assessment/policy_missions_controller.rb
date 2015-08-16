@@ -33,6 +33,7 @@ class Assessment::PolicyMissionsController < Assessment::AssessmentsController
     @policy_mission.open_at = DateTime.now.beginning_of_day
     @policy_mission.close_at = DateTime.now.end_of_day + 1  # 1 day from now
     @policy_mission.course_id = @course.id
+    @policy_mission.comment_per_qn = false
 
     @tags = @course.tags
     @topicconcepts = @course.topicconcepts.concepts

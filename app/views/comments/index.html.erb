@@ -37,6 +37,8 @@
         <%= render partial: "commentable_std_answer", locals: { std_answer: comment_topic.topic, ecid: ecid } %>
     <% elsif comment_topic.topic.class == Assessment::Question %>
         <%= render partial: "commentable_training_question", locals: { question: comment_topic.topic, ecid: ecid } %>
+    <% elsif comment_topic.topic.class == Assessment::McqQuestion %>
+        <%= render partial: "commentable_bank_question", locals: { question: comment_topic.topic, ecid: ecid } %>
     <% elsif comment_topic.topic.class == Assessment::Submission %>
         <%= render partial: "commentable_sbm", locals: { sbm: comment_topic.topic} %>
     <% end %>

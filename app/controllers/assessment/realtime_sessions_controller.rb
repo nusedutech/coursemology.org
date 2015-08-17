@@ -16,39 +16,41 @@ class Assessment::RealtimeSessionsController < ApplicationController
     end
     (1..@realtime_session.number_of_table).each_with_index do |t,i|
       session_students = @realtime_session.get_student_seats_by_table(t).has_student
-      total_grade = 0
-      sm_list = {}
-      no_sm_count = 0
+      if session_students.count > 0
+        total_grade = 0
+        sm_list = {}
+        no_sm_count = 0
 
-      #update team grade and exp
-      session_students.each do |ss|
-        sm = ss.student.submissions.where(assessment_id: @realtime_session.realtime_session_group.training.assessment.id).last
-        no_sm_count+=1 if sm.nil?
-        total_grade = total_grade + (sm.nil? ? 0 : (sm.gradings.last.nil? ? 0 : (sm.gradings.last.grade.nil? ? 0 : sm.gradings.last.grade)))
-        sm_list[ss.id] = sm
-      end
-      session_students.each do |ss|
-        if !sm_list[ss.id].nil?
-          team_grade = total_grade/(session_students.count-no_sm_count)
-          ss.update_attribute(:team_grade, team_grade)
-          asm = sm_list[ss.id].assessment
-          grading = sm_list[ss.id].get_final_grading
-          unless grading.exp_transaction
-            grading.exp_transaction = ExpTransaction.create({giver_id: sm_list[ss.id].get_final_grading.grader_id,
-                                                  user_course_id: ss.student.id,
-                                                  reason: "Exp for #{asm.title}",
-                                                  is_valid: true,
-                                                  rewardable_id: sm_list[ss.id].id,
-                                                  rewardable_type: sm_list[ss.id].class.name },
-                                                 without_protection: true)
-            grading.save
-          end
-
-          grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : ((team_grade*25/100 + (grading.grade.nil? ? 0 : grading.grade)*75/100) || 0) * asm.exp / asm.max_grade
-          grading.exp_transaction.save
+        #update team grade and exp
+        session_students.each do |ss|
+          sm = !ss.student.nil? ? ss.student.submissions.where(assessment_id: @realtime_session.realtime_session_group.training.assessment.id).last : nil
+          no_sm_count+=1 if sm.nil?
+          total_grade = total_grade + (sm.nil? ? 0 : (sm.gradings.last.nil? ? 0 : (sm.gradings.last.grade.nil? ? 0 : sm.gradings.last.grade)))
+          sm_list[ss.id] = sm
         end
+        session_students.each do |ss|
+          if !sm_list[ss.id].nil?
+            team_grade = total_grade/(session_students.count-no_sm_count)
+            ss.update_attribute(:team_grade, team_grade)
+            asm = sm_list[ss.id].assessment
+            grading = sm_list[ss.id].get_final_grading
+            unless grading.exp_transaction
+              grading.exp_transaction = ExpTransaction.create({giver_id: sm_list[ss.id].get_final_grading.grader_id,
+                                                               user_course_id: ss.student.id,
+                                                               reason: "Exp for #{asm.title}",
+                                                               is_valid: true,
+                                                               rewardable_id: sm_list[ss.id].id,
+                                                               rewardable_type: sm_list[ss.id].class.name },
+                                                              without_protection: true)
+              grading.save
+            end
 
+            grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : ((team_grade*25/100 + (grading.grade.nil? ? 0 : grading.grade)*75/100) || 0) * asm.exp / asm.max_grade
+            grading.exp_transaction.save
+          end
+        end
       end
+
     end
 
     #TODO: Check for Refactoring for performance (maybe use scope no submission in usercourse)

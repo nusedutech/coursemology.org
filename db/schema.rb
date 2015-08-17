@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150813040505) do
+ActiveRecord::Schema.define(:version => 20150817025611) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -488,6 +488,7 @@ ActiveRecord::Schema.define(:version => 20150813040505) do
     t.integer  "unlock_count"
     t.datetime "created_at",             :null => false
     t.datetime "updated_at",             :null => false
+    t.datetime "unlock_time"
   end
 
   create_table "assessment_realtime_sessions", :force => true do |t|

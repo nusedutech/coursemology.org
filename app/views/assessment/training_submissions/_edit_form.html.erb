@@ -22,8 +22,8 @@
           <% elsif @summary[:finalised].include? @summary[:questions][i - 1] %>
               <%= link_to i, "?step=#{i}#training-stop-pos", class: "step step-done" %>
           <% else %>
-              <% can_access = (curr_user_course.is_staff? or i == @summary[:next_undone]) %>
-              <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-disabled'}" %>
+              <% can_access = (curr_user_course.is_staff? or i >= @summary[:next_undone]) %>
+              <%= link_to i, "#{('?step=' + i.to_s) if can_access }#training-stop-pos", class: "step  #{can_access ? 'step-available' : 'step-available'}" %>
           <% end %>
       <% end %>
     </div>

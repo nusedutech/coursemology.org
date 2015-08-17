@@ -9,7 +9,7 @@ class Assessment::Answer < ActiveRecord::Base
   scope :general, -> { where(as_answer_type: "Assessment::GeneralAnswer") } do
     def give_vote(sq)
       joins("INNER JOIN assessment_general_answers ON assessment_answers.as_answer_id = assessment_general_answers.id")
-      .where("assessment_general_answers.voted_answer_id is not null and assessment_general_answers.updated_at >= (?)", sq.updated_at)
+      .where("assessment_general_answers.voted_answer_id is not null and assessment_general_answers.updated_at >= (?)", sq.unlock_time)
     end
   end
 
@@ -18,7 +18,7 @@ class Assessment::Answer < ActiveRecord::Base
 
   scope :in_student_list, lambda { |list_std| where(["assessment_answers.std_course_id IN (?)", list_std]) }
   scope :in_submission_list, lambda { |list_sub| where(["assessment_answers.submission_id IN (?)", list_sub]) }
-  scope :after_question_unlock, lambda { |sq| where(["assessment_answers.updated_at >= (?)", sq.updated_at]) }
+  scope :after_question_unlock, lambda { |sq| where("assessment_answers.updated_at >= (?)", sq.unlock_time) }
   scope :after_unlock_time, lambda { |t| where(["assessment_answers.updated_at >= (?)", t]) }
 
   belongs_to  :question, class_name: Assessment::Question

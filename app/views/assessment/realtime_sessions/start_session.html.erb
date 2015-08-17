@@ -24,12 +24,12 @@
     <hr/>
 
     <span class="count-submission-info"></span>
-     <table class="table asm-qns-table sort">
-      <tbody class="asm-qns sortable-table" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
+     <table class="table asm-qns-table">
+      <tbody class="asm-qns" url="<%= reorder_course_assessment_path(@course, @realtime_training.assessment) %>">
       <% @session.session_questions.relate_to_assessment(@realtime_training.assessment.id).each_with_index do |sq, index| %>
           <% qn = sq.question_assessment.question %>
           <% q = qn.as_question %>
-          <tr class="asm-qn <% if index != 0%>hidden<% end %>" id="sortable-item_<%= qn.id %>" >
+          <tr class="asm-qn <% if index != 0%>hidden<% end %>">
             <td width="80%">
               <div>
                 <div class="asm-qn-handler">
@@ -96,26 +96,38 @@
       var session_interval = null;
       $(document).ready(function(){
           $('.unlock-question').click(function(){
-              if($(this).text()== 'Lock'){
-                  clearInterval( session_interval );
+              //remove all interval
+              if(session_interval != null) {
+                  for (var i = 1; i < session_interval+1; i++) {
+                      window.clearInterval(i);
+                  }
+                  session_interval = null;
               }
-              var url = $(".switch-lock-ajax-url").val();
+              //reset others "Lock" buttons
+              var u_i = $('.unlock-question').index(this);
+              jQuery.each( $('.unlock-question'), function( i, unb ) {
+                  if(i != u_i && $(unb).text()=="Lock"){
+                      $(unb).text("Reunlock");
+                      $(unb).removeClass('btn-warning').addClass('btn-success');
+                  }
+              });
+              var switch_lock_url = $(".switch-lock-ajax-url").val();
               var $this = $(this);
               var session_question_id = $(this).parent().find(".session-question-id").val();
 
               $.ajax({
-                  url : url,
+                  url : switch_lock_url,
                   type : 'POST',
                   dataType : 'json',
-                  data : {session_question_id: session_question_id},
+                  data : {session_question_id: session_question_id,  unlock: $($this).text() == 'Lock' ? false : true},
                   success : function(result) {
                       //start counting as unlock
                       if(result.result && ($($this).text() == 'Unlock' || $($this).text() == 'Reunlock')){
                           $($this).parent().find('.count-submission').text("0");
                           $('.count-submission-info').text("");
                           session_interval = setInterval(function(){
-                              var url = $(".count-submission-ajax-url").val();
-                              var result = server_request({session_question_id: session_question_id}, "POST", url);
+                              var count_submission_url = $(".count-submission-ajax-url").val();
+                              var result = server_request({session_question_id: session_question_id}, "POST", count_submission_url);
                               $($this).parent().find('.count-submission').text(result.count);
                               $('.count-submission-info').text(result.info);
 
@@ -373,16 +385,20 @@
         var session_interval = null;
         $(document).ready(function(){
             $('.unlock-question').click(function(){
-                if($(this).text()== 'Lock'){
-                    clearInterval( session_interval );
+                //remove all interval
+                if(session_interval != null) {
+                    for (var i = 1; i < session_interval; i++) {
+                        window.clearInterval(i);
+                    }
                 }
-                var url = $(".switch-lock-ajax-url").val();
+
+                var switch_lock_url = $(".switch-lock-ajax-url").val();
                 var $this = $(this);
                 var session_question_id = $(this).parent().find(".session-question-id").val();
                 var $sub_question = $(this).parent().find(".sub-question-id");
 
                 $.ajax({
-                    url : url,
+                    url : switch_lock_url,
                     type : 'POST',
                     dataType : 'json',
                     data : {session_question_id: session_question_id, sub_question_id: $sub_question.length ? $sub_question.val() : null, unlock: $($this).text() == 'Lock' ? false : true},
@@ -393,21 +409,19 @@
                             $($this).text('Lock');
                             $($this).removeClass('btn-success').addClass('btn-warning');
                             session_interval = setInterval(function(){
-                                var url = $(".count-submission-ajax-url").val();
-                                var result = server_request({session_question_id: session_question_id, sub_question_id: $sub_question.length ? $sub_question.val() : null}, "POST", url);
+                                var count_submission_url = $(".count-submission-ajax-url").val();
+                                var result = server_request({session_question_id: session_question_id, sub_question_id: $sub_question.length ? $sub_question.val() : null}, "POST", count_submission_url);
                                 $($this).parent().find('.count-submission').text(result.count);
-                                //alert(result.count);
                             }, 3000);
                         }else if(result.result && $($this).text()== 'Lock' && result.u_c == 0){
                             $($this).text('Unlock');
                             $($this).removeClass('btn-warning').addClass('btn-success');
-                        }else if(result.result && $($this).text()== 'Lock' && result.u_c != 1){
+                        }else if(result.result && $($this).text()== 'Lock' && result.u_c >= 1){
                             $($this).text('Reunlock');
                             $($this).removeClass('btn-warning').addClass('btn-success');
                         }
                     }
                 });
-                //var result = server_request({question_id: $(this).parent().find(".question-id").val()}, "POST", url);
 
             });
 

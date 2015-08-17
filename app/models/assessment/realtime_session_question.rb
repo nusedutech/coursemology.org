@@ -1,5 +1,5 @@
 class Assessment::RealtimeSessionQuestion < ActiveRecord::Base
-  attr_accessible :question_assessment_id, :session_id, :unlock, :unlock_count, :updated_at
+  attr_accessible :question_assessment_id, :session_id, :unlock, :unlock_count, :updated_at, :unlock_time
 
   scope :relate_to_question, lambda { |q_a| where(question_assessment_id: q_a.id) }
   scope :relate_to_assessment, lambda { |assessment_id| joins("INNER JOIN question_assessments ON assessment_realtime_session_questions.question_assessment_id = question_assessments.id")

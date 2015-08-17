@@ -148,24 +148,25 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     response = {}
 
     if params[:sq_id] and params[:sid]
-      answers = question.answers.where(submission_id: params[:sid], std_course_id: curr_user_course.id)
       session_question = Assessment::RealtimeSessionQuestion.find(params[:sq_id])
-      session_question.update_attribute(:unlock_count, answers.count + 1) if session_question.unlock_count > answers.count + 1
+      total_answers = question.answers.where(submission_id: params[:sid], std_course_id: curr_user_course.id)
+      ans_after_unlock = total_answers.after_question_unlock(session_question)
+      #session_question.update_attribute(:unlock_count, answers.count + 1) if session_question.unlock_count > answers.count + 1
 
       if !session_question.unlock
         response = {
             result: false,
             explanation: "This question has been locked."
         }
-      elsif answers.count >= session_question.unlock_count
+      elsif ans_after_unlock.count > 0
         response = {
             result: false,
-            explanation: "You answered this question already."
+            explanation: "You answered this question for current unlocking already. You have <strong>#{total_answers.count}</strong> submission(s) for this question in total"
         }
       else
         case
           when question.class == Assessment::McqQuestion
-            response = submit_mcq_realtime(question)
+            response = submit_mcq_realtime(question, total_answers.count)
           when question.class == Assessment::CodingQuestion
             response = submit_code(question)
           else
@@ -267,7 +268,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     end
   end
 
-  def submit_mcq_realtime(question)
+  def submit_mcq_realtime(question, total_answers)
     session_question = Assessment::RealtimeSessionQuestion.find(params[:sq_id])
     selected_options = question.options.find_all_by_id(params[:aid])
     eval_array = selected_options.map(&:correct)
@@ -321,7 +322,9 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
         result: true,
         is_correct: true,
         count: session_question.unlock_count,
-        explanation: "Your answer is #{session_question.unlock_count > 1 ? "<strong> resubmitted </strong>" : "submitted"}. Please wait for Lecturer's instruction of next step."
+        explanation: "Your answer is #{total_answers+1 > 1 ? "<strong> resubmitted </strong>" : "submitted"}.
+         You have <strong>#{total_answers+1}</strong> submission(s) for this question in total.
+         Please wait for Lecturer's instruction of next step."
     }
   end
 

@@ -31,9 +31,13 @@
 
     <% if !@summary[:current] %>
         <% if !@summary[:student_seat].nil? and @summary[:student_seat].team_grade.nil? %>
-            <h2>Waiting for finalization!</h2>
-            <p>After Lecturer finalizes, refresh page to see grade</p>
+            <h2>Congratulations, you're done!</h2>
+            <p>This Real-Time Training has been finalised.
+              Your answers and the solution will be shown after the end date of the Real-Time Session.</p>
         <% else %>
+            <p>This Real-Time Training has been finalised.
+              Your answers and the solution will be shown after the end date of the Real-Time Session.</p>
+            <!--
             <h2>Congratulations, you're done!</h2>
             <p>Your individual grade is <strong><%=@submission.get_final_grading.grade%></strong></p>
             <p>Your team grade is <strong><%=@summary[:session].student_seats.belong_to_std(@submission.std_course).last.team_grade%></strong></p>
@@ -42,6 +46,7 @@
                 Click here
               </a> to review your answers.
             </p>
+            -->
         <% end %>
     <!--<%# elsif @summary[:session_question] and !@summary[:session_question].unlock %>
         <h4>This question is not unlocked yet. Please wait!</h4>

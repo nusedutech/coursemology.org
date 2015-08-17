@@ -199,7 +199,11 @@
         <div class="form-actions">
 
           <%= f.submit 'Save', :class => 'btn btn-primary', id: "mission-save" %>
-          <%= f.submit 'Finalize Submission', :class => 'btn btn-danger', id:"mission_submit" if !@mission.used_as_realtime? %>
+          <% if @mission.used_as_realtime? %>
+            <%= link_to 'Exit',course_assessment_realtime_session_groups_path, :class => 'btn btn-danger', id: "mission-exit" %>
+          <% else %>
+            <%= f.submit 'Finalize Submission', :class => 'btn btn-danger', id:"mission_submit" %>
+          <% end %>
         </div>
     <% end %>
 

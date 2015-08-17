@@ -387,10 +387,19 @@
             $('.unlock-question').click(function(){
                 //remove all interval
                 if(session_interval != null) {
-                    for (var i = 1; i < session_interval; i++) {
+                    for (var i = 1; i < session_interval+1; i++) {
                         window.clearInterval(i);
                     }
+                    session_interval = null;
                 }
+                //reset others "Lock" buttons
+                var u_i = $('.unlock-question').index(this);
+                jQuery.each( $('.unlock-question'), function( i, unb ) {
+                    if(i != u_i && $(unb).text()=="Lock"){
+                        $(unb).text("Reunlock");
+                        $(unb).removeClass('btn-warning').addClass('btn-success');
+                    }
+                });
 
                 var switch_lock_url = $(".switch-lock-ajax-url").val();
                 var $this = $(this);

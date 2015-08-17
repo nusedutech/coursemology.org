@@ -104,6 +104,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
           format.json { render json: { result: false}}
         else
           # Using unlock_count as temp variable for sub question unlock
+          session_question.session.reset
           session_question.unlock_count = params[:sub_question_id] if unlock_flag
           session_question.unlock_time = Time.now if unlock_flag
           session_question.unlock = unlock_flag

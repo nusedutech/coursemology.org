@@ -36,18 +36,18 @@
             </div>
             <%- if !q.is_a? Assessment::MpqQuestion %>
                 <h4>Choose final answer:</h4>
-                <table>
+                <table width="100%">
                   <%- answer = @submission.answers.where(question_id: q.id).first %>
                   <%- @summary[:teammate_answers].each do |ta| %>
                   <tr>
-                    <td><input class="choices" type="radio" name="votes[<%= q.id %>]" value="<%= ta.id %>" id="value=<%= ta.id %>"/></td>
+                    <td width="5%"><input class="choices" type="radio" name="votes[<%= q.id %>]" value="<%= ta.id %>" id="value=<%= ta.id %>"/></td>
                     <td width="80%">
                       <% if @mission.file_submission_only? %>
                           <p style="font-style: italic"> Please include you answer in file(s).</p>
                       <% else %>
                           <%- question = q.specific %>
                           <% if question.class == Assessment::GeneralQuestion and answer and answer == ta %>
-                              <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8">
+                              <textarea name="answers[<%= q.id %>]" class="span8 ck-editor" rows="8" style="width: 100%">
                                 <%= ta.content %>
                               </textarea>
                           <% elsif question.class == Assessment::GeneralQuestion and answer != ta %>

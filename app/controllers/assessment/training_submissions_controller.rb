@@ -29,41 +29,43 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     if @training.realtime_session_groups.count > 0
       #check student's realtime training session started
       session = @training.sessions.include_std(curr_user_course).started.first
-      #if curr_user_course.is_student? and !session
-      #  redirect_to :back
-      #else
-      questions = @assessment.questions
-      finalised = @assessment.questions.finalised_for_test(@submission)
-      current =  (questions - finalised).first
-      next_undone = (questions.index(current) || questions.length) + 1
+      if session.nil?
+         redirect_to course_assessment_realtime_session_groups_path,
+                      flash: { error: "The session is closed OR you are not allocated a seat."}
+      else
+        questions = @assessment.questions
+        finalised = @assessment.questions.finalised_for_test(@submission)
+        current =  (questions - finalised).first
+        next_undone = (questions.index(current) || questions.length) + 1
 
-      request_step = (params[:step] || next_undone).to_i
-      step = request_step #curr_user_course.is_staff? ? request_step : [next_undone , request_step].min
-      step = step > questions.length ? next_undone : step
-      current = step > questions.length ? current : questions[step - 1]
+        request_step = (params[:step] || next_undone).to_i
+        step = request_step #curr_user_course.is_staff? ? request_step : [next_undone , request_step].min
+        step = step > questions.length ? next_undone : step
+        current = step > questions.length ? current : questions[step - 1]
 
-      current = current.specific if current
-      if current && current.class == Assessment::CodingQuestion
-        prefilled_code = current.template
-        if current.dependent_on
-          std_answer = current.dependent_on.answers.where("correct = 1 AND std_course_id = ?", curr_user_course.id).last
-          code = std_answer ? std_answer.content : ""
-          prefilled_code = "#Answer from your previous question \n" + code + (prefilled_code.empty? ? "" : ("\n\n#prefilled code \n" + prefilled_code))
+        current = current.specific if current
+        if current && current.class == Assessment::CodingQuestion
+          prefilled_code = current.template
+          if current.dependent_on
+            std_answer = current.dependent_on.answers.where("correct = 1 AND std_course_id = ?", curr_user_course.id).last
+            code = std_answer ? std_answer.content : ""
+            prefilled_code = "#Answer from your previous question \n" + code + (prefilled_code.empty? ? "" : ("\n\n#prefilled code \n" + prefilled_code))
+          end
         end
-      end
 
-      #check current (current question) is unclocked
-      student_seat =  session.student_seats.where(std_course_id: curr_user_course.id).first
-      session_question = current.nil? ? nil : session.session_questions.relate_to_question(@assessment.question_assessments.where(question_id: current.question.id).first).first
-      @summary = {session: session, session_question: session_question, student_seat: student_seat, questions: questions, finalised: finalised, step: step,
-                  current: (!@submission.graded? ? current : nil), next_undone: next_undone, prefilled: prefilled_code,
-                  remain_time: ( defined? remain_time ? remain_time : 0)}
+        student_seat =  session.student_seats.where(std_course_id: curr_user_course.id).first
+        #check current (current question) is unclocked
+        session_question = current.nil? ? nil : session.session_questions.relate_to_question(@assessment.question_assessments.where(question_id: current.question.id).first).first
+        @summary = {session: session, session_question: session_question, student_seat: student_seat, questions: questions, finalised: finalised, step: step,
+                    current: (!@submission.graded? ? current : nil), next_undone: next_undone, prefilled: prefilled_code,
+                    remain_time: ( defined? remain_time ? remain_time : 0)}
 
-      #Training in lesson plan
-      if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
-        render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
+        #Training in lesson plan
+        if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
+          render_lesson_plan_view(@course, @assessment, params, nil, @curr_user_course)
+        end
+        #end
       end
-      #end
     #process for normal training and test
     else
       @training = @assessment.specific

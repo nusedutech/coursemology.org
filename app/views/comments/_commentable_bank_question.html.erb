@@ -1,6 +1,6 @@
 <% if curr_user_course.is_staff? %>
-<input type="hidden" id="submission_url_<%=ecid%>" value="<%= course_assessment_question_url(@course, question) %>">
-<a class="mission-box" href="<%= course_assessment_question_url(@course, question) %>">
+<input type="hidden" id="submission_url_<%=ecid%>" value="<%= polymorphic_path([@course, question], action: :edit) %>">
+<a class="mission-box" href="<%= polymorphic_path([@course, question], action: :edit) %>">
   <!--<img class="small-mission-pic" width="54" height="54" src="public/images/mission_icons/mission22_small.jpg">-->
   <div class="title"><%= "Question #{question.question.id}: #{question.title}" %></div>
 </a>

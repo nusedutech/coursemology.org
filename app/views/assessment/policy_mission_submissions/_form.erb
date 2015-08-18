@@ -19,13 +19,22 @@
     </div>
 <% end %>
 
-<% if !@summary[:current] %>
-    <h2>Congratulations, you're done!</h2>
-    <p>
-      <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
-        Click here
-      </a> to review your answers.
-    </p>
+<% if !@summary[:current]  %>
+    <% if !@summary[:forwardGroup].nil? and @summary[:forwardGroup].wrong_qn_left==0 %>
+        <h2>You exceeded Threshold! Submission is closed.</h2>
+        <p>
+          <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
+            Click here
+          </a> to review your answers.
+        </p>
+    <% else %>
+        <h2>Congratulations, you're done!</h2>
+        <p>
+          <a href="<%= course_assessment_submission_path(@course, @assessment, @submission)%>">
+            Click here
+          </a> to review your answers.
+        </p>
+    <% end %>
 <% else %>
     <div class="step-list">
       <div>

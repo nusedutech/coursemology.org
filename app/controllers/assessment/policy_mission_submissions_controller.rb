@@ -197,6 +197,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
         return
       end
 
+      @summary[:forwardGroup] = forwardGroup
       if forwardGroup != nil && forwardGroup.wrong_qn_left != 0
         forwardPolicyLevel = forwardGroup.getCorrespondingLevel
         tag = forwardPolicyLevel.getTag
@@ -213,7 +214,7 @@ class Assessment::PolicyMissionSubmissionsController < Assessment::SubmissionsCo
         end
         @submission.set_submitted
         grading = @submission.get_final_grading
-        grading.update_exp_transaction
+        grading.update_exp_transaction if forwardGroup == nil
         #@submission.update_grade
       end
 

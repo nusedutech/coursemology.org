@@ -24,6 +24,16 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
     if !params[:from_lesson_plan].nil? && params[:from_lesson_plan] == "true"
       render_lesson_plan_view(@course, @assessment, params, true, @curr_user_course)
     end
+
+    #View for real-time mission
+    if @assessment.realtime_session_groups.count > 0
+      session = @assessment.sessions.include_std(curr_user_course).first
+      if session
+        student_seat = session.student_seats.where(std_course_id: curr_user_course.id).first
+        @team_submission = student_seat.team_submission
+        @student_seats = session.get_student_seats_by_table(student_seat.table_number).has_student
+      end
+    end
   end
 
 
@@ -36,7 +46,7 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
     @questions = @assessment.questions
     @submission.build_initial_answers
 
-    #process for realtime session training
+    #process for realtime session mission
     if @mission.realtime_session_groups.count > 0 and @mission.sessions.include_std(curr_user_course).started.first
       @questions = []
       @assessment.questions.each do |qu|
@@ -58,7 +68,7 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
       request_step = (params[:step] || next_undone).to_i
       step = request_step #curr_user_course.is_staff? ? request_step : [next_undone , request_step].min
       step = step > @questions.length ? @questions.length+1 : step # next_undone : step
-      current = step > @questions.length ? current : @questions[step - 1]
+      current = step > @questions.length ? nil : @questions[step - 1]
 
       current = current.specific if current
 

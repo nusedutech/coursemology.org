@@ -70,10 +70,39 @@ class Assessment::RealtimeSessionsController < ApplicationController
 
   def finalize_grade_mission
     #TODO: REFACRORING - update grade for all student on table
-    #finalize all submission first
-    sms = @realtime_session.realtime_session_group.mission.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
-    sms.each do |sm|
-      sm.update_grade
+    #set submitted to all submission first
+    sbms = @realtime_session.realtime_session_group.mission.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
+    sbms.each do |sbm|
+      sbm.set_submitted
+    end
+
+    #Build the team submission of mission
+    (1..@realtime_session.number_of_table).each_with_index do |t,i|
+      session_students = @realtime_session.get_student_seats_by_table(t).has_student
+      if session_students.count > 0
+        sm_list = {}
+        no_sm_count = 0
+
+        #build team submission
+        session_students.each do |ss|
+          ss.team_submission.destroy if ss.team_submission
+          ss.team_submission_id = nil
+          ss.save
+          sm = !ss.student.nil? ? ss.student.submissions.where(assessment_id: @realtime_session.realtime_session_group.mission.assessment.id).last : nil
+          sm_list[ss.id] = sm if !sm.nil?
+        end
+        if sm_list.count > 0
+          team_sbm = @realtime_session.realtime_session_group.mission.submissions.create
+          team_sbm.set_generated
+          team_sbm.build_initial_answers_for_team sm_list
+
+          session_students.each do |ss|
+            ss.team_submission_id = team_sbm.id if !sm_list[ss.id].nil?
+            ss.save
+          end
+        end
+      end
+
     end
 
     @realtime_session.reset

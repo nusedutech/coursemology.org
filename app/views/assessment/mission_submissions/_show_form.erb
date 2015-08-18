@@ -1,73 +1,147 @@
-<%= render partial: 'summary' %>
+<%= render partial: 'header' %>
+<% if @team_submission %>
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#own_submission">Own Submission</a></li>
+  <li><a data-toggle="tab" href="#group_submission">Group Submission</a></li>
+</ul>
 
+<div class="tab-content">
+  <div id="own_submission" class="tab-pane fade in active">
+<% end %>
 
-<% @assessment.questions.includes(:answers).each_with_index do |q, i| %>
-    <% unless @assessment.specific.single_question? %>
-        <h3> <%= q.title || "Question  #{i + 1}" %></h3>
-        <div class="row">
-          <div class="span8">
-            <span><%= style_format(q.description) %></span>
-          </div>
-        </div>
+    <%= render partial: 'summary' %>
+    <% @assessment.questions.includes(:answers).each_with_index do |q, i| %>
+        <% unless @assessment.specific.single_question? %>
+            <h3> <%= q.title || "Question  #{i + 1}" %></h3>
+            <div class="row">
+              <div class="span8">
+                <span><%= style_format(q.description) %></span>
+              </div>
+            </div>
 
-    <% end %>
+        <% end %>
 
-    <%- question = q.specific %>
-    <% if question.class == Assessment::GeneralQuestion %>
-        <%- answer = @submission.answers.where(question_id: q.id).first %>
-        <h4>Your answer:</h4>
-        <div class="row-fluid">
-          <div class="submission-question-block span10">
-            <%= answer.content.html_safe %>
-          </div>
-        </div>
-    <% elsif question.class == Assessment::MpqQuestion%>
-        <% question.sub_questions.each_with_index do |sq,si| %>
-            <%- answer = @submission.answers.where(question_id: sq.id).first %>
-            <%- sq = sq.specific %>
-            <span><strong><%= "Sub question #{si+1}: " %></strong><%= style_format(sq.description) %></span>
+        <%- question = q.specific %>
+        <% if question.class == Assessment::GeneralQuestion %>
+            <%- answer = @submission.answers.where(question_id: q.id).first %>
             <h4>Your answer:</h4>
             <div class="row-fluid">
               <div class="submission-question-block span10">
                 <%= answer.content.html_safe %>
               </div>
             </div>
+        <% elsif question.class == Assessment::MpqQuestion%>
+            <% question.sub_questions.each_with_index do |sq,si| %>
+                <%- answer = @submission.answers.where(question_id: sq.id).first %>
+                <%- sq = sq.specific %>
+                <span><strong><%= "Sub question #{si+1}: " %></strong><%= style_format(sq.description) %></span>
+                <h4>Your answer:</h4>
+                <div class="row-fluid">
+                  <div class="submission-question-block span10">
+                    <%= answer.content.html_safe %>
+                  </div>
+                </div>
+            <% end %>
+        <% else %>
+            <%=render partial: 'do_coding',
+                      locals: { answer: answer,
+                                question: question,
+                                submission: @submission,
+                                mode: "view" } %>
         <% end %>
-    <% else %>
-        <%=render partial: 'do_coding',
-                  locals: { answer: answer,
-                            question: question,
-                            submission: @submission,
-                            mode: "view" } %>
+
+        <hr />
+
+        <% require 'digest/md5' %>
+        <% ecid =  Digest::MD5.hexdigest(answer.id.to_s) %>
+        <input type="hidden" id="submission_url_<%= ecid %>" value="<%= course_assessment_submission_url(@course, @assessment, @submission) %>">
+
+        <div class="row-fluid">
+          <div class="span10">
+            <%= render partial: "comments/list",
+                       locals: { comments:  CommentTopic.comments_to_json(answer.comment_topic, curr_user_course),
+                                 target:    answer,
+                                 header:    'Comments',
+                                 ecid:      ecid } %>
+          </div>
+        </div>
     <% end %>
 
-    <hr />
+    <br />
 
-    <% require 'digest/md5' %>
-    <% ecid =  Digest::MD5.hexdigest(answer.id.to_s) %>
-    <input type="hidden" id="submission_url_<%= ecid %>" value="<%= course_assessment_submission_url(@course, @assessment, @submission) %>">
-
-    <div class="row-fluid">
-      <div class="span10">
-        <%= render partial: "comments/list",
-                   locals: { comments:  CommentTopic.comments_to_json(answer.comment_topic, curr_user_course),
-                             target:    answer,
-                             header:    'Comments',
-                             ecid:      ecid } %>
-      </div>
-    </div>
+    <% if @assessment.file_submission?  %>
+        <span class="btn" data-toggle="collapse" data-target="#submission-files">
+        <i class="icon-upload icon-white"></i>
+        <span>Add files for submission</span>
+      </span>
+        <br/><br/>
+        <div id="submission-files" class="collapse out">
+          <%= render partial: 'layouts/file_uploader_complicated',
+                     locals: { owner: @submission } %>
+        </div>
+    <% end %>
+<% if @team_submission %>
+  </div>
 <% end %>
+<% if @team_submission %>
+  <div id="group_submission" class="tab-pane fade">
+    <%= render partial: 'team_summary' %>
+    <% @assessment.questions.includes(:answers).each_with_index do |q, i| %>
+        <% unless @assessment.specific.single_question? %>
+            <h3> <%= q.title || "Question  #{i + 1}" %></h3>
+            <div class="row">
+              <div class="span8">
+                <span><%= style_format(q.description) %></span>
+              </div>
+            </div>
 
-<br />
+        <% end %>
 
-<% if @assessment.file_submission?  %>
-    <span class="btn" data-toggle="collapse" data-target="#submission-files">
-    <i class="icon-upload icon-white"></i>
-    <span>Add files for submission</span>
-  </span>
-    <br/><br/>
-    <div id="submission-files" class="collapse out">
-      <%= render partial: 'layouts/file_uploader_complicated',
-                 locals: { owner: @submission } %>
-    </div>
+        <%- question = q.specific %>
+        <% if question.class == Assessment::GeneralQuestion %>
+            <%- answer = @team_submission.answers.where(question_id: q.id).first %>
+            <h4>Team answer:</h4>
+            <div class="row-fluid">
+              <div class="submission-question-block span10">
+                <%= answer.content.html_safe %>
+              </div>
+            </div>
+        <% elsif question.class == Assessment::MpqQuestion%>
+            <% question.sub_questions.each_with_index do |sq,si| %>
+                <%- answer = @team_submission.answers.where(question_id: sq.id).first %>
+                <%- sq = sq.specific %>
+                <span><strong><%= "Sub question #{si+1}: " %></strong><%= style_format(sq.description) %></span>
+                <h4>Team answer:</h4>
+                <div class="row-fluid">
+                  <div class="submission-question-block span10">
+                    <%= answer.content.html_safe if answer %>
+                  </div>
+                </div>
+            <% end %>
+        <% else %>
+            <%=render partial: 'do_coding',
+                      locals: { answer: answer,
+                                question: question,
+                                submission: @submission,
+                                mode: "view" } %>
+        <% end %>
+
+        <hr />
+
+        <% require 'digest/md5' %>
+        <% ecid =  Digest::MD5.hexdigest(answer.id.to_s) %>
+        <input type="hidden" id="submission_url_<%= ecid %>" value="<%= course_assessment_submission_url(@course, @assessment, @team_submission) %>">
+
+        <div class="row-fluid">
+          <div class="span10">
+            <%= render partial: "comments/list",
+                       locals: { comments:  CommentTopic.comments_to_json(answer.comment_topic, curr_user_course),
+                                 target:    answer,
+                                 header:    'Comments',
+                                 ecid:      ecid } %>
+          </div>
+        </div>
+    <% end %>
+  </div>
+</div>
 <% end %>

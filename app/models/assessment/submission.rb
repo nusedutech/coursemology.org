@@ -109,6 +109,10 @@ class Assessment::Submission < ActiveRecord::Base
     self.update_attribute(:submitted_at, updated_at)
   end
 
+  def set_generated
+    self.update_attribute(:status,'generated')
+    self.update_attribute(:submitted_at, updated_at)
+  end
 
   def set_graded
     self.update_attribute(:status,'graded')
@@ -206,6 +210,81 @@ class Assessment::Submission < ActiveRecord::Base
                            content: qn.specific.respond_to?(:template) ? qn.template : nil,
                            submission_id: self.id,
                            attempt_left: qn.attempt_limit})
+        end
+      end
+
+    end
+  end
+
+  def build_initial_answers_for_team sbm_list
+    ans_voted = {}
+    ans_stat = {}
+    sbm_list.each do |ss_id,sbm|
+      if !sbm.nil?
+        sbm.answers.each do |ans|
+          if ans.is_a? Assessment::GeneralAnswer and !ans.voted_answer_id.nil?
+            ans_stat[ans.question_id] = {} if ans_stat[ans.question_id].nil?
+            ans_stat[ans.question_id][ans.voted_answer_id]= ans_stat[ans.question_id][ans.voted_answer_id].nil? ? 1 : (ans_stat[ans.question_id][ans.voted_answer_id]+1)
+          end
+        end
+      end
+    end
+    ans_stat.each do |ques_id, chosen_ans|
+      curr_max = 0
+      shuffle_arr = []
+      chosen_ans.each do |ans_id, num_votes|
+        curr_max = num_votes if num_votes > curr_max
+      end
+      chosen_ans.each do |ans_id, num_votes|
+        shuffle_arr << ans_id if num_votes==curr_max
+      end
+      shuffle_arr.shuffle!
+      ans_voted[ques_id] = shuffle_arr.count>0 ? shuffle_arr[0] : nil
+    end
+    self.assessment.questions.includes(:as_question).each do |qn|
+      if qn.is_a?(Assessment::MpqQuestion)
+        qn.sub_questions.each do |sub|
+          unless self.answers.find_by_question_id(sub.id)
+            case
+              when sub.is_a?(Assessment::GeneralQuestion)
+                ans_class = Assessment::GeneralAnswer
+                content = Assessment::Answer.find(ans_voted[sub.id]).content if ans_voted[sub.id]
+              when sub.is_a?(Assessment::MpqQuestion)
+                ans_class = Assessment::GeneralAnswer
+              when sub.is_a?(Assessment::CodingQuestion)
+                ans_class = Assessment::CodingAnswer
+              when sub.is_a?(Assessment::McqQuestion)
+                ans_class = Assessment::McqAnswer
+              else
+                ans_class = Assessment::GeneralAnswer
+            end
+            ans_class.create!({question_id: sub.id,
+                               #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
+                               content: content,
+                               submission_id: self.id,
+                               attempt_left: sub.attempt_limit})
+          end
+        end
+      else
+        unless self.answers.find_by_question_id(qn.id)
+          case
+            when qn.is_a?(Assessment::GeneralQuestion)
+              ans_class = Assessment::GeneralAnswer
+              content = Assessment::Answer.find(ans_voted[qn.id]).content if ans_voted[qn.id]
+            when qn.is_a?(Assessment::MpqQuestion)
+              ans_class = Assessment::GeneralAnswer
+            when qn.is_a?(Assessment::CodingQuestion)
+              ans_class = Assessment::CodingAnswer
+            when qn.is_a?(Assessment::McqQuestion)
+              ans_class = Assessment::McqAnswer
+            else
+              ans_class = Assessment::GeneralAnswer
+          end
+          ans_class.create!({question_id: qn.id,
+                             #TODO, a acts_as_relation bug, parent can access children attributes, but respond_to return false
+                             content: content,
+                             submission_id: self.id,
+                             attempt_left: qn.attempt_limit})
         end
       end
 

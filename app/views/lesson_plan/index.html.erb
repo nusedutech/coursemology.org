@@ -249,7 +249,7 @@
             var type  = $(this).parent().find('span.entry_text_type').text();
             var des  = $(this).parent().find('span.entry_description').html();
             var loc  = $(this).parent().find('span.entry_location').text();
-            var $dis = $(this).next('div.discussion');
+            var $dis = $(this).parent().find('div.discussion');
             var $resource = $(this).parent().parent().find('div.resource-hide ul');
             var entry_start_end = $(this).parent().find('span.entry_start_end').html();
             if(entry_type =='0' || entry_type =='1'|| entry_type =='2' || entry_type =='4'){

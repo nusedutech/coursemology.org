@@ -77,7 +77,7 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
       #get all teammate
       table_answers = []
       teammate_seats = session.student_seats.where(table_number: student_seat.table_number)
-      teammate_answers = @assessment.answers.where("assessment_answers.question_id = (?) and assessment_answers.std_course_id in (?)",current.question.id,teammate_seats.map {|ts| ts.std_course_id})
+      teammate_answers = @assessment.answers.where("assessment_answers.question_id = (?) and assessment_answers.std_course_id in (?)",current.question.id,teammate_seats.map {|ts| ts.std_course_id}) if current
 
       if !current.nil? and current.parent
         session_question = session.session_questions.relate_to_question(@assessment.question_assessments.where(question_id: current.parent.question.id).first).first

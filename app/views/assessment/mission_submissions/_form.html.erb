@@ -1,8 +1,8 @@
 <%- if @mission.realtime_session_groups.count > 0 and @summary and @summary[:session] %>
     <%= form_for @submission, url: (@from_lesson_plan.nil? ? course_assessment_submission_path(@course, @assessment, @submission, anchor: 'training-stop-pos', step: @summary[:step]): course_lesson_plan_mission_update_path(@course, @assessment )), html: { class: 'form-horizontal' } do |f| %>
-        <% q = @summary[:current].question %>
+        <% q = @summary[:current].question if @summary[:current]%>
         <input type="hidden" name="session_id" value="<%= @summary[:session].id %>" >
-        <input type="hidden" name="session_question_id" value="<%= @summary[:session_question].id %>" >
+        <input type="hidden" name="session_question_id" value="<%= @summary[:session_question].id if @summary[:session_question]%>" >
         <input type="hidden" name="question_id" value="<%= @summary[:current].question.id if @summary[:current]%>" >
         <div class="tabbable tabs-below">
           <div id="training-stop-pos"><br></div>

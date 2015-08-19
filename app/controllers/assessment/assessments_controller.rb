@@ -129,6 +129,13 @@ class Assessment::AssessmentsController < ApplicationController
                                               ((sub_ids.include? ast.mission.assessment.id) ? {action: "Resumemission",flash: "Resume Mission",url: edit_course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} :
                                                   {action: "Attemptmission",flash: "Attempt Mission",url: new_course_assessment_submission_path(@course, ast.mission.assessment)})),
                                       seat: (session.last.start_time and session.last.start_time < Time.now) ? (seat ? "Table #{seat.table_number} - Seat #{seat.seat_number}": "Not allocated") : "Not published"}
+              elsif curr_user_course.tut_group_courses.has_group.count > 0
+                t_attempting = ast.training ? (sub_ids.include? ast.training.assessment.id and !sub_map[ast.training.assessment.id].attempting? ? true : false) : nil
+                m_attempting = ast.mission ? (sub_ids.include? ast.mission.assessment.id and !sub_map[ast.mission.assessment.id].attempting? ? true : false) : nil
+
+                action_map[ast.id] = {action: "realtime_session", warning: "Absent", seat: "Not allocated"}
+                action_map[ast.id][:training] = {action: "Review",flash: "Review Training",url: course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])} if t_attempting
+                action_map[ast.id][:mission] = {action: "Review",flash: "Review Mission",url: course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} if m_attempting
               else
                 action_map[ast.id] = {action: "realtime_session", warning: "No session", seat: "Not allocated"}
               end

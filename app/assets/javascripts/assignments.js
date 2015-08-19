@@ -42,6 +42,10 @@ $(document).ready(function() {
                             } else {
                                 $div.append('<a href="' + actions_map[mid]['mission'].url + '" class="lower-btn-rt btn ' + ((actions_map[mid]['mission'].action == 'Review') ? 'btn-info' : klass) + '" >' + actions_map[mid]['mission'].flash + '</a>')
                             }
+                        }else if(actions_map[mid].warning == "Absent") {
+                            if(typeof(actions_map[mid]['training']) != "undefined" && actions_map[mid]['training'].action == "Review") {
+                                $div.html('<a href="' + actions_map[mid]['training'].url + '" class="btn-rt btn ' + ((actions_map[mid]['training'].action == 'Review') ? 'btn-info' : klass) + '" >' + actions_map[mid]['training'].flash + '</a>')
+                            }
                         }
                     }else {
                         $div.html('<a href="' + actions_map[mid].url + '" class="btn ' + klass + '" >' + actions_map[mid].action + '</a>')

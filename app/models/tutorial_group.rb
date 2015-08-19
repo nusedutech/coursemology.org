@@ -2,6 +2,7 @@ class TutorialGroup < ActiveRecord::Base
   attr_accessible :course_id, :std_course_id, :tut_course_id, :group_id, :milestone_id
 
   scope :assigned, -> { where("tutorial_groups.group_id <> -1")}
+  scope :has_group, -> { where("group_id is not null")}
 
   belongs_to :course
   belongs_to :std_course, class_name: "UserCourse"

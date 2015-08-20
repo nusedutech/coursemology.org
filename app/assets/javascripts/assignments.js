@@ -33,7 +33,7 @@ $(document).ready(function() {
                         $div.parent().css("width","15%");
                         if(actions_map[mid].warning == null) {
                             if (actions_map[mid]['training'].action == 'Notstart' || actions_map[mid]['training'].action == 'Null') {
-                                $div.html('<a disabled="true" class="btn-rt btn ' + klass + '" >' + actions_map[mid]['training'].flash + '</a>')
+                                $div.html('<a disabled="true" class="btn-rt btn ' + ((actions_map[mid]['training'].flash == 'Review Training') ? 'btn-info' : klass) + '" >' + actions_map[mid]['training'].flash + '</a>')
                             } else {
                                 $div.html('<a href="' + actions_map[mid]['training'].url + '" class="btn-rt btn ' + ((actions_map[mid]['training'].action == 'Review') ? 'btn-info' : klass) + '" >' + actions_map[mid]['training'].flash + '</a>')
                             }
@@ -43,8 +43,12 @@ $(document).ready(function() {
                                 $div.append('<a href="' + actions_map[mid]['mission'].url + '" class="lower-btn-rt btn ' + ((actions_map[mid]['mission'].action == 'Review') ? 'btn-info' : klass) + '" >' + actions_map[mid]['mission'].flash + '</a>')
                             }
                         }else if(actions_map[mid].warning == "Absent") {
-                            if(typeof(actions_map[mid]['training']) != "undefined" && actions_map[mid]['training'].action == "Review") {
-                                $div.html('<a href="' + actions_map[mid]['training'].url + '" class="btn-rt btn ' + ((actions_map[mid]['training'].action == 'Review') ? 'btn-info' : klass) + '" >' + actions_map[mid]['training'].flash + '</a>')
+                            if(typeof(actions_map[mid]['training']) != "undefined") {
+                                if (actions_map[mid]['training'].action == "Null") {
+                                    $div.html('<a disabled="true" class="btn-rt btn btn-info" >' + actions_map[mid]['training'].flash + '</a>')
+                                }else if (actions_map[mid]['training'].action == "Review"){
+                                    $div.html('<a href="' + actions_map[mid]['training'].url + '" class="btn-rt btn ' + ((actions_map[mid]['training'].action == 'Review') ? 'btn-info' : klass) + '" >' + actions_map[mid]['training'].flash + '</a>')
+                                }
                             }
                         }
                     }else {

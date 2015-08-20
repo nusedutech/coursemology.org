@@ -248,7 +248,12 @@ class Assessment::Submission < ActiveRecord::Base
             case
               when sub.is_a?(Assessment::GeneralQuestion)
                 ans_class = Assessment::GeneralAnswer
-                content = Assessment::Answer.find(ans_voted[sub.id]).content if ans_voted[sub.id]
+                if ans_voted[sub.id]
+                  content = Assessment::Answer.find(ans_voted[sub.id]).content
+                else
+                  re_ans = sbm_list.values[Random.rand(sbm_list.count)].answers.where(question_id: sub.id).first
+                  content = re_ans.content if re_ans
+                end
               when sub.is_a?(Assessment::MpqQuestion)
                 ans_class = Assessment::GeneralAnswer
               when sub.is_a?(Assessment::CodingQuestion)
@@ -270,7 +275,12 @@ class Assessment::Submission < ActiveRecord::Base
           case
             when qn.is_a?(Assessment::GeneralQuestion)
               ans_class = Assessment::GeneralAnswer
-              content = Assessment::Answer.find(ans_voted[qn.id]).content if ans_voted[qn.id]
+              if ans_voted[qn.id]
+                content = Assessment::Answer.find(ans_voted[qn.id]).content
+              else
+                re_ans = sbm_list.values[Random.rand(sbm_list.count)].answers.where(question_id: qn.id).first
+                content = re_ans.content if re_ans
+              end
             when qn.is_a?(Assessment::MpqQuestion)
               ans_class = Assessment::GeneralAnswer
             when qn.is_a?(Assessment::CodingQuestion)

@@ -107,8 +107,8 @@ class Assessment::AssessmentsController < ApplicationController
       elsif ((ast.opened? and (ast.as_assessment.class == Assessment::Training or
           ast.as_assessment.class == Assessment::RealtimeSessionGroup or
           ast.dependent_id.nil? or ast.dependent_id == 0 or
-          (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or
-          can?(:manage, ast)) and ast.can_access_with_end_check? (curr_user_course)
+          (sub_ids.include? ast.dependent_id and !sub_map[ast.dependent_id].attempting?))) or can?(:manage, ast)) and
+          (ast.can_access_with_end_check? (curr_user_course) or ast.as_assessment.class == Assessment::RealtimeSessionGroup)
 
           #Check student's realtime_session status
           if curr_user_course.is_student? and ast.is_realtime_session_group?

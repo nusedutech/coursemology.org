@@ -72,7 +72,7 @@
     <div class="form-actions" style="text-align: center">
         <%= link_to "Finalize Grade", finalize_grade_training_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),
                     :class => 'btn btn-danger', id:"mission_finalize", confirm: "THIS ACTION IS IRREVERSIBLE AND ALL SUBMISSIONS WILL BE GRADED\n\nAre you sure you want to finalize? Students will no longer be able to amend their submissions" %>
-        <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
+        <%= link_to "Close Session", close_session_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn' %>
     </div>
     <div id="show_statistic" class="modal hide fade" data-backdrop="static">
       <div class="modal-dialog modal-lg">
@@ -380,7 +380,7 @@
     <div class="form-actions" style="text-align: center">
       <%= link_to "Finalize Grade", finalize_grade_mission_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),
                   :class => 'btn btn-danger', id:"mission_finalize", confirm: "THIS ACTION IS IRREVERSIBLE AND ALL SUBMISSIONS WILL BE FINISH\n\nAre you sure you want to finalize? Students will no longer be able to amend their submissions" %>
-      <%= link_to "Close Session", course_assessment_realtime_session_group_path(@course, @session.realtime_session_group),:class => 'btn' %>
+      <%= link_to "Close Session", close_session_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session),:class => 'btn' %>
     </div>
 
     <script>

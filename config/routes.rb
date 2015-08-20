@@ -278,6 +278,7 @@ Coursemology::Application.routes.draw do
           get 'finalize_grade_training' => 'realtime_sessions#finalize_grade_training'
           get 'finalize_grade_mission' => 'realtime_sessions#finalize_grade_mission'
           get 'start_session' => 'realtime_sessions#start_session'
+          get 'close_session' => 'realtime_sessions#close_session'
           post :switch_lock_question, to: 'realtime_sessions#switch_lock_question'
           post :count_submission, to: 'realtime_sessions#count_submission'
           post :answers_stats, to: 'realtime_sessions#answers_stats'

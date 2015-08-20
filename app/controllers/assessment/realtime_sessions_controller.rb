@@ -63,6 +63,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
       end
     end
 
+    @realtime_session.close_session
     @realtime_session.reset
     flash[:notice] = "Grade finalization is done!"
     redirect_to :back
@@ -105,6 +106,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
 
     end
 
+    @realtime_session.close_session
     @realtime_session.reset
     flash[:notice] = "Finalization is done!"
     redirect_to :back
@@ -230,4 +232,9 @@ class Assessment::RealtimeSessionsController < ApplicationController
     end
   end
 
+  def close_session
+    @realtime_session.close_session
+    @realtime_session.reset
+    redirect_to course_assessment_realtime_session_groups_path
+  end
 end

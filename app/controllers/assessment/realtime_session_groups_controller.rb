@@ -3,7 +3,7 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
 
   def show
     if curr_user_course.is_student? && !current_user.is_admin?
-      redirect_to course_assessment_realtime_trainings_path
+      redirect_to course_assessment_realtime_session_groups_path
       return
     end
     @assessment = @realtime_session_group.assessment
@@ -14,9 +14,9 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
     @summary[:specific] = @realtime_session_group
 
     #reset all session
-    @realtime_session_group.sessions.each do |s|
-      s.update_attribute(:status, false)
-    end
+    #@realtime_session_group.sessions.each do |s|
+    #  s.update_attribute(:status, false)
+    #end
 
     respond_to do |format|
       format.html { render "assessment/assessments/show" }

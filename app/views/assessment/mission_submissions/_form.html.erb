@@ -105,17 +105,20 @@
         <div id="uploaded_files_div"></div>
 
         <div class="form-actions">
-          <% flag_result = params[:result] %>
-          <% params[:anchor] = 'training-stop-pos'%>
-          <% params.delete :result if !q.is_a? Assessment::MpqQuestion %>
-          <%= link_to 'Get Latest Answers', url_for(params), :class => 'btn', id: "mission_refresh" if !q.is_a? Assessment::MpqQuestion %>
-          <%= f.submit 'Submit Answer', :class => 'btn btn-primary', id:"mission_save" if !q.is_a? Assessment::MpqQuestion %>
-          <%= link_to "Continue",
-                      edit_course_assessment_submission_path(@course, @assessment, @submission,
-                                                             from_lesson_plan: @from_lesson_plan.nil? ? false : true,
-                                                             anchor: 'training-stop-pos', step: @summary[:step] + 1),
-                                                             class: (flag_result || (q.is_a? Assessment::MpqQuestion)) ? 'btn btn-primary' : 'btn disabled',
-                                                             id: 'continue-btn' %>
+          <% if @summary[:current] %>
+              <% flag_result = params[:result] %>
+              <% params[:anchor] = 'training-stop-pos'%>
+              <% params[:step] = @summary[:step] if @summary[:step]%>
+              <% params.delete :result if !q.is_a? Assessment::MpqQuestion %>
+              <%= link_to 'Get Latest Answers', url_for(params), :class => 'btn', id: "mission_refresh" if !q.is_a? Assessment::MpqQuestion %>
+              <%= f.submit 'Submit Answer', :class => 'btn btn-primary', id:"mission_save" if !q.is_a? Assessment::MpqQuestion %>
+              <%= link_to "Continue",
+                          edit_course_assessment_submission_path(@course, @assessment, @submission,
+                                                                 from_lesson_plan: @from_lesson_plan.nil? ? false : true,
+                                                                 anchor: 'training-stop-pos', step: @summary[:step] + 1),
+                                                                 class: (flag_result || (q.is_a? Assessment::MpqQuestion)) ? 'btn btn-primary' : 'btn disabled',
+                                                                 id: 'continue-btn' %>
+          <% end %>
         </div>
     <% end %>
 
@@ -256,7 +259,7 @@
         });
 
         $("#mission_refresh").click(function(e) {
-            if(window.location.href.replace(/^.*\/\/[^\/]+/, '') == $(e.target).attr('href')){
+            if(window.location.href.replace(/^.*\/\/[^\/]+/, '') == $(e.target).attr('href')) {
                 window.location.reload();
             }else{
                 window.location.href = $(e.target).attr('href');

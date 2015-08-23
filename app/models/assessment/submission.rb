@@ -26,6 +26,9 @@ class Assessment::Submission < ActiveRecord::Base
   scope :attempting_format, -> { where(status: 'attempting') }
 
   scope :belong_to_stds, lambda { |std_list| where("std_course_id in (?)",std_list) }
+  scope :group_submissions_stds, lambda { |std_list|
+    joins("inner join assessment_realtime_seat_allocations on assessment_submissions.id = assessment_realtime_seat_allocations.team_submission_id").
+        where("assessment_realtime_seat_allocations.std_course_id in (?)",std_list) }
 
   belongs_to :assessment
   belongs_to :std_course, class_name: "UserCourse"

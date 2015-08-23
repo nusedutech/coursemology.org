@@ -41,30 +41,54 @@ class Assessment::Grading < ActiveRecord::Base
 
     asm = submission.assessment
     if !asm.is_training? or (asm.is_training? and asm.as_assessment.realtime_session_groups.count == 0)
-      unless self.exp_transaction
-        self.exp_transaction = ExpTransaction.create({giver_id: self.grader_id,
-                                                      user_course_id: submission.std_course_id,
-                                                      reason: "Exp for #{asm.title}",
-                                                      is_valid: true,
-                                                      rewardable_id: submission.id,
-                                                      rewardable_type: submission.class.name },
-                                                     without_protection: true)
-        self.save
-      end
+      if !student and submission.std_seats.count>0
+        submission.std_seats.each do |s|
+          exp_tran = ExpTransaction.where(user_course_id: s.std_course_id,rewardable_id: submission.id,rewardable_type: submission.class.name).first
+          unless exp_tran
+            exp_tran = ExpTransaction.create({giver_id: self.grader_id,
+                                                        user_course_id: s.std_course_id,
+                                                        reason: "Exp for #{asm.title}",
+                                                        is_valid: true,
+                                                        rewardable_id: submission.id,
+                                                        rewardable_type: submission.class.name },
+                                                        without_protection: true)
+          end
+          exp_tran.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+          if submission.has_multiplier?
+            exp_tran.exp *= submission.multiplier
+          else
+            exp_tran.exp += submission.get_bonus if submission.done?
+          end
 
-      if (submission.done? and asm.is_training? and asm.as_assessment.always_full_exp) or (asm.is_policy_mission? and submission.submitted?)
-        self.exp_transaction.exp = asm.exp
+          exp_tran.save
+        end
       else
-        self.exp_transaction.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+        unless self.exp_transaction
+          self.exp_transaction = ExpTransaction.create({giver_id: self.grader_id,
+                                                        user_course_id: submission.std_course_id,
+                                                        reason: "Exp for #{asm.title}",
+                                                        is_valid: true,
+                                                        rewardable_id: submission.id,
+                                                        rewardable_type: submission.class.name },
+                                                       without_protection: true)
+          self.save
+        end
+        if (submission.done? and asm.is_training? and asm.as_assessment.always_full_exp) or (asm.is_policy_mission? and submission.submitted?)
+          self.exp_transaction.exp = asm.exp
+        else
+          self.exp_transaction.exp = self.exp || (asm.max_grade.nil? ? 0 : (self.grade || 0) * asm.exp / asm.max_grade)
+        end
+
+        if submission.has_multiplier?
+          self.exp_transaction.exp *= submission.multiplier
+        else
+          self.exp_transaction.exp += submission.get_bonus if submission.done?
+        end
+
+        self.exp_transaction.save
       end
 
-      if submission.has_multiplier?
-        self.exp_transaction.exp *= submission.multiplier
-      else
-        self.exp_transaction.exp += submission.get_bonus if submission.done?
-      end
 
-      self.exp_transaction.save
     end
   end
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150817025611) do
+ActiveRecord::Schema.define(:version => 20150822175051) do
 
   create_table "achievements", :force => true do |t|
     t.string   "icon_url"
@@ -1218,6 +1218,7 @@ ActiveRecord::Schema.define(:version => 20150817025611) do
     t.time     "deleted_at"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+    t.integer  "tutor_id"
   end
 
   create_table "survey_essay_answers", :force => true do |t|

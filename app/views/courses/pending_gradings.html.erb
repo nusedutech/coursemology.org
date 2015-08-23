@@ -15,12 +15,12 @@
   <% @pending_gradings.each do |sub| %>
       <tr>
         <td>
-          <%= sub.std_course.name %>
+          <%= sub.std_course.name if sub.std_course %>
         </td>
         <td><%= link_to sub.assessment.get_title, sub.assessment.get_path %></td>
         <td><%= datetime_format sub.submitted_at %> </td>
         <td>
-          <%= sub.std_course.get_my_tutor_name %>
+          <%= sub.std_course.get_my_tutor_name if sub.std_course %>
         </td>
         <% if can? :manage, Assessment::Grading %>
 

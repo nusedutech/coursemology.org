@@ -66,15 +66,6 @@ class UserCoursesController < ApplicationController
     @staff_courses = @course.user_courses.staff
   end
 
-  def remove_group
-    #@user_course.role = Role.student.first
-    #@user_course.save
-    respond_to do |format|
-      format.json { render json: { status: 'OK' } }
-      format.html { redirect_to course_students_path(@course) }
-    end
-  end
-
   def staff
     @staff_courses = []
     @students_courses = []

@@ -15,17 +15,16 @@
         <input type="hidden" class="old-name" value="<%= group.name  %>">
         <td>  <input type="text" style="width: 80%" value="<%= group.name  %>" name="group_name" class="change-name" required> </td>
         <td>
-          <%tutor = TutorialGroup.where(:group_id => group.id).first %>
-          <% if tutor %>
-              <%= select "tutor","", tas, {:selected => "#{tutor.tut_course_id}" }%>
+          <% if group.tutor %>
+              <%= select "tutor","", tas, {:selected => "#{group.tutor_id}",:class => "tutor" }%>
           <% else %>
-              <%= select "tutor","", tas, {:selected => "#{-1}" }%>
+              <%= select "tutor","", tas, {:selected => "#{-1}" },:class => "tutor"%>
           <% end %>
         </td>
 
         <td>
           <% if current_user.is_admin? or curr_user_course.is_lecturer? %>
-              <%= link_to '#', class: 'btn update-group' do %>
+              <%= link_to course_update_group_path(@course,group), class: 'btn update-group' do %>
                   <i class="icon-ok"></i>
               <% end %>
 

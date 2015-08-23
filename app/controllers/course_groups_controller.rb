@@ -84,6 +84,34 @@ class CourseGroupsController < ApplicationController
     end
   end
 
+  def update_group
+    group = StudentGroup.find(params["group_id"]) if params["group_id"]
+    if group
+      group.update_attribute(:name, params[:change_name]) if params[:change_name] and params[:change_name] != group.name
+      tutor_id = (!params[:tutor] or params[:tutor] == '-1') ? nil : params[:tutor].to_i
+      if group.tutor_id != tutor_id
+        group.tutor_id = tutor_id
+        group.save
+        group.tutorial_groups.each do |t|
+          t.tut_course_id = tutor_id
+          t.save
+        end
+      end
+    end
+    respond_to do |format|
+      format.json { render json: { status: 'OK' } }
+    end
+  end
+
+  def remove_group
+    #@user_course.role = Role.student.first
+    #@user_course.save
+    respond_to do |format|
+      format.json { render json: { status: 'OK' } }
+      format.html { redirect_to course_students_path(@course) }
+    end
+  end
+
   private
   def access_control
     unless curr_user_course.is_staff?

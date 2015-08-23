@@ -39,4 +39,49 @@ $(document).ready(function(){
             }
         }
     }
+
+    $('.update-group').on('click',function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var group_row = $(this).parents('tr');
+        var old_name = group_row.find('.old-name').val().trim();
+        var change_name = group_row.find('.change-name').val().trim();
+        var tutor = group_row.find('.tutor');
+        var notice = $('.alert');
+        if(change_name.length == 0) {
+            notice.addClass("alert-error");
+            notice.text("User name can't be empty!");
+            notice.slideDown();
+            notice._removeClass('hidden');
+            notice.slideDown(function(){
+                setTimeout(function(){
+                    notice.slideUp()
+                },4400);
+            });
+            group_row.find('.change-name').val(old_name);
+            return;
+        }
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                old_name: old_name,
+                change_name: change_name,
+                tutor: tutor.val() },
+            success: function(e) {
+                notice.addClass("alert-success");
+                notice.removeClass("alert-error");
+                notice.text("Update group successful!");
+                notice.slideDown();
+                notice._removeClass('hidden');
+                notice.slideDown(function(){
+                    setTimeout(function(){
+                        notice.slideUp()
+                    },1500);
+                });
+            }
+        });
+        return false;
+    });
 });

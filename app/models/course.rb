@@ -113,7 +113,7 @@ class Course < ActiveRecord::Base
     if curr_user_course.is_lecturer?
       submissions.mission_submissions.where(status:"submitted").order(:submitted_at)
     else
-      ind_subms = submissions.mission_submissions.where(status:"submitted",std_course_id:curr_user_course.get_my_stds).order(:submitted_at)
+      ind_subms = assessments.mission.mission_without_realtime.submissions.where(status:"submitted",std_course_id:curr_user_course.get_my_stds).order(:submitted_at)
       group_subms = submissions_by_asms.where(status: "generated").group_submissions_stds(curr_user_course.get_my_stds).order(:submitted_at)
       group_subms.uniq+ind_subms
     end

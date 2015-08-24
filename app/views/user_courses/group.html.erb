@@ -16,9 +16,9 @@
         <td>  <input type="text" style="width: 80%" value="<%= group.name  %>" name="group_name" class="change-name" required> </td>
         <td>
           <% if group.tutor %>
-              <%= select "tutor","", tas, {:selected => "#{group.tutor_id}",:class => "tutor" }%>
+              <%= select "tutor","", tas, {:selected => "#{group.tutor_id}"},:class => "tutor" %>
           <% else %>
-              <%= select "tutor","", tas, {:selected => "#{-1}" },:class => "tutor"%>
+              <%= select "tutor","", tas, {:selected => "#{-1}"}, :class => "tutor" %>
           <% end %>
         </td>
 

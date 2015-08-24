@@ -241,7 +241,6 @@ class Assessment::AssessmentsController < ApplicationController
     @summary[:staff] = @course.user_courses.staff
 
     sbms = @summary[:selected_asm] ? @summary[:selected_asm].submissions : assessments.submissions
-    sbms = sbms.where("std_course_id is not null")
     sbms = sbms.accessible_by(current_ability).where('status != ?','attempting').order(:submitted_at).reverse_order
 
     if @summary[:selected_std]

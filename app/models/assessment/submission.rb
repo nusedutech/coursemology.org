@@ -304,6 +304,13 @@ class Assessment::Submission < ActiveRecord::Base
     end
   end
 
+  def get_group_name
+    if std_seats.count>0
+      sg = std_seats.first.session.student_group
+      "#{sg.name} - Group #{std_seats.first.table_number}"
+    end
+  end
+
   def fetch_params_answers(params)
     answers =  params[:answers] || []
 

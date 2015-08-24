@@ -1,6 +1,14 @@
-<table width="100%">
-  <col width="15%" />
-  <tr><td>Student: </td><td><%= render partial: "layouts/user_name_link", locals: {user_course: @submission.std_course} %></td></tr>
+<table class="table table-bordered" style="width: 400px">
+  <col width="20%" />
+  <tr><td>Student(s): </td><td>
+    <% if @submission.std_course %>
+        <%= render partial: "layouts/user_name_link", locals: {user_course: @submission.std_course} %>
+    <% else %>
+        <% @submission.group_stds.each do |std| %>
+            <p><%= render partial: "layouts/user_name_link", locals: {user_course: std} %></p>
+        <% end %>
+    <% end %>
+  </td></tr>
   <% if @submission.std_course and @submission.std_course.get_my_tutors.first %>
       <tr><td>Tutor: </td> <td> <%= @submission.std_course.get_my_tutor_name %></td></tr>
   <% end %>

@@ -90,7 +90,11 @@
 		    <tr>
 		      <% if can? :see_all, Assessment::Submission %>
 		          <td>
-		            <%= render partial: 'layouts/user_name_link', locals: {user_course: sub.std_course} %>
+                    <% if sub.std_course %>
+		                <%= render partial: 'layouts/user_name_link', locals: {user_course: sub.std_course} %>
+                    <% else %>
+                        <%= sub.get_group_name %>
+                    <% end %>
 		          </td>
 		      <% end %>
 		      <td><%= link_to sub.assessment.title, url_for([@course, sub.assessment.specific]) %></td>

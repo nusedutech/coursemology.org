@@ -2,7 +2,8 @@
 <% require 'digest/md5' %>
 <table class="table table-bordered" style="width: 300px">
   <tbody class="table-hover">
-  <tr><td style="width: 100px">Student: </td><td><%= render partial: 'layouts/user_name_link', locals: {user_course: @submission.std_course}%></td></tr>
+  <tr><td style="width: 100px">Student: </td><td>
+    <%= render partial: 'layouts/user_name_link', locals: {user_course: @submission.std_course} if @submission.std_course %></td></tr>
   <tr><td>Status:</td><td><strong><%= @submission.status  %></strong></td></tr>
   <% if @grading %>
       <tr>
@@ -43,5 +44,5 @@
 
 <div class="well"><%= @assessment.description.html_safe %></div>
 
-<%= render :partial => 'multiple_question_form', locals: {mode: "view"} %>
+<%= render :partial => 'assessment/gradings/multiple_question_form', locals: {mode: "view"} %>
 

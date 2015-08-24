@@ -16,10 +16,10 @@
                 <div class="row-fluid">
                   <div class="submission-question-block span10"><%= style_format(sqn_dic[:qn].description) %></div>
                 </div>
-                <%= render :partial => 'field_form', locals: {qid: sqid, qn_dic: sqn_dic, mode: mode} %>
+                <%= render :partial => 'assessment/gradings/field_form', locals: {qid: sqid, qn_dic: sqn_dic, mode: mode} %>
             <% end %>
         <% else %>
-            <%= render :partial => 'field_form', locals: {qid: qid, qn_dic: qn_dic, mode: mode} %>
+            <%= render :partial => 'assessment/gradings/field_form', locals: {qid: qid, qn_dic: qn_dic, mode: mode} %>
         <% end %>
     <% end %>
     <hr>

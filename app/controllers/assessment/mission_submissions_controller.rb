@@ -32,6 +32,10 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
         student_seat = session.student_seats.where(std_course_id: curr_user_course.id).first
         @team_submission = student_seat.team_submission
         @student_seats = session.get_student_seats_by_table(student_seat.table_number).has_student
+        if @team_submission.graded?
+          @grading=@team_submission.gradings.last
+          build_summary
+        end
       end
     end
   end
@@ -167,6 +171,48 @@ class Assessment::MissionSubmissionsController < Assessment::SubmissionsControll
     result[:can_test] = std_answer.can_run_test? curr_user_course
     respond_to do |format|
       format.html {render json: result}
+    end
+  end
+
+  def build_summary
+    @summary = {qn_ans: {}}
+
+    if @grading.autograding_refresh
+      eval_answer
+      @grading.update_attribute :autograding_refresh, false
+    end
+
+    @assessment.questions.each_with_index do |q,i|
+      if q.is_a?(Assessment::MpqQuestion)
+        @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+        @summary[:qn_ans][q.id][:sub_q] = {}
+        q.as_question.sub_questions.each_with_index do |sq, si|
+          @summary[:qn_ans][q.id][:sub_q][sq.id] = { qn: sq.specific, i: si + 1 }
+        end
+      else
+        @summary[:qn_ans][q.id] = { qn: q.specific, i: i + 1 }
+      end
+    end
+
+    @team_submission.answers.each do |sa|
+      qn = sa.question
+      if qn.parent
+        @summary[:qn_ans][qn.parent.question.id][:sub_q][qn.id][:ans] = sa
+      else
+        @summary[:qn_ans][qn.id][:ans] = sa
+      end
+      # @qadata[:aws][sa.id] = sa
+    end
+
+    #TODO, potential read row by row
+    @grading.answer_gradings.each do |ag|
+      qn = ag.answer.question
+      if qn.parent
+        @summary[:qn_ans][qn.parent.question.id][:sub_q][qn.id][:grade] = ag
+        @summary[:qn_ans][qn.parent.question.id][:grade] = @summary[:qn_ans][qn.parent.question.id][:grade].nil? ? Assessment::AnswerGrading.new(grade: ag.grade) : Assessment::AnswerGrading.new(grade: @summary[:qn_ans][qn.parent.question.id][:grade].grade + ag.grade)
+      else
+        @summary[:qn_ans][qn.id][:grade] = ag
+      end
     end
   end
 

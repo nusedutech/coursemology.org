@@ -186,7 +186,7 @@ class CourseAbility  < Ability
 
       can :students, Course
 
-      can :manage, [Assessment::Submission], std_course_id: user_course.id
+      can :manage, Assessment::Submission, std_course_id: user_course.id
       can :manage, [Annotation, Comment], user_course_id: user_course.id
       can :manage, SurveySubmission, user_course_id: user_course.id
       can :manage, SurveyMrqAnswer, user_course_id: user_course.id

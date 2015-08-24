@@ -60,7 +60,7 @@ class Assessment::Submission < ActiveRecord::Base
   has_many :concept_stages, class_name: "Assessment::GuidanceConceptStage", dependent: :destroy, foreign_key: "assessment_submission_id"
 
   has_many :std_seats, class_name: Assessment::RealtimeSeatAllocation, foreign_key: :team_submission_id
-
+  has_many :group_stds, through: :std_seats, source: :student
   after_create :set_attempting
   after_save   :status_change_tasks, if: :status_changed?
 

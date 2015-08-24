@@ -17,7 +17,12 @@ class CommentSubscription < ActiveRecord::Base
 
     CommentSubscription.subscribe(comment_topic, commentator)
     topic = comment_topic.topic
-    if topic && (topic.respond_to?(:user_course) || topic.respond_to?(:std_course))
+    if topic and topic.respond_to?(:std_seats) and topic.std_seats.count > 0
+      # add the owners of the topic to the subscription list
+      topic.std_seats.each do |s|
+        CommentSubscription.subscribe(comment_topic,s.student )
+      end
+    elsif topic && (topic.respond_to?(:user_course) || topic.respond_to?(:std_course))
       # add the owner of the topic to the subscription list
       CommentSubscription.subscribe(comment_topic,
                                     topic.respond_to?(:user_course) ?

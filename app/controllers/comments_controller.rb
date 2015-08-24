@@ -14,9 +14,17 @@ class CommentsController < ApplicationController
   def create
     @comment = Comment.new(params[:comment])
     @comment.user_course = curr_user_course
-    authorize! :read, @comment.commentable
-    #if @comment.save
     commentable = @comment.commentable
+
+    if commentable.respond_to?(:group_stds) and commentable.group_stds.count > 0 and curr_user_course.is_student?
+      if !commentable.group_stds.include?(curr_user_course)
+        return
+      end
+    else
+      authorize! :read, commentable
+    end
+
+    #if @comment.save
 
     # update / create comment_topic
     comment_topic = CommentTopic.where(

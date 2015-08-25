@@ -10,7 +10,7 @@
     <% if std_course %>
         <a href="<%= course_user_course_path(@course, std_course) %>"><%= std_course.name %></a>
     <% else %>
-
+        <% submission.get_group_name %>
     <% end %>
     <!--<span class="student-tag common ">Chao Recruit</span>-->
     </span>

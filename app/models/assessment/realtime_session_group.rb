@@ -25,14 +25,14 @@ class Assessment::RealtimeSessionGroup < ActiveRecord::Base
     entry = LessonPlanEntry.create_virtual
     entry.title = self.title
     entry.description = self.description
-    entry.entry_type = 4
-    entry.entry_real_type = course.customized_title("RealtimeSession")
+    entry.entry_type = 5
+    entry.entry_real_type = course.customized_title("Realtime_Session")
     entry.start_at = self.open_at
     entry.end_at = self.close_at  if self.respond_to? :close_at
     entry.url = get_path
     entry.assessment = self
     entry.is_published = self.published
-    entry.submission = user_course ? get_submission(course, user_course, manage_assessment) : nil
+    entry.submission = {action: "Real-Time Session List", url: course_assessment_realtime_session_groups_path(course)}
     entry
   end
 

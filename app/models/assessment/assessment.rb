@@ -36,6 +36,13 @@ class Assessment < ActiveRecord::Base
              Assessment::RealtimeSessionGroup.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
     end
   end
+  scope :without_rt_assessment, lambda { |course|
+    where(" (assessments.as_assessment_type <> 'Assessment::Mission' and assessments.as_assessment_type <> 'Assessment::Training')or
+            (assessments.as_assessment_type = 'Assessment::Mission' and assessments.as_assessment_id not in (?)) or
+            (assessments.as_assessment_type = 'Assessment::Training' and assessments.as_assessment_id not in (?))",
+           course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id),
+           course.realtime_session_groups.where("training_id is not null").select(:training_id).uniq.map(&:training_id))
+  }
 
   scope :training, -> { where(as_assessment_type: "Assessment::Training") } do
     def retry_training
@@ -52,6 +59,7 @@ class Assessment < ActiveRecord::Base
       .where(:assessment_trainings => {:test => true})
     end
   end
+
 	scope :policy_mission, -> { where(as_assessment_type: "Assessment::PolicyMission") }
   scope :realtime_training, -> { where(as_assessment_type: "Assessment::RealtimeTraining") }
   scope :realtime_session_group, -> { where(as_assessment_type: "Assessment::RealtimeSessionGroup") }

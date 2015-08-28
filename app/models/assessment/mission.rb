@@ -19,10 +19,6 @@ class Assessment::Mission < ActiveRecord::Base
   has_many :realtime_session_groups, class_name: Assessment::RealtimeSessionGroup, foreign_key: :mission_id
   has_many :sessions, through: :realtime_session_groups
 
-  def used_as_realtime?
-    realtime_session_groups.count > 0
-  end
-
   def full_title
     "#{I18n.t('Assessment.Mission')} : #{self.title}"
   end

@@ -36,6 +36,7 @@ class Assessment < ActiveRecord::Base
              Assessment::RealtimeSessionGroup.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
     end
   end
+
   scope :without_rt_assessment, lambda { |course|
     where(" (assessments.as_assessment_type <> 'Assessment::Mission' and assessments.as_assessment_type <> 'Assessment::Training')or
             (assessments.as_assessment_type = 'Assessment::Mission' and assessments.as_assessment_id not in (?)) or
@@ -183,10 +184,6 @@ class Assessment < ActiveRecord::Base
     as_assessment_type == Assessment::PolicyMission.name
   end
 
-  def is_realtime_training?
-    as_assessment_type == Assessment::RealtimeTraining.name
-  end
-
   def is_realtime_session_group?
     as_assessment_type == Assessment::RealtimeSessionGroup.name
   end
@@ -194,6 +191,11 @@ class Assessment < ActiveRecord::Base
   def is_guidance_quiz?
     as_assessment_type == Assessment::GuidanceQuiz.name
   end
+
+  def used_as_realtime?
+    as_assessment.respond_to? (:realtime_session_groups) and as_assessment.realtime_session_groups.count > 0
+  end
+
 
   def getPolicyMission
     Assessment::PolicyMission.find(self.as_assessment_id)

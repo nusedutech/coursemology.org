@@ -187,17 +187,17 @@ class CourseAbility  < Ability
       can :students, Course
 
       can :manage, Assessment::Submission, std_course_id: user_course.id
-      #can :manage, Assessment::Submission do |sub|
-      #  sub.std_course_id == user_course.id || (sub.std_course_id.nil? and sub.group_stds.include?(user_course))
-      #end
+      can :read, Assessment::Submission do |sub|
+        sub.std_course_id.nil? and sub.group_stds.include?(user_course)
+      end
       can :manage, [Annotation, Comment], user_course_id: user_course.id
       can :manage, SurveySubmission, user_course_id: user_course.id
       can :manage, SurveyMrqAnswer, user_course_id: user_course.id
       can :manage, Assessment::Answer, std_course_id: user_course.id
-      can :read, Assessment::Grading, std_course_id: user_course.id
-      #can :read, Assessment::Grading do |grad|
-      #  grad.std_course_id == user_course.id || (grad.std_course_id.nil? and grad.submission.group_stds.include?(user_course))
-      #end
+      #can :read, Assessment::Grading, std_course_id: user_course.id
+      can :read, Assessment::Grading do |grad|
+        grad.std_course_id == user_course.id || (grad.std_course_id.nil? and grad.submission.group_stds.include?(user_course))
+      end
       can :read, ExpTransaction, user_course_id: user_course.id
 
       can :ignore, PendingAction, user_course: user_course

@@ -17,8 +17,8 @@
   <tr>
     <td><strong><%= "Team members" %>:</strong></td>
     <td>
-      <% if @student_seats %>
-          <% @student_seats.each do |st| %>
+      <% if student_seats %>
+          <% student_seats.each do |st| %>
             <p><%= st.student.name %></p>
           <% end %>
       <% end %>

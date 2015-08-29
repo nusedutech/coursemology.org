@@ -1,1 +1,21 @@
-<%= render partial: 'show_form' %>
+<%= render partial: 'header' %>
+
+<% if @ind_submission %>
+    <ul class="nav nav-tabs">
+      <li class="active"><a data-toggle="tab" href="#group_submission">Group Submission</a></li>
+      <li><a data-toggle="tab" href="#own_submission">Own Submission</a></li>
+    </ul>
+
+<div class="tab-content">
+    <div id="group_submission" class="tab-pane fade in active">
+<% end %>
+<%= render partial: 'show_form', locals: {submission: @submission} %>
+<% if @ind_submission %>
+    </div>
+<% end %>
+<% if @ind_submission %>
+    <div id="own_submission" class="tab-pane fade">
+      <%= render partial: 'show_form', locals: {submission: @ind_submission} %>
+    </div>
+</div>
+<% end %>

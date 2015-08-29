@@ -121,7 +121,8 @@ class Assessment::SubmissionsController < ApplicationController
     if params[:id] and params[:id].is_a? Numeric
       @submission = @assessment.submissions.send(:find, params[:id])
     elsif params[:action] == 'index'
-      @submissions = @assessment.submissions.accessible_by(current_ability)
+      @submissions = curr_user_course.is_student? ? @assessment.submissions.std_without_rt_individual(@course,curr_user_course) : @assessment.submissions.without_rt_individual(@course)
+      #@submissions = @assessment.submissions.accessible_by(current_ability)
     else
       @submission = @assessment.submissions.new
     end

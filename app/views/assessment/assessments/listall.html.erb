@@ -31,7 +31,7 @@
             <option value="0">Any</option>
             <% @summary[:staff].each do |stuff| %>
                 <option value="<%= stuff.id %>"
-                        <%= "selected" if stuff == @summary[:selected_stuff] %>>
+                        <%= "selected" if stuff == @summary[:selected_staff] %>>
                   <%= stuff.name %>
                 </option>
             <% end %>

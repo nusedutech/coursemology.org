@@ -155,6 +155,7 @@ class Assessment::GradingsController < ApplicationController
 
   def edit
     build_summary
+
   end
 
   def show
@@ -270,6 +271,11 @@ class Assessment::GradingsController < ApplicationController
       else
         @summary[:qn_ans][qn.id][:grade] = ag
       end
+    end
+
+    #View for real-time mission submission individual
+    if @assessment.realtime_session_groups.count > 0
+      @ind_submission = @curr_user_course.submissions.where(assessment_id: @assessment.id).last if @submission.group_stds.include? (@curr_user_course)
     end
   end
 end

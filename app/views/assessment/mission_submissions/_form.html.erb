@@ -61,7 +61,7 @@
                                   </textarea>
                               <% elsif question.class == Assessment::GeneralQuestion and answer != ta %>
                                   <p><strong><%= ta.std_course.name %>:</strong></p>
-                                  <%= style_format(ta.content) %>
+                                  <p><%= style_format(ta.content) %></p>
                               <% elsif question.class == Assessment::CodingQuestion %>
                                   <%=render partial: 'do_coding',
                                             locals: { answer: answer,

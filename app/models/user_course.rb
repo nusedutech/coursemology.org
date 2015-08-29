@@ -71,6 +71,10 @@ class UserCourse < ActiveRecord::Base
 
   default_scope includes(:course)
 
+  def self.seat_allocations
+    Assessment::RealtimeSeatAllocation.where(std_course_id: self.all)
+  end
+
   def is_student?
     self.role && self.role.name == 'student'
   end
@@ -246,6 +250,16 @@ class UserCourse < ActiveRecord::Base
       self.std_courses
     elsif self.is_lecturer?
       self.get_all_stds
+    else
+      []
+    end
+  end
+
+  def get_my_stds_group_sbms
+    if self.std_courses.size > 0
+      self.std_courses.seat_allocations.group(:team_submission_id).select(:team_submission_id).uniq.map(&:team_submission_id)
+    elsif self.is_lecturer?
+      self.get_all_stds.seat_allocations.group(:team_submission_id).select(:team_submission_id).uniq.map(&:team_submission_id)
     else
       []
     end

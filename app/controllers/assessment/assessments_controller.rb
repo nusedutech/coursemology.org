@@ -240,13 +240,17 @@ class Assessment::AssessmentsController < ApplicationController
     @summary[:stds] = @course.student_courses.order(:name)
     @summary[:staff] = @course.user_courses.staff
 
-    sbms = @summary[:selected_asm] ? @summary[:selected_asm].submissions : assessments.submissions
-    sbms = sbms.accessible_by(current_ability).where('status != ?','attempting').order(:submitted_at).reverse_order
+    #sbms = @summary[:selected_asm] ? @summary[:selected_asm].submissions : assessments.submissions
+    #sbms = sbms.accessible_by(current_ability).where('status != ?','attempting').order(:submitted_at).reverse_order
+    sbms = (@summary[:selected_asm] ? @summary[:selected_asm].submissions : assessments.submissions).where('status != ?','attempting')
+    sbms = curr_user_course.is_student? ? sbms.std_without_rt_individual(@course,curr_user_course) : sbms.without_rt_individual(@course)
+    sbms = sbms.order(:submitted_at).reverse_order
 
     if @summary[:selected_std]
       sbms = sbms.where(std_course_id: @summary[:selected_std])
     elsif @summary[:selected_staff]
-      sbms = sbms.where(std_course_id: @summary[:selected_staff].get_my_stds)
+      sbms = sbms.where("(std_course_id is not null and std_course_id in (?)) or (std_course_id is null and assessment_submissions.id in (?))",
+                        @summary[:selected_staff].get_my_stds, @summary[:selected_staff].get_my_stds_group_sbms)
     end
 
     if curr_user_course.is_student?

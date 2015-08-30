@@ -184,6 +184,10 @@ class Assessment < ActiveRecord::Base
     as_assessment_type == Assessment::PolicyMission.name
   end
 
+  def is_realtime_training?
+    as_assessment_type == Assessment::RealtimeTraining.name
+  end
+
   def is_realtime_session_group?
     as_assessment_type == Assessment::RealtimeSessionGroup.name
   end

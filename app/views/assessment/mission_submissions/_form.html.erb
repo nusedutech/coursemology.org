@@ -211,8 +211,21 @@
         </div>
 
         <br />
-
         <div id="uploaded_files_div"></div>
+
+        <% unless @assessment.comment_per_qn? %>
+            <input type="hidden" id="submission_url_<%= @submission.id %>" value="<%= course_assessment_submission_url(@course, @assessment, @submission) %>">
+            <div class="row">
+              <div class="span8">
+                <%= render partial: "comments/list",
+                           locals: { comments:  CommentTopic.comments_to_json(@submission.comment_topic, curr_user_course),
+                                     target:    @submission,
+                                     header:    "Comments",
+                                     ecid:      @submission.id,
+                                     margin_left: "0px"} %>
+              </div>
+            </div>
+        <% end %>
         <div class="form-actions">
 
           <%= f.submit 'Save', :class => 'btn btn-primary', id: "mission-save" %>

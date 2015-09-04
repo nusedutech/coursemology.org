@@ -10,28 +10,40 @@ class Assessment::RealtimeSessionsController < ApplicationController
   def finalize_grade_training
     #TODO: REFACRORING - update grade for all student on table
     #finalize all submission first
-    sms = @realtime_session.realtime_session_group.training.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
-    sms.each do |sm|
-      sm.update_grade
+    training = @realtime_session.realtime_session_group.training
+    sbms = training.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
+    sbms.each do |sbm|
+      sbm.update_grade
     end
+
     (1..@realtime_session.number_of_table).each_with_index do |t,i|
       session_students = @realtime_session.get_student_seats_by_table(t).has_student
       if session_students.count > 0
-        total_grade = 0
         sm_list = {}
-        no_sm_count = 0
+        session_students.map {|ss| ss.team_grade=0 }
 
-        #update team grade and exp
-        session_students.each do |ss|
-          sm = !ss.student.nil? ? ss.student.submissions.where(assessment_id: @realtime_session.realtime_session_group.training.assessment.id).last : nil
-          no_sm_count+=1 if sm.nil?
-          total_grade = total_grade + (sm.nil? ? 0 : (sm.gradings.last.nil? ? 0 : (sm.gradings.last.grade.nil? ? 0 : sm.gradings.last.grade)))
-          sm_list[ss.id] = sm
+        #update team grade separately
+        training.questions.each do |q|
+          sum_on_q = 0
+          std_answered = []
+          session_students.each do |ss|
+            sbm = !ss.student.nil? ? ss.student.submissions.where(assessment_id: training.assessment.id).last : nil
+            ans = sbm ? sbm.answers.where(question_id: q.id).last : nil
+            if ans
+              sm_list[ss.id] = sbm if sbm and sm_list[ss.id].nil?
+              std_answered << ss
+              sum_on_q += ans.answer_grading.grade if ans.answer_grading and ans.answer_grading.grade
+            end
+          end
+          session_students.each do |ss|
+            ss.team_grade += (sum_on_q/std_answered.count) if std_answered.include?(ss)
+            ss.save
+          end
         end
+
+        #add exp
         session_students.each do |ss|
           if !sm_list[ss.id].nil?
-            team_grade = total_grade/(session_students.count-no_sm_count)
-            ss.update_attribute(:team_grade, team_grade)
             asm = sm_list[ss.id].assessment
             grading = sm_list[ss.id].get_final_grading
             unless grading.exp_transaction
@@ -44,13 +56,12 @@ class Assessment::RealtimeSessionsController < ApplicationController
                                                               without_protection: true)
               grading.save
             end
-
-            grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : ((team_grade*25/100 + (grading.grade.nil? ? 0 : grading.grade)*75/100) || 0) * asm.exp / asm.max_grade
+            grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : ((ss.team_grade*25/100 + (grading.grade.nil? ? 0 : grading.grade)*75/100) || 0) * asm.exp / asm.max_grade
             grading.exp_transaction.save
           end
         end
-      end
 
+      end
     end
 
     #TODO: Check for Refactoring for performance (maybe use scope no submission in usercourse)

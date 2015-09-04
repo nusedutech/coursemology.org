@@ -282,7 +282,7 @@ class Assessment < ActiveRecord::Base
   end
 
   def update_max_grade
-    self.update_attribute(:max_grade, questions.sum(&:max_grade))
+    self.update_attribute(:max_grade, questions.sum{ |q| q.max_grade.to_f })
   end
 
   #TODO

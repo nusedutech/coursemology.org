@@ -160,7 +160,7 @@ class Assessment::Question < ActiveRecord::Base
   def update_assessment_grade
     puts "update grade", self.question_assessments.count
     self.question_assessments.each do |qa|
-      qa.assessment.update_grade
+      qa.assessment.update_max_grade
     end
   end
 

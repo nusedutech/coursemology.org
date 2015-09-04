@@ -86,7 +86,9 @@
               <%= link_to edit_course_material_file_path(@course, material), class: 'btn' do %>
                   <i class="icon-edit"></i>
               <% end %>
-              <%= render :partial => "layouts/delete_confirm", :locals => { :path_to_item => course_material_file_path(@course, material) } %>
+              <% if (can? :upload, @folder) %>
+                <%= render :partial => "layouts/delete_confirm", :locals => { :path_to_item => course_material_file_path(@course, material) } %>
+              <% end %>
           <% end %>
       <% end %>
     </div>

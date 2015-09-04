@@ -41,7 +41,11 @@ class UserCoursesController < ApplicationController
       tt.std_course = @user_course
       #tt.tut_course_id =  params[:tutor].first
       tt.group_id = params[:group][0].to_i
-      tt.save
+      #tt.save
+    end
+    if params[:group][0] and params[:group][0].to_i > 0
+      g = StudentGroup.find(params[:group][0].to_i)
+      tt.tut_course = g.tutor
     end
     tt.save
 

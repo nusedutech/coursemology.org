@@ -19,7 +19,7 @@ class QuestionAssessment < ActiveRecord::Base
   end
 
   def update_assessment_grade
-      assessment.update_grade
+      assessment.update_max_grade
   end
 
   def update_question_pos

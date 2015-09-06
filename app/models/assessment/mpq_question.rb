@@ -6,7 +6,7 @@ class Assessment::MpqQuestion < ActiveRecord::Base
   has_many :sub_questions, :through => :children, class_name: Assessment::Question, dependent: :destroy, :source => :child
 
   def update_max_grade
-    self.max_grade = sub_questions.sum(&:max_grade)
+    self.update_attribute(:max_grade, sub_questions.sum{ |q| q.max_grade.to_f })
   end
 
 end

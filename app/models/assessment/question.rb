@@ -20,7 +20,7 @@ class Assessment::Question < ActiveRecord::Base
   belongs_to  :course
   belongs_to  :creator, class_name: "User"
   belongs_to  :dependent_on, class_name: "Assessment::Question", foreign_key: "dependent_id"
-  has_one  :sub_question, class_name: Assessment::MpqSubQuestion, foreign_key: "child_id"
+  has_one  :sub_question, class_name: Assessment::MpqSubQuestion, foreign_key: "child_id", dependent: :destroy
   has_one  :parent, through: :sub_question, as: :parent
 
   #TODO, dependent: :destroy here
@@ -159,9 +159,15 @@ class Assessment::Question < ActiveRecord::Base
 
   def update_assessment_grade
     puts "update grade", self.question_assessments.count
-    self.question_assessments.each do |qa|
-      qa.assessment.update_max_grade
+    #check for sub question
+    if self.parent
+      self.parent.update_max_grade
+    else
+      self.question_assessments.each do |qa|
+        qa.assessment.update_max_grade
+      end
     end
+
   end
 
   def update_attempt_limit

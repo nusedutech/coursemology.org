@@ -143,12 +143,12 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
 
     clone.save
     new_link.save
-    to_asm.update_grade
+    to_asm.update_max_grade
 
     if is_move
       asm = asm_qn.asm
       asm_qn.destroy
-      asm.update_grade
+      asm.update_max_grade
       asm.update_qns_pos
     end
 

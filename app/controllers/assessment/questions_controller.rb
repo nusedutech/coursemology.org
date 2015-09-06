@@ -239,7 +239,6 @@ class Assessment::QuestionsController < ApplicationController
       qa = QuestionAssessment.find_by_assessment_id_and_question_id(@assessment.id, @question.question.id)
       if !qa.nil?
         qa.destroy
-        @assessment.update_max_grade if !@assessment.is_policy_mission?
       end
     else
       @question.destroy
@@ -249,11 +248,8 @@ class Assessment::QuestionsController < ApplicationController
         format.html { redirect_to url_for([@course, @assessment.as_assessment]),
                                 notice: "Question has been successfully deleted." }
       elsif !@parent_mpq_question.nil?
-        @parent_mpq_question.update_max_grade
-        if @parent_mpq_question.save
           format.html { redirect_to main_app.course_assessment_mpq_question_url(@course,@parent_mpq_question),
                                   notice: 'Question updated.'}
-        end
       else
         format.html { redirect_to main_app.course_assessment_questions_url(@course),
                                   notice: "Question has been successfully deleted." }

@@ -282,7 +282,7 @@ class Assessment < ActiveRecord::Base
   end
 
   def update_max_grade
-    self.update_attribute(:max_grade, questions.sum{ |q| q.max_grade.to_f })
+    self.update_attribute(:max_grade, questions.sum{ |q| q.max_grade.to_f }) if !self.is_policy_mission?
   end
 
   #TODO

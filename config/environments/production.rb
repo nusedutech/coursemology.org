@@ -105,7 +105,7 @@ Coursemology::Application.configure do
       :domain => "comp.nus.edu.sg",
       :user_name => "eduthsoc",
       :password => "hiepadmin",
-      :openssl_verify_mode  => 'none',
+      #:openssl_verify_mode  => 'none',
   }
 
   #Setting for paperclip with s3 - amazon cloud storage (Not used for local storage)

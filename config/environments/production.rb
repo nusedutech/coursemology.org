@@ -95,7 +95,7 @@ Coursemology::Application.configure do
 		:domain => ENV['GMAIL_SMTP_USER'],
 		:user_name => ENV['GMAIL_SMTP_USER'],
 		:password => ENV['GMAIL_SMTP_PASSWORD'],
-  # :openssl_verify_mode  => 'none',
+   :openssl_verify_mode  => 'none',
 	}
 
   #ActionMailer::Base.smtp_settings = {

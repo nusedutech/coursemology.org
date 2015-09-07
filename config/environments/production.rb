@@ -95,6 +95,7 @@ Coursemology::Application.configure do
 		:domain => ENV['GMAIL_SMTP_USER'],
 		:user_name => ENV['GMAIL_SMTP_USER'],
 		:password => ENV['GMAIL_SMTP_PASSWORD'],
+    :openssl_verify_mode  => 'none',
 	}
 	
   #Setting for paperclip with s3 - amazon cloud storage (Not used for local storage)

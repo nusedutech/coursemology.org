@@ -156,4 +156,9 @@ class UserMailer < ActionMailer::Base
     @body = body
     mail(to: email, subject: "[Coursemology] #{subject}")
   end
+
+  # Whoa! error has to be a class method!
+  def self.error(job, e)
+    puts "I can now handle test mailer errors in delayed job!!!! #{e}"
+  end
 end

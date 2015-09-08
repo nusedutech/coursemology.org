@@ -75,7 +75,7 @@ Coursemology::Application.configure do
   # Setup for production - deliveries, no errors raised
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.raise_delivery_errors = false
   config.action_mailer.default :charset => "utf-8"
   
   #Setting host mail MANDRILL
@@ -89,12 +89,12 @@ Coursemology::Application.configure do
   #}
   
 	ActionMailer::Base.smtp_settings = {
-		:address => "smtp.gmail.com",
-		:port => 587,
+		:address => "mailauth.comp.nus.edu.sg",
+		:port => 25,
 		:authentication => :plain,
-		:domain => ENV['GMAIL_SMTP_USER'],
-		:user_name => ENV['GMAIL_SMTP_USER'],
-		:password => ENV['GMAIL_SMTP_PASSWORD'],
+		:domain => ENV['SOC_DOMAIN'],
+		:user_name => ENV['SOC_USER'],
+		:password => ENV['SOC_PASSWORD'],
   # :openssl_verify_mode  => 'none',
 	}
 
@@ -112,7 +112,7 @@ Coursemology::Application.configure do
                         :email => {
                             :email_prefix => "[ERROR]",
                             :sender_address => %{"Coursemology Exception" <exception.notifier@coursemology.com>},
-                            :exception_recipients => "eduthsoc@comp.nus.edu.sg"
+                            :exception_recipients => "nusedutech@gmail.com"
                         }
 
   #ivle login, NUS openID login

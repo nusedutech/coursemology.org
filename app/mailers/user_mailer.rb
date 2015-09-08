@@ -60,6 +60,7 @@ class UserMailer < ActionMailer::Base
   def update_user_role(user)
     @user = user
     mail(to:user.email, subject: "You are now #{user.get_role} on Coursemology!")
+    Delayed::Worker.logger.debug("abcccccccccccccccccccccccccc") if Delayed::Worker.logger
   end
 
   def new_enroll_request(enroll_request, lecturer,redirect_url)
@@ -158,7 +159,8 @@ class UserMailer < ActionMailer::Base
   end
 
   # Whoa! error has to be a class method!
-  def self.error(job, e)
-    puts "I can now handle test mailer errors in delayed job!!!! #{e}"
+  def self.error(job, exception)
+    puts "I can now handle test mailer errors in delayed job!!!! #{exception}"
+    Delayed::Worker.logger.debug("#{exception}") if Delayed::Worker.logger
   end
 end

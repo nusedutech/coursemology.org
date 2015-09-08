@@ -112,4 +112,11 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
                                 notice: "Realtime Session Group '#{@realtime_session_group.title}' has been removed." }
     end
   end
+
+  def get_eligible_assessments
+    eligible_trainings = @course.trainings.not_test - @course.trainings.with_session_group
+    eligible_missions = @course.missions -  @course.missions.with_session_group
+    @training_collection = @realtime_session_group.training ? eligible_trainings.unshift(@realtime_session_group.training) : eligible_trainings
+    @mission_collection = @realtime_session_group.mission ? eligible_missions.unshift(@realtime_session_group.mission) : eligible_missions
+  end
 end

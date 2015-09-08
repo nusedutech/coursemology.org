@@ -95,18 +95,8 @@ Coursemology::Application.configure do
 		:domain => ENV['GMAIL_SMTP_USER'],
 		:user_name => ENV['GMAIL_SMTP_USER'],
 		:password => ENV['GMAIL_SMTP_PASSWORD'],
-   :openssl_verify_mode  => 'none',
+  # :openssl_verify_mode  => 'none',
 	}
-
-  #ActionMailer::Base.smtp_settings = {
-  #    :address => "mailauth.comp.nus.edu.sg",
-  #    :port => 25,
-  #    :authentication => :plain,
-  #    :domain => "comp.nus.edu.sg",
-  #    :user_name => "eduthsoc",
-  #    :password => "hiepadmin",
-      #:openssl_verify_mode  => 'none',
-  #}
 
   #Setting for paperclip with s3 - amazon cloud storage (Not used for local storage)
   #config.paperclip_defaults = {

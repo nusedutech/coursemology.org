@@ -6,7 +6,9 @@ class EnrollRequestsController < ApplicationController
 
   def index
 
-    UserMailer.new_enroll_request(EnrollRequest.find(386),User.find(764),"http://edutech.comp.nus.edu.sg/courses/1/enroll_requests").deliver
+    #UserMailer.new_enroll_request(EnrollRequest.find(386),User.find(764),"http://edutech.comp.nus.edu.sg/courses/1/enroll_requests").deliver
+    UserMailer.update_user_role(current_user).deliver#test
+
     # only staff should be able to access this page
     # here staff can approve student to enroll to a class
     @staff_requests = []

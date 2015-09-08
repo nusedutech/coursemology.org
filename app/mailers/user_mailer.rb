@@ -69,7 +69,7 @@ class UserMailer < ActionMailer::Base
     @user = enroll_request.user
     @lecturer = lecturer
     @redirect_url = redirect_url
-    mail(to:lecturer.email, subject: "New enroll request for your course on Coursemology")
+    mail(to:lecturer.email, subject: "New enroll request for your course on Coursemology").deliver
     Delayed::Worker.logger.debug("12333333333333333333333") if Delayed::Worker.logger
   end
 

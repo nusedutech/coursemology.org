@@ -31,8 +31,7 @@ class Assessment < ActiveRecord::Base
   scope :exclude_guidance_quiz, -> { where("as_assessment_type != ?", "Assessment::GuidanceQuiz") }
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") } do
     def mission_without_realtime
-      joins("INNER JOIN assessment_missions ON assessments.as_assessment_id = assessment_missions.id")
-      .where("assessment_missions.id not in (?)",
+      where("assessments.as_assessment_id not in (?)",
              Assessment::RealtimeSessionGroup.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
     end
   end

@@ -17,8 +17,9 @@ class Assessment::Training < ActiveRecord::Base
   validates_with DateValidator, fields: [:open_at, :bonus_cutoff_at]
 
   scope :not_test, -> { where("test is null or test = 0") }
-  scope :with_session_group, -> { joins(:realtime_session_groups).where("assessment_realtime_session_groups.deleted_at is null") }
-  #scope :without_session_group, -> { includes(:realtime_session_groups).where("assessment_realtime_session_groups.deleted_at is null and assessment_realtime_session_groups.id is null") }
+  scope :without_session_group, lambda { |course| where("assessment_trainings.id not in (?)",
+         course.realtime_session_groups.where("training_id is not null").select(:training_id).uniq.map(&:training_id))}
+
 
   has_many :realtime_session_groups, class_name: Assessment::RealtimeSessionGroup, foreign_key: :training_id
   has_many :sessions, through: :realtime_session_groups

@@ -4,13 +4,11 @@
                     defaults: { input_html: { class: 'span7' } } do |f| %>
     <%= f.input :title %>
     <%= f.input :description, as: :text, input_html:{class: "span7 text-area html-editor", rows:10}  %>
-    <%- eligible_trainings = @course.trainings.not_test - @course.trainings.with_session_group %>
-    <%- training_collection = @realtime_session_group.training ? eligible_trainings.unshift(@realtime_session_group.training) : eligible_trainings %>
     <%= f.association :training,
-                      collection: training_collection,
+                      collection: @training_collection,
                       input_html: {class: "input-large"}, include_blank: true %>
     <%= f.association :mission,
-                      collection: @course.missions,
+                      collection: @mission_collection,
                       input_html: {class: "input-large"}, include_blank: true %>
     <%= f.input :open_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
     <%= f.input :close_at, as: :datetime_picker, input_html: {class: "input-medium"} %>

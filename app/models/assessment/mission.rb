@@ -16,8 +16,10 @@ class Assessment::Mission < ActiveRecord::Base
   #TODO
   validates_with DateValidator, fields: [:open_at, :close_at]
 
-  scope :with_session_group, -> { joins(:realtime_session_groups).where("assessment_realtime_session_groups.deleted_at is null") }
-  
+  scope :without_session_group, lambda { |course| where("assessment_missions.id not in (?)",
+             course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))}
+
+
   has_many :realtime_session_groups, class_name: Assessment::RealtimeSessionGroup, foreign_key: :mission_id
   has_many :sessions, through: :realtime_session_groups
 

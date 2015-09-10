@@ -34,6 +34,7 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
       @realtime_session_group.sessions.new(student_group_id: g.id, number_of_table: 1, seat_per_table: 1)
     end
 
+    get_eligible_assessments
     @asm_tags = {}
   end
 
@@ -70,6 +71,7 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
         @realtime_session_group.sessions.new(student_group_id: g.id, number_of_table: 1, seat_per_table: 1)
       end
     end
+    get_eligible_assessments
   end
 
   def update
@@ -114,8 +116,8 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
   end
 
   def get_eligible_assessments
-    eligible_trainings = @course.trainings.not_test - @course.trainings.with_session_group
-    eligible_missions = @course.missions -  @course.missions.with_session_group
+    eligible_trainings = @course.trainings.not_test.without_session_group(@course)
+    eligible_missions = @course.missions.without_session_group(@course)
     @training_collection = @realtime_session_group.training ? eligible_trainings.unshift(@realtime_session_group.training) : eligible_trainings
     @mission_collection = @realtime_session_group.mission ? eligible_missions.unshift(@realtime_session_group.mission) : eligible_missions
   end

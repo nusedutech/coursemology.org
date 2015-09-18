@@ -33,7 +33,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     #process for realtime session training
     if @training.realtime_session_groups.count > 0
       #check student's realtime training session started
-      session = @training.sessions.include_std(curr_user_course).started.first
+      session = @training.sessions.include_std(curr_user_course).started.last
       if session.nil?
          redirect_to course_assessment_realtime_session_groups_path,
                       flash: { error: "The session is closed OR you are not allocated a seat."}

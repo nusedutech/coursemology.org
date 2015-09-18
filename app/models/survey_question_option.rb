@@ -29,7 +29,7 @@ class SurveyQuestionOption < ActiveRecord::Base
     if include_phantom
       count
     else
-      answers.includes(:user_course).where("user_courses.is_phantom = 0 and user_courses.role_id = 5").count
+      answers.includes(:user_course).where("(user_courses.is_phantom = 0 and user_courses.role_id = 5) or user_courses.id is null").count
     end
   end
 end

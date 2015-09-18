@@ -32,12 +32,12 @@ class SurveySubmission < ActiveRecord::Base
       pending_action = user_course.pending_actions.where(item_type: Survey.to_s, item_id: self.survey.id).first
       pending_action.set_done if pending_action
     end
-    if !submitted? and survey.exp.to_i > 0
+    if !submitted? and (survey.anonymous or survey.exp.to_i >= 0)
       self.exp_transaction = ExpTransaction.new
       self.exp_transaction.user_course = self.user_course
       self.exp_transaction.reason = "Exp for #{survey.title}"
       self.exp_transaction.is_valid = true
-      self.exp_transaction.exp = survey.exp
+      self.exp_transaction.exp = survey.exp ? survey.exp : 0
       self.exp_transaction.rewardable = survey
       self.save
       self.exp_transaction.update_user_data
@@ -46,6 +46,7 @@ class SurveySubmission < ActiveRecord::Base
     self.status = 'submitted'
     self.submitted_at = Time.now
     self.save
+    self.make_anonymmous if survey.anonymous and self.user_course.is_real_student?
   end
 
   def started?
@@ -58,5 +59,12 @@ class SurveySubmission < ActiveRecord::Base
 
   def done?
     (self.current_qn || 1) > self.survey.survey_questions.count
+  end
+
+  def make_anonymmous
+    (survey_mrq_answers.to_a + survey_essay_answers.to_a).each do |ans|
+      ans.update_attribute(:user_course_id,nil)
+    end
+    self.update_attribute(:user_course_id,nil)
   end
 end

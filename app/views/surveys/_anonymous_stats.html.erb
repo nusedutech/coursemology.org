@@ -1,0 +1,23 @@
+<span class="pull-right">Number of responses: <strong><%= "#{submissions.count}" %><%= "/#{@course.user_courses.real_students.count}" %></strong></span>
+<table class="table">
+  <thead>
+  <th style="width: 50%">No.</th>
+  <th >Status</th>
+  <th>Progress</th>
+  </thead>
+  <tbody>
+  <% submissions.each_with_index do |sub, index| %>
+      <tr>
+        <% if sub %>
+            <td> <a href="<%= course_survey_survey_submission_path(@course, @survey, sub) %>">  <%= (index+1) %> </a> </td>
+        <% else %>
+            <td><%= (index+1) %></td>
+        <% end %>
+
+        <td><%= sub ? sub.status.capitalize : '<span class="not-started">Not Started</span>'.html_safe %></td>
+        <td><%= sub ? (sub.current_qn || 0) : 0 %>/ <%= no_qn %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+

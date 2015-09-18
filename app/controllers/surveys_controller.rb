@@ -15,13 +15,14 @@ class SurveysController < ApplicationController
       @stats = {}
       total = @course.user_courses.real_students.count
       @surveys.each do |survey|
-        sub = survey.submissions.select {|s| s.user_course and s.user_course.is_student? and !s.user_course.is_phantom? }.count
+        sub = survey.submissions.select {|s| !s.user_course or (s.user_course and s.user_course.is_real_student?)}.count
         @stats[survey] = {started: sub, total: total}
       end
     end
   end
 
   def new
+    @survey.exp = 0
     @survey.open_at =  DateTime.now.beginning_of_day + 1.day
     @survey.expire_at = DateTime.now.beginning_of_day + 8.days
     @survey.creator = current_user
@@ -61,7 +62,7 @@ class SurveysController < ApplicationController
     @tab = "stats"
     @submissions = @survey.submissions.all
     @staff_courses = @course.user_courses.staff.order(:name)
-    @std_courses = @course.user_courses.student.order(:name).where(is_phantom: false)
+    @std_courses = @course.user_courses.student.order(:name).where(is_phantom: false) if !@survey.anonymous
     @std_courses_phantom = @course.user_courses.student.order(:name).where(is_phantom: true)
   end
 

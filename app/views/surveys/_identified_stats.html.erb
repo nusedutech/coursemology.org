@@ -1,0 +1,22 @@
+<table class="table">
+  <thead>
+  <th style="width: 50%">Name</th>
+  <th >Status</th>
+  <th>Progress</th>
+  </thead>
+  <tbody>
+  <% user_courses.each do |std| %>
+      <% sub = @submissions.select {|sub| sub.user_course == std }.first %>
+      <tr>
+        <% if sub %>
+            <td> <a href="<%= course_survey_survey_submission_path(@course, @survey, sub) %>">  <%= std.name %> </a> </td>
+        <% else %>
+            <td><%= std.name %></td>
+        <% end %>
+        <% has_exp = @survey.exp_by(std.id) %>
+        <td><%= sub ? sub.status.capitalize : ( has_exp ? 'Done' : '<span class="not-started">Not Started</span>'.html_safe) %></td>
+        <td><%= sub ? (sub.current_qn || 0) : 0 %>/ <%= no_qn %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>

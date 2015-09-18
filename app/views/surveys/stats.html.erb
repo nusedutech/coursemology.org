@@ -4,37 +4,14 @@
 
 <%= render partial: "nav_bar" %>
 <% no_qn = @survey.survey_questions.count %>
+
+<% titles = ["Staff","All Students","Phantom Students"] %>
 <% [@staff_courses, @std_courses, @std_courses_phantom].each_with_index do |user_courses, index| %>
-    <% case index  %>
-    <% when 0 %>
-        <h3>Staff</h3>
-    <% when 1 %>
-        <h3>All Students</h3>
-    <% when 2 %>
-        <h3>Phantom Students </h3>
+    <h3><%= titles[index]%></h3>
+    <% if index == 0 or (index == 1 and !@survey.anonymous) or index == 2 %>
+        <%= render partial: "identified_stats",:locals => { :no_qn => no_qn, :user_courses => user_courses } %>
+    <% elsif index == 1 and @survey.anonymous %>
+        <%= render partial: "anonymous_stats",:locals => { :no_qn => no_qn, :submissions => @submissions.select{ |s| !s.user_course or (s.user_course and s.user_course.is_real_student?) } } %>
     <% end %>
 
-    <table class="table">
-      <thead>
-      <th style="width: 50%">Name</th>
-      <th >Status</th>
-      <th>Progress</th>
-      </thead>
-      <tbody>
-      <% user_courses.each do |std| %>
-          <% sub = @submissions.select {|sub| sub.user_course == std }.first %>
-          <tr>
-            <% if sub %>
-                <td> <a href="<%= course_survey_survey_submission_path(@course, @survey, sub) %>">  <%= std.name %> </a> </td>
-            <% else %>
-                <td><%= std.name %></td>
-            <% end %>
-
-            <td><%= sub ? sub.status.capitalize : '<span class="not-started">Not Started</span>'.html_safe %></td>
-            <td><%= sub ? (sub.current_qn || 0) : 0 %>/ <%= no_qn %></td>
-          </tr>
-      <% end %>
-      </tbody>
-    </table>
 <% end %>
-

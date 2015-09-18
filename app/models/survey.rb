@@ -17,6 +17,7 @@ class Survey < ActiveRecord::Base
   has_many :survey_submissions, class_name: "SurveySubmission", dependent: :destroy
   has_many :pending_actions, as: :item, dependent: :destroy
   has_many :queued_jobs, as: :owner, class_name: "QueuedJob", dependent: :destroy
+  has_many :exp_transactions, as: :rewardable, class_name: "ExpTransaction"
 
   amoeba do
     include_field :survey_sections
@@ -47,6 +48,10 @@ class Survey < ActiveRecord::Base
 
   def submission_by(user_course)
     self.submissions.where(user_course_id: user_course).first
+  end
+
+  def exp_by(user_course)
+    self.exp_transactions.where(user_course_id: user_course).first
   end
 
   def sections

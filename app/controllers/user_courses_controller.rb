@@ -32,22 +32,7 @@ class UserCoursesController < ApplicationController
     if params[:email]
       @user_course.user.email = params[:email].strip
     end
-
-    tt = TutorialGroup.where(:std_course_id => @user_course.id).first
-    if tt
-      tt.group_id = params[:group][0].to_i
-    else
-      tt = @course.tutorial_groups.build
-      tt.std_course = @user_course
-      #tt.tut_course_id =  params[:tutor].first
-      tt.group_id = params[:group][0].to_i
-      #tt.save
-    end
-    if params[:group][0] and params[:group][0].to_i > 0
-      g = StudentGroup.find(params[:group][0].to_i)
-      tt.tut_course = g.tutor
-    end
-    tt.save
+    assign_group_tut
 
     @user_course.is_phantom =  params[:is_phantom] || false
 
@@ -95,6 +80,20 @@ class UserCoursesController < ApplicationController
   end
 
   private
+
+  def assign_group_tut
+    if params[:group][0]
+      tt = TutorialGroup.where(:std_course_id => @user_course.id).first
+      if !tt
+        tt = @course.tutorial_groups.build
+        tt.std_course = @user_course
+      end
+      tt.group_id = params[:group][0].to_i
+      g = params[:group][0].to_i > 0 ? StudentGroup.find(params[:group][0].to_i) : nil
+      tt.tut_course = g ? g.tutor : nil
+      tt.save
+    end
+  end
 
   def tut_group_assign
     #invalid

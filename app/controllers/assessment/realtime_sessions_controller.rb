@@ -28,7 +28,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
           std_answered = []
           session_students.each do |ss|
             sbm = !ss.student.nil? ? ss.student.submissions.where(assessment_id: training.assessment.id).last : nil
-            ans = sbm ? sbm.answers.where(question_id: q.id).last : nil
+            ans = sbm ? sbm.answers.select{|an| an.question==q and an.answer_grading }.last : nil
             if ans
               sm_list[ss.id] = sbm if sbm and sm_list[ss.id].nil?
               std_answered << ss

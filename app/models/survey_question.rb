@@ -34,6 +34,12 @@ class SurveyQuestion < ActiveRecord::Base
         self.survey_mrq_answers.where(user_course_id: user_course)
   end
 
+  def answer_for_submission(sub)
+    is_essay? ?
+        self.survey_essay_answers.where(survey_submission_id: sub).first :
+        self.survey_mrq_answers.where(survey_submission_id: sub)
+  end
+
   def essay_answers(include_phantom = true)
     include_phantom ? survey_essay_answers : survey_essay_answers.includes(:user_course).where("(user_courses.is_phantom = 0 and user_courses.role_id = 5) or user_courses.id is null")
   end

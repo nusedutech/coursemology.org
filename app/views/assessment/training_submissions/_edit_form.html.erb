@@ -169,8 +169,9 @@
                  value="<%= submit_course_assessment_submission_path(@course, @assessment, @submission) %>" />
           <input type="hidden" name="qid" value="<%= @summary[:current].question.id %>" />
 
+          <% done = (@assessment.as_assessment.test and (@summary[:finalised].include? @summary[:current].question)) %>
           <% if @summary[:current].class == Assessment::McqQuestion %>
-              <%= render partial:"assessment/training_submissions/do_mcq", locals: {mcq: @summary[:current]} %>
+              <%= render partial:"assessment/training_submissions/do_mcq", locals: {mcq: @summary[:current], done: done} %>
           <% elsif @summary[:current].class == Assessment::CodingQuestion %>
               <%= render partial:"assessment/training_submissions/do_coding", locals: {question: @summary[:current], prefilled: @summary[:prefilled]} %>
           <% end %>

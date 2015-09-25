@@ -12,11 +12,10 @@
     <% end %>
     <%= f.input :bonus_exp, as: :integer, input_html: {class: "number_field input-medium"} %>
     <%= f.input :bonus_cutoff_at, as: :datetime_picker, input_html: {class: "input-medium"} %>
-    <% if !@test_flag and !@training.test %>
-        <%= f.input :skippable, as: :boolean, label: "Allow skip?",
+    <%= f.input :skippable, as: :boolean, label: "Allow skip?",
                 input_html: {class: ""},
                 inline_label:"Check to allow students to skip steps"%>
-    <% else %>
+    <% if @test_flag or @training.test %>
         <%= f.input :duration, as: :integer, input_html: {class: "number_field input-medium"}  %>
     <% end %>
     <%= f.input :show_solution_after_close, as: :boolean, label: "Solution after close?",

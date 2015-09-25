@@ -3,13 +3,17 @@
 <% if mcq.select_all %>
   <p style="margin-left: 15px">* Select all correct answers</p>
 <% end %>
+
 <ul>
+  <% done = (!(defined? done).nil? and done) %>
+  <% answer = mcq.mcq_answers(std_course_id: @submission.std_course, submission_id: @submission.id).first if done %>
   <% mcq.options.each do |opt| %>
+      <% attr = "#{"disabled" if done} #{"checked" if done and answer and answer.options.include? opt}"%>
       <li class="checkbox-text">
         <% if mcq.select_all %>
-          <input class="choices" type="checkbox" name="answers[]" value="<%= opt.id %>" id="value=<%= opt.id %>"/>
+          <input class="choices" <%= attr if done %> type="checkbox" name="answers[]" value="<%= opt.id %>" id="value=<%= opt.id %>"/>
         <% else %>
-          <input class="choices" type="radio" name="answers" value="<%= opt.id %>" id="value=<%= opt.id %>"/>
+          <input class="choices" <%= attr if done %> type="radio" name="answers" value="<%= opt.id %>" id="value=<%= opt.id %>"/>
         <% end %>
         <label for="value=<%= opt.id %>"> <%= style_format(opt.text) %></label>
       </li>

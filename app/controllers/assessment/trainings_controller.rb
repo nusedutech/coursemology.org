@@ -29,6 +29,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     @training.open_at = DateTime.now.beginning_of_day
     @training.bonus_exp = 0
     @training.bonus_cutoff_at = DateTime.now.beginning_of_day + 1
+    @training.duration = 0 if @test_flag
     @tags = @course.tags
     @asm_tags = {}
   end
@@ -37,7 +38,7 @@ class Assessment::TrainingsController < Assessment::AssessmentsController
     @training.position = @course.trainings.count + 1
     @training.creator = current_user
     @training.course_id = @course.id
-    @training.test = @training.skippable.nil? ? true : false
+    @training.test = @training.duration ? true : false
     @training.duration = @training.duration.nil? ? 0 : @training.duration
     if params[:files]
       @training.attach_files(params[:files].values)

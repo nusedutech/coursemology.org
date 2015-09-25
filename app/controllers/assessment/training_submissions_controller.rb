@@ -79,12 +79,17 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
       current =  (questions - finalised).first
       next_undone = (questions.index(current) || questions.length) + 1
 
+      request_step = (params[:step] || next_undone).to_i
+      step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
+      step = step > questions.length ? next_undone : step
+      current = step > questions.length ? current : questions[step - 1]
+
       if @training.test #test - one kind of training - do one question once
         #process next question
         if @assessment.duration == 0
-          step = next_undone
+          #step = next_undone
         elsif ((DateTime.now - @submission.created_at.to_datetime) * 24 * 60 * 60).to_i < @assessment.duration * 60
-          step = next_undone
+          #step = next_undone
           if flash[:attempt_flag] and @submission.answers.count == 0
             remain_time = @assessment.duration * 60
             flash[:attempt_flag] = nil
@@ -97,11 +102,6 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
             @submission.update_grade
           end
         end
-      else # normal training - old training
-        request_step = (params[:step] || next_undone).to_i
-        step = (curr_user_course.is_staff? || @training.skippable?) ? request_step : [next_undone , request_step].min
-        step = step > questions.length ? next_undone : step
-        current = step > questions.length ? current : questions[step - 1]
       end
 
       current = current.specific if current

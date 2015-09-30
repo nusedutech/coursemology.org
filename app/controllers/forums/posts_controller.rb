@@ -1,4 +1,6 @@
 class Forums::PostsController < ApplicationController
+  protect_from_forgery only: :set_vote
+
   load_and_authorize_resource :course
   before_filter :load_general_course_data, only: [:reply, :edit]
 

@@ -3,7 +3,7 @@ class PythonEvaluator
   require 'open3'
 
   def self.get_asm_file_path(assign)
-    "#{Rails.root}/public/#{assign.class.to_s}/#{assign.id}/files/"
+    "#{Rails.root}/#{assign.class.to_s}/#{assign.id}/files/"
   end
 
   def self.get_exec_path

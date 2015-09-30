@@ -286,8 +286,8 @@ class Assessment::AssessmentsController < ApplicationController
     file = FileUpload.find_by_id(params[:file_id].to_i)
 
     #send_file "#{Rails.root}/#{file.file_url}",
-    send_file "#{Rails.root}/public/Assessment/#{params[:id]}/files/#{file.original_name}",
-              :filename => params[:filename],
+    send_file "#{Rails.root}#{file.file_url.split('?')[0]}",
+              :filename => file.original_name,
               :type => file.file_content_type
   end
 

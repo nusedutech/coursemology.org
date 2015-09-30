@@ -145,7 +145,7 @@ class MaterialsController < ApplicationController
     end
 
     #redirect_to material.file.file_url
-    send_file "#{Rails.root}/Material/files/#{material.file.original_name}",
+    send_file "#{Rails.root}#{material.file.file_url.split('?')[0]}",
                 :filename => material.file.original_name,
                 :disposition => 'inline',
                 :type => material.file.file_content_type

@@ -32,7 +32,7 @@ class Assessment < ActiveRecord::Base
   scope :mission, -> { where(as_assessment_type: "Assessment::Mission") } do
     def mission_without_realtime
       where("assessments.as_assessment_id not in (?)",
-             Assessment::RealtimeSessionGroup.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
+             Assessment::RealtimeSessionGroup.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id) || [])
     end
   end
 
@@ -52,7 +52,7 @@ class Assessment < ActiveRecord::Base
     def retry_training_without_realtime
       joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")
       .where("(assessment_trainings.test is null or assessment_trainings.test = 0) and assessment_trainings.id not in (?)",
-             Assessment::RealtimeSessionGroup.where("training_id is not null").select(:training_id).uniq.map(&:training_id))
+             Assessment::RealtimeSessionGroup.where("training_id is not null").select(:training_id).uniq.map(&:training_id) || [])
     end
     def test
       joins("INNER JOIN assessment_trainings ON assessments.as_assessment_id = assessment_trainings.id")

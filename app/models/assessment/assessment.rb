@@ -40,8 +40,8 @@ class Assessment < ActiveRecord::Base
     where(" (assessments.as_assessment_type <> 'Assessment::Mission' and assessments.as_assessment_type <> 'Assessment::Training')or
             (assessments.as_assessment_type = 'Assessment::Mission' and assessments.as_assessment_id not in (?)) or
             (assessments.as_assessment_type = 'Assessment::Training' and assessments.as_assessment_id not in (?))",
-           course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id),
-           course.realtime_session_groups.where("training_id is not null").select(:training_id).uniq.map(&:training_id))
+           course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id).push(0),
+           course.realtime_session_groups.where("training_id is not null").select(:training_id).uniq.map(&:training_id).push(0))
   }
 
   scope :training, -> { where(as_assessment_type: "Assessment::Training") } do

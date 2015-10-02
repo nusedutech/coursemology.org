@@ -1,6 +1,6 @@
 class Assessment::AssessmentsController < ApplicationController
   load_and_authorize_resource :course
-  load_and_authorize_resource :assessment, only: [:reorder, :stats, :access_denied]
+  load_and_authorize_resource :assessment, only: [:reorder, :stats, :access_denied, :download_file]
   before_filter :load_general_course_data, only: [:show, :index, :new, :edit, :access_denied, :stats, :overview, :listall]
 
   def index
@@ -283,10 +283,10 @@ class Assessment::AssessmentsController < ApplicationController
 
   def download_file
     #redirect_to material.file.file_url
-    file = FileUpload.find_by_id(params[:file_id].to_i)
+    file = @assessment.files.find_by_id(params[:file_id].to_i)
 
     #send_file "#{Rails.root}/#{file.file_url}",
-    send_file "#{Rails.root}#{file.file_url.split('?')[0]}",
+    send_file "#{Rails.root}/public#{file.file_url.split('?')[0]}",
               :filename => file.original_name,
               :type => file.file_content_type
   end

@@ -152,6 +152,7 @@ class CourseAbility  < Ability
 
       can :read, Assessment, published: true
       can :access_denied, Assessment
+      can :download_file, Assessment, course_id: user_course.course_id
       can :read, [Assessment::Mission, Assessment::Training, Assessment::PolicyMission, Assessment::RealtimeTraining], assessment: {published: true}
       can :answer_sheet, Assessment::PolicyMission
       can :read, Survey, publish: true

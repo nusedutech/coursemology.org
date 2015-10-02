@@ -11,14 +11,14 @@ class Assessment::Submission < ActiveRecord::Base
     def without_rt_individual(course)
       where("assessment_submissions.std_course_id is null or assessments.as_assessment_type <> 'Assessment::Mission' or
             (assessments.as_assessment_type = 'Assessment::Mission' and assessment_submissions.std_course_id is not null and assessments.as_assessment_id not in (?))",
-             course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
+             course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id).push(0))
     end
     def std_without_rt_individual(course,std)
       where("(assessment_submissions.std_course_id is null and assessment_submissions.id in (?)) or
             (assessments.as_assessment_type <> 'Assessment::Mission' and assessment_submissions.std_course_id = (?)) or
             (assessments.as_assessment_type = 'Assessment::Mission' and assessment_submissions.std_course_id = (?) and assessments.as_assessment_id not in (?))",
-          Assessment::RealtimeSeatAllocation.where(std_course_id: std.id).select(:team_submission_id).uniq.map(&:team_submission_id),
-          std.id,std.id, course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
+          Assessment::RealtimeSeatAllocation.where(std_course_id: std.id).select(:team_submission_id).uniq.map(&:team_submission_id).push(0),
+          std.id,std.id, course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id).push(0))
     end
   end
 
@@ -48,7 +48,7 @@ class Assessment::Submission < ActiveRecord::Base
     joins("inner join assessments on assessment_submissions.assessment_id = assessments.id ").
         where("assessment_submissions.std_course_id is null or assessments.as_assessment_type <> 'Assessment::Mission' or
             (assessments.as_assessment_type = 'Assessment::Mission' and assessment_submissions.std_course_id is not null and assessments.as_assessment_id not in (?))",
-              course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
+              course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id).push(0))
     }
 
   scope :std_without_rt_individual, lambda { |course,std|
@@ -56,8 +56,8 @@ class Assessment::Submission < ActiveRecord::Base
         where("(assessment_submissions.std_course_id is null and assessment_submissions.id in (?)) or
             (asm.as_assessment_type <> 'Assessment::Mission' and assessment_submissions.std_course_id = (?)) or
             (asm.as_assessment_type = 'Assessment::Mission' and assessment_submissions.std_course_id = (?) and asm.as_assessment_id not in (?))",
-              Assessment::RealtimeSeatAllocation.where(std_course_id: std.id).select(:team_submission_id).uniq.map(&:team_submission_id),
-              std.id,std.id, course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id))
+              Assessment::RealtimeSeatAllocation.where(std_course_id: std.id).select(:team_submission_id).uniq.map(&:team_submission_id).push(0),
+              std.id,std.id, course.realtime_session_groups.where("mission_id is not null").select(:mission_id).uniq.map(&:mission_id).push(0))
   }
 
   belongs_to :assessment

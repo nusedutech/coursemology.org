@@ -18,7 +18,7 @@ class Assessment::Training < ActiveRecord::Base
 
   scope :not_test, -> { where("test is null or test = 0") }
   scope :without_session_group, lambda { |course| where("assessment_trainings.id not in (?)",
-         course.realtime_session_groups.where("training_id is not null").select(:training_id).uniq.map(&:training_id))}
+         course.realtime_session_groups.where("training_id is not null").select(:training_id).uniq.map(&:training_id).push(0))}
 
 
   has_many :realtime_session_groups, class_name: Assessment::RealtimeSessionGroup, foreign_key: :training_id

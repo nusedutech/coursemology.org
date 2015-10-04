@@ -14,6 +14,10 @@ class Assessment::PolicyMission < ActiveRecord::Base
   has_one :forward_policy, class_name: "Assessment::ForwardPolicy", through: :progression_policy,
           source: :as_progression_policy, source_type: "Assessment::ForwardPolicy"
 
+  amoeba do
+    include_field [:forward_policy]
+  end
+
   def multipleAttempts?
     self.multiple_submissions
   end

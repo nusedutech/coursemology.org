@@ -6,6 +6,9 @@ class Assessment::ForwardPolicy < ActiveRecord::Base
 
 	has_many	:forward_policy_levels, class_name: "Assessment::ForwardPolicyLevel", dependent: :destroy, foreign_key: :forward_policy_id
 
+  amoeba do
+    include_field [:forward_policy_levels]
+  end
 
 	def getSortedPolicyLevels
 		self.forward_policy_levels.order("assessment_forward_policy_levels.order")

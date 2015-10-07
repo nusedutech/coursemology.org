@@ -117,7 +117,7 @@ class Course < ActiveRecord::Base
       group_subms.uniq+ind_subms
     else
       ind_subms = assessments.mission.mission_without_realtime.submissions.where(status:"submitted",std_course_id:curr_user_course.get_my_stds).order(:submitted_at)
-      group_subms = submissions_by_asms.where(status: "generated").group_submissions_stds(curr_user_course.get_my_stds).order(:submitted_at)
+      group_subms = submissions_by_asms.where(status: "generated").group_submissions_stds(curr_user_course.student_groups).order(:submitted_at)
       group_subms.uniq+ind_subms
     end
   end

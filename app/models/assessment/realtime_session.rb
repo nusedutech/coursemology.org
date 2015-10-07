@@ -8,6 +8,8 @@ class Assessment::RealtimeSession < ActiveRecord::Base
 
   belongs_to :realtime_session_group, class_name: Assessment::RealtimeSessionGroup, foreign_key: :session_group_id
   belongs_to :student_group
+  delegate :tutor, :to => :student_group
+
   has_many :students, through: :student_group
 
   has_many :student_seats, class_name: Assessment::RealtimeSeatAllocation, foreign_key: :session_id, dependent: :destroy

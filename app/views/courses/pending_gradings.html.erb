@@ -20,7 +20,7 @@
         <td><%= link_to sub.assessment.get_title, sub.assessment.get_path %></td>
         <td><%= datetime_format sub.submitted_at %> </td>
         <td>
-          <%= sub.std_course ? sub.std_course.get_my_tutor_name : (sub.group_stds.first.get_my_tutor_name if sub.group_stds.count > 0) %>
+          <%= sub.std_course ? sub.std_course.get_my_tutor_name : sub.get_group_sub_tutor %>
         </td>
         <% if can? :manage, Assessment::Grading %>
 

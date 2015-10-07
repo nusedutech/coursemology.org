@@ -40,9 +40,10 @@ class Assessment::Submission < ActiveRecord::Base
   scope :attempting_format, -> { where(status: 'attempting') }
 
   scope :belong_to_stds, lambda { |std_list| where("std_course_id in (?)",std_list) }
-  scope :group_submissions_stds, lambda { |std_list|
+  scope :group_submissions_stds, lambda { |group_list|
     joins("inner join assessment_realtime_seat_allocations on assessment_submissions.id = assessment_realtime_seat_allocations.team_submission_id").
-        where("assessment_realtime_seat_allocations.std_course_id in (?)",std_list) }
+        joins("inner join assessment_realtime_sessions on assessment_realtime_seat_allocations.session_id = assessment_realtime_sessions.id").
+          where("assessment_realtime_sessions.student_group_id in (?)",group_list) }
 
   scope :without_rt_individual, lambda { |course|
     joins("inner join assessments on assessment_submissions.assessment_id = assessments.id ").
@@ -338,6 +339,12 @@ class Assessment::Submission < ActiveRecord::Base
     if std_seats.count>0
       sg = std_seats.first.session.student_group
       "#{sg.name} - Group #{std_seats.first.table_number}"
+    end
+  end
+
+  def get_group_sub_tutor
+    if std_seats.count > 0 and std_seats.first.session.tutor
+      return std_seats.first.session.tutor.name
     end
   end
 

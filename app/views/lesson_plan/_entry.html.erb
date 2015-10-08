@@ -124,7 +124,7 @@
   <% elsif entry.is_virtual? %>
       <% if (cannot? :manage, LessonPlanEntry) %> <div class="resource-hide" style="display: none"> <% end %>
           <%= render partial: "file_uploads/download_local_files",
-                     locals: { owner: entry.assessment }%>
+                     locals: { owner: entry.assessment.assessment }%>
       <% if (cannot? :manage, LessonPlanEntry) %> </div> <% end %>
   <% end %>
     </div>

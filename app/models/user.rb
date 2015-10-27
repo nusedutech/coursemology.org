@@ -122,20 +122,23 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_openid_oauth(auth, signed_in_resource = nil)
-    user = User.where(:provider => auth.provider, :uid => auth.uid).first
+    user = User.where(:student_id => auth.info.nickname).order(current_sign_in_at: :desc).first
     unless user
-      user = User.find_by_email(auth.info.email)
+      user = User.where(:provider => auth.provider, :uid => auth.uid).first
       unless user
-        user = User.create(name: auth.info.name,
-                           provider: auth.provider,
-                           uid: auth.info.nickname,
-                           email: auth.info.email,
-                           student_id: auth.info.nickname,
-                           password: Devise.friendly_token[0,20]
-        )
-        user.skip_confirmation!
+        user = User.find_by_email(auth.info.email)
+        unless user
+          user = User.create(name: auth.info.name,
+                             provider: auth.provider,
+                             uid: auth.info.nickname,
+                             email: auth.info.email,
+                             student_id: auth.info.nickname,
+                             password: Devise.friendly_token[0,20]
+          )
+          user.skip_confirmation!
+        end
+        user.save
       end
-      user.save
     end
     user
   end

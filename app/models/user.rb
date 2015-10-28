@@ -100,29 +100,32 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_ivle_oauth(auth, signed_in_resource = nil)
-    user = User.where(:provider => auth.provider, :uid => auth.uid).first
-    unless user
-      user = User.find_by_email(auth.info.email)
-      #if user
-      #  user.provider = auth.provider
-      #  user.uid = auth.uid
+    #user = User.where(:student_id => auth.uid).order('current_sign_in_at DESC').first
+    #unless user
+      user = User.where(:provider => auth.provider, :uid => auth.uid).first
       unless user
-        user = User.create(name: auth.extra.profile.Name,
-                           provider: auth.provider,
-                           uid: auth.uid,
-                           email: auth.info.email,
-                           student_id: auth.uid,
-                           password: Devise.friendly_token[0,20]
-        )
-        user.skip_confirmation!
+        user = User.find_by_email(auth.info.email)
+        #if user
+        #  user.provider = auth.provider
+        #  user.uid = auth.uid
+        unless user
+          user = User.create(name: auth.extra.profile.Name,
+                             provider: auth.provider,
+                             uid: auth.uid,
+                             email: auth.info.email,
+                             student_id: auth.uid,
+                             password: Devise.friendly_token[0,20]
+          )
+          user.skip_confirmation!
+        end
+        user.save
       end
-      user.save
-    end
+    #end
     user
   end
 
   def self.find_for_openid_oauth(auth, signed_in_resource = nil)
-    user = User.where(:student_id => auth.info.nickname).order(current_sign_in_at: :desc).first
+    user = User.where(:student_id => auth.info.nickname).order('current_sign_in_at DESC').first
     unless user
       user = User.where(:provider => auth.provider, :uid => auth.uid).first
       unless user

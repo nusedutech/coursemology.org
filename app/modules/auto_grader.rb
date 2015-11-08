@@ -27,10 +27,17 @@ module AutoGrader
       if submission.assessment.as_assessment.is_a?(Assessment::Training) and
           (submission.assessment.as_assessment.test or submission.assessment.realtime_session_groups.count > 0)
         answer = std_answers.first
-        if answer.nil? || !answer.correct
+        if answer.nil?
           ag.grade = 0
+        elsif !answer.correct
+          if submission.assessment.option_grading
+            an_ops = answer.answer_options.map(&:option_id)
+            corrects = mcq.options.map{ |x| ((x.correct && (an_ops.include? x.id)) || (!x.correct && !(an_ops.include? x.id))) ? 1 : 0 }.reduce(:+)
+            ag.grade = corrects * (mcq.max_grade.nil? ? 0 : mcq.max_grade) / mcq.options.count
+          else
+            ag.grade = 0
+          end
         else
-
           ag.grade = mcq.max_grade.nil? ? 0 : mcq.max_grade
         end
       else

@@ -30,7 +30,7 @@ module AutoGrader
         if answer.nil?
           ag.grade = 0
         elsif !answer.correct
-          if submission.assessment.option_grading
+          if submission.assessment.option_grading && mcq.select_all
             an_ops = answer.answer_options.map(&:option_id)
             corrects = mcq.options.map{ |x| ((x.correct && (an_ops.include? x.id)) || (!x.correct && !(an_ops.include? x.id))) ? 1 : 0 }.reduce(:+)
             ag.grade = corrects * (mcq.max_grade.nil? ? 0 : mcq.max_grade) / mcq.options.count

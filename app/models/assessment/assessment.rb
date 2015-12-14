@@ -356,7 +356,7 @@ class Assessment < ActiveRecord::Base
 
   def dup
     s = self.specific
-    d = s.dup
+    d = s.amoeba_dup
     asm = super
     d.assessment = asm
     asm.as_assessment = d

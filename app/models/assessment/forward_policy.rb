@@ -1,11 +1,15 @@
 class Assessment::ForwardPolicy < ActiveRecord::Base
   acts_as_paranoid
+  acts_as_duplicable
 	is_a :progression_policy, as: :as_progression_policy, class_name: "Assessment::ProgressionPolicy"
 	
 	attr_accessible :policy_mission_id, :overall_seconds_to_complete, :overall_wrong_threshold
 
 	has_many	:forward_policy_levels, class_name: "Assessment::ForwardPolicyLevel", dependent: :destroy, foreign_key: :forward_policy_id
 
+  amoeba do
+    include_field :forward_policy_levels
+  end
 
 	def getSortedPolicyLevels
 		self.forward_policy_levels.order("assessment_forward_policy_levels.order")

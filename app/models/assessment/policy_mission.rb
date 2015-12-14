@@ -1,5 +1,6 @@
 class Assessment::PolicyMission < ActiveRecord::Base
   acts_as_paranoid
+  acts_as_duplicable
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
 	attr_accessible  :title, :description, :exp, :open_at, :close_at, :published, :comment_per_qn,
@@ -13,6 +14,12 @@ class Assessment::PolicyMission < ActiveRecord::Base
 
   has_one :forward_policy, class_name: "Assessment::ForwardPolicy", through: :progression_policy,
           source: :as_progression_policy, source_type: "Assessment::ForwardPolicy"
+
+  amoeba do
+    #clone [:questions]
+    include_field :progression_policy
+    # as_requirements
+  end
 
   def multipleAttempts?
     self.multiple_submissions

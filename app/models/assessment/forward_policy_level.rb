@@ -1,5 +1,6 @@
 class Assessment::ForwardPolicyLevel < ActiveRecord::Base
   acts_as_paranoid
+  acts_as_duplicable
   attr_accessible :forward_policy_theme_id, :progression_threshold, :order, :wrong_threshold, :seconds_to_complete, :is_consecutive 
 
   validates_presence_of :forward_policy_theme_id, :progression_threshold, :forward_policy_theme_type

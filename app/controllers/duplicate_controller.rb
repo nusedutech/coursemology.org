@@ -241,5 +241,19 @@ class DuplicateController < ApplicationController
       rt.required_concept = t.dest_obj
       rt.save
     end
+
+    t_logs = clone.tags.all_dest_logs
+    th_logs = t_logs + tc_logs
+    #forward_policy_level - forward_policy_theme(tag|concept)
+    clone.policy_missions.each do |pm|
+      pm.forward_policy.forward_policy_levels.each do |fpl|
+        l = (fpl.forward_policy_theme.duplicate_logs_orig & th_logs).first if fpl.forward_policy_theme
+        unless l
+          next
+        end
+        fpl.forward_policy_theme = l.dest_obj
+        fpl.save
+      end
+    end
   end
 end

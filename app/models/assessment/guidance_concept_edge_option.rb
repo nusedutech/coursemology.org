@@ -1,12 +1,16 @@
 class Assessment::GuidanceConceptEdgeOption < ActiveRecord::Base
   acts_as_paranoid
-
+  acts_as_duplicable
   attr_accessible :enabled, :concept_edge_id
-  validates_presence_of :concept_edge_id 
+  validates_presence_of :concept_edge_id
 
   belongs_to :concept_edge, class_name: ConceptEdge, foreign_key: "concept_edge_id"
 
-  has_many  :concept_edge_criteria, class_name: Assessment::GuidanceConceptEdgeCriterion, dependent: :destroy 
+  has_many  :concept_edge_criteria, class_name: Assessment::GuidanceConceptEdgeCriterion, dependent: :destroy
+
+  amoeba do
+    include_field [:concept_edge_criteria]
+  end
 
   def self.enable(concept_edge)
     enable_status = concept_edge.concept_edge_option

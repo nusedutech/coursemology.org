@@ -35,7 +35,7 @@ class Topicconcept < ActiveRecord::Base
   has_many :concept_stages, class_name: Assessment::GuidanceConceptStage, foreign_key: "topicconcept_id"
 
   amoeba do
-    include_field [:taggable_tags,:topic_edge_included_topicconcepts,:concept_edge_required_concepts]
+    include_field [:taggable_tags,:topic_edge_included_topicconcepts,:concept_edge_required_concepts, :concept_option]
   end
 
   def is_concept?

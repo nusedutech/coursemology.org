@@ -2,7 +2,7 @@ class Assessment::GuidanceConceptCriterion < ActiveRecord::Base
   acts_as_paranoid
   acts_as_superclass as: :guidance_concept_criterion
   
-  validates_presence_of :guidance_concept_option_id
+  #validates_presence_of :guidance_concept_option_id
 
 
   belongs_to :guidance_concept_option, class_name: Assessment::GuidanceConceptOption, foreign_key: "guidance_concept_option_id"
@@ -21,5 +21,14 @@ class Assessment::GuidanceConceptCriterion < ActiveRecord::Base
 
   def is_type
     nil
+  end
+
+  def dup
+    s = self.specific
+    d = s.amoeba_dup
+    cc = super
+    d.concept_criterion = cc
+    cc.guidance_concept_criterion = d
+    cc
   end
 end

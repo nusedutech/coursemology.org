@@ -120,6 +120,6 @@ Coursemology::Application.configure do
     provider :ivle, api_key: "mHy1mEcwwWvlHYqc9bNdO"
     provider :open_id, :identifier => "https://openid.nus.edu.sg"
   end
-  config.ivle_api_key = "mHy1mEcwwWvlHYqc9bNdO"
+  config.ivle_api_key = ENV['IVLE_API_KEY']
 
 end

@@ -208,11 +208,6 @@ class MaterialsController < ApplicationController
   end
 
   def update
-    # check if we have a new file version
-    if params[:new_file_id] != '' then
-      @material.attach(FileUpload.find_by_id(params[:new_file_id]))
-    end
-
     @material.update_attributes(params[:material])
     
     respond_to do |format|

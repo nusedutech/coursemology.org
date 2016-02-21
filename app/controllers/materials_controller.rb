@@ -123,7 +123,7 @@ class MaterialsController < ApplicationController
     end
     authorize! :read, @material_folder
 
-    @material_folder.materials.each { |m|
+    @material_folder.materials.accessible_by(current_ability).each { |m|
       curr_user_course.mark_as_seen(m)
     }
 

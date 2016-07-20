@@ -112,7 +112,7 @@ class Assessment::AssessmentsController < ApplicationController
 
           #Check student's realtime_session status
           if curr_user_course.is_student? and ast.is_realtime_session_group?
-            if curr_user_course.tut_group_courses.assigned.count > 0
+            if curr_user_course.tut_group_courses.assigned.count > 0 || ast.specific.recitation?
               session = get_session(ast, curr_user_course)
               if session.count > 0
                 seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last

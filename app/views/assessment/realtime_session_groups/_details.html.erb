@@ -8,6 +8,9 @@
     <td><strong><%= model_class.human_attribute_name(:open_at) %>:</strong></td>
     <td><%= datetime_format(ast.open_at) %></td>
   </tr>
-
+  <tr>
+    <td><strong><%= model_class.human_attribute_name(:close_at) %>:</strong></td>
+    <td><%= datetime_format(ast.close_at) %></td>
+  </tr>
 
 </table>

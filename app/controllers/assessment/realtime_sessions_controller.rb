@@ -11,7 +11,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
     #TODO: REFACRORING - update grade for all student on table
     #finalize all submission first
     training = @realtime_session.realtime_session_group.training
-    sbms = training.submissions.belong_to_stds(@realtime_session.student_seats.map{|s| s.std_course_id })
+    sbms = training.submissions.belong_to_stds(@realtime_session.student_ids)
     sbms.each do |sbm|
       sbm.update_grade
     end
@@ -225,7 +225,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
   def answers_stats
     session_question = Assessment::RealtimeSessionQuestion.find(params[:session_question_id])
     question = session_question.question_assessment.question
-    answers = question.answers.in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
+    answers = question.answers.in_student_list(@realtime_session.student_ids).
         in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
         after_unlock_time(session_question.unlock_time)
 

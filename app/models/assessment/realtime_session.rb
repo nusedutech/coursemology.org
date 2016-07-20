@@ -56,7 +56,9 @@ class Assessment::RealtimeSession < ActiveRecord::Base
     end
   end
 
-  private
+  def student_ids
+    recitation_group? ? students.map(&:id) : student_seats.map(&:std_course_id)
+  end
 
   def recitation_group?
     realtime_session_group && realtime_session_group.recitation?

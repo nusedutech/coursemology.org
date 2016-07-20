@@ -30,7 +30,7 @@
     <hr/>
 
     <% if !@summary[:current] %>
-        <% if !@summary[:student_seat].nil? and @summary[:student_seat].team_grade.nil? %>
+        <% if @summary[:session].recitation_group? || @summary[:student_seat].present? && @summary[:student_seat].team_grade.nil? %>
             <h2>Congratulations, you're done!</h2>
             <p>This Real-Time Training has been finalised.
               Your answers and the solution will be shown after the end date of the Real-Time Session.</p>

@@ -18,6 +18,8 @@ class Assessment::RealtimeSession < ActiveRecord::Base
   has_many :questions, through: :question_assessments
 
   def allocate_seats
+    return if recitation_group?
+
     if(self.students.count <= self.number_of_table*self.seat_per_table)
       seat_list = (1..self.students.count).to_a.shuffle
       self.students.each_with_index do |s,i|
@@ -44,5 +46,19 @@ class Assessment::RealtimeSession < ActiveRecord::Base
     self.session_questions.each do |sq|
       sq.lock
     end
+  end
+
+  def students
+    if recitation_group?
+      realtime_session_group.course.user_courses.real_students
+    else
+      super
+    end
+  end
+
+  private
+
+  def recitation_group?
+    realtime_session_group && realtime_session_group.recitation?
   end
 end

@@ -15,25 +15,34 @@
     <%= f.input :published, as: :boolean,
                 input_html: {class: ""},
                 inline_label:"Check to publish #{display_name.downcase}" %>
-    <hr/>
-
-
-    <% if !@realtime_session_group.published %>
-        <h4>Groups</h4>
-        <hr/>
-        <div class = "multi-field-wrapper">
-          <div class = "sort-table multi-fields">
-
-            <%= render :partial => 'session_fields', :locals => { :f => f } %>
-
-          </div>
-          <!--<a class="btn add-fields">Add new tag</a>-->
-        </div>
-    <% else %>
-        <h4>Cannot edit groups as assessment is already published.</h4>
-        <hr/>
+    <% if params[:action] == 'new'%>
+      <%= f.input :recitation,
+                  input_html: { class: "", id: "recitation-toggle" },
+                  inline_label:"Check to make this a recitation: The whole class will be involved +  Students will get full marks as soon as they complete all questions" %>
     <% end %>
     <hr/>
+
+
+    <% if !@realtime_session_group.recitation? %>
+      <div class = "groups">
+        <% if !@realtime_session_group.published %>
+            <h4>Groups</h4>
+            <hr/>
+            <div class = "multi-field-wrapper">
+              <div class = "sort-table multi-fields">
+
+                <%= render :partial => 'session_fields', :locals => { :f => f } %>
+
+              </div>
+              <!--<a class="btn add-fields">Add new tag</a>-->
+            </div>
+        <% else %>
+            <h4>Cannot edit groups as assessment is already published.</h4>
+            <hr/>
+        <% end %>
+        <hr/>
+      </div>
+    <% end %>
 
     <div id="uploaded_files_div"></div>
     <%= f.button :form_submit, value: @realtime_session_group.id.nil? ? "Create Sessions" : "Update Sessions", cancel: course_assessment_realtime_session_groups_path %>
@@ -75,6 +84,15 @@
             }
         });
 
+    });
+
+    // Toggle session fields after recitation status changed
+    $('#recitation-toggle').click(function(){
+      if($(this).is(':checked')){
+        $(".groups").hide();
+      } else {
+        $(".groups").show();
+      }
     });
 
 </script>

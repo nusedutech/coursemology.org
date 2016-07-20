@@ -1,0 +1,95 @@
+<h2>Groups</h2>
+
+<table class="table">
+  <tr>
+    <th>Group</th>
+    <th>No. of Tables</th>
+    <th>Seat/Table</th>
+    <th>Start Time</th>
+          <th>End Time</th>
+          <th></th>
+  </tr>
+  <% sessions.each_with_index do |session, index| %>
+    <tr>
+      <td><%= session.student_group.name %></td>
+      <td><%= session.number_of_table %></td>
+      <td><%= session.seat_per_table %></td>
+      <td><%= session.start_time.strftime("%d/%m/%yy %I:%M %p") if session.start_time %></td>
+              <td><%= session.end_time.strftime("%d/%m/%yy %I:%M %p") if session.end_time %></td>
+              <td>
+                <p><a href="#" class="btn btn-rt-100" data-toggle="modal" data-target="#seating_plan_view_<%= session.id%>" >View Seating Plan</a>
+                <a href="#" class="seating-plan btn btn-rt-100" data-toggle="modal" data-target="#seat_plan_<%= session.id%>" >Edit Seating Plan</a></p>
+                <p><%= link_to 'Start Training',
+                            start_session_course_assessment_realtime_session_group_session_path(@course, @realtime_session_group, session, t: "training"),
+                            :class => 'btn btn-success btn-rt-100' %>
+                <%= link_to 'Start Mission',
+                            start_session_course_assessment_realtime_session_group_session_path(@course, @realtime_session_group, session, t: "mission"),
+                            :class => 'btn btn-success btn-rt-100' %></p>
+                <div id="seat_plan_<%= session.id%>" class="modal-60 modal hide fade" data-backdrop="static">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3>Seating Plan</h3>
+                      </div>
+                      <div class="modal-body hidden">
+                      </div>
+                      <div class="alert alert-success alert-seating-plan" style="margin: 0" role="alert"></div>
+                      <div class="modal-body">
+                        <table>
+                          <% std_group = session.student_group.students %>
+                          <% (1..session.number_of_table).each_with_index do |t,i| %>
+                              <tr>
+                                <td><%= "Table #{t}: "%></td>
+                                <td>
+                                  <% (1..session.seat_per_table).each_with_index do |s,s_i| %>
+                                      <% seat = session.get_student_seats_by_seat(t,s).first %>
+                                      <span>
+                                          <input type="hidden" id="session_id" value="<%= session.id%>">
+                                          <input type="hidden" id="table_number" value="<%= t%>">
+                                          <input type="hidden" id="seat_number" value="<%= s%>">
+                                          <%= collection_select(:session,:seat_allocation,std_group,:id,:name,{:include_blank => 'Empty Seat', :selected => seat.nil? ? nil : (seat.student.nil? ? nil : seat.student.id.to_i)}, {:class => 'allocate-seat'})%>
+                                      </span>
+                                  <% end %>
+                                </td>
+                              </tr>
+                          <% end %>
+                        </table>
+                      </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-primary update-seating-plan">Update</button>
+                        <button data-dismiss="modal" class="btn">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="seating_plan_view_<%= session.id%>" class="modal hide fade" data-backdrop="static">
+                  <div class="modal-header">
+                    <h3>Seat Plan</h3>
+                  </div>
+                  <div class="modal-body hidden">
+                  </div>
+                  <div class="modal-body">
+                    <table>
+                      <% (1..session.number_of_table).each_with_index do |t,i| %>
+                          <tr>
+                            <td><%= "Table #{t}: "%></td>
+                            <td>
+                              <% (1..session.seat_per_table).each_with_index do |s,s_i| %>
+                                  <% seat = session.get_student_seats_by_seat(t,s).first %>
+                                  <% if !seat.nil? and !seat.student.nil? %>
+                                      <span class="label label-info"><%= seat.student.name %></span>
+                                  <% end %>
+                              <% end %>
+                            </td>
+                          </tr>
+                      <% end %>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn">Close</button>
+                  </div>
+                </div>
+              </td>
+    </tr>
+  <% end %>
+</table>

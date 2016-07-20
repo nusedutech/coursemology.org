@@ -3,13 +3,15 @@ class Assessment::RealtimeSessionGroup < ActiveRecord::Base
   is_a :assessment, as: :as_assessment, class_name: "Assessment"
 
   attr_accessible :average_grading, :mission_id, :seat_randomizable, :title, :training_id
-  attr_accessible :exp, :bonus_exp, :description, :published, :open_at, :close_at,:sessions_attributes
+  attr_accessible :exp, :bonus_exp, :description, :published, :recitation, :open_at, :close_at,:sessions_attributes
 
   validates_presence_of :title, :open_at
 
   has_many  :sessions, class_name: Assessment::RealtimeSession, foreign_key: :session_group_id, dependent: :destroy
   belongs_to :training, class_name: Assessment::Training, foreign_key: :training_id
   belongs_to :mission, class_name: Assessment::Mission, foreign_key: :mission_id
+
+  before_save :sync_recitation_session, if: :recitation?
 
   accepts_nested_attributes_for :sessions, allow_destroy: true
 
@@ -57,6 +59,20 @@ class Assessment::RealtimeSessionGroup < ActiveRecord::Base
         end
       end
     end
+  end
 
+  private
+
+  def sync_recitation_session
+    build_recitation_session if new_record?
+
+    session = sessions.first
+    session.update_attributes(start_time: open_at, end_time: close_at)
+  end
+
+  def build_recitation_session
+    sessions.clear
+
+    sessions.build(start_time: open_at, end_time: close_at)
   end
 end

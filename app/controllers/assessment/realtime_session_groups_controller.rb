@@ -18,9 +18,7 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
     #  s.update_attribute(:status, false)
     #end
 
-    respond_to do |format|
-      format.html { render "assessment/assessments/show" }
-    end
+    render "assessment/assessments/show"
   end
 
   def new
@@ -49,18 +47,16 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
     #                                                   close_at:@realtime_session_group.close_at,
     #                                                   bonus_cutoff_at: @realtime_session_group.open_at + 1.days)
 
-    respond_to do |format|
-      if @realtime_session_group.save
-        @realtime_session_group.sessions.each do |s|
-          s.allocate_seats
-        end
-        @realtime_session_group.update_session_questions(nil, nil)
-        @realtime_session_group.create_local_file
-        format.html { redirect_to course_assessment_realtime_session_group_path(@course, @realtime_session_group),
-                                  notice: "The Realtime Session Group '#{@realtime_session_group.title}' has been created." }
-      else
-        format.html { render action: "new" }
+    if @realtime_session_group.save
+      @realtime_session_group.sessions.each do |s|
+        s.allocate_seats
       end
+      @realtime_session_group.update_session_questions(nil, nil)
+      @realtime_session_group.create_local_file
+      redirect_to course_assessment_realtime_session_group_path(@course, @realtime_session_group),
+                  notice: "The Realtime Session Group '#{@realtime_session_group.title}' has been created."
+    else
+      render action: "new"
     end
   end
 
@@ -120,5 +116,11 @@ class Assessment::RealtimeSessionGroupsController < Assessment::AssessmentsContr
     eligible_missions = @course.missions.without_session_group(@course)
     @training_collection = @realtime_session_group.training ? eligible_trainings.unshift(@realtime_session_group.training) : eligible_trainings
     @mission_collection = @realtime_session_group.mission ? eligible_missions.unshift(@realtime_session_group.mission) : eligible_missions
+  end
+
+  private
+
+  def build_recitation_group(group)
+
   end
 end

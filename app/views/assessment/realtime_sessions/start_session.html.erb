@@ -1,3 +1,4 @@
+<% group = @session.realtime_session_group %>
 <%- if @realtime_training %>
     <input type="hidden" class="switch-lock-ajax-url" value="<%= switch_lock_question_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
     <input type="hidden" class="answers-stats-ajax-url" value="<%= answers_stats_course_assessment_realtime_session_group_session_path(@course, @session.realtime_session_group, @session) %>"/>
@@ -6,18 +7,21 @@
       <h1> <%= @realtime_training.title %></h1>
     </div>
 
-    <h2 class="assignments-description-title">Session of <%= @session.student_group.name %></h2>
+    <% if group.recitation? %>
+        <h2 class="assignments-description-title"><%= group.title %></h2>
+    <% else %>
+        <h2 class="assignments-description-title">Session of <%= @session.student_group.name %></h2>
+        <table class="table-top-align">
+          <tr>
+            <td>
+              <div class="pull-left">
+                <%= render partial: "assessment/realtime_trainings/group_details", locals: {session: @session } %>
+              </div>
+            </td>
 
-    <table class="table-top-align">
-      <tr>
-        <td>
-          <div class="pull-left">
-            <%= render partial: "assessment/realtime_trainings/group_details", locals: {session: @session } %>
-          </div>
-        </td>
-
-      </tr>
-    </table>
+          </tr>
+        </table>
+    <% end %>
 
     <%= render partial: "file_uploads/download_local_files",
                locals: { owner: @realtime_training.assessment }%>

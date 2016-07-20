@@ -1,0 +1,8 @@
+<p>
+  <%= link_to 'Start Training',
+              start_session_course_assessment_realtime_session_group_session_path(@course, @realtime_session_group, session, t: "training"),
+              :class => 'btn btn-success btn-rt-100' %>
+  <%= link_to 'Start Mission',
+              start_session_course_assessment_realtime_session_group_session_path(@course, @realtime_session_group, session, t: "mission"),
+              :class => 'btn btn-success btn-rt-100' %>
+</p>

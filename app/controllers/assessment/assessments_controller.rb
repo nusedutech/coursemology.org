@@ -113,7 +113,7 @@ class Assessment::AssessmentsController < ApplicationController
           #Check student's realtime_session status
           if curr_user_course.is_student? and ast.is_realtime_session_group?
             if curr_user_course.tut_group_courses.assigned.count > 0
-              session = ast.as_assessment.sessions.include_std(curr_user_course)
+              session = get_session(ast, curr_user_course)
               if session.count > 0
                 seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
                 t_attempting = ast.training ? (sub_ids.include? ast.training.assessment.id and !sub_map[ast.training.assessment.id].attempting? ? true : false) : nil
@@ -299,5 +299,9 @@ class Assessment::AssessmentsController < ApplicationController
   def extract_type
     controller = request.filtered_parameters["controller"].split('/').last
     controller.singularize
+  end
+
+  def get_session(group, user_course)
+    group.recitation? ? group.sessions : group.as_assessment.sessions.include_std(user_course)
   end
 end

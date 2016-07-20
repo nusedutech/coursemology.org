@@ -299,11 +299,11 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
     pref_grader = @course.mcq_auto_grader.prefer_value
 
 
-    if !@submission.graded?
+    unless @submission.graded?
       grade = AutoGrader.mcq_grader(@submission, ans.answer, question, pref_grader)
-      #if @submission.done?
-      #  @submission.update_grade
-      #end
+      if session_question.session.recitation_group? && @submission.done?
+       @submission.update_grade(true)
+      end
     end
 
     if pref_grader == 'two-one-zero'

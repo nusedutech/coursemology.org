@@ -40,7 +40,7 @@ class Assessment::Grading < ActiveRecord::Base
   def update_exp_transaction
 
     asm = submission.assessment
-    if !asm.is_training? or (asm.is_training? and asm.as_assessment.realtime_session_groups.count == 0)
+    if !asm.is_training? or (asm.is_training? and asm.as_assessment.realtime_session_groups.select { |g| !g.recitation? }.count == 0)
       if !student and submission.std_seats.count>0
         submission.std_seats.each do |s|
           exp_tran = ExpTransaction.where(user_course_id: s.std_course_id,rewardable_id: submission.id,rewardable_type: submission.class.name).first

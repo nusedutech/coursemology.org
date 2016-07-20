@@ -186,7 +186,7 @@ class Assessment::Submission < ActiveRecord::Base
     end
   end
 
-  def update_grade
+  def update_grade(full_grade = false)
     self.submitted_at = DateTime.now
     self.set_graded
 
@@ -194,7 +194,11 @@ class Assessment::Submission < ActiveRecord::Base
     pending_action.set_done if pending_action
 
     grading = self.get_final_grading
-    grading.update_grade
+    if full_grade
+      grading.grade = assessment.max_grade || 0
+    else
+      grading.update_grade
+    end
     grading.save
     grading.exp
   end

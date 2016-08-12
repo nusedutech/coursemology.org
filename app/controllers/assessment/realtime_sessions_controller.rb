@@ -206,10 +206,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
         end
       end
     else
-      question_answers = session_question.question_assessment.question.answers.
-          in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
-          in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
-          after_question_unlock(session_question)
+      question_answers = get_question_answers(session_question)
 
       answers_notcount_std_sbm = session_question.question_assessment.question.answers.
           after_question_unlock(session_question)
@@ -219,6 +216,19 @@ class Assessment::RealtimeSessionsController < ApplicationController
         format.json { render json: { count: question_answers.count, info: "check submissions after unlock time #{session_question.unlock_time}, run at #{Time.now}"}}
         logger.debug "Do count_submission to check for submission updated after #{session_question.updated_at}, run at #{Time.now}, count_with_std_sbm #{question_answers.count},count_without_std_sbm #{answers_notcount_std_sbm.count}"
       end
+    end
+  end
+
+  def get_question_answers(session_question)
+    if @realtime_session.recitation_group?
+      session_question.question_assessment.question.answers.
+          in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
+          after_question_unlock(session_question)
+    else
+      session_question.question_assessment.question.answers.
+          in_student_list(@realtime_session.student_seats.map{|s| s.std_course_id }).
+          in_submission_list(@realtime_session.realtime_session_group.training.assessment.submissions.map{|s| s.id }).
+          after_question_unlock(session_question)
     end
   end
 

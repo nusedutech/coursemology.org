@@ -14,7 +14,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
         (@training.show_solution_after_close and @training.close_at and @training.close_at.to_datetime < DateTime.now) or
         ((can? :manage, Assessment::Grading)))
 
-    if @training.realtime_session_groups.count > 0 and ((@training.close_at && @training.close_at > Time.now && !recitation_training?) or (@training.bonus_cutoff_at and @training.bonus_cutoff_at > Time.now))
+    if @training.realtime_session_groups.count > 0 && !recitation_training? && ((@training.close_at && @training.close_at > Time.now) or (@training.bonus_cutoff_at and @training.bonus_cutoff_at > Time.now))
       redirect_to course_assessment_realtime_session_groups_path,
                   flash: { error: "Your Answers and Solution will be opened after close date."}
     end

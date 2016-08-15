@@ -121,7 +121,7 @@ class Assessment::AssessmentsController < ApplicationController
 
                 action_map[ast.id] = {action: "realtime_session", warning: nil,
                                       training: t_attempting.nil? ? {action: "Null",flash: "No Training"} :
-                                          ( t_attempting ? ((ast.training.close_at and ast.training.close_at > Time.now) ? {action: "Null",flash: "Review Training"} : {action: "Review",flash: "Review Training",url: course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])}) :
+                                          ( t_attempting ? ((ast.training.close_at && ast.training.close_at > Time.now && !ast.recitation? ) ? {action: "Null",flash: "Review Training"} : {action: "Review",flash: "Review Training",url: course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])}) :
                                               (session.started.count == 0 ? {action: "Notstart",flash: "Attempt Training"} : ((sub_ids.include? ast.training.assessment.id) ? {action: "Resumetraining",flash: "Resume Training",url: edit_course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])} :
                                                   {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)}))),
                                       mission: m_attempting.nil? ? {action: "Null",flash: "No Mission"} :

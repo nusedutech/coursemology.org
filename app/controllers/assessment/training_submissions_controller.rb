@@ -161,7 +161,7 @@ class Assessment::TrainingSubmissionsController < Assessment::SubmissionsControl
       #session_question.update_attribute(:unlock_count, answers.count + 1) if session_question.unlock_count > answers.count + 1
 
       session = session_question.session
-      if !session_question.unlock && !(session.recitation_group? && session.end_time < Time.now) # Not recitation ended
+      if !session_question.unlock && !(session.recitation_group? && (session.end_time < Time.now || session.status == false)) # Not recitation ended or closed.
         response = {
             result: false,
             explanation: "This question has been locked."

@@ -116,13 +116,14 @@ class Assessment::AssessmentsController < ApplicationController
               session = get_session(ast, curr_user_course)
               if session.count > 0
                 seat = Assessment::RealtimeSeatAllocation.where(std_course_id: curr_user_course.id, session_id: session.last.id).last
+                recitation_with_existing_submission = ast.recitation? && ast.training && sub_map[ast.training.assessment.id].present?
                 t_attempting = ast.training ? (sub_ids.include? ast.training.assessment.id and !sub_map[ast.training.assessment.id].attempting? ? true : false) : nil
                 m_attempting = ast.mission ? (sub_ids.include? ast.mission.assessment.id and !sub_map[ast.mission.assessment.id].attempting? ? true : false) : nil
 
                 action_map[ast.id] = {action: "realtime_session", warning: nil,
                                       training: t_attempting.nil? ? {action: "Null",flash: "No Training"} :
                                           ( t_attempting ? ((ast.training.close_at && ast.training.close_at > Time.now && !ast.recitation? ) ? {action: "Null",flash: "Review Training"} : {action: "Review",flash: "Review Training",url: course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])}) :
-                                              (session.started.count == 0 ? {action: "Notstart",flash: "Attempt Training"} : ((sub_ids.include? ast.training.assessment.id) ? {action: "Resumetraining",flash: "Resume Training",url: edit_course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])} :
+                                              ((session.started.count == 0 && !recitation_with_existing_submission) ? {action: "Notstart",flash: "Attempt Training"} : ((sub_ids.include? ast.training.assessment.id) ? {action: "Resumetraining",flash: "Resume Training",url: edit_course_assessment_submission_path(@course, ast.training.assessment,sub_map[ast.training.assessment.id])} :
                                                   {action: "Attempttraining",flash: "Attempt Training",url: new_course_assessment_submission_path(@course, ast.training.assessment)}))),
                                       mission: m_attempting.nil? ? {action: "Null",flash: "No Mission"} :
                                           ( m_attempting ? {action: "Review",flash: "Review Mission",url: course_assessment_submission_path(@course, ast.mission.assessment,sub_map[ast.mission.assessment.id])} :

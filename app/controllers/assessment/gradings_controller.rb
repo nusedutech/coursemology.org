@@ -65,16 +65,18 @@ class Assessment::GradingsController < ApplicationController
     invalid_assign = false
     @grading.grade = 0
 
-    params[:ags].each do |ag|
-      @ag = @grading.answer_gradings.build(ag)
-      @ag.grader = current_user
-      @ag.grader_course = curr_user_course
-      unless validate_gradings(@ag, ag)
-        invalid_assign = true
-        break
-      end
+    if params[:ags]
+      params[:ags].each do |ag|
+        @ag = @grading.answer_gradings.build(ag)
+        @ag.grader = current_user
+        @ag.grader_course = curr_user_course
+        unless validate_gradings(@ag, ag)
+          invalid_assign = true
+          break
+        end
 
-      @grading.grade += @ag.grade
+        @grading.grade += @ag.grade
+      end
     end
 
     if @grading.grade > @assessment.max_grade || @grading.exp > @assessment.exp

@@ -108,29 +108,31 @@ class Assessment::GradingsController < ApplicationController
     @grading.grade = 0
     @grading.exp = params[:assessment_grading][:exp].to_i
 
-    params[:ags].each do |v|
-      if v.is_a? Array
-        @ag = @grading.answer_gradings.find(v.first)
-        ag = v.last
-      else
-        @ag = @grading.answer_gradings.build(v)
-        @ag.grader = current_user
-        @ag.grader_course = curr_user_course
-        ag = v
-      end
-      unless validate_gradings(@ag, ag)
-        invalid_assign = true
-        break
-      end
-      if @ag.grade != ag[:grade].to_f
-        @ag.grade = ag[:grade].to_f
-        @ag.grader = current_user
-        @ag.grader_course = curr_user_course
-        #is this save necessary
-        @ag.save
-      end
+    if params[:ags]
+      params[:ags].each do |v|
+        if v.is_a? Array
+          @ag = @grading.answer_gradings.find(v.first)
+          ag = v.last
+        else
+          @ag = @grading.answer_gradings.build(v)
+          @ag.grader = current_user
+          @ag.grader_course = curr_user_course
+          ag = v
+        end
+        unless validate_gradings(@ag, ag)
+          invalid_assign = true
+          break
+        end
+        if @ag.grade != ag[:grade].to_f
+          @ag.grade = ag[:grade].to_f
+          @ag.grader = current_user
+          @ag.grader_course = curr_user_course
+          #is this save necessary
+          @ag.save
+        end
 
-      @grading.grade += @ag.grade
+        @grading.grade += @ag.grade
+      end
     end
 
     @submission.set_graded

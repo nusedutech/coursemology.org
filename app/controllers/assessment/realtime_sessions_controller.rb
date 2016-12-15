@@ -56,7 +56,7 @@ class Assessment::RealtimeSessionsController < ApplicationController
                                                               without_protection: true)
               grading.save
             end
-            grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : ((ss.team_grade*25/100 + (grading.grade.nil? ? 0 : grading.grade)*75/100) || 0) * asm.exp / asm.max_grade
+            grading.exp_transaction.exp = asm.max_grade.nil? ? 0 : (grading.grade|| 0) * asm.exp / asm.max_grade
             grading.exp_transaction.save
           end
         end

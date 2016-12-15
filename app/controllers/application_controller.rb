@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   helper_method :sort_direction, :sort_column
   before_filter :init_gon
+  before_filter :protect_from_host_header_attack
   skip_before_filter  :verify_authenticity_token
 
   rescue_from CanCan::AccessDenied do |exception|
@@ -321,7 +322,12 @@ class ApplicationController < ActionController::Base
     ""
   end
 
+  def protect_from_host_header_attack
+    return unless Rails.env.production?
+
+    env['HTTP_HOST'] = 'edutech.comp.nus.edu.sg'
+  end
+
   helper_method :masquerading?
   helper_method :curr_user_course
-  #helper_method :fb_liked?
 end
